@@ -3,11 +3,11 @@
  * This is not a WebGPU fallback and does not validate emitted WGSL or measure GPU performance.
  * Lanes run as cooperative generators, yielding at each __syncthreads site.
  */
-import {isArray, vectorLength, walk} from './compiler.js';
+import {isArray, vectorLength, vectorElement, walk} from './compiler.js';
 const f = Math.fround;
 function convert(value,type){
   if(type==='f32')return f(value);if(type==='u32')return Number(value)>>>0;if(type==='i32')return Number(value)|0;if(type==='bool')return !!value;
-  const size=vectorLength(type);if(size){if(!Array.isArray(value)||value.length!==size)throw new Error('Invalid vector value.');return value.map(f);}return value;
+  const size=vectorLength(type);if(size){if(!Array.isArray(value)||value.length!==size)throw new Error('Invalid vector value.');return value.map(v=>convert(v,vectorElement(type)));}return value;
 }
 function zero(type){if(isArray(type))return Array.from({length:type.length},()=>zero(type.element));const n=vectorLength(type);return n?Array(n).fill(0):type==='bool'?false:0;}
 class BufferView {
@@ -42,7 +42,7 @@ class Context {
     }
     if(n.kind==='member'){
       const reference=yield* this.ref(n.base),i='xyzw'.indexOf(n.member);
-      return {get:()=>reference.get()[i],set:v=>{const copy=[...reference.get()];copy[i]=f(v);reference.set(copy);}};
+      return {get:()=>reference.get()[i],set:v=>{const copy=[...reference.get()];copy[i]=convert(v,n.type);reference.set(copy);}};
     }
     throw new Error(`Expression ${n.kind} is not an lvalue.`);
   }
@@ -86,7 +86,7 @@ class Context {
       const old=args[0].get(),value=name==='atomicAdd'?old+args[1]:name==='atomicMin'?Math.min(old,args[1]):name==='atomicMax'?Math.max(old,args[1]):args[1];args[0].set(value);return old;
     }
     if(['float','int','uint','bool'].includes(name))return convert(args[0],n.type);
-    if(name.startsWith('make_float'))return args.map(f);
+    if(/^make_(float|uint|int)[234]$/.test(name))return args.map(v=>convert(v,vectorElement(n.type)));
     if(name==='__fdividef')return f(args[0]/args[1]);
     const unary={sinf:Math.sin,cosf:Math.cos,tanf:Math.tan,sqrtf:Math.sqrt,rsqrtf:x=>1/Math.sqrt(x),expf:Math.exp,__expf:Math.exp,exp2f:x=>2**x,logf:Math.log,__logf:Math.log,log2f:Math.log2,fabsf:Math.abs,floorf:Math.floor,ceilf:Math.ceil,truncf:Math.trunc};
     if(unary[name])return f(unary[name](args[0]));

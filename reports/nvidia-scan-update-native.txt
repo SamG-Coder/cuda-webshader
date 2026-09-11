@@ -1,0 +1,4 @@
+blocks=1 threads=32 uint4 output + guards: PASS
+blocks=3 threads=128 uint4 output + guards: PASS
+blocks=4 threads=256 uint4 output + guards: PASS
+blocks=7 threads=256 uint4 output + guards: PASS

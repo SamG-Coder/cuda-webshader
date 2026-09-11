@@ -122,6 +122,11 @@
       "entry": "MatrixMulCUDA<32>",
       "sample": "cpp/0_Introduction/matrixMul",
       "passed": true
+    },
+    {
+      "entry": "uniformUpdate",
+      "sample": "cpp/2_Concepts_and_Techniques/scan",
+      "passed": true
     }
   ]
 }

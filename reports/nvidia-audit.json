@@ -3238,8 +3238,25 @@
         ]
       },
       "browser": {
-        "status": "translation-rejected",
-        "reason": "Unsupported type 'volatile'. Use float, int, unsigned int, bool or float2/3/4. (47:51)\n       __device__ uint scan1Inclusive(uint idata, volatile uint *s_Data, uint size, cg::thread_block cta)\r\n                                                  ^"
+        "status": "kernel-verified",
+        "reason": "Isolated kernels checked against CPU reference on a real NVIDIA WebGPU adapter. Full host program is not executed.",
+        "checks": [
+          {
+            "sample": "cpp/2_Concepts_and_Techniques/scan",
+            "entry": "uniformUpdate",
+            "pass": true,
+            "values": 3072,
+            "maxError": 0,
+            "failures": 0,
+            "outputs": {
+              "d_Data": {
+                "values": 3072,
+                "maxError": 0,
+                "failures": 0
+              }
+            }
+          }
+        ]
       }
     },
     {
@@ -9460,11 +9477,11 @@
       }
     }
   ],
-  "executionUpdated": "2026-09-11T23:25:28.993Z",
+  "executionUpdated": "2026-09-11T23:31:23.022Z",
   "counts": {
     "samples": 208,
     "compilerProbes": 350,
-    "webgpuPassed": 24,
+    "webgpuPassed": 25,
     "nativeProgramsAttempted": 149,
     "nativeStatuses": {
       "exited-zero": 142,

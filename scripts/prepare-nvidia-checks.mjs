@@ -2,7 +2,7 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {fixture} from '../showcases/nvidia/fixtures.js';
 const rows=JSON.parse(await readFile('reports/nvidia-artifacts.json','utf8'));
 await mkdir('showcases/nvidia/kernels',{recursive:true});await mkdir('.local/nvidia-checks',{recursive:true});
-let native='#include <cuda_runtime.h>\n#include <cooperative_groups.h>\n#include <cstdio>\n#include <cmath>\n#define CHECK(x) do {auto r=(x);if(r!=cudaSuccess){printf("CUDA ERROR %s\\n",cudaGetErrorString(r));return 2;}}while(0)\n';
+let native='#include <cuda_runtime.h>\n#include <cooperative_groups.h>\n#include <cstdio>\n#include <cmath>\nusing uint = unsigned int;\n#define CHECK(x) do {auto r=(x);if(r!=cudaSuccess){printf("CUDA ERROR %s\\n",cudaGetErrorString(r));return 2;}}while(0)\n';
 const runs=[];
 for(const [index,row] of rows.entries()){
  const text=await readFile('.local/nvidia-audit/'+row.file,'utf8'),start=text.search(new RegExp('__global__\\s+void\\s+'+(row.sourceEntry||row.entry)+'\\s*\\('));
@@ -12,10 +12,10 @@ for(const [index,row] of rows.entries()){
  native+=`namespace sample${index} {\n${row.wholeFile?text:(row.preamble||'')+text.slice(start,end)}\n}\n`;
  const f=fixture(row),meta=row.artifact.metadata,lines=[];
  row.preview={groups:f.groups,scalars:f.scalars,output:f.out,buffers:Object.fromEntries(meta.bindings.map(b=>[b.name,{records:f.buffers[b.name].length*4/b.stride,fill:b.readOnly?'ramp':'zero',...row.previewBufferOverrides?.[b.name]}]))};
- for(const b of meta.bindings){const a=f.buffers[b.name],type=a instanceof Int32Array?'int':'float',name=b.name;lines.push(`${type} h_${name}[]={${Array.from(a).join(',')}}; ${type} *d_${name}; CHECK(cudaMalloc(&d_${name},sizeof(h_${name}))); CHECK(cudaMemcpy(d_${name},h_${name},sizeof(h_${name}),cudaMemcpyHostToDevice));`);}
+ for(const b of meta.bindings){const a=f.buffers[b.name],type=a instanceof Uint32Array?'unsigned int':a instanceof Int32Array?'int':'float',name=b.name;lines.push(`${type} h_${name}[]={${Array.from(a).join(',')}}; ${type} *d_${name}; CHECK(cudaMalloc(&d_${name},sizeof(h_${name}))); CHECK(cudaMemcpy(d_${name},h_${name},sizeof(h_${name}),cudaMemcpyHostToDevice));`);}
  // Parameter order follows the unchanged CUDA declaration, rather than grouped metadata.
  const signature=text.slice(start,brace),params=signature.slice(signature.indexOf('(')+1,signature.lastIndexOf(')')).split(',').map(p=>p.trim().match(/(\w+)\s*$/)[1]);
- const args=params.map(p=>p in f.buffers?`(${meta.bindings.find(b=>b.name===p).elementType.startsWith('vec')?'float'+meta.bindings.find(b=>b.name===p).stride/4: f.buffers[p] instanceof Int32Array?'int':'float'}*)d_${p}`:String(f.scalars[p]));
+ const args=params.map(p=>p in f.buffers?`(${meta.bindings.find(b=>b.name===p).elementType.startsWith('vec')?(f.buffers[p] instanceof Uint32Array?'uint':f.buffers[p] instanceof Int32Array?'int':'float')+meta.bindings.find(b=>b.name===p).stride/4: f.buffers[p] instanceof Uint32Array?'unsigned int':f.buffers[p] instanceof Int32Array?'int':'float'}*)d_${p}`:String(f.scalars[p]));
  lines.push(`sample${index}::${row.entry}<<<dim3(${f.groups}),dim3(${meta.workgroupSize})>>>(${args}); CHECK(cudaGetLastError()); CHECK(cudaDeviceSynchronize()); int failures=0;`);
  for(const [name,expected]of Object.entries(f.expectedOutputs||{[f.out]:f.expected}))lines.push(`{CHECK(cudaMemcpy(h_${name},d_${name},sizeof(h_${name}),cudaMemcpyDeviceToHost)); double expected[]={${Array.from(expected).join(',')}};for(int i=0;i<${expected.length};i++)if(!std::isfinite(h_${name}[i])||fabs(h_${name}[i]-expected[i])>${f.absoluteTolerance??0.000003}+${f.relativeTolerance??0}*fabs(expected[i]))failures++;}`);
  lines.push(`printf("${index} %s\\n",failures?"FAIL":"PASS"); total+=failures;`);

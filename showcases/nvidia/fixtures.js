@@ -1,8 +1,10 @@
 import {matrixFixture} from './matrixmul-fixtures.js';
+import {scanUpdateFixture} from './scan-update-fixtures.js';
 // Deterministic correctness fixtures for isolated upstream kernels, not host applications.
 import {scalarFixture} from './scalar-fixtures.js';
 import {blackScholesFixture} from './blackscholes-fixtures.js';
 export function fixture(row) {
+ if(row.entry==='uniformUpdate')return scanUpdateFixture();
  if(row.entry.startsWith('MatrixMulCUDA<'))return matrixFixture(row.artifact.metadata.workgroupSize[0],64,64,64);
  if(row.entry==='BlackScholesGPU')return blackScholesFixture();
  if(row.entry==='scalarProdGPU')return scalarFixture({guards:0});

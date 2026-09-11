@@ -5,6 +5,7 @@ export const isArray = t => !!t && typeof t === 'object' && t.kind === 'array';
 export const arrayOf = (element, length = null) => ({kind: 'array', element, length});
 export const typeName = t => isArray(t) ? `array<${typeName(t.element)}${t.length == null ? '' : `, ${t.length}`}>` : t;
 export const vectorLength = t => typeof t === 'string' && /^vec[234]</.test(t) ? Number(t[3]) : 0;
+export const vectorElement = t => vectorLength(t)?t.slice(5,-1):t;
 export const typeStride = t => isArray(t) ? typeStride(t.element) * t.length : vectorLength(t) === 3 ? 16 : (vectorLength(t) || 1) * 4;
 const numeric = t => ['f32', 'i32', 'u32'].includes(t);
 const indent = lines => lines.map(l => `  ${l}`);
@@ -102,7 +103,7 @@ class Emitter {
         if (['true', 'false'].includes(n.name)) return this.result(n, 'bool', n.name);
         const s = this.lookup(n.name, n); n.symbol = s;
         if(s.kind==='thread-block')this.fail('A thread_block handle can only be used for block synchronization.',n);
-        return this.result(n, s.type, s.code, [], {rootSymbol: s, atomicRoot: s.atomic});
+        const atomic=s.atomic&&!isArray(s.type);return this.result(n, s.type, atomic&&!raw?`atomicLoad(&${s.code})`:s.code, [], {rootSymbol: s, atomicRoot: s.atomic,atomic});
       }
       case 'index': {
         const base = this.expr(n.base, true), index = this.expr(n.index);
@@ -120,7 +121,7 @@ class Emitter {
         }
         const base = this.expr(n.base, raw), size = vectorLength(base.type);
         if (!size || n.member.length !== 1 || 'xyzw'.indexOf(n.member) < 0 || 'xyzw'.indexOf(n.member) >= size) this.fail('Only valid single vector components (.x/.y/.z/.w) are supported.', n);
-        return this.result(n, 'f32', `${base.code}.${n.member}`, base.pre, {rootSymbol: base.rootSymbol});
+        return this.result(n, vectorElement(base.type), `${base.code}.${n.member}`, base.pre, {rootSymbol: base.rootSymbol});
       }
       case 'cast': { const value = this.expr(n.value); return this.result(n, n.target, this.convert(value.code, value.type, n.target, n), value.pre); }
       case 'unary': {
@@ -176,7 +177,7 @@ class Emitter {
     if (name === '__syncthreads') { if (n.args.length) this.fail('__syncthreads takes no arguments.', n); if (this.currentFunction !== this.kernel) this.fail('Barriers in helper functions are not supported.', n); return this.result(n, 'void', 'workgroupBarrier()'); }
     const atomics = {atomicAdd: 'atomicAdd', atomicMin: 'atomicMin', atomicMax: 'atomicMax', atomicExch: 'atomicExchange'};
     if (atomics[name]) {
-      if (n.args.length !== 2 || n.args[0].kind !== 'unary' || n.args[0].op !== '&' || n.args[0].value.kind !== 'index') this.fail(`${name} requires &buffer[index] and a scalar value.`, n);
+      if (n.args.length !== 2 || n.args[0].kind !== 'unary' || n.args[0].op !== '&' || !['index','id'].includes(n.args[0].value.kind)) this.fail(`${name} requires &buffer[index] or &sharedScalar and a scalar value.`, n);
       const target = this.expr(n.args[0].value, true), value = this.expr(n.args[1]);
       if (!target.atomic || !['u32', 'i32'].includes(target.type)) this.fail('Only integer buffer/shared-array atomics are supported; CUDA float atomicAdd is not silently emulated.', n);
       this.writable(target, n.args[0].value);
@@ -191,9 +192,10 @@ class Emitter {
       return this.result(n,type,`cw_${signed?'mul24':'umul24'}(${args.map(a=>this.convert(a.code,a.type,type,n)).join(', ')})`,pre);
     }
     if (casts[name]) { if (args.length !== 1) this.fail('Scalar casts require one argument.', n); return this.result(n, casts[name], this.convert(args[0].code, args[0].type, casts[name], n), pre); }
-    if (/^make_float[234]$/.test(name)) {
+    if (/^make_(float|uint|int)[234]$/.test(name)) {
       const count = Number(name.at(-1)); if (args.length !== count) this.fail(`${name} needs ${count} arguments.`, n);
-      return this.result(n, `vec${count}<f32>`, `vec${count}<f32>(${args.map(a => this.convert(a.code, a.type, 'f32', n)).join(', ')})`, pre);
+      const element=name.startsWith('make_uint')?'u32':name.startsWith('make_int')?'i32':'f32';
+      return this.result(n, `vec${count}<${element}>`, `vec${count}<${element}>(${args.map(a => this.convert(a.code, a.type, element, n)).join(', ')})`, pre);
     }
     if(name==='__fdividef'){if(args.length!==2)this.fail('__fdividef requires two arguments.',n);return this.result(n,'f32',`(${args.map(a=>this.convert(a.code,a.type,'f32',n)).join(' / ')})`,pre);}
     const unary = {sinf: 'sin', cosf: 'cos', tanf: 'tan', sqrtf: 'sqrt', rsqrtf: 'inverseSqrt', expf: 'exp', __expf:'exp', exp2f: 'exp2', logf: 'log', __logf:'log', log2f: 'log2', fabsf: 'abs', floorf: 'floor', ceilf: 'ceil', truncf: 'trunc'};
@@ -257,7 +259,7 @@ class Emitter {
     let type = n.type;
     const dims = n.dimensions.map(d => { const value = constantValue(d); if (!Number.isSafeInteger(value) || value < 1 || value > 65536) this.fail('Invalid fixed array dimension (1..65536).', n); return value; });
     for (let i = dims.length - 1; i >= 0; i--) type = arrayOf(type, dims[i]);
-    if (n.shared && (!dims.length || n.init)) this.fail('__shared__ requires a fixed-size array without an initializer.', n);
+    if (n.shared && n.init) this.fail('__shared__ variables cannot have an initializer.', n);
     if (isArray(type) && n.init) this.fail('Array initializers are unsupported. Initialize elements explicitly.', n);
     const atomic = n.shared && this.usage.atomic.has(n.name);
     if (atomic && !['i32', 'u32'].includes(n.type)) this.fail('Shared atomics require int or unsigned int.', n);
@@ -319,7 +321,7 @@ class Emitter {
     for (const p of this.kernel.params) {
       if (p.shared || p.reference || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
       if (p.pointer) {
-        if (p.type === 'bool' || p.type === 'vec3<f32>') this.fail('bool* and float3* have incompatible CUDA/WGSL layouts. Use unsigned int* or float4*.', p);
+        if (p.type === 'bool' || vectorLength(p.type)===3) this.fail('bool* and three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
         const atomic = this.usage.atomic.has(p.name), readOnly = p.constant || !this.usage.writes.has(p.name);
         if (p.constant && this.usage.writes.has(p.name)) this.fail(`Cannot write through const buffer '${p.name}'.`, p);
         if (atomic && !['i32', 'u32'].includes(p.type)) this.fail('Only 32-bit integer atomics are supported.', p);

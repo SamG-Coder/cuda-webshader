@@ -8,7 +8,7 @@ NVIDIA cuda-samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
 The audit scans direct source files for standalone global void kernels. It is
 not a complete C++ preprocessor or a claim to compile every template instance.
 
-The 24 translated entries were run separately with NVCC on RTX 5080 and with
+The 25 translated entries were run separately with NVCC on RTX 5080 and with
 WebGPU on a real NVIDIA adapter. Fixtures use 256 elements or a 32×32 grid,
 with 64×64 matrices for the two transpose kernels and 17 vectors of 1,537
 elements for the scalar-product kernel;
@@ -30,6 +30,7 @@ node scripts/prepare-nvidia-transpose.mjs
 node scripts/prepare-nvidia-scalar.mjs
 node scripts/prepare-nvidia-blackscholes.mjs
 node scripts/prepare-nvidia-matrixmul.mjs
+node scripts/prepare-nvidia-scan-update.mjs
 node scripts/prepare-nvidia-checks.mjs
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor .local/nvidia-checks/check.cu -o .local/nvidia-checks/check.exe
 .local/nvidia-checks/check.exe
@@ -38,6 +39,7 @@ node scripts/test-nvidia-transpose.mjs
 node scripts/test-nvidia-scalar.mjs
 node scripts/test-nvidia-blackscholes.mjs
 node scripts/test-nvidia-matrixmul.mjs
+node scripts/test-nvidia-scan-update.mjs
 ```
 
 Run the server first (`npm start`) for browser checks. The browser script uses
@@ -104,3 +106,16 @@ CPU matrix multiplication. Native and browser results are recorded in
 `reports/nvidia-matrixmul-native.txt` and `reports/nvidia-matrixmul.json`.
 Compile the native harness using the NVCC flags above. These are correctness
 checks, not evidence that either tile size is faster.
+
+The scan follow-up imports only the unchanged `uniformUpdate` kernel plus its
+namespace alias. Its `uint4` data receives a shared block offset; the two earlier
+scan stages still require shared-memory pointers, helper barriers and other
+unsupported helper constructs. No complete scan is claimed. Native harnesses
+supply `using uint = unsigned int`, the alias normally supplied by NVIDIA helper
+headers. `scan-update-native.cu` and `scripts/test-nvidia-scan-update.mjs` check
+four block/thread configurations, values above 2^24, unsigned wraparound and 16
+guard values. The browser additionally checks signed/unsigned vector constructors,
+helper returns and shared scalar atomics. Results are recorded in
+`reports/nvidia-scan-update-native.txt` and `reports/nvidia-scan-update.json`.
+Build the native harness with the NVCC flags above. The sandbox uses generic
+integer buffers and the compiled shader; its preview performs no CPU scan work.
