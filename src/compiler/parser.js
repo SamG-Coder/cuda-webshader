@@ -126,6 +126,7 @@ export class Parser {
   }
   statement() {
     const token = this.peek();
+    if(this.match('do')){const body=this.statement();this.take('while');this.take('(');const condition=this.expression();this.take(')');this.take(';');return {kind:'do',token,body,condition};}
     if(this.groupNamespaces.has(token.value)&&this.peek(1).value==='::'&&this.peek(2).value==='thread_block'){
       this.qualifiedName();const name=this.name();this.take('=');const factory=this.qualifiedName();this.take('(');this.take(')');this.take(';');
       if(factory!=='cooperative_groups::this_thread_block')this.fail('thread_block must be initialized with cooperative_groups::this_thread_block().',token);

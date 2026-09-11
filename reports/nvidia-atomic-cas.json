@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-11T23:35:28.298Z",
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "sourceCompiled": true,
+  "results": [
+    {
+      "groups": 1,
+      "threads": 32,
+      "activeThreads": 32,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "groups": 3,
+      "threads": 128,
+      "activeThreads": 384,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "groups": 17,
+      "threads": 256,
+      "activeThreads": 4352,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "groups": 3907,
+      "threads": 256,
+      "activeThreads": 1000000,
+      "guardsPreserved": true,
+      "pass": true
+    }
+  ],
+  "semantics": [
+    {
+      "type": "int",
+      "pass": true
+    },
+    {
+      "type": "unsigned int",
+      "pass": true
+    }
+  ],
+  "passed": true
+}

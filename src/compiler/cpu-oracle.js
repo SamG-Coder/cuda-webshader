@@ -82,6 +82,7 @@ class Context {
     const args=[];for(const [i,a] of n.args.entries())args.push(yield* (n.referenceArgs?.[i]?this.ref(a):this.eval(a)));
     if(name==='__mul24')return Math.imul((args[0]<<8)>>8,(args[1]<<8)>>8);
     if(name==='__umul24')return Math.imul(args[0]&0xffffff,args[1]&0xffffff)>>>0;
+    if(name==='atomicCAS'){const old=args[0].get();if(old===convert(args[1],n.type))args[0].set(convert(args[2],n.type));return old;}
     if(['atomicAdd','atomicMin','atomicMax','atomicExch'].includes(name)){
       const old=args[0].get(),value=name==='atomicAdd'?old+args[1]:name==='atomicMin'?Math.min(old,args[1]):name==='atomicMax'?Math.max(old,args[1]):args[1];args[0].set(value);return old;
     }
@@ -108,6 +109,7 @@ class Context {
       case 'decls':for(const d of n.declarations)yield* this.statement(d);return;
       case 'expr':yield* this.eval(n.value);return;
       case 'if':if(yield* this.eval(n.condition))return yield* this.statement(n.yes);else if(n.no)return yield* this.statement(n.no);return;
+      case 'do':{do{const signal=yield* this.statement(n.body);if(signal?.control==='return')return signal;if(signal?.control==='break')break;this.tick();}while(yield* this.eval(n.condition));return;}
       case 'for':case 'while':{
         if(n.init){if(['decl','decls'].includes(n.init.kind))yield* this.statement(n.init);else yield* this.eval(n.init);}
         while(!n.condition||(yield* this.eval(n.condition))){const signal=yield* this.statement(n.body);if(signal?.control==='return')return signal;if(signal?.control==='break')break;if(n.step)yield* this.eval(n.step);this.tick();}return;

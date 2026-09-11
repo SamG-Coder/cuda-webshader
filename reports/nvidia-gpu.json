@@ -16,7 +16,7 @@
     }
   },
   "softwareAdapterRequested": false,
-  "date": "2026-09-11T23:29:13.792Z",
+  "date": "2026-09-11T23:34:15.368Z",
   "results": [
     {
       "sample": "cpp/0_Introduction/asyncAPI",
@@ -3532,6 +3532,33 @@
       "outputs": {
         "d_Data": {
           "values": 3072,
+          "maxError": 0,
+          "failures": 0
+        }
+      }
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleAtomicIntrinsics",
+      "entry": "cas_atomic",
+      "pass": true,
+      "values": 10,
+      "maxError": 0,
+      "failures": 0,
+      "output": [
+        103,
+        103,
+        103,
+        103,
+        102,
+        102,
+        102,
+        102,
+        102,
+        102
+      ],
+      "outputs": {
+        "g": {
+          "values": 10,
           "maxError": 0,
           "failures": 0
         }

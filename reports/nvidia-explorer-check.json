@@ -127,6 +127,11 @@
       "entry": "uniformUpdate",
       "sample": "cpp/2_Concepts_and_Techniques/scan",
       "passed": true
+    },
+    {
+      "entry": "cas_atomic",
+      "sample": "cpp/0_Introduction/simpleAtomicIntrinsics",
+      "passed": true
     }
   ]
 }

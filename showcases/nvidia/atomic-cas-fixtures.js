@@ -1,0 +1,1 @@
+export function atomicCasFixture(groups=4,threads=256,guards=0){const g=new Int32Array(10+guards).fill(-12345);g.fill(0,0,10);const expected=g.slice(),n=Math.min(groups*threads,1000000);for(let i=0;i<n;i++)expected[i%10]++;return {buffers:{g},scalars:{},groups:[groups,1,1],out:'g',expected};}

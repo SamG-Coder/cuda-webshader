@@ -35,7 +35,7 @@ function analyse(functions, params) {
     if (!n || !n.kind) return;
     if (n.kind === 'assign') { scan(n.left, n.op === '=' ? 'write' : 'both'); scan(n.right); return; }
     if (n.kind === 'unary' && ['++', '--'].includes(n.op)) { scan(n.value, 'both'); return; }
-    if (n.kind === 'call' && n.callee.kind === 'id' && ['atomicAdd', 'atomicMin', 'atomicMax', 'atomicExch'].includes(n.callee.name)) {
+    if (n.kind === 'call' && n.callee.kind === 'id' && ['atomicAdd', 'atomicMin', 'atomicMax', 'atomicExch','atomicCAS'].includes(n.callee.name)) {
       const target = n.args[0];
       if (target?.kind === 'unary' && target.op === '&') { const name = rootName(target.value); if (name) atomic.add(name); scan(target.value, 'both'); }
       n.args.slice(1).forEach(a => scan(a)); return;
@@ -175,6 +175,13 @@ class Emitter {
     if (n.callee.kind !== 'id') this.fail('Only named functions are supported.', n);
     const name = n.callee.name; n.callName = name;
     if (name === '__syncthreads') { if (n.args.length) this.fail('__syncthreads takes no arguments.', n); if (this.currentFunction !== this.kernel) this.fail('Barriers in helper functions are not supported.', n); return this.result(n, 'void', 'workgroupBarrier()'); }
+    if(name==='atomicCAS'){
+      if(n.args.length!==3||n.args[0].kind!=='unary'||n.args[0].op!=='&'||!['index','id'].includes(n.args[0].value.kind))this.fail('atomicCAS requires &buffer[index] or &sharedScalar, compare and replacement.',n);
+      const target=this.expr(n.args[0].value,true),compare=this.expr(n.args[1]),replacement=this.expr(n.args[2]);
+      if(!target.atomic||!['i32','u32'].includes(target.type))this.fail('atomicCAS requires 32-bit integer atomic storage.',n);this.writable(target,n.args[0].value);
+      const id=`cw_cas_${this.temp++}`,type=target.type;
+      return this.result(n,type,id+'_old',[...target.pre,`let ${id}_ptr = &${target.code};`,...compare.pre,`let ${id}_compare = ${this.convert(compare.code,compare.type,type,n)};`,...replacement.pre,`let ${id}_value = ${this.convert(replacement.code,replacement.type,type,n)};`,`var ${id}_old: ${type};`,'loop {',`  let ${id}_result = atomicCompareExchangeWeak(${id}_ptr, ${id}_compare, ${id}_value);`,`  ${id}_old = ${id}_result.old_value;`,`  if (${id}_result.exchanged || ${id}_old != ${id}_compare) { break; }`,'}']);
+    }
     const atomics = {atomicAdd: 'atomicAdd', atomicMin: 'atomicMin', atomicMax: 'atomicMax', atomicExch: 'atomicExchange'};
     if (atomics[name]) {
       if (n.args.length !== 2 || n.args[0].kind !== 'unary' || n.args[0].op !== '&' || !['index','id'].includes(n.args[0].value.kind)) this.fail(`${name} requires &buffer[index] or &sharedScalar and a scalar value.`, n);
@@ -291,6 +298,10 @@ class Emitter {
       case 'decls': return n.declarations.flatMap(d=>this.declare(d));
       case 'expr': return this.effect(n.value);
       case 'if': { const condition = this.expr(n.condition); return [...condition.pre, `if (${this.convert(condition.code, condition.type, 'bool', n)}) {`, ...indent(this.body(n.yes)), ...(n.no ? ['} else {', ...indent(this.body(n.no))] : []), '}']; }
+      case 'do': {
+        const condition=this.expr(n.condition);this.loopDepth++;const inner=this.body(n.body);this.loopDepth--;
+        return ['loop {',...indent(inner),'  continuing {',...indent(indent([...condition.pre,`break if !${this.convert(condition.code,condition.type,'bool',n)};`])),'  }','}'];
+      }
       case 'for': case 'while': {
         this.scopes.push(new Map()); this.loopDepth++;
         const init = n.kind === 'for' && n.init ? (['decl','decls'].includes(n.init.kind) ? this.statement(n.init) : this.effect(n.init)) : [];

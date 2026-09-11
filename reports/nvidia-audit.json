@@ -603,8 +603,25 @@
         ]
       },
       "browser": {
-        "status": "translation-rejected",
-        "reason": "Expected ';', found ':'. (99:13)\n        cuda::std::atomic_ref<int> ref(g[i]);\r\n            ^"
+        "status": "kernel-verified",
+        "reason": "Isolated kernels checked against CPU reference on a real NVIDIA WebGPU adapter. Full host program is not executed.",
+        "checks": [
+          {
+            "sample": "cpp/0_Introduction/simpleAtomicIntrinsics",
+            "entry": "cas_atomic",
+            "pass": true,
+            "values": 10,
+            "maxError": 0,
+            "failures": 0,
+            "outputs": {
+              "g": {
+                "values": 10,
+                "maxError": 0,
+                "failures": 0
+              }
+            }
+          }
+        ]
       }
     },
     {
@@ -9477,11 +9494,11 @@
       }
     }
   ],
-  "executionUpdated": "2026-09-11T23:31:23.022Z",
+  "executionUpdated": "2026-09-11T23:36:27.061Z",
   "counts": {
     "samples": 208,
     "compilerProbes": 350,
-    "webgpuPassed": 25,
+    "webgpuPassed": 26,
     "nativeProgramsAttempted": 149,
     "nativeStatuses": {
       "exited-zero": 142,

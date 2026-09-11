@@ -8,7 +8,7 @@ NVIDIA cuda-samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
 The audit scans direct source files for standalone global void kernels. It is
 not a complete C++ preprocessor or a claim to compile every template instance.
 
-The 25 translated entries were run separately with NVCC on RTX 5080 and with
+The 26 translated entries were run separately with NVCC on RTX 5080 and with
 WebGPU on a real NVIDIA adapter. Fixtures use 256 elements or a 32×32 grid,
 with 64×64 matrices for the two transpose kernels and 17 vectors of 1,537
 elements for the scalar-product kernel;
@@ -31,6 +31,7 @@ node scripts/prepare-nvidia-scalar.mjs
 node scripts/prepare-nvidia-blackscholes.mjs
 node scripts/prepare-nvidia-matrixmul.mjs
 node scripts/prepare-nvidia-scan-update.mjs
+node scripts/prepare-nvidia-atomic-cas.mjs
 node scripts/prepare-nvidia-checks.mjs
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor .local/nvidia-checks/check.cu -o .local/nvidia-checks/check.exe
 .local/nvidia-checks/check.exe
@@ -40,6 +41,7 @@ node scripts/test-nvidia-scalar.mjs
 node scripts/test-nvidia-blackscholes.mjs
 node scripts/test-nvidia-matrixmul.mjs
 node scripts/test-nvidia-scan-update.mjs
+node scripts/test-nvidia-atomic-cas.mjs
 ```
 
 Run the server first (`npm start`) for browser checks. The browser script uses
@@ -119,3 +121,16 @@ helper returns and shared scalar atomics. Results are recorded in
 `reports/nvidia-scan-update-native.txt` and `reports/nvidia-scan-update.json`.
 Build the native harness with the NVCC flags above. The sandbox uses generic
 integer buffers and the compiled shader; its preview performs no CPU scan work.
+
+The atomic follow-up preserves the complete `cas_atomic` kernel body and original
+`NUM_THREADS` / `ARRAY_SIZE` constants from `simpleAtomicIntrinsics`. Only this
+intrinsic-based kernel is imported; the CCCL atomic_ref variants remain outside
+the supported subset. `atomic-cas-native.cu` and
+`scripts/test-nvidia-atomic-cas.mjs` check 32, 384, 4,352 and 1,000,000 active
+threads updating ten counters, including extra launched lanes beyond the source
+limit and 16 guard values. Browser checks additionally verify signed/unsigned
+CAS success/failure return values, shared scalar CAS and do-while continuation.
+The emitter handles possible spurious failure of WGSL weak compare-exchange by
+retrying while the observed value still equals the comparison value and no
+exchange occurred. Reports are `reports/nvidia-atomic-cas-native.txt` and
+`reports/nvidia-atomic-cas.json`; native build flags are the same as above.

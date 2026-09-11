@@ -1,0 +1,12 @@
+import {chromium} from 'playwright';import {writeFile} from 'node:fs/promises';
+const browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM||'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+try{const page=await browser.newPage();await page.goto('http://localhost:5173/');const report=await page.evaluate(async()=>{
+ const {GpuRuntime}=await import('/src/runtime/runtime.js'),{atomicCasFixture}=await import('/showcases/nvidia/atomic-cas-fixtures.js'),runtime=await GpuRuntime.create(),results=[];
+ try{const adapter=runtime.describe();if(!/nvidia/i.test(JSON.stringify(adapter)))throw Error('Real NVIDIA adapter required');const source=await(await fetch('/showcases/nvidia/kernels/25.cu')).text();
+ for(const [groups,threads]of [[1,32],[3,128],[17,256],[3907,256]]){const f=atomicCasFixture(groups,threads,16),g=runtime.createBuffer(f.buffers.g);try{const k=await runtime.kernel(source,{workgroupSize:[threads,1,1]});runtime.batch().dispatch(k.bind({g},{}),f.groups).submit();const out=await runtime.read(g,Int32Array);results.push({groups,threads,activeThreads:Math.min(groups*threads,1000000),guardsPreserved:out.slice(10).every(v=>v===-12345),pass:out.every((v,i)=>v===f.expected[i])});}finally{runtime.destroyBuffer(g);}}
+ const semantics=[];
+ for(const [type,Type,initial,next]of [['int',Int32Array,-8,9],['unsigned int',Uint32Array,4294967295,7]]){const literal=v=>type==='unsigned int'?v+'u':v,out=runtime.createBuffer(new Type([initial,0,0,0]));try{const code=`__global__ void k(${type}* out){out[1]=atomicCAS(&out[0],${literal(initial)},${literal(next)});out[2]=atomicCAS(&out[0],${literal(initial)},${literal(3)});__shared__ int s;s=2;int i=0;do{i++;if(i<3)continue;}while(i<4);out[3]=atomicCAS(&s,2,i);}`,k=await runtime.kernel(code,{workgroupSize:[1,1,1]});runtime.batch().dispatch(k.bind({out},{}),[1,1,1]).submit();const values=await runtime.read(out,Type);semantics.push({type,pass:values.every((v,i)=>v===[next,initial,next,2][i])});}finally{runtime.destroyBuffer(out);}}
+ return {date:new Date().toISOString(),adapter,softwareAdapterRequested:false,sourceCompiled:true,results,semantics,passed:results.every(r=>r.pass)&&semantics.every(r=>r.pass)};
+ }finally{runtime.dispose();}
+ });await writeFile('reports/nvidia-atomic-cas.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));if(!report.passed)process.exitCode=1;
+}finally{await browser.close();}
