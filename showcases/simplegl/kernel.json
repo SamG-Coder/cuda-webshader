@@ -1,0 +1,44 @@
+{
+  "version": "0.1.0",
+  "name": "simple_vbo_kernel",
+  "entryPoint": "main",
+  "wgsl": "// CUDA WebShader 0.1.0. Generated from kernel simple_vbo_kernel.\n@group(0) @binding(0) var<storage, read_write> b_pos: array<vec4<f32>>;\nstruct CWParams {\n  p_width: u32,\n  p_height: u32,\n  p_time: f32,\n  cw_pad_12: u32,\n}\n@group(0) @binding(1) var<uniform> cw_params: CWParams;\nconst cw_block_size: vec3<u32> = vec3<u32>(8u, 8u, 1u);\n\n\n@compute @workgroup_size(8, 8, 1)\nfn main(\n  @builtin(local_invocation_id) cw_thread: vec3<u32>,\n  @builtin(workgroup_id) cw_block: vec3<u32>,\n  @builtin(num_workgroups) cw_grid: vec3<u32>\n) {\n  var v_x: u32 = ((cw_block.x * cw_block_size.x) + cw_thread.x);\n  var v_y: u32 = ((cw_block.y * cw_block_size.y) + cw_thread.y);\n  var v_u: f32 = (f32(v_x) / f32(cw_params.p_width));\n  var v_v: f32 = (f32(v_y) / f32(cw_params.p_height));\n  v_u = ((v_u * 2.0f) - 1.0f);\n  v_v = ((v_v * 2.0f) - 1.0f);\n  var v_freq: f32 = 4.0f;\n  var v_w: f32 = ((sin(((v_u * v_freq) + cw_params.p_time)) * cos(((v_v * v_freq) + cw_params.p_time))) * 0.5f);\n  b_pos[((v_y * cw_params.p_width) + v_x)] = vec4<f32>(v_u, v_w, v_v, 1.0f);\n}\n",
+  "metadata": {
+    "workgroupSize": [
+      8,
+      8,
+      1
+    ],
+    "bindings": [
+      {
+        "name": "pos",
+        "elementType": "vec4<f32>",
+        "stride": 16,
+        "binding": 0,
+        "readOnly": false,
+        "atomic": false
+      }
+    ],
+    "scalars": [
+      {
+        "name": "width",
+        "type": "u32",
+        "offset": 0
+      },
+      {
+        "name": "height",
+        "type": "u32",
+        "offset": 4
+      },
+      {
+        "name": "time",
+        "type": "f32",
+        "offset": 8
+      }
+    ],
+    "uniformSize": 16,
+    "uniformBinding": 1,
+    "workgroupStorageBytes": 0,
+    "barrier": "workgroup"
+  }
+}

@@ -13,6 +13,8 @@ Open [the measured comparison](reports/performance-comparison.html) or read [the
 Measured hardware: NVIDIA GeForce RTX 5080, driver 616.64, CUDA Toolkit 13.3, Microsoft Edge 152, Windows WDDM. Results apply to these specific kernels and workloads, not all CUDA code or optimized CUDA libraries. See [VALIDATION.md](VALIDATION.md).
 ## Run
 
+Try the [NVIDIA simpleGL showcase](showcases/simplegl/): an unchanged, BSD-3-Clause-licensed NVIDIA CUDA vertex kernel translated by this compiler and displayed through WebGPU/Three.js. It passed 12 native CUDA and 12 browser GPU checks. See [provenance and instructions](showcases/simplegl/README.md).
+
 Install Node.js 20 or newer. Extract the project, then:
 
 ```sh

@@ -1,0 +1,9 @@
+{
+  "repository": "NVIDIA/cuda-samples",
+  "commit": "5443602d89ed99aede2e4b7bf329daddeadb320e",
+  "path": "cpp/5_Domain_Specific/simpleGL/simpleGL.cu",
+  "url": "https://github.com/NVIDIA/cuda-samples/blob/5443602d89ed99aede2e4b7bf329daddeadb320e/cpp/5_Domain_Specific/simpleGL/simpleGL.cu",
+  "kernelModified": false,
+  "kernelSha256": "16a424d3e68a2554ccd23ca50ad33d44438b8c21be97b0c3d959959786b824b3",
+  "license": "BSD-3-Clause"
+}

@@ -1,0 +1,209 @@
+{
+  "passed": true,
+  "unmodifiedUpstreamKernel": true,
+  "numericalCases": 12,
+  "results": [
+    {
+      "passed": true,
+      "grid": [
+        128,
+        128
+      ],
+      "vertices": 16384,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "timestamp-query"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 256,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "checks": [
+        {
+          "time": 0,
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 2.682209014892578e-7,
+          "maxRel": 0.00000967308965629508
+        },
+        {
+          "time": 1.25,
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 2.8312206268310547e-7,
+          "maxRel": 0.000017000759704583465
+        },
+        {
+          "time": 7.5,
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.280598998069763e-7,
+          "maxRel": 0.00016450979634514284
+        }
+      ]
+    },
+    {
+      "passed": true,
+      "grid": [
+        256,
+        256
+      ],
+      "vertices": 65536,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "timestamp-query"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 256,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "checks": [
+        {
+          "time": 0,
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 2.980232238769531e-7,
+          "maxRel": 0.000025435696612354534
+        },
+        {
+          "time": 1.25,
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 3.129243850708008e-7,
+          "maxRel": 0.00007031554667371955
+        },
+        {
+          "time": 7.5,
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.662441253662109e-7,
+          "maxRel": 0.0002506955676674555
+        }
+      ]
+    },
+    {
+      "passed": true,
+      "grid": [
+        512,
+        512
+      ],
+      "vertices": 262144,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "timestamp-query"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 256,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "checks": [
+        {
+          "time": 0,
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 3.2782554626464844e-7,
+          "maxRel": 0.00011324797794202882
+        },
+        {
+          "time": 1.25,
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 3.2782554626464844e-7,
+          "maxRel": 0.0001175905284735471
+        },
+        {
+          "time": 7.5,
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 6.407499313354492e-7,
+          "maxRel": 0.00034353947716201034
+        }
+      ]
+    },
+    {
+      "passed": true,
+      "grid": [
+        1024,
+        1024
+      ],
+      "vertices": 1048576,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "timestamp-query"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 256,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "checks": [
+        {
+          "time": 0,
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 3.2782554626464844e-7,
+          "maxRel": 0.00022577020939321842
+        },
+        {
+          "time": 1.25,
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 3.427267074584961e-7,
+          "maxRel": 0.00034967378349947694
+        },
+        {
+          "time": 7.5,
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 6.407499313354492e-7,
+          "maxRel": 0.0006321984368775471
+        }
+      ]
+    }
+  ],
+  "pause": "PASS",
+  "pageErrors": []
+}

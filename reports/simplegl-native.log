@@ -1,0 +1,14 @@
+GPU: NVIDIA GeForce RTX 5080
+PASS 128x128 time=0.00 max_error=4.96310852e-08
+PASS 128x128 time=1.25 max_error=4.96310852e-08
+PASS 128x128 time=7.50 max_error=4.83923914e-08
+PASS 256x256 time=0.00 max_error=5.73637042e-08
+PASS 256x256 time=1.25 max_error=5.73637042e-08
+PASS 256x256 time=7.50 max_error=5.7166188e-08
+PASS 512x512 time=0.00 max_error=5.73637042e-08
+PASS 512x512 time=1.25 max_error=5.73637042e-08
+PASS 512x512 time=7.50 max_error=5.88935845e-08
+PASS 1024x1024 time=0.00 max_error=5.75992959e-08
+PASS 1024x1024 time=1.25 max_error=5.75992959e-08
+PASS 1024x1024 time=7.50 max_error=5.88935845e-08
+12/12 native NVIDIA simpleGL kernel checks passed.

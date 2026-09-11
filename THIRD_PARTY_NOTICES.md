@@ -11,6 +11,7 @@ licenses; the project's MIT license does not relicense them.
 | Playwright | 1.56.1 | Apache-2.0 | Development/browser test runner |
 | playwright-core | 1.56.1 | Apache-2.0 | Transitive browser test dependency |
 | fsevents | 2.3.2 | MIT | Optional macOS-only Playwright dependency |
+| NVIDIA CUDA Samples simpleGL kernel | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Imported, unchanged showcase kernel |
 
 Versions and package license declarations are recorded in package-lock.json.
 Dependencies are installed separately with npm; node_modules is not committed.
@@ -32,8 +33,11 @@ later redistribution of NVIDIA components remain subject to NVIDIA's terms.
 The MIT license here covers the project's original CUDA source, not CUDA itself.
 
 The implementation's design references are listed in [docs/research.md](docs/research.md).
-The source review found no embedded third-party implementation bearing a
-conflicting license. Standard CUDA algorithms and API use do not make the
+The imported `showcases/simplegl/kernel.cu` retains NVIDIA's full copyright
+and BSD-3-Clause notice; its generated WGSL is a translation of that licensed
+source and retains that license. See [the upstream license](licenses/nvidia-cuda-samples-BSD-3-Clause.txt)
+and [showcase provenance](showcases/simplegl/README.md). This is an explicit
+exception to the original project code's MIT license. Standard CUDA algorithms and API use do not make the
 project an NVIDIA SDK distribution. CUDA and NVIDIA names identify compatible
 technology; no affiliation, endorsement or trademark rights are granted.
 
