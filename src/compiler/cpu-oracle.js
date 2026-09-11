@@ -11,10 +11,10 @@ function convert(value,type){
 }
 function zero(type){if(isArray(type))return Array.from({length:type.length},()=>zero(type.element));const n=vectorLength(type);return n?Array(n).fill(0):type==='bool'?false:0;}
 class BufferView {
-  constructor(data,type){this.data=data;this.type=type;this.width=vectorLength(type)||1;this.length=data.length/this.width;if(!Number.isInteger(this.length))throw new Error('Buffer record count is not integral.');}
-  check(i){if(!Number.isInteger(i)||i<0||i>=this.length)throw new RangeError(`CPU oracle detected out-of-bounds access at ${i}, length ${this.length}.`);}
-  get(i){this.check(i);return this.width===1?this.data[i]:Array.from(this.data.subarray(i*this.width,(i+1)*this.width));}
-  set(i,v){this.check(i);if(this.width===1)this.data[i]=convert(v,this.type);else this.data.set(convert(v,this.type),i*this.width);}
+  constructor(data,type,offset=0){this.data=data;this.type=type;this.offset=offset;this.width=vectorLength(type)||1;this.length=data.length/this.width;if(!Number.isInteger(this.length))throw new Error('Buffer record count is not integral.');}
+  check(i){if(!Number.isInteger(i)||i+this.offset<0||i+this.offset>=this.length)throw new RangeError(`CPU oracle detected out-of-bounds access at ${i}, length ${this.length}.`);}
+  get(i){this.check(i);i+=this.offset;return this.width===1?this.data[i]:Array.from(this.data.subarray(i*this.width,(i+1)*this.width));}
+  set(i,v){this.check(i);i+=this.offset;if(this.width===1)this.data[i]=convert(v,this.type);else this.data.set(convert(v,this.type),i*this.width);}
 }
 function binary(op,a,b,type){
   if(op==='&&')return !!a&&!!b;if(op==='||')return !!a||!!b;
@@ -105,7 +105,7 @@ class Context {
     this.tick();
     switch(n.kind){
       case 'block':for(const s of n.body){const signal=yield* this.statement(s);if(signal)return signal;}return;
-      case 'decl':if(!n.shared)this.env.set(n.symbol,{value:n.init?convert(yield* this.eval(n.init),n.resolvedType):zero(n.resolvedType)});return;
+      case 'decl':if(n.aliasBase){const base=this.env.get(n.aliasBase).value,offset=base.offset+(n.aliasOffset?yield* this.eval(n.aliasOffset):0);if(!Number.isInteger(offset)||offset<0||offset>base.length)throw new RangeError('CPU alias offset outside buffer.');this.env.set(n.symbol,{value:new BufferView(base.data,base.type,offset)});}else if(!n.shared)this.env.set(n.symbol,{value:n.init?convert(yield* this.eval(n.init),n.resolvedType):zero(n.resolvedType)});return;
       case 'decls':for(const d of n.declarations)yield* this.statement(d);return;
       case 'expr':yield* this.eval(n.value);return;
       case 'if':if(yield* this.eval(n.condition))return yield* this.statement(n.yes);else if(n.no)return yield* this.statement(n.no);return;

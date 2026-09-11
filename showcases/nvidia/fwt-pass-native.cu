@@ -1,0 +1,8 @@
+// Original project harness (MIT); included NVIDIA kernel retains BSD-3-Clause.
+#include <cuda_runtime.h>
+#include <vector>
+#include <array>
+#include <cstdio>
+#include "kernels/29.cu"
+#define CHECK(x) do{auto e=(x);if(e!=cudaSuccess){printf("CUDA ERROR %s\n",cudaGetErrorString(e));return 2;}}while(0)
+int main(){int failures=0;for(auto shape:{std::array<int,4>{1,1,32,1},{2,3,32,16},{2,3,128,128},{4,2,256,1024}}){int groups=shape[0],batches=shape[1],threads=shape[2],stride=shape[3],N=groups*threads*4;std::vector<float>input(N*batches),output(N*batches+16,-12345);for(int i=0;i<N*batches;i++)input[i]=(i%31-15)/16.f;auto expected=output;for(int b=0;b<batches;b++)for(int base=0;base<N;base+=4*stride)for(int lane=0;lane<stride;lane++){int i=b*N+base+lane;float a=input[i],x=input[i+stride],y=input[i+2*stride],z=input[i+3*stride];expected[i]=a+x+y+z;expected[i+stride]=a-x+y-z;expected[i+2*stride]=a+x-y-z;expected[i+3*stride]=a-x-y+z;}float *in,*out;CHECK(cudaMalloc(&in,input.size()*4));CHECK(cudaMalloc(&out,output.size()*4));CHECK(cudaMemcpy(in,input.data(),input.size()*4,cudaMemcpyHostToDevice));CHECK(cudaMemcpy(out,output.data(),output.size()*4,cudaMemcpyHostToDevice));fwtBatch2Kernel<<<dim3(groups,batches),threads>>>(out,in,stride);CHECK(cudaGetLastError());CHECK(cudaDeviceSynchronize());CHECK(cudaMemcpy(output.data(),out,output.size()*4,cudaMemcpyDeviceToHost));bool pass=output==expected;printf("groups=%d batches=%d threads=%d stride=%d output + guards: %s\n",groups,batches,threads,stride,pass?"PASS":"FAIL");failures+=!pass;CHECK(cudaFree(in));CHECK(cudaFree(out));}return failures?1:0;}

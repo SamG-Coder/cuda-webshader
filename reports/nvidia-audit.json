@@ -6663,8 +6663,25 @@
         ]
       },
       "browser": {
-        "status": "translation-rejected",
-        "reason": "Expected ';', found ':'. (46:7)\n    cg::thread_block cta  = cg::this_thread_block();\r\n      ^"
+        "status": "kernel-verified",
+        "reason": "Isolated kernels checked against CPU reference on a real NVIDIA WebGPU adapter. Full host program is not executed.",
+        "checks": [
+          {
+            "sample": "cpp/5_Domain_Specific/fastWalshTransform",
+            "entry": "fwtBatch2Kernel",
+            "pass": true,
+            "values": 3072,
+            "maxError": 0,
+            "failures": 0,
+            "outputs": {
+              "d_Output": {
+                "values": 3072,
+                "maxError": 0,
+                "failures": 0
+              }
+            }
+          }
+        ]
       }
     },
     {
@@ -9541,11 +9558,11 @@
       }
     }
   ],
-  "executionUpdated": "2026-09-11T23:41:41.573Z",
+  "executionUpdated": "2026-09-11T23:48:22.045Z",
   "counts": {
     "samples": 208,
     "compilerProbes": 350,
-    "webgpuPassed": 29,
+    "webgpuPassed": 30,
     "nativeProgramsAttempted": 149,
     "nativeStatuses": {
       "exited-zero": 142,

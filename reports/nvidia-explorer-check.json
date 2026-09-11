@@ -147,6 +147,11 @@
       "entry": "testKernel<float4>",
       "sample": "cpp/6_Performance/alignedTypes",
       "passed": true
+    },
+    {
+      "entry": "fwtBatch2Kernel",
+      "sample": "cpp/5_Domain_Specific/fastWalshTransform",
+      "passed": true
     }
   ]
 }

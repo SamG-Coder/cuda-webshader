@@ -31,17 +31,21 @@ function constantValue(n) {
 }
 function analyse(functions, params) {
   const atomic = new Set(), reads = new Set(), writes = new Set(), bufferNames = new Set(params.filter(p => p.pointer).map(p => p.name));
+  let aliases=new Map();const resolve=name=>aliases.has(name)?aliases.get(name):name;
   const scan = (n, mode = 'read') => {
     if (!n || !n.kind) return;
+    if(n.kind==='block'||n.kind==='for'){const saved=aliases;aliases=new Map(aliases);if(n.kind==='block')n.body.forEach(s=>scan(s));else{scan(n.init);scan(n.condition);scan(n.body);scan(n.step);}aliases=saved;return;}
+    if(['if','while','do'].includes(n.kind)){scan(n.condition);const saved=aliases;aliases=new Map(saved);scan(n.kind==='if'?n.yes:n.body);aliases=new Map(saved);if(n.kind==='if')scan(n.no);aliases=saved;return;}
+    if(n.kind==='decl'){scan(n.init);const base=n.init?.kind==='id'?n.init:n.init?.kind==='binary'&&n.init.op==='+'?n.init.left:null;aliases.set(n.name,n.pointer&&base?.kind==='id'?resolve(base.name):null);return;}
     if (n.kind === 'assign') { scan(n.left, n.op === '=' ? 'write' : 'both'); scan(n.right); return; }
     if (n.kind === 'unary' && ['++', '--'].includes(n.op)) { scan(n.value, 'both'); return; }
     if (n.kind === 'call' && n.callee.kind === 'id' && ['atomicAdd', 'atomicMin', 'atomicMax', 'atomicExch','atomicCAS'].includes(n.callee.name)) {
       const target = n.args[0];
-      if (target?.kind === 'unary' && target.op === '&') { const name = rootName(target.value); if (name) atomic.add(name); scan(target.value, 'both'); }
+      if (target?.kind === 'unary' && target.op === '&') { const name = rootName(target.value); if (name) atomic.add(resolve(name)??name); scan(target.value, 'both'); }
       n.args.slice(1).forEach(a => scan(a)); return;
     }
     if (n.kind === 'index') {
-      const name = rootName(n); if (bufferNames.has(name)) { if (mode !== 'write') reads.add(name); if (mode !== 'read') writes.add(name); }
+      const name = resolve(rootName(n)); if (bufferNames.has(name)) { if (mode !== 'write') reads.add(name); if (mode !== 'read') writes.add(name); }
       scan(n.index); if (n.base.kind === 'index') scan(n.base, mode); return;
     }
     if (n.kind === 'member') { scan(n.base, mode); return; }
@@ -50,7 +54,7 @@ function analyse(functions, params) {
       if (Array.isArray(val)) val.forEach(x => scan(x)); else if (val?.kind) scan(val);
     }
   };
-  functions.forEach(f => scan(f.body));
+  functions.forEach(f => {aliases=new Map(f.params.filter(p=>!p.pointer).map(p=>[p.name,null]));scan(f.body);});
   return {atomic, reads, writes, storageBarrier: [...writes].some(x => reads.has(x))};
 }
 class Emitter {
@@ -108,7 +112,8 @@ class Emitter {
       case 'index': {
         const base = this.expr(n.base, true), index = this.expr(n.index);
         if (!isArray(base.type) || !['i32', 'u32'].includes(index.type)) this.fail('Indexing requires an array and a 32-bit integer index.', n);
-        const code = `${base.code}[${index.code}]`, type = base.type.element;
+        const offset=base.rootSymbol?.offsetCode,indexCode=offset?`(${offset} + ${this.convert(index.code,index.type,'i32',n)})`:index.code;
+        const code = `${base.code}[${indexCode}]`, type = base.type.element;
         const atomic = base.atomicRoot && !isArray(type);
         return this.result(n, type, atomic && !raw ? `atomicLoad(&${code})` : code, [...base.pre, ...index.pre], {rootSymbol: base.rootSymbol, atomicRoot: base.atomicRoot, atomic});
       }
@@ -261,7 +266,15 @@ class Emitter {
   }
   declare(n) {
     if(n.reference)this.fail('References are supported only as helper parameters, not local declarations.',n);
-    if (n.pointer) this.fail('Local pointers are unsupported; use buffer parameters.', n);
+    if(n.pointer){
+      const baseNode=n.init?.kind==='id'?n.init:n.init?.kind==='binary'&&n.init.op==='+'?n.init.left:null,offsetNode=n.init?.kind==='binary'?n.init.right:null;
+      if(n.shared||n.dimensions.length||baseNode?.kind!=='id')this.fail('Local pointers require a buffer alias with an optional integer offset.',n);
+      const base=this.lookup(baseNode.name,baseNode);if(!['buffer','buffer-alias'].includes(base.kind)||base.type.element!==n.type)this.fail('Local pointers can alias only same-type storage buffers.',n);
+      if(base.constant&&!n.constant)this.fail('Cannot discard const through a buffer alias.',n);
+      const offset=offsetNode?this.expr(offsetNode):{type:'i32',code:'0i',pre:[]};if(!['i32','u32'].includes(offset.type))this.fail('Buffer alias offsets must be 32-bit integers.',n);
+      const offsetCode=`cw_offset_${this.temp++}`,symbol={...base,name:n.name,constant:n.constant||base.constant,kind:'buffer-alias',offsetCode};this.add(n.name,symbol,n);n.symbol=symbol;n.aliasBase=base;n.aliasOffset=offsetNode;
+      return [...offset.pre,`let ${offsetCode} = ${base.offsetCode?base.offsetCode+' + ':''}${this.convert(offset.code,offset.type,'i32',n)};`];
+    }
     if (n.type === 'void') this.fail('Variables cannot have void type.', n);
     let type = n.type;
     const dims = n.dimensions.map(d => { const value = constantValue(d); if (!Number.isSafeInteger(value) || value < 1 || value > 65536) this.fail('Invalid fixed array dimension (1..65536).', n); return value; });

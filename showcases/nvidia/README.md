@@ -8,7 +8,7 @@ NVIDIA cuda-samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
 The audit scans direct source files for standalone global void kernels. It is
 not a complete C++ preprocessor or a claim to compile every template instance.
 
-The 29 translated entries were run separately with NVCC on RTX 5080 and with
+The 30 translated entries were run separately with NVCC on RTX 5080 and with
 WebGPU on a real NVIDIA adapter. Fixtures use 256 elements or a 32×32 grid,
 with 64×64 matrices for the two transpose kernels and 17 vectors of 1,537
 elements for the scalar-product kernel;
@@ -33,6 +33,7 @@ node scripts/prepare-nvidia-matrixmul.mjs
 node scripts/prepare-nvidia-scan-update.mjs
 node scripts/prepare-nvidia-atomic-cas.mjs
 node scripts/prepare-nvidia-aligned-copy.mjs
+node scripts/prepare-nvidia-fwt-pass.mjs
 node scripts/prepare-nvidia-checks.mjs
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor .local/nvidia-checks/check.cu -o .local/nvidia-checks/check.exe
 .local/nvidia-checks/check.exe
@@ -44,6 +45,7 @@ node scripts/test-nvidia-matrixmul.mjs
 node scripts/test-nvidia-scan-update.mjs
 node scripts/test-nvidia-atomic-cas.mjs
 node scripts/test-nvidia-aligned-copy.mjs
+node scripts/test-nvidia-fwt-pass.mjs
 ```
 
 Run the server first (`npm start`) for browser checks. The browser script uses
@@ -149,3 +151,17 @@ zero in float4 and integer values beyond float precision. Reports are
 `reports/nvidia-aligned-copy-native.txt` and `reports/nvidia-aligned-copy.json`;
 native build flags are the same as above. Performance differences between custom
 alignment layouts have not been measured by these checks.
+
+The FWT follow-up retains the complete `fwtBatch2Kernel` body, including its
+local buffer aliases. It runs a single global-memory radix-4 pass with separate
+input/output buffers. The original host program's in-place binding of two
+parameters is not supported by this runtime, and the dynamic-shared-memory
+finishing kernel remains unimplemented. No full transform/convolution is claimed.
+`fwt-pass-native.cu` and `scripts/test-nvidia-fwt-pass.mjs` cover four combinations
+of block counts, batch counts, thread counts and power-of-two strides, comparing
+with independent four-term butterfly equations and checking 16 guard values.
+The stride must divide a quarter of each batch length; the source has no bounds
+guards. Alias tests additionally check captured offsets, chained aliases,
+indexing back within the original allocation, const protection, lexical scopes
+and atomics through aliases. Results are `reports/nvidia-fwt-pass-native.txt` and
+`reports/nvidia-fwt-pass.json`; use the same native build flags as above.

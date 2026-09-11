@@ -1,0 +1,11 @@
+import {chromium} from 'playwright';import {writeFile} from 'node:fs/promises';
+const browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM||'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+try{const page=await browser.newPage();await page.goto('http://localhost:5173/');const report=await page.evaluate(async()=>{
+ const {GpuRuntime}=await import('/src/runtime/runtime.js'),{fwtPassFixture}=await import('/showcases/nvidia/fwt-pass-fixtures.js'),runtime=await GpuRuntime.create(),results=[];
+ try{const adapter=runtime.describe();if(!/nvidia/i.test(JSON.stringify(adapter)))throw Error('Real NVIDIA adapter required');const source=await(await fetch('/showcases/nvidia/kernels/29.cu')).text();
+ for(const [groups,batches,threads,stride]of [[1,1,32,1],[2,3,32,16],[2,3,128,128],[4,2,256,1024]]){const f=fwtPassFixture(groups,batches,threads,stride,16),resources=Object.fromEntries(Object.entries(f.buffers).map(([name,data])=>[name,runtime.createBuffer(data)]));try{const k=await runtime.kernel(source,{workgroupSize:[threads,1,1]});runtime.batch().dispatch(k.bind(resources,f.scalars),f.groups).submit();const out=await runtime.read(resources.d_Output);results.push({groups,batches,threads,stride,guardsPreserved:out.slice(-16).every(v=>v===-12345),pass:out.every((v,i)=>v===f.expected[i])});}finally{await runtime.idle();for(const r of Object.values(resources))runtime.destroyBuffer(r);}}
+ const out=runtime.createBuffer(new Uint32Array(4));let aliasesPassed;try{const k=await runtime.kernel('__global__ void k(unsigned int* out){int offset=1;unsigned int* p=out+offset;offset=3;unsigned int* q=p+1;atomicAdd(&q[-1],1u);}',{workgroupSize:[32,1,1]});runtime.batch().dispatch(k.bind({out},{}),[1,1,1]).submit();const values=await runtime.read(out,Uint32Array);aliasesPassed=values.every((v,i)=>v===(i===1?32:0));}finally{runtime.destroyBuffer(out);}
+ return {date:new Date().toISOString(),adapter,softwareAdapterRequested:false,sourceCompiled:true,results,aliasesPassed,passed:results.every(r=>r.pass)&&aliasesPassed};
+ }finally{runtime.dispose();}
+ });await writeFile('reports/nvidia-fwt-pass.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));if(!report.passed)process.exitCode=1;
+}finally{await browser.close();}

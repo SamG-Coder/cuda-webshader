@@ -1,0 +1,4 @@
+groups=1 batches=1 threads=32 stride=1 output + guards: PASS
+groups=2 batches=3 threads=32 stride=16 output + guards: PASS
+groups=2 batches=3 threads=128 stride=128 output + guards: PASS
+groups=4 batches=2 threads=256 stride=1024 output + guards: PASS
