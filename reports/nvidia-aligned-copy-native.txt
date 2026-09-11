@@ -1,0 +1,12 @@
+int records=0 bytes + guards: PASS
+uint4 records=0 bytes + guards: PASS
+float4 records=0 bytes + guards: PASS
+int records=1 bytes + guards: PASS
+uint4 records=1 bytes + guards: PASS
+float4 records=1 bytes + guards: PASS
+int records=129 bytes + guards: PASS
+uint4 records=129 bytes + guards: PASS
+float4 records=129 bytes + guards: PASS
+int records=1031 bytes + guards: PASS
+uint4 records=1031 bytes + guards: PASS
+float4 records=1031 bytes + guards: PASS

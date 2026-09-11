@@ -1,4 +1,4 @@
-import {parse, CompileError} from './parser.js';
+import {parse, CompileError,builtinType} from './parser.js';
 export {CompileError, parse};
 export const COMPILER_VERSION = '0.1.0';
 export const isArray = t => !!t && typeof t === 'object' && t.kind === 'array';
@@ -382,16 +382,22 @@ class Emitter {
 }
 export function compile(source, options = {}) {
   const ast = parse(source, options), kernels = ast.functions.filter(f => f.qualifier === '__global__');
-  const specialization=options.entry?.match(/^([A-Za-z_]\w*)<\s*(\d+)\s*>$/),entry=specialization?specialization[1]:options.entry;
+  const specialization=options.entry?.match(/^([A-Za-z_]\w*)<\s*(\d+|[A-Za-z_]\w*)\s*>$/),entry=specialization?specialization[1]:options.entry;
   const kernel = entry ? kernels.find(k => k.name === entry) : kernels.length === 1 ? kernels[0] : null;
   if (!kernel) throw new CompileError(options.entry ? `Kernel '${options.entry}' was not found.` : 'Multiple kernels found; specify options.entry.');
-  if(!!kernel.templateParameter!==!!specialization)throw new CompileError(kernel.templateParameter?'Specify an integer template entry, for example '+kernel.name+'<16>.':'This kernel does not have a template parameter.',kernel.token,source);
-  if(specialization){const value=Number(specialization[2]),name=kernel.templateParameter;
+  if(!!kernel.templateParameter!==!!specialization)throw new CompileError(kernel.templateParameter?'Specify a template entry, for example '+kernel.name+(kernel.templateKind==='type'?'<float>.':'<16>.'):'This kernel does not have a template parameter.',kernel.token,source);
+  if(specialization&&kernel.templateKind==='type'){
+    const type=builtinType(specialization[2]),name=kernel.templateParameter,placeholder='template:'+name;
+    if(!type||type==='void')throw new CompileError('Template type argument must be a supported built-in value type.',kernel.token,source);
+    for(const p of kernel.params){if(p.name===name)throw new CompileError('Template parameter shadowing is unsupported.',p.token,source);if(p.type===placeholder)p.type=type;}
+    if(kernel.result===placeholder)kernel.result=type;
+    walk(kernel.body,n=>{if(['decl','thread-block'].includes(n.kind)&&n.name===name)throw new CompileError('Template parameter shadowing is unsupported.',n.token,source);if(n.type===placeholder)n.type=type;if(n.target===placeholder)n.target=type;});
+  }else if(specialization){const value=Number(specialization[2]),name=kernel.templateParameter;
     if(!Number.isSafeInteger(value)||value>2147483647)throw new CompileError('Template argument must be a nonnegative 32-bit signed integer.',kernel.token,source);
     for(const p of kernel.params)if(p.name===name)throw new CompileError('Template parameter shadowing is unsupported.',p.token,source);
     walk(kernel.body,n=>{if(['decl','thread-block'].includes(n.kind)&&n.name===name)throw new CompileError('Template parameter shadowing is unsupported.',n.token,source);if(n.kind==='id'&&n.name===name){n.kind='literal';n.value=String(value);delete n.name;}});
   }
-  const result=new Emitter(ast, kernel, options).emit();if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:Number(specialization[2])};return result;
+  const result=new Emitter(ast, kernel, options).emit();if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};return result;
 }
 export function serializableArtifact(compiled) {
   return {version: compiled.version, name: compiled.name, entryPoint: compiled.entryPoint, wgsl: compiled.wgsl, metadata: compiled.metadata};

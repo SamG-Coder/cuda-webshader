@@ -132,6 +132,21 @@
       "entry": "cas_atomic",
       "sample": "cpp/0_Introduction/simpleAtomicIntrinsics",
       "passed": true
+    },
+    {
+      "entry": "testKernel<int>",
+      "sample": "cpp/6_Performance/alignedTypes",
+      "passed": true
+    },
+    {
+      "entry": "testKernel<uint4>",
+      "sample": "cpp/6_Performance/alignedTypes",
+      "passed": true
+    },
+    {
+      "entry": "testKernel<float4>",
+      "sample": "cpp/6_Performance/alignedTypes",
+      "passed": true
     }
   ]
 }

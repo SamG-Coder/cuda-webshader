@@ -14,6 +14,7 @@ const TYPES = new Set(['float', 'int', 'uint', 'unsigned', 'bool', 'void', 'floa
 const QUALIFIERS = new Set(['const', '__shared__', '__restrict__', '__restrict', 'restrict']);
 const MAP = { float: 'f32', int: 'i32', uint: 'u32', bool: 'bool', void: 'void', float2: 'vec2<f32>', float3: 'vec3<f32>', float4: 'vec4<f32>' };
 for(const [prefix,type] of [['uint','u32'],['int','i32']])for(const size of [2,3,4]){TYPES.add(prefix+size);MAP[prefix+size]=`vec${size}<${type}>`;}
+export const builtinType = name => Object.hasOwn(MAP,name)?MAP[name]:null;
 export function tokenize(source, defines = {}) {
   if (typeof source !== 'string' || source.length > 1_000_000) throw new CompileError('Source must be a string of at most 1 MB.');
   const macros = new Map(Object.entries(defines).map(([k, v]) => {
@@ -75,12 +76,12 @@ export class Parser {
     if(!this.groupNamespaces.has(name))this.fail(`Unsupported namespace '${name}'. Only cooperative_groups namespace aliases are supported.`,token);
     return 'cooperative_groups::'+this.name();
   }
-  startsType() { return TYPES.has(this.peek().value) || QUALIFIERS.has(this.peek().value); }
+  startsType() { return TYPES.has(this.peek().value) || this.peek().value===this.templateTypeName || QUALIFIERS.has(this.peek().value); }
   type() {
     let constant = false, shared = false;
     while (QUALIFIERS.has(this.peek().value)) { const q = this.take().value; constant ||= q === 'const'; shared ||= q === '__shared__'; }
     const tok = this.take(); let type;
-    if (tok.value === 'unsigned') { this.match('int'); type = 'u32'; } else type = MAP[tok.value];
+    if (tok.value === 'unsigned') { this.match('int'); type = 'u32'; } else type = tok.value===this.templateTypeName?'template:'+tok.value:builtinType(tok.value);
     if (!type) this.fail(`Unsupported type '${tok.value}'. Use float, int, unsigned int, bool or float2/3/4.`, tok);
     if (this.match('const')) constant = true;
     const pointer = this.match('*');
@@ -94,15 +95,15 @@ export class Parser {
     const functions = [];
     while (this.peek().kind !== 'eof') {
       const token = this.peek();
-      let templateParameter=null;
-      if(this.match('template')){this.take('<');this.take('int');templateParameter=this.name();this.take('>');}
+      let templateParameter=null,templateKind=null;this.templateTypeName=null;
+      if(this.match('template')){this.take('<');const kind=this.take();if(!['int','class','typename'].includes(kind.value))this.fail('Only one integer or built-in type template parameter is supported.',kind);templateKind=kind.value==='int'?'int':'type';templateParameter=this.name();if(TYPES.has(templateParameter))this.fail('Template parameter must have a distinct name.',token);this.take('>');if(templateKind==='type')this.templateTypeName=templateParameter;}
       if(this.match('namespace')){const alias=this.name();this.take('=');const target=this.name();this.take(';');if(target!=='cooperative_groups'||this.groupNamespaces.has(alias))this.fail('Only distinct aliases of cooperative_groups are supported.',token);this.groupNamespaces.add(alias);continue;}
       while (['inline', '__forceinline__'].includes(this.peek().value)) this.take();
       let launchThreads=null;
       const launchBounds=()=>{this.take('__launch_bounds__');this.take('(');const t=this.take();if(t.kind!=='number'||!/^[0-9]+[uU]?$/.test(t.value))this.fail('Launch bounds require a positive integer thread count.',t);launchThreads=Number(t.value.replace(/[uU]$/,''));if(launchThreads<1||launchThreads>1024)this.fail('Launch bounds thread count must be in [1,1024].',t);this.take(')');};
       if(this.is('__launch_bounds__'))launchBounds();
       const qualifier = this.take().value;
-      if(templateParameter&&qualifier!=='__global__')this.fail('Integer templates are supported only on kernels.',token);
+      if(templateParameter&&qualifier!=='__global__')this.fail('Templates are supported only on kernels.',token);
       if (!['__global__', '__device__'].includes(qualifier)) this.fail('Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported.', token);
       while (['inline', '__forceinline__'].includes(this.peek().value)) this.take();
       if(this.is('__launch_bounds__')){if(launchThreads!==null)this.fail('Duplicate launch bounds.');launchBounds();}
@@ -113,7 +114,7 @@ export class Parser {
       const name = this.name(); this.take('('); const params = [];
       if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(); params.push({kind: 'param', token, name, ...type}); } while (this.match(','));
       this.take(')'); const body = this.block();
-      functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads,templateParameter});
+      functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads,templateParameter,templateKind});
     }
     if (!functions.some(f => f.qualifier === '__global__')) this.fail('No __global__ kernel was found.');
     return {kind: 'module', functions, source: this.source};
@@ -155,7 +156,7 @@ export class Parser {
   unary() {
     const token = this.peek();
     if (['+', '-', '!', '~', '&', '++', '--', '*'].includes(token.value)) { this.take(); return {kind: 'unary', token, op: token.value, value: this.unary(), prefix: true}; }
-    if (this.is('(') && (TYPES.has(this.peek(1).value) || this.peek(1).value === 'const')) { this.take('('); const type = this.type(); if (type.pointer||type.reference) this.fail('Pointer/reference casts are unsupported.'); this.take(')'); return {kind: 'cast', token, target: type.type, value: this.unary()}; }
+    if (this.is('(') && (TYPES.has(this.peek(1).value) || this.peek(1).value===this.templateTypeName || this.peek(1).value === 'const')) { this.take('('); const type = this.type(); if (type.pointer||type.reference) this.fail('Pointer/reference casts are unsupported.'); this.take(')'); return {kind: 'cast', token, target: type.type, value: this.unary()}; }
     let value;
     if (token.kind === 'number') { this.take(); value = {kind: 'literal', token, value: token.value}; }
     else if (this.match('(')) { value = this.expression(); this.take(')'); }

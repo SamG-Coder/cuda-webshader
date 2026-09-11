@@ -6,6 +6,19 @@
 
 ## CUDA sandbox
 
+NVIDIA's `alignedTypes` copy template now accepts explicit built-in type
+specializations: **[int](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=26)**,
+**[uint4](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=27)** and
+**[float4](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=28)**.
+The compiler supports one `template<class T>` or `template<typename T>` parameter
+on a kernel, selected through an entry such as `testKernel<uint4>`. Parameters,
+local declarations and casts use the selected built-in type. Custom structs,
+template defaults, multiple parameters and templated helpers remain unsupported.
+These are new built-in specializations of the unchanged copy kernel, not the
+upstream custom-struct alignment benchmark. Native CUDA and real WebGPU passed
+12 byte-for-byte copy checks, including signed zero and untouched guards.
+See [typed copy results](reports/nvidia-aligned-copy.json).
+
 **[Atomic compare-and-swap counters](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=25)**
 runs NVIDIA's unchanged `cas_atomic` retry loop. The compiler now accepts
 `do…while` and 32-bit signed/unsigned `atomicCAS` on storage elements or shared
@@ -36,7 +49,7 @@ Enter `MatrixMulCUDA<16>` or `MatrixMulCUDA<32>` in the sandbox entry field.
 The compiler accepts one `template <int NAME>` parameter on a kernel, an explicit
 nonnegative 32-bit integer argument, comma-separated `for` step updates, and
 `#pragma unroll` hints. The hint leaves optimization to the WGSL backend.
-Type templates, template defaults, multiple template parameters and helper
+Template defaults, multiple template parameters and helper
 templates remain unsupported. For this NVIDIA kernel, launch blocks must match
 the selected square tile and all matrix dimensions must be positive multiples
 of it; the original kernel has no boundary guards. Both specializations passed
@@ -78,7 +91,7 @@ per workgroup. See [transpose validation](reports/nvidia-transpose.json).
 
 The main showcase grid contains individual runnable samples; every card opens
 the sandbox directly. The NVIDIA audit covers 208 upstream sample directories,
-350 compiler entry probes, and 26 kernel entries/specializations checked with both native CUDA and
+350 compiler entry probes, and 29 kernel entries/specializations checked with both native CUDA and
 real NVIDIA WebGPU. See [the audit and remaining blockers](reports/nvidia-audit.md)
 and [reproduction instructions](showcases/nvidia/README.md). These kernel checks
 are separate from full native application execution and from performance tests.
@@ -110,7 +123,7 @@ This is source translation. **It does not run CUDA binaries, PTX, the CUDA drive
 
 ## Validated on an RTX 5080
 
-The project is running locally with installed, locked dependencies. **221 Node tests, 79 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
+The project is running locally with installed, locked dependencies. **227 Node tests, 79 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
 
 Open [the measured comparison](reports/performance-comparison.html) or read [the full methodology and results](reports/performance-comparison.md). All ten kernel sources are compiled by NVCC and translated to WGSL at two workload sizes. Raw GPU timestamps, CUDA event timings, ordinary CUDA launch timings, and verification logs are in `reports/`.
 

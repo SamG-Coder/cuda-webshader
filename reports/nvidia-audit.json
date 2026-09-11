@@ -7735,8 +7735,55 @@
         ]
       },
       "browser": {
-        "status": "translation-rejected",
-        "reason": "Unsupported type 'TData'. Use float, int, unsigned int, bool or float2/3/4. (133:51)\n                       __global__ void testKernel(TData *d_odata, TData *d_idata, int numElements)\r\n                                                  ^"
+        "status": "kernel-verified",
+        "reason": "Isolated kernels checked against CPU reference on a real NVIDIA WebGPU adapter. Full host program is not executed.",
+        "checks": [
+          {
+            "sample": "cpp/6_Performance/alignedTypes",
+            "entry": "testKernel<int>",
+            "pass": true,
+            "values": 257,
+            "maxError": 0,
+            "failures": 0,
+            "outputs": {
+              "d_odata": {
+                "values": 257,
+                "maxError": 0,
+                "failures": 0
+              }
+            }
+          },
+          {
+            "sample": "cpp/6_Performance/alignedTypes",
+            "entry": "testKernel<uint4>",
+            "pass": true,
+            "values": 1028,
+            "maxError": 0,
+            "failures": 0,
+            "outputs": {
+              "d_odata": {
+                "values": 1028,
+                "maxError": 0,
+                "failures": 0
+              }
+            }
+          },
+          {
+            "sample": "cpp/6_Performance/alignedTypes",
+            "entry": "testKernel<float4>",
+            "pass": true,
+            "values": 1028,
+            "maxError": 0,
+            "failures": 0,
+            "outputs": {
+              "d_odata": {
+                "values": 1028,
+                "maxError": 0,
+                "failures": 0
+              }
+            }
+          }
+        ]
       }
     },
     {
@@ -9494,11 +9541,11 @@
       }
     }
   ],
-  "executionUpdated": "2026-09-11T23:36:27.061Z",
+  "executionUpdated": "2026-09-11T23:41:41.573Z",
   "counts": {
     "samples": 208,
     "compilerProbes": 350,
-    "webgpuPassed": 26,
+    "webgpuPassed": 29,
     "nativeProgramsAttempted": 149,
     "nativeStatuses": {
       "exited-zero": 142,

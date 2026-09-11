@@ -1,10 +1,12 @@
 import {matrixFixture} from './matrixmul-fixtures.js';
 import {scanUpdateFixture} from './scan-update-fixtures.js';
 import {atomicCasFixture} from './atomic-cas-fixtures.js';
+import {alignedCopyFixture} from './aligned-copy-fixtures.js';
 // Deterministic correctness fixtures for isolated upstream kernels, not host applications.
 import {scalarFixture} from './scalar-fixtures.js';
 import {blackScholesFixture} from './blackscholes-fixtures.js';
 export function fixture(row) {
+ if(row.sample==='cpp/6_Performance/alignedTypes')return alignedCopyFixture(row.artifact.metadata.templateArguments.TData);
  if(row.entry==='cas_atomic')return atomicCasFixture();
  if(row.entry==='uniformUpdate')return scanUpdateFixture();
  if(row.entry.startsWith('MatrixMulCUDA<'))return matrixFixture(row.artifact.metadata.workgroupSize[0],64,64,64);

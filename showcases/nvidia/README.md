@@ -8,7 +8,7 @@ NVIDIA cuda-samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
 The audit scans direct source files for standalone global void kernels. It is
 not a complete C++ preprocessor or a claim to compile every template instance.
 
-The 26 translated entries were run separately with NVCC on RTX 5080 and with
+The 29 translated entries were run separately with NVCC on RTX 5080 and with
 WebGPU on a real NVIDIA adapter. Fixtures use 256 elements or a 32×32 grid,
 with 64×64 matrices for the two transpose kernels and 17 vectors of 1,537
 elements for the scalar-product kernel;
@@ -32,6 +32,7 @@ node scripts/prepare-nvidia-blackscholes.mjs
 node scripts/prepare-nvidia-matrixmul.mjs
 node scripts/prepare-nvidia-scan-update.mjs
 node scripts/prepare-nvidia-atomic-cas.mjs
+node scripts/prepare-nvidia-aligned-copy.mjs
 node scripts/prepare-nvidia-checks.mjs
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor .local/nvidia-checks/check.cu -o .local/nvidia-checks/check.exe
 .local/nvidia-checks/check.exe
@@ -42,6 +43,7 @@ node scripts/test-nvidia-blackscholes.mjs
 node scripts/test-nvidia-matrixmul.mjs
 node scripts/test-nvidia-scan-update.mjs
 node scripts/test-nvidia-atomic-cas.mjs
+node scripts/test-nvidia-aligned-copy.mjs
 ```
 
 Run the server first (`npm start`) for browser checks. The browser script uses
@@ -134,3 +136,16 @@ The emitter handles possible spurious failure of WGSL weak compare-exchange by
 retrying while the observed value still equals the comparison value and no
 exchange occurred. Reports are `reports/nvidia-atomic-cas-native.txt` and
 `reports/nvidia-atomic-cas.json`; native build flags are the same as above.
+
+The alignedTypes follow-up retains the complete `template<class TData>` copy
+kernel and supplies explicit `int`, `uint4` and `float4` specializations. These
+built-in types are not substitutes for the original host benchmark's custom
+alignment structs; that benchmark is not reproduced in the sandbox. Type
+templates accept one built-in argument and specialize parameter/local/cast types.
+`aligned-copy-native.cu` and `scripts/test-nvidia-aligned-copy.mjs` check all three
+types with 0, 1, 129 and 1,031 records, two 128-thread blocks, and 16 trailing
+guard components. Entire outputs are compared byte for byte, including signed
+zero in float4 and integer values beyond float precision. Reports are
+`reports/nvidia-aligned-copy-native.txt` and `reports/nvidia-aligned-copy.json`;
+native build flags are the same as above. Performance differences between custom
+alignment layouts have not been measured by these checks.

@@ -1,0 +1,97 @@
+{
+  "date": "2026-09-11T23:40:37.482Z",
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "sourceCompiled": true,
+  "comparison": "byte-for-byte, including guards and signed zero",
+  "results": [
+    {
+      "type": "int",
+      "n": 0,
+      "bytesChecked": 68,
+      "pass": true
+    },
+    {
+      "type": "int",
+      "n": 1,
+      "bytesChecked": 68,
+      "pass": true
+    },
+    {
+      "type": "int",
+      "n": 129,
+      "bytesChecked": 580,
+      "pass": true
+    },
+    {
+      "type": "int",
+      "n": 1031,
+      "bytesChecked": 4188,
+      "pass": true
+    },
+    {
+      "type": "uint4",
+      "n": 0,
+      "bytesChecked": 80,
+      "pass": true
+    },
+    {
+      "type": "uint4",
+      "n": 1,
+      "bytesChecked": 80,
+      "pass": true
+    },
+    {
+      "type": "uint4",
+      "n": 129,
+      "bytesChecked": 2128,
+      "pass": true
+    },
+    {
+      "type": "uint4",
+      "n": 1031,
+      "bytesChecked": 16560,
+      "pass": true
+    },
+    {
+      "type": "float4",
+      "n": 0,
+      "bytesChecked": 80,
+      "pass": true
+    },
+    {
+      "type": "float4",
+      "n": 1,
+      "bytesChecked": 80,
+      "pass": true
+    },
+    {
+      "type": "float4",
+      "n": 129,
+      "bytesChecked": 2128,
+      "pass": true
+    },
+    {
+      "type": "float4",
+      "n": 1031,
+      "bytesChecked": 16560,
+      "pass": true
+    }
+  ],
+  "passed": true
+}
