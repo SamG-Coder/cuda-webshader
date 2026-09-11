@@ -110,6 +110,7 @@ class Context {
       case 'return':return {control:'return',value:n.value?yield* this.eval(n.value):undefined};
       case 'break':case 'continue':return {control:n.kind};
       case 'empty':return;
+      case 'thread-block':return;
       default:throw new Error(`CPU oracle: unsupported statement ${n.kind}.`);
     }
   }

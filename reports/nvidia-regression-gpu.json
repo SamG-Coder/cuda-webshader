@@ -1,0 +1,1118 @@
+{
+  "schema": "cuda-webshader.correctness.v1",
+  "mode": "REAL WebGPU execution",
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "date": "2026-09-11T22:57:05.341Z",
+  "total": 79,
+  "passed": 79,
+  "failed": 0,
+  "wallMs": 384.6400000154972,
+  "results": [
+    {
+      "name": "SAXPY n=0",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 16.855000019073486
+    },
+    {
+      "name": "SAXPY n=1",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 1.3849999904632568
+    },
+    {
+      "name": "SAXPY n=2",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.935000002384186
+    },
+    {
+      "name": "SAXPY n=63",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.58500000834465
+    },
+    {
+      "name": "SAXPY n=127",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.050000011920929
+    },
+    {
+      "name": "SAXPY n=128",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.9950000047683716
+    },
+    {
+      "name": "SAXPY n=129",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.7899999916553497
+    },
+    {
+      "name": "SAXPY n=257",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.7250000238418579
+    },
+    {
+      "name": "SAXPY n=1031",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.179999977350235
+    },
+    {
+      "name": "float4 SAXPY records=0",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 6.659999996423721
+    },
+    {
+      "name": "float4 SAXPY records=1",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.9850000143051147
+    },
+    {
+      "name": "float4 SAXPY records=31",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.020000010728836
+    },
+    {
+      "name": "float4 SAXPY records=128",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.084999978542328
+    },
+    {
+      "name": "float4 SAXPY records=129",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.080000013113022
+    },
+    {
+      "name": "float4 SAXPY records=257",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.0450000166893005
+    },
+    {
+      "name": "matmul_naive 1×1×1",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 10.275000005960464
+    },
+    {
+      "name": "matmul_tiled 1×1×1",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 14.395000010728836
+    },
+    {
+      "name": "matmul_register 1×1×1",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 24.334999978542328
+    },
+    {
+      "name": "matmul_naive 3×5×7",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 2.988747068412719e-7
+        }
+      },
+      "wallMs": 0.8149999976158142
+    },
+    {
+      "name": "matmul_tiled 3×5×7",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 2.988747068412719e-7
+        }
+      },
+      "wallMs": 0.7349999845027924
+    },
+    {
+      "name": "matmul_register 3×5×7",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 2.988747068412719e-7
+        }
+      },
+      "wallMs": 3.3900000154972076
+    },
+    {
+      "name": "matmul_naive 16×16×16",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 4.76837158203125e-7,
+          "maxRel": 0.000007962963505512887
+        }
+      },
+      "wallMs": 3.0250000059604645
+    },
+    {
+      "name": "matmul_tiled 16×16×16",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 4.76837158203125e-7,
+          "maxRel": 0.000007962963505512887
+        }
+      },
+      "wallMs": 3.2849999964237213
+    },
+    {
+      "name": "matmul_register 16×16×16",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 4.76837158203125e-7,
+          "maxRel": 0.000007962963505512887
+        }
+      },
+      "wallMs": 4.034999996423721
+    },
+    {
+      "name": "matmul_naive 17×19×23",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 7.152557373046875e-7,
+          "maxRel": 0.00017283374599630626
+        }
+      },
+      "wallMs": 3.119999974966049
+    },
+    {
+      "name": "matmul_tiled 17×19×23",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 7.152557373046875e-7,
+          "maxRel": 0.00017283374599630626
+        }
+      },
+      "wallMs": 4.310000002384186
+    },
+    {
+      "name": "matmul_register 17×19×23",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 7.152557373046875e-7,
+          "maxRel": 0.00017283374599630626
+        }
+      },
+      "wallMs": 3.9950000047683716
+    },
+    {
+      "name": "matmul_naive 31×9×5",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.1920928955078125e-7,
+          "maxRel": 0.000004401365831844938
+        }
+      },
+      "wallMs": 3.060000002384186
+    },
+    {
+      "name": "matmul_tiled 31×9×5",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.1920928955078125e-7,
+          "maxRel": 0.000004401365831844938
+        }
+      },
+      "wallMs": 3.314999997615814
+    },
+    {
+      "name": "matmul_register 31×9×5",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.1920928955078125e-7,
+          "maxRel": 0.000004401365831844938
+        }
+      },
+      "wallMs": 3.969999998807907
+    },
+    {
+      "name": "matmul_naive 0×5×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.009999990463257
+    },
+    {
+      "name": "matmul_tiled 0×5×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.8149999976158142
+    },
+    {
+      "name": "matmul_register 0×5×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 5.350000023841858
+    },
+    {
+      "name": "matmul_naive 5×0×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.844999998807907
+    },
+    {
+      "name": "matmul_tiled 5×0×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.6350000202655792
+    },
+    {
+      "name": "matmul_register 5×0×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.020000010728836
+    },
+    {
+      "name": "matmul_naive 5×7×0",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.9249999821186066
+    },
+    {
+      "name": "matmul_tiled 5×7×0",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.4100000262260437
+    },
+    {
+      "name": "matmul_register 5×7×0",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 5.004999995231628
+    },
+    {
+      "name": "Reduction partials n=0",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 11.465000003576279
+    },
+    {
+      "name": "Reduction partials n=1",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.064999997615814
+    },
+    {
+      "name": "Reduction partials n=2",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.0049999952316284
+    },
+    {
+      "name": "Reduction partials n=127",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.5999999940395355
+    },
+    {
+      "name": "Reduction partials n=128",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.3900000154972076
+    },
+    {
+      "name": "Reduction partials n=129",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.219999998807907
+    },
+    {
+      "name": "Reduction partials n=255",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.979999989271164
+    },
+    {
+      "name": "Reduction partials n=256",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.0550000071525574
+    },
+    {
+      "name": "Reduction partials n=257",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.6100000143051147
+    },
+    {
+      "name": "Reduction partials n=1031",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.830000013113022
+    },
+    {
+      "name": "Convolution + halo n=0",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 11.504999995231628
+    },
+    {
+      "name": "Convolution + halo n=1",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 7.009999990463257
+    },
+    {
+      "name": "Convolution + halo n=2",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.040000021457672
+    },
+    {
+      "name": "Convolution + halo n=3",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.9549999833106995
+    },
+    {
+      "name": "Convolution + halo n=127",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.000001985454559894215
+        }
+      },
+      "wallMs": 3.030000001192093
+    },
+    {
+      "name": "Convolution + halo n=128",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.000001985454559894215
+        }
+      },
+      "wallMs": 0.6399999856948853
+    },
+    {
+      "name": "Convolution + halo n=129",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.000001985454559894215
+        }
+      },
+      "wallMs": 3.4100000262260437
+    },
+    {
+      "name": "Convolution + halo n=259",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.000002949040578798364
+        }
+      },
+      "wallMs": 3.0399999916553497
+    },
+    {
+      "name": "Histogram grid-stride n=0",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 13.504999995231628
+    },
+    {
+      "name": "Histogram grid-stride n=1",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.5699999928474426
+    },
+    {
+      "name": "Histogram grid-stride n=127",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.4650000035762787
+    },
+    {
+      "name": "Histogram grid-stride n=128",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.824999988079071
+    },
+    {
+      "name": "Histogram grid-stride n=129",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 12.185000002384186
+    },
+    {
+      "name": "Histogram grid-stride n=1031",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.9650000035762787
+    },
+    {
+      "name": "Histogram grid-stride n=4099",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.979999989271164
+    },
+    {
+      "name": "Transpose 1×1",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 14.120000004768372
+    },
+    {
+      "name": "Transpose 7×19",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.969999998807907
+    },
+    {
+      "name": "Transpose 33×35",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.009999990463257
+    },
+    {
+      "name": "Transpose 64×9",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.3600000143051147
+    },
+    {
+      "name": "Transpose 0×5",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.6500000059604645
+    },
+    {
+      "name": "Transpose 5×0",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3
+    },
+    {
+      "name": "Particle float4 interop n=1, dt=0.016",
+      "pass": true,
+      "checks": {
+        "position": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        },
+        "velocity": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.4901161193847656e-8,
+          "maxRel": 6.473254873600313e-8
+        }
+      },
+      "wallMs": 12.360000014305115
+    },
+    {
+      "name": "Particle float4 interop n=17, dt=0.016",
+      "pass": true,
+      "checks": {
+        "position": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 2.9802322387695312e-8,
+          "maxRel": 1.1298011606447323e-7
+        },
+        "velocity": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 1.0583948172522589e-7
+        }
+      },
+      "wallMs": 5.990000009536743
+    },
+    {
+      "name": "Particle float4 interop n=129, dt=0.033",
+      "pass": true,
+      "checks": {
+        "position": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.0000034511987865248366
+        },
+        "velocity": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.1920928955078125e-7,
+          "maxRel": 0.00001895253120455294
+        }
+      },
+      "wallMs": 3.5250000059604645
+    },
+    {
+      "name": "Particle float4 interop n=17, dt=0",
+      "pass": true,
+      "checks": {
+        "position": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        },
+        "velocity": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 6.990000009536743
+    },
+    {
+      "name": "Two parameter versions in one batch retain their own snapshots",
+      "pass": true,
+      "wallMs": 7.254999995231628
+    },
+    {
+      "name": "Reusable hierarchical reduction, including empty and singleton inputs",
+      "pass": true,
+      "wallMs": 10.520000010728836
+    },
+    {
+      "name": "SAXPY workgroup specialization 64",
+      "pass": true,
+      "wallMs": 9.604999989271164
+    },
+    {
+      "name": "SAXPY workgroup specialization 256",
+      "pass": true,
+      "wallMs": 8.449999988079071
+    },
+    {
+      "name": "Three r186 compute-to-render shared-buffer pixel test",
+      "pass": true,
+      "mode": "REAL WebGPU render readback",
+      "cpuUploadAfterCompute": false
+    }
+  ],
+  "softwareAdapterRequested": false
+}

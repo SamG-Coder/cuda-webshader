@@ -1,0 +1,97 @@
+{
+  "date": "2026-09-11T22:56:07.096Z",
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "sourceCompiledAtRuntime": true,
+  "results": [
+    {
+      "entry": "transposeCoalesced",
+      "width": 32,
+      "height": 32,
+      "pass": true,
+      "failures": 0,
+      "guardValues": 16,
+      "guardsPreserved": true
+    },
+    {
+      "entry": "transposeCoalesced",
+      "width": 64,
+      "height": 96,
+      "pass": true,
+      "failures": 0,
+      "guardValues": 16,
+      "guardsPreserved": true
+    },
+    {
+      "entry": "transposeCoalesced",
+      "width": 96,
+      "height": 64,
+      "pass": true,
+      "failures": 0,
+      "guardValues": 16,
+      "guardsPreserved": true
+    },
+    {
+      "entry": "transposeCoalesced",
+      "width": 128,
+      "height": 128,
+      "pass": true,
+      "failures": 0,
+      "guardValues": 16,
+      "guardsPreserved": true
+    },
+    {
+      "entry": "transposeNoBankConflicts",
+      "width": 32,
+      "height": 32,
+      "pass": true,
+      "failures": 0,
+      "guardValues": 16,
+      "guardsPreserved": true
+    },
+    {
+      "entry": "transposeNoBankConflicts",
+      "width": 64,
+      "height": 96,
+      "pass": true,
+      "failures": 0,
+      "guardValues": 16,
+      "guardsPreserved": true
+    },
+    {
+      "entry": "transposeNoBankConflicts",
+      "width": 96,
+      "height": 64,
+      "pass": true,
+      "failures": 0,
+      "guardValues": 16,
+      "guardsPreserved": true
+    },
+    {
+      "entry": "transposeNoBankConflicts",
+      "width": 128,
+      "height": 128,
+      "pass": true,
+      "failures": 0,
+      "guardValues": 16,
+      "guardsPreserved": true
+    }
+  ],
+  "divergentRejected": true,
+  "passed": true
+}

@@ -1,0 +1,8 @@
+transposeCoalesced 32x32 PASS (all values and 16 guard values)
+transposeCoalesced 64x96 PASS (all values and 16 guard values)
+transposeCoalesced 96x64 PASS (all values and 16 guard values)
+transposeCoalesced 128x128 PASS (all values and 16 guard values)
+transposeNoBankConflicts 32x32 PASS (all values and 16 guard values)
+transposeNoBankConflicts 64x96 PASS (all values and 16 guard values)
+transposeNoBankConflicts 96x64 PASS (all values and 16 guard values)
+transposeNoBankConflicts 128x128 PASS (all values and 16 guard values)

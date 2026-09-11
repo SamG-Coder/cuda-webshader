@@ -92,6 +92,16 @@
       "entry": "simple_vbo_kernel",
       "sample": "cpp/8_Platform_Specific/Tegra/simpleGLES_EGLOutput",
       "passed": true
+    },
+    {
+      "entry": "transposeCoalesced",
+      "sample": "cpp/6_Performance/transpose",
+      "passed": true
+    },
+    {
+      "entry": "transposeNoBankConflicts",
+      "sample": "cpp/6_Performance/transpose",
+      "passed": true
     }
   ]
 }

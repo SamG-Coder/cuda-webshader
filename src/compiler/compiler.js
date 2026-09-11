@@ -100,6 +100,7 @@ class Emitter {
       case 'id': {
         if (['true', 'false'].includes(n.name)) return this.result(n, 'bool', n.name);
         const s = this.lookup(n.name, n); n.symbol = s;
+        if(s.kind==='thread-block')this.fail('A thread_block handle can only be used for block synchronization.',n);
         return this.result(n, s.type, s.code, [], {rootSymbol: s, atomicRoot: s.atomic});
       }
       case 'index': {
@@ -161,6 +162,14 @@ class Emitter {
     }
   }
   call(n) {
+    const groupSync=n.callee.kind==='id'&&n.callee.name==='cooperative_groups::sync';
+    const memberSync=n.callee.kind==='member'&&n.callee.member==='sync';
+    if(groupSync||memberSync){
+      const group=groupSync?n.args[0]:n.callee.base;
+      if(n.args.length!==(groupSync?1:0)||group?.kind!=='id'||this.lookup(group.name,group).kind!=='thread-block')this.fail('Block sync requires a local thread_block handle from this_thread_block().',n);
+      if(this.currentFunction!==this.kernel)this.fail('Barriers in helper functions are not supported.',n);
+      n.callName='__syncthreads';return this.result(n,'void','workgroupBarrier()');
+    }
     if (n.callee.kind !== 'id') this.fail('Only named functions are supported.', n);
     const name = n.callee.name; n.callName = name;
     if (name === '__syncthreads') { if (n.args.length) this.fail('__syncthreads takes no arguments.', n); if (this.currentFunction !== this.kernel) this.fail('Barriers in helper functions are not supported.', n); return this.result(n, 'void', 'workgroupBarrier()'); }
@@ -257,6 +266,9 @@ class Emitter {
   statement(n) {
     switch (n.kind) {
       case 'empty': return [];
+      case 'thread-block':
+        if(this.currentFunction!==this.kernel)this.fail('thread_block handles are supported only inside a kernel.',n);
+        n.symbol=this.add(n.name,{name:n.name,kind:'thread-block',constant:true},n);return [];
       case 'block': return ['{', ...indent(this.body(n)), '}'];
       case 'decl': return this.declare(n);
       case 'expr': return this.effect(n.value);

@@ -6,9 +6,19 @@
 
 ## CUDA sandbox
 
+NVIDIA's coalesced and padded matrix-transpose kernels now run unchanged in the
+sandbox. The compiler accepts `cooperative_groups::thread_block`, explicit
+namespace aliases such as `namespace cg = cooperative_groups;`, and
+`cg::sync(block)` / `block.sync()` for a local `this_thread_block()` handle.
+These become WGSL workgroup barriers, with a storage barrier when needed.
+Handles cannot be used as numbers, passed through helpers, or substituted with
+grid/tiled groups. Divergent barriers remain subject to WebGPU validation.
+The original 32×16 thread launch requires an adapter supporting 512 invocations
+per workgroup. See [transpose validation](reports/nvidia-transpose.json).
+
 The main showcase grid contains individual runnable samples; every card opens
 the sandbox directly. The NVIDIA audit covers 208 upstream sample directories,
-350 compiler entry probes, and 18 kernels checked with both native CUDA and
+350 compiler entry probes, and 20 kernels checked with both native CUDA and
 real NVIDIA WebGPU. See [the audit and remaining blockers](reports/nvidia-audit.md)
 and [reproduction instructions](showcases/nvidia/README.md). These kernel checks
 are separate from full native application execution and from performance tests.
@@ -40,7 +50,7 @@ This is source translation. **It does not run CUDA binaries, PTX, the CUDA drive
 
 ## Validated on an RTX 5080
 
-The project is running locally with installed, locked dependencies. **148 Node tests, 79 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
+The project is running locally with installed, locked dependencies. **168 Node tests, 79 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
 
 Open [the measured comparison](reports/performance-comparison.html) or read [the full methodology and results](reports/performance-comparison.md). All ten kernel sources are compiled by NVCC and translated to WGSL at two workload sizes. Raw GPU timestamps, CUDA event timings, ordinary CUDA launch timings, and verification logs are in `reports/`.
 

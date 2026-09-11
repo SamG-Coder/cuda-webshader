@@ -8,7 +8,7 @@ export class CompileError extends Error {
 }
 const NUM = /^(?:0[xX][\da-fA-F]+[uU]?|(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?[fFuU]?)/;
 const WORD = /^[A-Za-z_]\w*/;
-const OPERATORS = ['<<=', '>>=', '++', '--', '+=', '-=', '*=', '/=', '%=', '==', '!=', '<=', '>=', '&&', '||', '<<', '>>', '&=', '|=', '^=', '->'];
+const OPERATORS = ['<<=', '>>=', '::', '++', '--', '+=', '-=', '*=', '/=', '%=', '==', '!=', '<=', '>=', '&&', '||', '<<', '>>', '&=', '|=', '^=', '->'];
 const TYPES = new Set(['float', 'int', 'uint', 'unsigned', 'bool', 'void', 'float2', 'float3', 'float4']);
 const QUALIFIERS = new Set(['const', '__shared__', '__restrict__', 'restrict']);
 const MAP = { float: 'f32', int: 'i32', uint: 'u32', bool: 'bool', void: 'void', float2: 'vec2<f32>', float3: 'vec3<f32>', float4: 'vec4<f32>' };
@@ -52,13 +52,19 @@ export function tokenize(source, defines = {}) {
 }
 const PRECEDENCE = {'=': 1, '+=': 1, '-=': 1, '*=': 1, '/=': 1, '%=': 1, '&=': 1, '|=': 1, '^=': 1, '<<=': 1, '>>=': 1, '||': 3, '&&': 4, '|': 5, '^': 6, '&': 7, '==': 8, '!=': 8, '<': 9, '>': 9, '<=': 9, '>=': 9, '<<': 10, '>>': 10, '+': 11, '-': 11, '*': 12, '/': 12, '%': 12};
 export class Parser {
-  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; }
+  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); }
   peek(offset = 0) { return this.tokens[this.i + offset] || this.tokens.at(-1); }
   is(value) { return this.peek().value === value; }
   take(value) { if (value && !this.is(value)) this.fail(`Expected '${value}', found '${this.peek().value}'.`); return this.tokens[this.i++]; }
   match(value) { if (this.is(value)) { this.i++; return true; } return false; }
   fail(message, token = this.peek()) { throw new CompileError(message, token, this.source); }
   name() { const t = this.take(); if (t.kind !== 'word') this.fail('Expected an identifier.', t); return t.value; }
+  qualifiedName() {
+    const token=this.peek(),name=this.name();
+    if(!this.match('::'))return name;
+    if(!this.groupNamespaces.has(name))this.fail(`Unsupported namespace '${name}'. Only cooperative_groups namespace aliases are supported.`,token);
+    return 'cooperative_groups::'+this.name();
+  }
   startsType() { return TYPES.has(this.peek().value) || QUALIFIERS.has(this.peek().value); }
   type() {
     let constant = false, shared = false;
@@ -76,6 +82,7 @@ export class Parser {
     const functions = [];
     while (this.peek().kind !== 'eof') {
       const token = this.peek();
+      if(this.match('namespace')){const alias=this.name();this.take('=');const target=this.name();this.take(';');if(target!=='cooperative_groups'||this.groupNamespaces.has(alias))this.fail('Only distinct aliases of cooperative_groups are supported.',token);this.groupNamespaces.add(alias);continue;}
       while (['inline', '__forceinline__'].includes(this.peek().value)) this.take();
       const qualifier = this.take().value;
       if (!['__global__', '__device__'].includes(qualifier)) this.fail('Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported.', token);
@@ -100,6 +107,11 @@ export class Parser {
   }
   statement() {
     const token = this.peek();
+    if(this.groupNamespaces.has(token.value)&&this.peek(1).value==='::'&&this.peek(2).value==='thread_block'){
+      this.qualifiedName();const name=this.name();this.take('=');const factory=this.qualifiedName();this.take('(');this.take(')');this.take(';');
+      if(factory!=='cooperative_groups::this_thread_block')this.fail('thread_block must be initialized with cooperative_groups::this_thread_block().',token);
+      return {kind:'thread-block',token,name};
+    }
     if (this.is('{')) return this.block();
     if (this.match(';')) return {kind: 'empty', token};
     if (this.match('if')) { this.take('('); const condition = this.expression(); this.take(')'); const yes = this.statement(), no = this.match('else') ? this.statement() : null; return {kind: 'if', token, condition, yes, no}; }
@@ -127,7 +139,7 @@ export class Parser {
     let value;
     if (token.kind === 'number') { this.take(); value = {kind: 'literal', token, value: token.value}; }
     else if (this.match('(')) { value = this.expression(); this.take(')'); }
-    else if (token.kind === 'word') { this.take(); value = {kind: 'id', token, name: token.value}; }
+    else if (token.kind === 'word') { value = {kind: 'id', token, name: this.qualifiedName()}; }
     else this.fail('Expected an expression.', token);
     while (true) {
       if (this.match('[')) { const index = this.expression(); this.take(']'); value = {kind: 'index', token, base: value, index}; }

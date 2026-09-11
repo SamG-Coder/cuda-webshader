@@ -2,7 +2,7 @@
 
 Revision: 5443602d89ed99aede2e4b7bf329daddeadb320e
 
-208 sample directories inventoried; 350 direct-source CUDA entry probes. 18 isolated kernels passed native CUDA and real NVIDIA WebGPU reference checks. These use 256 elements or a 32×32 grid, with a 0.000003 absolute error limit. They are correctness checks, not performance measurements.
+208 sample directories inventoried; 350 direct-source CUDA entry probes. 20 isolated kernels passed native CUDA and real NVIDIA WebGPU reference checks. These use 256 elements, a 32×32 grid, or a 64×64 transpose matrix, with a 0.000003 absolute error limit. They are correctness checks, not performance measurements.
 
 ## Full native programs
 
@@ -44,10 +44,10 @@ The 12 Tegra samples require Jetson platform APIs. The 34 Python samples were no
 
 ## Browser results
 
-All 18 translated kernels passed on a real NVIDIA adapter. 120 sample directories reject translation; each exact compiler error is recorded in nvidia-audit.json. 38 have no extractable standalone entry (including library/host-only/template examples). 34 Python samples are not CUDA C input. The remaining 16 directories supply the 18 verified entries.
+All 20 supported isolated kernels passed on a real NVIDIA adapter. The initial direct-source scan rejected 120 sample directories; each exact compiler error is recorded in nvidia-audit.json. 38 have no extractable standalone entry (including library/host-only/template examples). 34 Python samples are not CUDA C input. The baseline had 18 translated entries from 16 directories; the transpose follow-up adds two verified entries. Baseline errors describe the original import attempts, while current GPU checks describe the supported extracted kernels.
 
-Common frontend blockers are templates/classes, cooperative-group namespaces, device printf/inline PTX, texture/surface types and preprocessing. A compiler rejection describes the current import path; it does not establish that the algorithm cannot be implemented in WGSL.
+Common frontend blockers are templates/classes, unsupported cooperative-group operations, device printf/inline PTX, texture/surface types and preprocessing. A compiler rejection describes the current import path; it does not establish that the algorithm cannot be implemented in WGSL.
 
 Each verified kernel has its own main-page card that opens the sandbox. Presets contain source and launch/input data only. The sandbox compiles the CUDA anew; CPU reference calculations stay in the separate correctness harness.
 
-See nvidia-audit.json for all 208 entries, nvidia-native.json for per-program output and previous attempts, nvidia-build-targets.json for build outcomes, nvidia-gpu.json for numeric checks, and nvidia-isolated-native.txt for the 18 native kernel checks. Reproduction scripts and licensing are documented in ../showcases/nvidia/README.md.
+See nvidia-audit.json for all 208 entries, nvidia-native.json for per-program output and previous attempts, nvidia-build-targets.json for build outcomes, nvidia-gpu.json for numeric checks, and nvidia-isolated-native.txt for the native kernel checks. Reproduction scripts and licensing are documented in ../showcases/nvidia/README.md.

@@ -18,6 +18,13 @@ Neither barrier synchronizes different workgroups. Reduction across blocks is de
 
 Do not put a barrier behind nonuniform control flow. All live invocations in a workgroup must meet compatible barrier control flow; the browser validator is authoritative. The CPU oracle can detect mismatched barrier sites/early exits in the fixtures but is not a complete static uniformity analysis. There is no translation of cooperative grid-wide synchronization.
 
+The frontend also parses local `cooperative_groups::thread_block` handles
+constructed with `this_thread_block()`, including explicit namespace aliases.
+Handles are compile-time, scoped symbols without shader storage. `sync(handle)`
+and `handle.sync()` lower to the existing barrier path, preserving storage
+visibility analysis and CPU-oracle synchronization sites. Other group types,
+numeric use of handles, helper-local handles and out-of-scope handles are rejected.
+
 ## Resource ownership
 
 `GpuRuntime.createBuffer()` owns an allocation; `importBuffer()` borrows one. Owned allocations are destroyed by the runtime. Borrowed allocations are never destroyed by runtime cleanup, although their wrapper can be invalidated. Raw imported buffers must belong to the same device; WebGPU does not expose a generic buffer-to-device identity query, so the Three bridge explicitly compares renderer and runtime devices before importing.

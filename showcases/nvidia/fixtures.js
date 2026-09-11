@@ -1,13 +1,14 @@
 // Deterministic correctness fixtures for isolated upstream kernels, not host applications.
 export function fixture(row) {
- const m=row.artifact.metadata,e=row.entry,two=m.workgroupSize[1]>1,n=two?1024:256,w=32;
+ const m=row.artifact.metadata,e=row.entry,two=m.workgroupSize[1]>1,transpose=e==='transposeCoalesced'||e==='transposeNoBankConflicts',w=transpose?64:32,n=two?w*w:256;
  const scalars=Object.fromEntries(m.scalars.map(s=>[s.name,({inc_value:5,b:7,n,N:n,vectorLength:n,count:n,inner_reps:3,base:19,width:w,height:w,time:0.375})[s.name]]));
  if(Object.values(scalars).some(v=>v===undefined))throw Error('Missing scalar fixture');
  const buffers=Object.fromEntries(m.bindings.map((b,k)=>{const Type=b.elementType==='i32'?Int32Array:Float32Array;return [b.name,Type.from({length:n*b.stride/4},(_,i)=>b.readOnly||['g_data','g_a','data'].includes(b.name)?(i%29-14)*(Type===Int32Array?1:0.125)+k:0)];}));
  const out=m.bindings.find(b=>!b.readOnly).name,expected=buffers[out].slice();
  for(let i=0;i<n;i++){
   const x=i%w,y=Math.floor(i/w);
-  if(e==='increment_kernel')expected[i]=buffers.g_data[i]+5;
+  if(transpose)expected[x*w+y]=buffers.idata[i];
+  else if(e==='increment_kernel')expected[i]=buffers.g_data[i]+5;
   else if(e==='kernelAddConstant')expected[i]=buffers.g_a[i]+7;
   else if(e==='incrementKernel')expected[i]=buffers.data[i]+1;
   else if(e==='incKernel')expected[i]=buffers.g_in[i]+1;
@@ -22,5 +23,5 @@ export function fixture(row) {
   else if(e==='simple_vbo_kernel'){const u=x/w*2-1,v=y/w*2-1;expected.set([u,Math.sin(u*4+scalars.time)*Math.cos(v*4+scalars.time)*0.5,v,1],i*4);}
   else throw Error('Missing reference for '+e);
  }
- return {buffers,scalars,out,expected,groups:two?[4,4,1]:[2,1,1]};
+ return {buffers,scalars,out,expected,groups:transpose?[2,2,1]:two?[4,4,1]:[2,1,1]};
 }

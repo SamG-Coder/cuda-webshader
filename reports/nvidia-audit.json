@@ -2,7 +2,7 @@
   "commit": "5443602d89ed99aede2e4b7bf329daddeadb320e",
   "date": "2026-09-11T22:27:15.449Z",
   "scope": "All sample README directories in cpp/ and python/ at the pinned upstream commit",
-  "method": "350 standalone CUDA entry compiler probes from direct sample sources; 18 isolated native/WebGPU numerical checks; separate upstream configure/build/program attempts. Python environment check only. Not all full programs run on this PC.",
+  "method": "350 standalone CUDA entry compiler probes from direct sample sources; follow-up isolated native/WebGPU numerical checks; separate upstream configure/build/program attempts. Python environment check only. Not all full programs run on this PC.",
   "samples": [
     {
       "id": "cpp/0_Introduction/UnifiedMemoryStreams",
@@ -7670,8 +7670,26 @@
         ]
       },
       "browser": {
-        "status": "translation-rejected",
-        "reason": "Expected ';', found ':'. (96:7)\n    cg::thread_block cta = cg::this_thread_block();\r\n      ^"
+        "status": "kernel-verified",
+        "reason": "Isolated kernels checked against CPU reference on a real NVIDIA WebGPU adapter. Full host program is not executed.",
+        "checks": [
+          {
+            "sample": "cpp/6_Performance/transpose",
+            "entry": "transposeCoalesced",
+            "pass": true,
+            "values": 4096,
+            "maxError": 0,
+            "failures": 0
+          },
+          {
+            "sample": "cpp/6_Performance/transpose",
+            "entry": "transposeNoBankConflicts",
+            "pass": true,
+            "values": 4096,
+            "maxError": 0,
+            "failures": 0
+          }
+        ]
       }
     },
     {
@@ -9231,11 +9249,11 @@
       }
     }
   ],
-  "executionUpdated": "2026-09-11T22:48:33.336Z",
+  "executionUpdated": "2026-09-11T22:57:36.095Z",
   "counts": {
     "samples": 208,
     "compilerProbes": 350,
-    "webgpuPassed": 18,
+    "webgpuPassed": 20,
     "nativeProgramsAttempted": 149,
     "nativeStatuses": {
       "exited-zero": 142,
