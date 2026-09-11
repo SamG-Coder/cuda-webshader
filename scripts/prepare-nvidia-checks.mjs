@@ -5,7 +5,7 @@ await mkdir('showcases/nvidia/kernels',{recursive:true});await mkdir('.local/nvi
 let native='#include <cuda_runtime.h>\n#include <cooperative_groups.h>\n#include <cstdio>\n#include <cmath>\n#define CHECK(x) do {auto r=(x);if(r!=cudaSuccess){printf("CUDA ERROR %s\\n",cudaGetErrorString(r));return 2;}}while(0)\n';
 const runs=[];
 for(const [index,row] of rows.entries()){
- const text=await readFile('.local/nvidia-audit/'+row.file,'utf8'),start=text.search(new RegExp('__global__\\s+void\\s+'+row.entry+'\\s*\\('));
+ const text=await readFile('.local/nvidia-audit/'+row.file,'utf8'),start=text.search(new RegExp('__global__\\s+void\\s+'+(row.sourceEntry||row.entry)+'\\s*\\('));
  if(start<0)throw Error('Cannot locate '+row.entry);const brace=text.indexOf('{',start);let depth=1,end=brace+1;for(;depth;end++){if(text[end]==='{')depth++;if(text[end]==='}')depth--;if(end>=text.length)throw Error('Unbalanced kernel');}
  const source=row.wholeFile?text:text.slice(0,text.indexOf('*/')+2)+'\n\n'+(row.preamble||'')+text.slice(start,end)+'\n';
  row.source=`kernels/${index}.cu`;await writeFile('showcases/nvidia/'+row.source,source);

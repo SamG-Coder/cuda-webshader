@@ -8,7 +8,7 @@ NVIDIA cuda-samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
 The audit scans direct source files for standalone global void kernels. It is
 not a complete C++ preprocessor or a claim to compile every template instance.
 
-The 22 translated entries were run separately with NVCC on RTX 5080 and with
+The 24 translated entries were run separately with NVCC on RTX 5080 and with
 WebGPU on a real NVIDIA adapter. Fixtures use 256 elements or a 32×32 grid,
 with 64×64 matrices for the two transpose kernels and 17 vectors of 1,537
 elements for the scalar-product kernel;
@@ -29,6 +29,7 @@ node scripts/audit-nvidia.mjs
 node scripts/prepare-nvidia-transpose.mjs
 node scripts/prepare-nvidia-scalar.mjs
 node scripts/prepare-nvidia-blackscholes.mjs
+node scripts/prepare-nvidia-matrixmul.mjs
 node scripts/prepare-nvidia-checks.mjs
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor .local/nvidia-checks/check.cu -o .local/nvidia-checks/check.exe
 .local/nvidia-checks/check.exe
@@ -36,6 +37,7 @@ node scripts/test-nvidia.mjs
 node scripts/test-nvidia-transpose.mjs
 node scripts/test-nvidia-scalar.mjs
 node scripts/test-nvidia-blackscholes.mjs
+node scripts/test-nvidia-matrixmul.mjs
 ```
 
 Run the server first (`npm start`) for browser checks. The browser script uses
@@ -88,3 +90,17 @@ Results are in `reports/nvidia-blackscholes-native.txt` and
 flags above. Preset buffers use generic fill patterns with optional `scale` and
 `offset` to provide positive prices and times; all option calculations run in
 the compiled shader. Select either result buffer in sandbox settings.
+
+The matrixMul follow-up retains the original `template <int BLOCK_SIZE>`
+declaration and complete kernel body. Entries `MatrixMulCUDA<16>` and
+`MatrixMulCUDA<32>` select the specialization explicitly; the compiler does not
+infer template values from the launch dimensions. Both use square thread blocks
+matching the tile, with positive matrix dimensions divisible by that tile.
+The unchanged kernel does not handle arbitrary edge tiles. `matrixmul-native.cu`
+and `scripts/test-nvidia-matrixmul.mjs` cover eight cases: square and rectangular
+matrices, one and multiple inner tiles, multiple output blocks, and 16 trailing
+guard values. Binary-fraction inputs permit exact comparison with independent
+CPU matrix multiplication. Native and browser results are recorded in
+`reports/nvidia-matrixmul-native.txt` and `reports/nvidia-matrixmul.json`.
+Compile the native harness using the NVCC flags above. These are correctness
+checks, not evidence that either tile size is faster.

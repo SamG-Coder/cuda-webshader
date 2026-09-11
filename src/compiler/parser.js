@@ -28,6 +28,7 @@ export function tokenize(source, defines = {}) {
     if (rest.startsWith('/*')) { const end = rest.indexOf('*/'); if (end < 0) throw new CompileError('Unclosed comment.', token, source); advance(rest.slice(0, end + 2)); continue; }
     if (rest[0] === '#') {
       const directive = rest.split('\n')[0];
+      if(/^#\s*pragma\s+unroll(?:\s+[1-9]\d*)?\s*(?:\/\/.*)?$/.test(directive.trimEnd())){advance(directive);continue;}
       const forward=forwardingMacro(directive.trimEnd());
       if(forward){if(macros.has(forward.name)||forwarders.has(forward.name))throw new CompileError('Macro redefinition is unsupported.',token,source);forwarders.set(forward.name,forward);advance(directive);continue;}
       const m = directive.trimEnd().match(/^#\s*define\s+([A-Za-z_]\w*)\s+([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFuU]?)\s*(?:\/\/.*)?$/);
@@ -92,12 +93,15 @@ export class Parser {
     const functions = [];
     while (this.peek().kind !== 'eof') {
       const token = this.peek();
+      let templateParameter=null;
+      if(this.match('template')){this.take('<');this.take('int');templateParameter=this.name();this.take('>');}
       if(this.match('namespace')){const alias=this.name();this.take('=');const target=this.name();this.take(';');if(target!=='cooperative_groups'||this.groupNamespaces.has(alias))this.fail('Only distinct aliases of cooperative_groups are supported.',token);this.groupNamespaces.add(alias);continue;}
       while (['inline', '__forceinline__'].includes(this.peek().value)) this.take();
       let launchThreads=null;
       const launchBounds=()=>{this.take('__launch_bounds__');this.take('(');const t=this.take();if(t.kind!=='number'||!/^[0-9]+[uU]?$/.test(t.value))this.fail('Launch bounds require a positive integer thread count.',t);launchThreads=Number(t.value.replace(/[uU]$/,''));if(launchThreads<1||launchThreads>1024)this.fail('Launch bounds thread count must be in [1,1024].',t);this.take(')');};
       if(this.is('__launch_bounds__'))launchBounds();
       const qualifier = this.take().value;
+      if(templateParameter&&qualifier!=='__global__')this.fail('Integer templates are supported only on kernels.',token);
       if (!['__global__', '__device__'].includes(qualifier)) this.fail('Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported.', token);
       while (['inline', '__forceinline__'].includes(this.peek().value)) this.take();
       if(this.is('__launch_bounds__')){if(launchThreads!==null)this.fail('Duplicate launch bounds.');launchBounds();}
@@ -108,7 +112,7 @@ export class Parser {
       const name = this.name(); this.take('('); const params = [];
       if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(); params.push({kind: 'param', token, name, ...type}); } while (this.match(','));
       this.take(')'); const body = this.block();
-      functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads});
+      functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads,templateParameter});
     }
     if (!functions.some(f => f.qualifier === '__global__')) this.fail('No __global__ kernel was found.');
     return {kind: 'module', functions, source: this.source};
@@ -129,7 +133,7 @@ export class Parser {
     if (this.is('{')) return this.block();
     if (this.match(';')) return {kind: 'empty', token};
     if (this.match('if')) { this.take('('); const condition = this.expression(); this.take(')'); const yes = this.statement(), no = this.match('else') ? this.statement() : null; return {kind: 'if', token, condition, yes, no}; }
-    if (this.match('for')) { this.take('('); const init = this.is(';') ? null : this.startsType() ? this.declaration(false) : this.expression(); this.take(';'); const condition = this.is(';') ? null : this.expression(); this.take(';'); const step = this.is(')') ? null : this.expression(); this.take(')'); return {kind: 'for', token, init, condition, step, body: this.statement()}; }
+    if (this.match('for')) { this.take('('); const init = this.is(';') ? null : this.startsType() ? this.declaration(false) : this.expression(); this.take(';'); const condition = this.is(';') ? null : this.expression(); this.take(';'); const steps=[];if(!this.is(')'))do{steps.push(this.expression());}while(this.match(','));const step=steps.length>1?{kind:'sequence',token,expressions:steps}:steps[0]||null; this.take(')'); return {kind: 'for', token, init, condition, step, body: this.statement()}; }
     if (this.match('while')) { this.take('('); const condition = this.expression(); this.take(')'); return {kind: 'while', token, condition, body: this.statement()}; }
     if (this.match('return')) { const value = this.is(';') ? null : this.expression(); this.take(';'); return {kind: 'return', token, value}; }
     if (this.match('break') || this.match('continue')) { this.take(';'); return {kind: token.value, token}; }

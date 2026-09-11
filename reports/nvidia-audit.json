@@ -286,8 +286,40 @@
         ]
       },
       "browser": {
-        "status": "translation-rejected",
-        "reason": "Only numeric object-like #define directives are supported; preprocess other directives first. (114:1)\n#pragma unroll\r\n^"
+        "status": "kernel-verified",
+        "reason": "Isolated kernels checked against CPU reference on a real NVIDIA WebGPU adapter. Full host program is not executed.",
+        "checks": [
+          {
+            "sample": "cpp/0_Introduction/matrixMul",
+            "entry": "MatrixMulCUDA<16>",
+            "pass": true,
+            "values": 4096,
+            "maxError": 0,
+            "failures": 0,
+            "outputs": {
+              "C": {
+                "values": 4096,
+                "maxError": 0,
+                "failures": 0
+              }
+            }
+          },
+          {
+            "sample": "cpp/0_Introduction/matrixMul",
+            "entry": "MatrixMulCUDA<32>",
+            "pass": true,
+            "values": 4096,
+            "maxError": 0,
+            "failures": 0,
+            "outputs": {
+              "C": {
+                "values": 4096,
+                "maxError": 0,
+                "failures": 0
+              }
+            }
+          }
+        ]
       }
     },
     {
@@ -9428,11 +9460,11 @@
       }
     }
   ],
-  "executionUpdated": "2026-09-11T23:20:33.362Z",
+  "executionUpdated": "2026-09-11T23:25:28.993Z",
   "counts": {
     "samples": 208,
     "compilerProbes": 350,
-    "webgpuPassed": 22,
+    "webgpuPassed": 24,
     "nativeProgramsAttempted": 149,
     "nativeStatuses": {
       "exited-zero": 142,

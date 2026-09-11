@@ -112,6 +112,16 @@
       "entry": "BlackScholesGPU",
       "sample": "cpp/5_Domain_Specific/BlackScholes",
       "passed": true
+    },
+    {
+      "entry": "MatrixMulCUDA<16>",
+      "sample": "cpp/0_Introduction/matrixMul",
+      "passed": true
+    },
+    {
+      "entry": "MatrixMulCUDA<32>",
+      "sample": "cpp/0_Introduction/matrixMul",
+      "passed": true
     }
   ]
 }

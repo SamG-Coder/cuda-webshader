@@ -1,0 +1,104 @@
+{
+  "date": "2026-09-11T23:24:53.434Z",
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "sourceCompiled": true,
+  "softwareAdapterRequested": false,
+  "results": [
+    {
+      "tile": 16,
+      "M": 16,
+      "N": 16,
+      "K": 16,
+      "guardsPreserved": true,
+      "valuesChecked": 272,
+      "maxError": 0,
+      "pass": true
+    },
+    {
+      "tile": 16,
+      "M": 16,
+      "N": 32,
+      "K": 48,
+      "guardsPreserved": true,
+      "valuesChecked": 528,
+      "maxError": 0,
+      "pass": true
+    },
+    {
+      "tile": 16,
+      "M": 48,
+      "N": 16,
+      "K": 32,
+      "guardsPreserved": true,
+      "valuesChecked": 784,
+      "maxError": 0,
+      "pass": true
+    },
+    {
+      "tile": 16,
+      "M": 64,
+      "N": 96,
+      "K": 128,
+      "guardsPreserved": true,
+      "valuesChecked": 6160,
+      "maxError": 0,
+      "pass": true
+    },
+    {
+      "tile": 32,
+      "M": 32,
+      "N": 32,
+      "K": 32,
+      "guardsPreserved": true,
+      "valuesChecked": 1040,
+      "maxError": 0,
+      "pass": true
+    },
+    {
+      "tile": 32,
+      "M": 32,
+      "N": 64,
+      "K": 96,
+      "guardsPreserved": true,
+      "valuesChecked": 2064,
+      "maxError": 0,
+      "pass": true
+    },
+    {
+      "tile": 32,
+      "M": 96,
+      "N": 32,
+      "K": 64,
+      "guardsPreserved": true,
+      "valuesChecked": 3088,
+      "maxError": 0,
+      "pass": true
+    },
+    {
+      "tile": 32,
+      "M": 64,
+      "N": 96,
+      "K": 128,
+      "guardsPreserved": true,
+      "valuesChecked": 6160,
+      "maxError": 0,
+      "pass": true
+    }
+  ],
+  "passed": true
+}

@@ -227,6 +227,7 @@ class Emitter {
     if (s.kind === 'uniform') this.fail('Scalar kernel parameters are read-only in this subset. Copy the parameter to a local variable first.', n);
   }
   effect(n) {
+    if(n.kind==='sequence')return n.expressions.flatMap(e=>this.effect(e));
     if (n.kind === 'assign') {
       const target = this.expr(n.left, true); this.writable(target, n.left); const value = this.expr(n.right);
       let code = this.convert(value.code, value.type, target.type, n);
@@ -368,9 +369,16 @@ class Emitter {
 }
 export function compile(source, options = {}) {
   const ast = parse(source, options), kernels = ast.functions.filter(f => f.qualifier === '__global__');
-  const kernel = options.entry ? kernels.find(k => k.name === options.entry) : kernels.length === 1 ? kernels[0] : null;
+  const specialization=options.entry?.match(/^([A-Za-z_]\w*)<\s*(\d+)\s*>$/),entry=specialization?specialization[1]:options.entry;
+  const kernel = entry ? kernels.find(k => k.name === entry) : kernels.length === 1 ? kernels[0] : null;
   if (!kernel) throw new CompileError(options.entry ? `Kernel '${options.entry}' was not found.` : 'Multiple kernels found; specify options.entry.');
-  return new Emitter(ast, kernel, options).emit();
+  if(!!kernel.templateParameter!==!!specialization)throw new CompileError(kernel.templateParameter?'Specify an integer template entry, for example '+kernel.name+'<16>.':'This kernel does not have a template parameter.',kernel.token,source);
+  if(specialization){const value=Number(specialization[2]),name=kernel.templateParameter;
+    if(!Number.isSafeInteger(value)||value>2147483647)throw new CompileError('Template argument must be a nonnegative 32-bit signed integer.',kernel.token,source);
+    for(const p of kernel.params)if(p.name===name)throw new CompileError('Template parameter shadowing is unsupported.',p.token,source);
+    walk(kernel.body,n=>{if(['decl','thread-block'].includes(n.kind)&&n.name===name)throw new CompileError('Template parameter shadowing is unsupported.',n.token,source);if(n.kind==='id'&&n.name===name){n.kind='literal';n.value=String(value);delete n.name;}});
+  }
+  const result=new Emitter(ast, kernel, options).emit();if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:Number(specialization[2])};return result;
 }
 export function serializableArtifact(compiled) {
   return {version: compiled.version, name: compiled.name, entryPoint: compiled.entryPoint, wgsl: compiled.wgsl, metadata: compiled.metadata};

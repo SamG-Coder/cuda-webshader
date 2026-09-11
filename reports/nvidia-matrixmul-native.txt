@@ -1,0 +1,8 @@
+tile=16 M=16 N=16 K=16 output + guards: PASS
+tile=16 M=16 N=32 K=48 output + guards: PASS
+tile=16 M=48 N=16 K=32 output + guards: PASS
+tile=16 M=64 N=96 K=128 output + guards: PASS
+tile=32 M=32 N=32 K=32 output + guards: PASS
+tile=32 M=32 N=64 K=96 output + guards: PASS
+tile=32 M=96 N=32 K=64 output + guards: PASS
+tile=32 M=64 N=96 K=128 output + guards: PASS

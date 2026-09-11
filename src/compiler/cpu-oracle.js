@@ -47,6 +47,7 @@ class Context {
     throw new Error(`Expression ${n.kind} is not an lvalue.`);
   }
   *eval(n){
+    if(n.kind==='sequence'){let result;for(const expression of n.expressions)result=yield* this.eval(expression);return result;}
     this.tick();
     switch(n.kind){
       case 'literal':return convert(n.numericValue,n.type);
