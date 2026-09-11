@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "name": "source",
+      "device": "WEBGPU / nvidia",
+      "particles": "131,072",
+      "cadence": "56 FPS",
+      "fatalVisible": false,
+      "overflow": false,
+      "pause": "PASS"
+    },
+    {
+      "name": "dist",
+      "device": "WEBGPU / nvidia",
+      "particles": "131,072",
+      "cadence": "61 FPS",
+      "fatalVisible": false,
+      "overflow": false,
+      "pause": "PASS"
+    }
+  ],
+  "reportFilter": "PASS",
+  "pageErrors": []
+}

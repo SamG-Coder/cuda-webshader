@@ -1,0 +1,142 @@
+/** A deliberately bounded CUDA C frontend. No eval, regex transpilation, or source-specific rewrites. */
+export class CompileError extends Error {
+  constructor(message, token = {}, source = '') {
+    const line = token.line || 1, column = token.column || 1;
+    super(`${message} (${line}:${column})${source ? `\n${source.split('\n')[line - 1] || ''}\n${' '.repeat(column - 1)}^` : ''}`);
+    this.name = 'CompileError'; this.line = line; this.column = column;
+  }
+}
+const NUM = /^(?:0[xX][\da-fA-F]+[uU]?|(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?[fFuU]?)/;
+const WORD = /^[A-Za-z_]\w*/;
+const OPERATORS = ['<<=', '>>=', '++', '--', '+=', '-=', '*=', '/=', '%=', '==', '!=', '<=', '>=', '&&', '||', '<<', '>>', '&=', '|=', '^=', '->'];
+const TYPES = new Set(['float', 'int', 'uint', 'unsigned', 'bool', 'void', 'float2', 'float3', 'float4']);
+const QUALIFIERS = new Set(['const', '__shared__', '__restrict__', 'restrict']);
+const MAP = { float: 'f32', int: 'i32', uint: 'u32', bool: 'bool', void: 'void', float2: 'vec2<f32>', float3: 'vec3<f32>', float4: 'vec4<f32>' };
+export function tokenize(source, defines = {}) {
+  if (typeof source !== 'string' || source.length > 1_000_000) throw new CompileError('Source must be a string of at most 1 MB.');
+  const macros = new Map(Object.entries(defines).map(([k, v]) => {
+    if (!/^[A-Za-z_]\w*$/.test(k) || !Number.isFinite(v)) throw new CompileError('Defines must be named finite numbers.');
+    return [k, String(v)];
+  }));
+  const tokens = []; let i = 0, line = 1, column = 1;
+  const advance = str => { for (const c of str) { if (c === '\n') { line++; column = 1; } else column++; } i += str.length; };
+  while (i < source.length) {
+    const rest = source.slice(i), token = {line, column, offset: i};
+    if (/^\s/.test(rest)) { advance(rest.match(/^\s+/)[0]); continue; }
+    if (rest.startsWith('//')) { advance(rest.split('\n')[0]); continue; }
+    if (rest.startsWith('/*')) { const end = rest.indexOf('*/'); if (end < 0) throw new CompileError('Unclosed comment.', token, source); advance(rest.slice(0, end + 2)); continue; }
+    if (rest[0] === '#') {
+      const directive = rest.split('\n')[0];
+      const m = directive.match(/^#\s*define\s+([A-Za-z_]\w*)\s+([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFuU]?)\s*(?:\/\/.*)?$/);
+      if (!m) throw new CompileError('Only numeric object-like #define directives are supported; preprocess other directives first.', token, source);
+      if (!macros.has(m[1])) macros.set(m[1], m[2]); advance(directive); continue;
+    }
+    const number = rest.match(NUM);
+    if (number) { tokens.push({...token, kind: 'number', value: number[0]}); advance(number[0]); continue; }
+    const word = rest.match(WORD);
+    if (word) {
+      const value = word[0], expanded = macros.get(value);
+      if (expanded !== undefined) {
+        let body = expanded;
+        if (body.startsWith('-') || body.startsWith('+')) { tokens.push({...token, kind: 'symbol', value: body[0]}); body = body.slice(1); }
+        tokens.push({...token, kind: 'number', value: body});
+      } else tokens.push({...token, kind: 'word', value});
+      advance(value); continue;
+    }
+    const op = OPERATORS.find(x => rest.startsWith(x));
+    if (op) { tokens.push({...token, kind: 'symbol', value: op}); advance(op); continue; }
+    if ('{}[]();,.?:+-*/%<>=!~&|^'.includes(rest[0])) { tokens.push({...token, kind: 'symbol', value: rest[0]}); advance(rest[0]); continue; }
+    throw new CompileError(`Unsupported character ${JSON.stringify(rest[0])}.`, token, source);
+  }
+  tokens.push({kind: 'eof', value: '<eof>', line, column, offset: i}); return tokens;
+}
+const PRECEDENCE = {'=': 1, '+=': 1, '-=': 1, '*=': 1, '/=': 1, '%=': 1, '&=': 1, '|=': 1, '^=': 1, '<<=': 1, '>>=': 1, '||': 3, '&&': 4, '|': 5, '^': 6, '&': 7, '==': 8, '!=': 8, '<': 9, '>': 9, '<=': 9, '>=': 9, '<<': 10, '>>': 10, '+': 11, '-': 11, '*': 12, '/': 12, '%': 12};
+export class Parser {
+  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; }
+  peek(offset = 0) { return this.tokens[this.i + offset] || this.tokens.at(-1); }
+  is(value) { return this.peek().value === value; }
+  take(value) { if (value && !this.is(value)) this.fail(`Expected '${value}', found '${this.peek().value}'.`); return this.tokens[this.i++]; }
+  match(value) { if (this.is(value)) { this.i++; return true; } return false; }
+  fail(message, token = this.peek()) { throw new CompileError(message, token, this.source); }
+  name() { const t = this.take(); if (t.kind !== 'word') this.fail('Expected an identifier.', t); return t.value; }
+  startsType() { return TYPES.has(this.peek().value) || QUALIFIERS.has(this.peek().value); }
+  type() {
+    let constant = false, shared = false;
+    while (QUALIFIERS.has(this.peek().value)) { const q = this.take().value; constant ||= q === 'const'; shared ||= q === '__shared__'; }
+    const tok = this.take(); let type;
+    if (tok.value === 'unsigned') { this.match('int'); type = 'u32'; } else type = MAP[tok.value];
+    if (!type) this.fail(`Unsupported type '${tok.value}'. Use float, int, unsigned int, bool or float2/3/4.`, tok);
+    if (this.match('const')) constant = true;
+    const pointer = this.match('*');
+    while (['__restrict__', 'restrict'].includes(this.peek().value)) this.take();
+    if (this.is('*')) this.fail('Pointer-to-pointer types are not supported.');
+    return {type, constant, shared, pointer};
+  }
+  parse() {
+    const functions = [];
+    while (this.peek().kind !== 'eof') {
+      const token = this.peek();
+      while (['inline', '__forceinline__'].includes(this.peek().value)) this.take();
+      const qualifier = this.take().value;
+      if (!['__global__', '__device__'].includes(qualifier)) this.fail('Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported.', token);
+      while (['inline', '__forceinline__'].includes(this.peek().value)) this.take();
+      const result = this.type();
+      if (result.pointer || result.shared) this.fail('Function return pointers/shared qualifiers are unsupported.');
+      const name = this.name(); this.take('('); const params = [];
+      if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(); params.push({kind: 'param', token, name, ...type}); } while (this.match(','));
+      this.take(')'); const body = this.block();
+      functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body});
+    }
+    if (!functions.some(f => f.qualifier === '__global__')) this.fail('No __global__ kernel was found.');
+    return {kind: 'module', functions, source: this.source};
+  }
+  block() { const token = this.take('{'), body = []; while (!this.is('}')) { if (this.peek().kind === 'eof') this.fail('Unclosed block.'); body.push(this.statement()); } this.take('}'); return {kind: 'block', token, body}; }
+  declaration(semicolon = true) {
+    const token = this.peek(), d = this.type(), name = this.name(), dimensions = [];
+    while (this.match('[')) { dimensions.push(this.expression(2)); this.take(']'); }
+    const init = this.match('=') ? this.expression(2) : null;
+    if (this.is(',')) this.fail('Use one local variable per declaration.');
+    if (semicolon) this.take(';'); return {kind: 'decl', token, name, ...d, dimensions, init};
+  }
+  statement() {
+    const token = this.peek();
+    if (this.is('{')) return this.block();
+    if (this.match(';')) return {kind: 'empty', token};
+    if (this.match('if')) { this.take('('); const condition = this.expression(); this.take(')'); const yes = this.statement(), no = this.match('else') ? this.statement() : null; return {kind: 'if', token, condition, yes, no}; }
+    if (this.match('for')) { this.take('('); const init = this.is(';') ? null : this.startsType() ? this.declaration(false) : this.expression(); this.take(';'); const condition = this.is(';') ? null : this.expression(); this.take(';'); const step = this.is(')') ? null : this.expression(); this.take(')'); return {kind: 'for', token, init, condition, step, body: this.statement()}; }
+    if (this.match('while')) { this.take('('); const condition = this.expression(); this.take(')'); return {kind: 'while', token, condition, body: this.statement()}; }
+    if (this.match('return')) { const value = this.is(';') ? null : this.expression(); this.take(';'); return {kind: 'return', token, value}; }
+    if (this.match('break') || this.match('continue')) { this.take(';'); return {kind: token.value, token}; }
+    if (this.startsType()) return this.declaration();
+    const value = this.expression(); this.take(';'); return {kind: 'expr', token, value};
+  }
+  expression(min = 1) {
+    let left = this.unary();
+    while (true) {
+      const token = this.peek(), op = token.value;
+      if (op === '?' && min <= 2) { this.take(); const yes = this.expression(); this.take(':'); const no = this.expression(2); left = {kind: 'conditional', token, condition: left, yes, no}; continue; }
+      const p = PRECEDENCE[op]; if (p === undefined || p < min) break;
+      this.take(); const right = this.expression(p === 1 ? p : p + 1); left = {kind: p === 1 ? 'assign' : 'binary', token, op, left, right};
+    }
+    return left;
+  }
+  unary() {
+    const token = this.peek();
+    if (['+', '-', '!', '~', '&', '++', '--', '*'].includes(token.value)) { this.take(); return {kind: 'unary', token, op: token.value, value: this.unary(), prefix: true}; }
+    if (this.is('(') && (TYPES.has(this.peek(1).value) || this.peek(1).value === 'const')) { this.take('('); const type = this.type(); if (type.pointer) this.fail('Pointer casts are unsupported.'); this.take(')'); return {kind: 'cast', token, target: type.type, value: this.unary()}; }
+    let value;
+    if (token.kind === 'number') { this.take(); value = {kind: 'literal', token, value: token.value}; }
+    else if (this.match('(')) { value = this.expression(); this.take(')'); }
+    else if (token.kind === 'word') { this.take(); value = {kind: 'id', token, name: token.value}; }
+    else this.fail('Expected an expression.', token);
+    while (true) {
+      if (this.match('[')) { const index = this.expression(); this.take(']'); value = {kind: 'index', token, base: value, index}; }
+      else if (this.match('.')) { value = {kind: 'member', token, base: value, member: this.name()}; }
+      else if (this.match('(')) { const args = []; if (!this.is(')')) do { args.push(this.expression(2)); } while (this.match(',')); this.take(')'); value = {kind: 'call', token, callee: value, args}; }
+      else if (this.is('++') || this.is('--')) { value = {kind: 'unary', token, op: this.take().value, value, prefix: false}; }
+      else break;
+    }
+    return value;
+  }
+}
+export function parse(source, options = {}) { return new Parser(source, options.defines).parse(); }

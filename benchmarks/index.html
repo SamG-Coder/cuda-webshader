@@ -1,0 +1,4 @@
+<!doctype html><meta charset="utf-8"><title>CUDA / WebGPU comparison runner</title><pre id="status">Running matched benchmarks…</pre><script type="module">
+import {runComparison} from './webgpu.js';
+try {window.comparisonReport=await runComparison(r=>document.querySelector('#status').textContent=JSON.stringify(r,null,2));}catch(e){window.comparisonReport={error:e.stack};}document.querySelector('#status').textContent=JSON.stringify(window.comparisonReport,null,2);
+</script>

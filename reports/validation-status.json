@@ -1,0 +1,36 @@
+{
+  "project": "CUDA WebShader 0.1.0",
+  "validatedAt": "2026-09-12T07:36:35.6947245+10:00",
+  "environment": {
+    "cuda": "13.3",
+    "gpu": "NVIDIA GeForce RTX 5080",
+    "browser": "Microsoft Edge 152",
+    "driver": "616.64",
+    "os": "Windows",
+    "node": "v24.19.0"
+  },
+  "nodeTests": {
+    "passed": 144,
+    "failed": 0
+  },
+  "browserGpuSuite": {
+    "log": "reports/gpu-local.json",
+    "failed": 0,
+    "passed": 79
+  },
+  "nativeCudaBaseline": {
+    "log": "reports/native-reference.log",
+    "passed": 5
+  },
+  "matchedBenchmarks": {
+    "report": "reports/performance-comparison.md",
+    "webgpuPassed": 20,
+    "cudaPassed": 20
+  },
+  "dependencyInstallAndBuild": "PASS",
+  "appSmoke": {
+    "log": "reports/app-smoke.json",
+    "status": "PASS"
+  },
+  "ciWorkflow": "NOT EXECUTED"
+}

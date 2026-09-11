@@ -1,0 +1,7 @@
+NATIVE CUDA CORRECTNESS ONLY; GPU=NVIDIA GeForce RTX 5080
+PASS SAXPY tail 1031 max_abs_error=0
+PASS Matrix baseline 17x19x23 max_abs_error=0
+PASS Matrix shared tile 17x19x23 max_abs_error=0
+PASS Matrix register tile 17x19x23 max_abs_error=0
+PASS Hierarchical reduction 4099 max_abs_error=0
+5/5 native CUDA checks passed. This is NOT a CUDA-versus-WebGPU speed comparison.

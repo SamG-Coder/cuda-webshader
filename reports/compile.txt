@@ -1,0 +1,10 @@
+saxpy                0 shared bytes, 25 WGSL lines
+saxpy_vec4           0 shared bytes, 27 WGSL lines
+matmul_naive         0 shared bytes, 38 WGSL lines
+matmul_tiled         2048 shared bytes, 67 WGSL lines
+matmul_register      2048 shared bytes, 130 WGSL lines
+reduce_sum           512 shared bytes, 49 WGSL lines
+convolution          528 shared bytes, 57 WGSL lines
+histogram            1024 shared bytes, 59 WGSL lines
+transpose            4224 shared bytes, 55 WGSL lines
+particles            0 shared bytes, 44 WGSL lines

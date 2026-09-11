@@ -1,0 +1,34 @@
+name: compiler-and-webgpu
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  compiler:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test
+      - run: npm run compile
+      - run: npm run check:cuda-syntax
+      - run: npm run build
+  software-webgpu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:gpu
+        env:
+          CW_SOFTWARE_GPU: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software-webgpu-correctness
+          path: reports/gpu-local.json
+# This workflow is supplied but was not run during authoring. SwiftShader results
+# validate a software implementation; they must never be presented as hardware performance.

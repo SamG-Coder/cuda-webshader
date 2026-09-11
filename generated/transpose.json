@@ -1,0 +1,47 @@
+{
+  "version": "0.1.0",
+  "name": "transpose",
+  "entryPoint": "main",
+  "wgsl": "// CUDA WebShader 0.1.0. Generated from kernel transpose.\n@group(0) @binding(0) var<storage, read> b_input: array<f32>;\n@group(0) @binding(1) var<storage, read_write> b_output: array<f32>;\nstruct CWParams {\n  p_width: u32,\n  p_height: u32,\n  cw_pad_8: u32,\n  cw_pad_12: u32,\n}\n@group(0) @binding(2) var<uniform> cw_params: CWParams;\nconst cw_block_size: vec3<u32> = vec3<u32>(32u, 8u, 1u);\nvar<workgroup> s_tile: array<array<f32, 33>, 32>;\n\n\n@compute @workgroup_size(32, 8, 1)\nfn main(\n  @builtin(local_invocation_id) cw_thread: vec3<u32>,\n  @builtin(workgroup_id) cw_block: vec3<u32>,\n  @builtin(num_workgroups) cw_grid: vec3<u32>\n) {\n  var v_x: u32 = ((cw_block.x * u32(32i)) + cw_thread.x);\n  var v_y: u32 = ((cw_block.y * u32(32i)) + cw_thread.y);\n  {\n    var v_j: u32 = u32(0i);\n    loop {\n      if (!(v_j < u32(32i))) { break; }\n      var cw_tmp_0: f32;\n      if (((v_x < cw_params.p_width) && ((v_y + v_j) < cw_params.p_height))) {\n        cw_tmp_0 = b_input[(((v_y + v_j) * cw_params.p_width) + v_x)];\n      } else {\n        cw_tmp_0 = 0.0f;\n      }\n      s_tile[(cw_thread.y + v_j)][cw_thread.x] = cw_tmp_0;\n      continuing {\n        v_j = (v_j + u32(8i));\n      }\n    }\n  }\n  workgroupBarrier();\n  v_x = ((cw_block.y * u32(32i)) + cw_thread.x);\n  v_y = ((cw_block.x * u32(32i)) + cw_thread.y);\n  {\n    var v_j: u32 = u32(0i);\n    loop {\n      if (!(v_j < u32(32i))) { break; }\n      if (((v_x < cw_params.p_height) && ((v_y + v_j) < cw_params.p_width))) {\n        b_output[(((v_y + v_j) * cw_params.p_height) + v_x)] = s_tile[cw_thread.x][(cw_thread.y + v_j)];\n      }\n      continuing {\n        v_j = (v_j + u32(8i));\n      }\n    }\n  }\n}\n",
+  "metadata": {
+    "workgroupSize": [
+      32,
+      8,
+      1
+    ],
+    "bindings": [
+      {
+        "name": "input",
+        "elementType": "f32",
+        "stride": 4,
+        "binding": 0,
+        "readOnly": true,
+        "atomic": false
+      },
+      {
+        "name": "output",
+        "elementType": "f32",
+        "stride": 4,
+        "binding": 1,
+        "readOnly": false,
+        "atomic": false
+      }
+    ],
+    "scalars": [
+      {
+        "name": "width",
+        "type": "u32",
+        "offset": 0
+      },
+      {
+        "name": "height",
+        "type": "u32",
+        "offset": 4
+      }
+    ],
+    "uniformSize": 16,
+    "uniformBinding": 2,
+    "workgroupStorageBytes": 4224,
+    "barrier": "workgroup"
+  }
+}

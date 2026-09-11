@@ -1,0 +1,2915 @@
+{
+  "date": "2026-09-11T21:32:54.559Z",
+  "rows": [
+    {
+      "key": "small-saxpy",
+      "id": "saxpy",
+      "scalars": {
+        "a": 0.125,
+        "n": 262144
+      },
+      "webgpu": {
+        "key": "small-saxpy",
+        "id": "saxpy",
+        "scalars": {
+          "a": 0.125,
+          "n": 262144
+        },
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          2048
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "y": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0,
+            "maxRel": 0
+          }
+        },
+        "gpuMedianMs": 0.001632,
+        "wallMedianMs": 0.0033056640531867743,
+        "timings": [
+          {
+            "gpuMs": 0.001632,
+            "wallMs": 0.007543945306679234
+          },
+          {
+            "gpuMs": 0.001664,
+            "wallMs": 0.003881835931679234
+          },
+          {
+            "gpuMs": 0.001664,
+            "wallMs": 0.0034643554681679234
+          },
+          {
+            "gpuMs": 0.001632,
+            "wallMs": 0.0029760742181679234
+          },
+          {
+            "gpuMs": 0.001632,
+            "wallMs": 0.0033056640531867743
+          },
+          {
+            "gpuMs": 0.001632,
+            "wallMs": 0.002617187492433004
+          },
+          {
+            "gpuMs": 0.001792,
+            "wallMs": 0.0028173828177386895
+          },
+          {
+            "gpuMs": 0.001632,
+            "wallMs": 0.0035717773425858468
+          },
+          {
+            "gpuMs": 0.001632,
+            "wallMs": 0.0030419921968132257
+          }
+        ]
+      },
+      "cuda": {
+        "key": "small-saxpy",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.001494718716,
+        "wallMedianMs": 0.001497851563,
+        "directGpuMedianMs": 0.00666149985,
+        "directWallMedianMs": 0.006667529297,
+        "timings": [
+          {
+            "gpuMs": 0.00180371874,
+            "wallMs": 0.001809960937,
+            "directGpuMs": 0.00666149985,
+            "directWallMs": 0.006667529297
+          },
+          {
+            "gpuMs": 0.001493578078,
+            "wallMs": 0.001496972656,
+            "directGpuMs": 0.006717578042,
+            "directWallMs": 0.006721386719
+          },
+          {
+            "gpuMs": 0.001494046883,
+            "wallMs": 0.001497314453,
+            "directGpuMs": 0.00656970311,
+            "directWallMs": 0.006572753906
+          },
+          {
+            "gpuMs": 0.001492234413,
+            "wallMs": 0.001495263672,
+            "directGpuMs": 0.007172984537,
+            "directWallMs": 0.007176611328
+          },
+          {
+            "gpuMs": 0.001494718716,
+            "wallMs": 0.001497851563,
+            "directGpuMs": 0.00721826544,
+            "directWallMs": 0.007221777344
+          },
+          {
+            "gpuMs": 0.001493937452,
+            "wallMs": 0.001497021484,
+            "directGpuMs": 0.007405093871,
+            "directWallMs": 0.007408349609
+          },
+          {
+            "gpuMs": 0.001562421909,
+            "wallMs": 0.001566503906,
+            "directGpuMs": 0.006511656102,
+            "directWallMs": 0.006566357422
+          },
+          {
+            "gpuMs": 0.001702046837,
+            "wallMs": 0.001705029297,
+            "directGpuMs": 0.006362312473,
+            "directWallMs": 0.006365625
+          },
+          {
+            "gpuMs": 0.001563843805,
+            "wallMs": 0.00156796875,
+            "directGpuMs": 0.006214906462,
+            "directWallMs": 0.006275683594
+          }
+        ]
+      },
+      "ratio": 1.0918442262952168
+    },
+    {
+      "key": "small-saxpy_vec4",
+      "id": "saxpy_vec4",
+      "scalars": {
+        "a": 0.125,
+        "n4": 65536
+      },
+      "webgpu": {
+        "key": "small-saxpy_vec4",
+        "id": "saxpy_vec4",
+        "scalars": {
+          "a": 0.125,
+          "n4": 65536
+        },
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          512
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "y": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0,
+            "maxRel": 0
+          }
+        },
+        "gpuMedianMs": 0.00144,
+        "wallMedianMs": 0.0029614257800858468,
+        "timings": [
+          {
+            "gpuMs": 0.0016,
+            "wallMs": 0.0029614257800858468
+          },
+          {
+            "gpuMs": 0.00144,
+            "wallMs": 0.00239746093575377
+          },
+          {
+            "gpuMs": 0.00144,
+            "wallMs": 0.002416992181679234
+          },
+          {
+            "gpuMs": 0.00144,
+            "wallMs": 0.0025708007742650807
+          },
+          {
+            "gpuMs": 0.001408,
+            "wallMs": 0.00335693359375
+          },
+          {
+            "gpuMs": 0.001504,
+            "wallMs": 0.0024951171944849193
+          },
+          {
+            "gpuMs": 0.00144,
+            "wallMs": 0.0030078125128056854
+          },
+          {
+            "gpuMs": 0.001408,
+            "wallMs": 0.0031030273530632257
+          },
+          {
+            "gpuMs": 0.00144,
+            "wallMs": 0.0037011718668509275
+          }
+        ]
+      },
+      "cuda": {
+        "key": "small-saxpy_vec4",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.00140010938,
+        "wallMedianMs": 0.001403808594,
+        "directGpuMedianMs": 0.006463218946,
+        "directWallMedianMs": 0.006570068359,
+        "timings": [
+          {
+            "gpuMs": 0.001720234402,
+            "wallMs": 0.001735839844,
+            "directGpuMs": 0.006553406361,
+            "directWallMs": 0.006570068359
+          },
+          {
+            "gpuMs": 0.001452968805,
+            "wallMs": 0.001457373047,
+            "directGpuMs": 0.006394437514,
+            "directWallMs": 0.006450585938
+          },
+          {
+            "gpuMs": 0.001431203098,
+            "wallMs": 0.001434130859,
+            "directGpuMs": 0.006342609413,
+            "directWallMs": 0.006345507812
+          },
+          {
+            "gpuMs": 0.001405062503,
+            "wallMs": 0.001407958984,
+            "directGpuMs": 0.006520046853,
+            "directWallMs": 0.006575634766
+          },
+          {
+            "gpuMs": 0.00140010938,
+            "wallMs": 0.001403808594,
+            "directGpuMs": 0.006260703318,
+            "directWallMs": 0.006316796875
+          },
+          {
+            "gpuMs": 0.001267703134,
+            "wallMs": 0.001270458984,
+            "directGpuMs": 0.006743531208,
+            "directWallMs": 0.006746337891
+          },
+          {
+            "gpuMs": 0.001265781233,
+            "wallMs": 0.001269628906,
+            "directGpuMs": 0.006463218946,
+            "directWallMs": 0.006588183594
+          },
+          {
+            "gpuMs": 0.001278656302,
+            "wallMs": 0.001282080078,
+            "directGpuMs": 0.00663312478,
+            "directWallMs": 0.006636816406
+          },
+          {
+            "gpuMs": 0.00126695307,
+            "wallMs": 0.001269677734,
+            "directGpuMs": 0.006305109244,
+            "directWallMs": 0.006308251953
+          }
+        ]
+      },
+      "ratio": 1.0284910740330873
+    },
+    {
+      "key": "small-matmul_naive",
+      "id": "matmul_naive",
+      "scalars": {
+        "M": 128,
+        "N": 128,
+        "K": 128
+      },
+      "webgpu": {
+        "key": "small-matmul_naive",
+        "id": "matmul_naive",
+        "scalars": {
+          "M": 128,
+          "N": 128,
+          "K": 128
+        },
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          16,
+          16
+        ],
+        "iterations": 512,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "C": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0.00000667572021484375,
+            "maxRel": 0.0014302512207944628
+          }
+        },
+        "gpuMedianMs": 0.019968,
+        "wallMedianMs": 0.024873046844732016,
+        "timings": [
+          {
+            "gpuMs": 0.019328,
+            "wallMs": 0.021298828127328306
+          },
+          {
+            "gpuMs": 0.020096,
+            "wallMs": 0.026416015636641532
+          },
+          {
+            "gpuMs": 0.020352,
+            "wallMs": 0.022919921902939677
+          },
+          {
+            "gpuMs": 0.020224,
+            "wallMs": 0.022734374972060323
+          },
+          {
+            "gpuMs": 0.019328,
+            "wallMs": 0.023046875023283064
+          },
+          {
+            "gpuMs": 0.019968,
+            "wallMs": 0.02690429682843387
+          },
+          {
+            "gpuMs": 0.019968,
+            "wallMs": 0.026621093798894435
+          },
+          {
+            "gpuMs": 0.020096,
+            "wallMs": 0.02685546875
+          },
+          {
+            "gpuMs": 0.019712,
+            "wallMs": 0.024873046844732016
+          }
+        ]
+      },
+      "cuda": {
+        "key": "small-matmul_naive",
+        "verified": true,
+        "iterations": 512,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.006624499802,
+        "wallMedianMs": 0.006635742187,
+        "directGpuMedianMs": 0.01024662517,
+        "directWallMedianMs": 0.01029628906,
+        "timings": [
+          {
+            "gpuMs": 0.0067542498,
+            "wallMs": 0.006815625,
+            "directGpuMs": 0.01112762466,
+            "directWallMs": 0.01114179688
+          },
+          {
+            "gpuMs": 0.00694981264,
+            "wallMs": 0.0069625,
+            "directGpuMs": 0.009783499874,
+            "directWallMs": 0.009795117188
+          },
+          {
+            "gpuMs": 0.006624999922,
+            "wallMs": 0.006635742187,
+            "directGpuMs": 0.01131581236,
+            "directWallMs": 0.01132792969
+          },
+          {
+            "gpuMs": 0.006624499802,
+            "wallMs": 0.006635546875,
+            "directGpuMs": 0.0101393126,
+            "directWallMs": 0.0101515625
+          },
+          {
+            "gpuMs": 0.006616062485,
+            "wallMs": 0.0066265625,
+            "directGpuMs": 0.01127218734,
+            "directWallMs": 0.01128339844
+          },
+          {
+            "gpuMs": 0.006619624794,
+            "wallMs": 0.006630273437,
+            "directGpuMs": 0.01024662517,
+            "directWallMs": 0.01025703125
+          },
+          {
+            "gpuMs": 0.006616500206,
+            "wallMs": 0.006627734375,
+            "directGpuMs": 0.01086331252,
+            "directWallMs": 0.01090429688
+          },
+          {
+            "gpuMs": 0.006624062546,
+            "wallMs": 0.006675195312,
+            "directGpuMs": 0.01018243749,
+            "directWallMs": 0.01019453125
+          },
+          {
+            "gpuMs": 0.0069565624,
+            "wallMs": 0.0069671875,
+            "directGpuMs": 0.009704562835,
+            "directWallMs": 0.01029628906
+          }
+        ]
+      },
+      "ratio": 3.0142653176578658
+    },
+    {
+      "key": "small-matmul_tiled",
+      "id": "matmul_tiled",
+      "scalars": {
+        "M": 128,
+        "N": 128,
+        "K": 128
+      },
+      "webgpu": {
+        "key": "small-matmul_tiled",
+        "id": "matmul_tiled",
+        "scalars": {
+          "M": 128,
+          "N": 128,
+          "K": 128
+        },
+        "block": [
+          16,
+          16,
+          1
+        ],
+        "groups": [
+          8,
+          8
+        ],
+        "iterations": 512,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "C": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0.00000667572021484375,
+            "maxRel": 0.0014302512207944628
+          }
+        },
+        "gpuMedianMs": 0.0032,
+        "wallMedianMs": 0.0055175781599245965,
+        "timings": [
+          {
+            "gpuMs": 0.003328,
+            "wallMs": 0.005537109391298145
+          },
+          {
+            "gpuMs": 0.003328,
+            "wallMs": 0.005419921886641532
+          },
+          {
+            "gpuMs": 0.0032,
+            "wallMs": 0.005322265613358468
+          },
+          {
+            "gpuMs": 0.0032,
+            "wallMs": 0.0055175781599245965
+          },
+          {
+            "gpuMs": 0.003328,
+            "wallMs": 0.006582031201105565
+          },
+          {
+            "gpuMs": 0.0032,
+            "wallMs": 0.005380859365686774
+          },
+          {
+            "gpuMs": 0.0032,
+            "wallMs": 0.005458984349388629
+          },
+          {
+            "gpuMs": 0.003328,
+            "wallMs": 0.009296874981373549
+          },
+          {
+            "gpuMs": 0.0032,
+            "wallMs": 0.0074707031599245965
+          }
+        ]
+      },
+      "cuda": {
+        "key": "small-matmul_tiled",
+        "verified": true,
+        "iterations": 512,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.002884624992,
+        "wallMedianMs": 0.002895507812,
+        "directGpuMedianMs": 0.006999124773,
+        "directWallMedianMs": 0.00701171875,
+        "timings": [
+          {
+            "gpuMs": 0.00300631253,
+            "wallMs": 0.00306171875,
+            "directGpuMs": 0.006839312613,
+            "directWallMs": 0.006850976562
+          },
+          {
+            "gpuMs": 0.002879687585,
+            "wallMs": 0.002890625,
+            "directGpuMs": 0.006694499869,
+            "directWallMs": 0.006705078125
+          },
+          {
+            "gpuMs": 0.002880437532,
+            "wallMs": 0.002891210937,
+            "directGpuMs": 0.0069085625,
+            "directWallMs": 0.00692265625
+          },
+          {
+            "gpuMs": 0.002897625091,
+            "wallMs": 0.002917773438,
+            "directGpuMs": 0.007057937328,
+            "directWallMs": 0.00706953125
+          },
+          {
+            "gpuMs": 0.002883937443,
+            "wallMs": 0.002894921875,
+            "directGpuMs": 0.007393187378,
+            "directWallMs": 0.007405078125
+          },
+          {
+            "gpuMs": 0.002889187541,
+            "wallMs": 0.002905273438,
+            "directGpuMs": 0.006999124773,
+            "directWallMs": 0.00701171875
+          },
+          {
+            "gpuMs": 0.002885875059,
+            "wallMs": 0.002898828125,
+            "directGpuMs": 0.006790500134,
+            "directWallMs": 0.006801171875
+          },
+          {
+            "gpuMs": 0.002884624992,
+            "wallMs": 0.002895507812,
+            "directGpuMs": 0.007254312281,
+            "directWallMs": 0.00726484375
+          },
+          {
+            "gpuMs": 0.002879937412,
+            "wallMs": 0.002891210937,
+            "directGpuMs": 0.007314937655,
+            "directWallMs": 0.007325585938
+          }
+        ]
+      },
+      "ratio": 1.109329638644412
+    },
+    {
+      "key": "small-matmul_register",
+      "id": "matmul_register",
+      "scalars": {
+        "M": 128,
+        "N": 128,
+        "K": 128
+      },
+      "webgpu": {
+        "key": "small-matmul_register",
+        "id": "matmul_register",
+        "scalars": {
+          "M": 128,
+          "N": 128,
+          "K": 128
+        },
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          8,
+          8
+        ],
+        "iterations": 512,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "C": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0.00000667572021484375,
+            "maxRel": 0.0014302512207944628
+          }
+        },
+        "gpuMedianMs": 0.005888,
+        "wallMedianMs": 0.011113281245343387,
+        "timings": [
+          {
+            "gpuMs": 0.005888,
+            "wallMs": 0.007666015648283064
+          },
+          {
+            "gpuMs": 0.006528,
+            "wallMs": 0.009306640655267984
+          },
+          {
+            "gpuMs": 0.00576,
+            "wallMs": 0.011201171902939677
+          },
+          {
+            "gpuMs": 0.005888,
+            "wallMs": 0.011240234365686774
+          },
+          {
+            "gpuMs": 0.006528,
+            "wallMs": 0.01138671871740371
+          },
+          {
+            "gpuMs": 0.005888,
+            "wallMs": 0.009179687534924597
+          },
+          {
+            "gpuMs": 0.005888,
+            "wallMs": 0.007460937544237822
+          },
+          {
+            "gpuMs": 0.006272,
+            "wallMs": 0.011113281245343387
+          },
+          {
+            "gpuMs": 0.005888,
+            "wallMs": 0.011484374990686774
+          }
+        ]
+      },
+      "cuda": {
+        "key": "small-matmul_register",
+        "verified": true,
+        "iterations": 512,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.003062937409,
+        "wallMedianMs": 0.003073632813,
+        "directGpuMedianMs": 0.008001687936,
+        "directWallMedianMs": 0.008012304687,
+        "timings": [
+          {
+            "gpuMs": 0.003182874992,
+            "wallMs": 0.003248242188,
+            "directGpuMs": 0.009773249738,
+            "directWallMs": 0.009791210937
+          },
+          {
+            "gpuMs": 0.00307118753,
+            "wallMs": 0.003083984375,
+            "directGpuMs": 0.007979437709,
+            "directWallMs": 0.007990625
+          },
+          {
+            "gpuMs": 0.003059874987,
+            "wallMs": 0.00307265625,
+            "directGpuMs": 0.007803124841,
+            "directWallMs": 0.007813476562
+          },
+          {
+            "gpuMs": 0.003060812596,
+            "wallMs": 0.003072265625,
+            "directGpuMs": 0.009174937382,
+            "directWallMs": 0.009185546875
+          },
+          {
+            "gpuMs": 0.003061000025,
+            "wallMs": 0.003071679687,
+            "directGpuMs": 0.007516374812,
+            "directWallMs": 0.007526953125
+          },
+          {
+            "gpuMs": 0.003065312514,
+            "wallMs": 0.00307578125,
+            "directGpuMs": 0.008022562601,
+            "directWallMs": 0.008033007812
+          },
+          {
+            "gpuMs": 0.003062937409,
+            "wallMs": 0.003073632813,
+            "directGpuMs": 0.008881687187,
+            "directWallMs": 0.008895507812
+          },
+          {
+            "gpuMs": 0.003066062462,
+            "wallMs": 0.003077734375,
+            "directGpuMs": 0.008001687936,
+            "directWallMs": 0.008012304687
+          },
+          {
+            "gpuMs": 0.003060250077,
+            "wallMs": 0.003073242187,
+            "directGpuMs": 0.007349874824,
+            "directWallMs": 0.007360546875
+          }
+        ]
+      },
+      "ratio": 1.9223376823499432
+    },
+    {
+      "key": "small-reduce_sum",
+      "id": "reduce_sum",
+      "scalars": {
+        "n": 262144
+      },
+      "webgpu": {
+        "key": "small-reduce_sum",
+        "id": "reduce_sum",
+        "scalars": {
+          "n": 262144
+        },
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          1024
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "output": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0,
+            "maxRel": 0
+          }
+        },
+        "gpuMedianMs": 0.00368,
+        "wallMedianMs": 0.007780761719914153,
+        "timings": [
+          {
+            "gpuMs": 0.00368,
+            "wallMs": 0.010842285162652843
+          },
+          {
+            "gpuMs": 0.00368,
+            "wallMs": 0.01041992187674623
+          },
+          {
+            "gpuMs": 0.00368,
+            "wallMs": 0.007573242182843387
+          },
+          {
+            "gpuMs": 0.00368,
+            "wallMs": 0.007973632818902843
+          },
+          {
+            "gpuMs": 0.003712,
+            "wallMs": 0.007514648430515081
+          },
+          {
+            "gpuMs": 0.00368,
+            "wallMs": 0.007561035148683004
+          },
+          {
+            "gpuMs": 0.00368,
+            "wallMs": 0.008552246101316996
+          },
+          {
+            "gpuMs": 0.00368,
+            "wallMs": 0.007780761719914153
+          },
+          {
+            "gpuMs": 0.00368,
+            "wallMs": 0.007482910150429234
+          }
+        ]
+      },
+      "cuda": {
+        "key": "small-reduce_sum",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.003549140645,
+        "wallMedianMs": 0.003553320312,
+        "directGpuMedianMs": 0.018627204,
+        "directWallMedianMs": 0.01863125,
+        "timings": [
+          {
+            "gpuMs": 0.003574390663,
+            "wallMs": 0.003581982422,
+            "directGpuMs": 0.01863626577,
+            "directWallMs": 0.01864106445
+          },
+          {
+            "gpuMs": 0.003576703137,
+            "wallMs": 0.003581005859,
+            "directGpuMs": 0.01841295324,
+            "directWallMs": 0.01847241211
+          },
+          {
+            "gpuMs": 0.003391749924,
+            "wallMs": 0.003394775391,
+            "directGpuMs": 0.01883826591,
+            "directWallMs": 0.01884189453
+          },
+          {
+            "gpuMs": 0.003387718694,
+            "wallMs": 0.003390673828,
+            "directGpuMs": 0.018627204,
+            "directWallMs": 0.01863125
+          },
+          {
+            "gpuMs": 0.003549140645,
+            "wallMs": 0.003553320312,
+            "directGpuMs": 0.01884410903,
+            "directWallMs": 0.01884868164
+          },
+          {
+            "gpuMs": 0.003556968644,
+            "wallMs": 0.003560644531,
+            "directGpuMs": 0.01837253198,
+            "directWallMs": 0.01837675781
+          },
+          {
+            "gpuMs": 0.003390109399,
+            "wallMs": 0.003393847656,
+            "directGpuMs": 0.01905503124,
+            "directWallMs": 0.01905878906
+          },
+          {
+            "gpuMs": 0.003387890523,
+            "wallMs": 0.003391064453,
+            "directGpuMs": 0.01852195337,
+            "directWallMs": 0.01852495117
+          },
+          {
+            "gpuMs": 0.003588171909,
+            "wallMs": 0.003592089844,
+            "directGpuMs": 0.01831506193,
+            "directWallMs": 0.01837314453
+          }
+        ]
+      },
+      "ratio": 1.0368707155024566
+    },
+    {
+      "key": "small-convolution",
+      "id": "convolution",
+      "scalars": {
+        "n": 262144
+      },
+      "webgpu": {
+        "key": "small-convolution",
+        "id": "convolution",
+        "scalars": {
+          "n": 262144
+        },
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          2048
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "output": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0,
+            "maxRel": 0
+          }
+        },
+        "gpuMedianMs": 0.002048,
+        "wallMedianMs": 0.0030981445306679234,
+        "timings": [
+          {
+            "gpuMs": 0.002048,
+            "wallMs": 0.0038916015619179234
+          },
+          {
+            "gpuMs": 0.002048,
+            "wallMs": 0.0030981445306679234
+          },
+          {
+            "gpuMs": 0.002048,
+            "wallMs": 0.003588867184589617
+          },
+          {
+            "gpuMs": 0.002048,
+            "wallMs": 0.0030786132847424597
+          },
+          {
+            "gpuMs": 0.002048,
+            "wallMs": 0.003107910160906613
+          },
+          {
+            "gpuMs": 0.002048,
+            "wallMs": 0.0030615234427386895
+          },
+          {
+            "gpuMs": 0.002112,
+            "wallMs": 0.0030004882864886895
+          },
+          {
+            "gpuMs": 0.002048,
+            "wallMs": 0.0030200195324141532
+          },
+          {
+            "gpuMs": 0.002048,
+            "wallMs": 0.0030981445452198386
+          }
+        ]
+      },
+      "cuda": {
+        "key": "small-convolution",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.001812828123,
+        "wallMedianMs": 0.001815722656,
+        "directGpuMedianMs": 0.006339828018,
+        "directWallMedianMs": 0.006405322266,
+        "timings": [
+          {
+            "gpuMs": 0.001976359403,
+            "wallMs": 0.001980371094,
+            "directGpuMs": 0.006807984319,
+            "directWallMs": 0.006811425781
+          },
+          {
+            "gpuMs": 0.001811437542,
+            "wallMs": 0.001815234375,
+            "directGpuMs": 0.006339828018,
+            "directWallMs": 0.006405322266
+          },
+          {
+            "gpuMs": 0.001812828123,
+            "wallMs": 0.001815722656,
+            "directGpuMs": 0.006241781171,
+            "directWallMs": 0.006299169922
+          },
+          {
+            "gpuMs": 0.001934921835,
+            "wallMs": 0.001939257813,
+            "directGpuMs": 0.006054312456,
+            "directWallMs": 0.006058056641
+          },
+          {
+            "gpuMs": 0.001789749949,
+            "wallMs": 0.001792773438,
+            "directGpuMs": 0.006207265425,
+            "directWallMs": 0.006267480469
+          },
+          {
+            "gpuMs": 0.001834578114,
+            "wallMs": 0.001837451172,
+            "directGpuMs": 0.006085843779,
+            "directWallMs": 0.006088769531
+          },
+          {
+            "gpuMs": 0.001785625005,
+            "wallMs": 0.001789453125,
+            "directGpuMs": 0.006827859208,
+            "directWallMs": 0.006882861328
+          },
+          {
+            "gpuMs": 0.001876171911,
+            "wallMs": 0.001879052734,
+            "directGpuMs": 0.006894890685,
+            "directWallMs": 0.006897851562
+          },
+          {
+            "gpuMs": 0.00167246873,
+            "wallMs": 0.001675292969,
+            "directGpuMs": 0.006972078234,
+            "directWallMs": 0.006975195312
+          }
+        ]
+      },
+      "ratio": 1.129726516273821
+    },
+    {
+      "key": "small-histogram",
+      "id": "histogram",
+      "scalars": {
+        "n": 262144
+      },
+      "webgpu": {
+        "key": "small-histogram",
+        "id": "histogram",
+        "scalars": {
+          "n": 262144
+        },
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          256
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "bins": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0,
+            "maxRel": 0
+          }
+        },
+        "gpuMedianMs": 0.004096,
+        "wallMedianMs": 0.007104492193320766,
+        "timings": [
+          {
+            "gpuMs": 0.004096,
+            "wallMs": 0.006555175787070766
+          },
+          {
+            "gpuMs": 0.004096,
+            "wallMs": 0.0069482421822613105
+          },
+          {
+            "gpuMs": 0.004096,
+            "wallMs": 0.007604980462929234
+          },
+          {
+            "gpuMs": 0.004096,
+            "wallMs": 0.007104492193320766
+          },
+          {
+            "gpuMs": 0.004096,
+            "wallMs": 0.0074560546927386895
+          },
+          {
+            "gpuMs": 0.004096,
+            "wallMs": 0.007851562506402843
+          },
+          {
+            "gpuMs": 0.004096,
+            "wallMs": 0.006872558587929234
+          },
+          {
+            "gpuMs": 0.004256,
+            "wallMs": 0.006628417962929234
+          },
+          {
+            "gpuMs": 0.004288,
+            "wallMs": 0.007487792972824536
+          }
+        ]
+      },
+      "cuda": {
+        "key": "small-histogram",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.003819062607,
+        "wallMedianMs": 0.003822167969,
+        "directGpuMedianMs": 0.01389850024,
+        "directWallMedianMs": 0.0139019043,
+        "timings": [
+          {
+            "gpuMs": 0.004064843524,
+            "wallMs": 0.004068798828,
+            "directGpuMs": 0.01370785944,
+            "directWallMs": 0.01371137695
+          },
+          {
+            "gpuMs": 0.003819062607,
+            "wallMs": 0.003822167969,
+            "directGpuMs": 0.01412089076,
+            "directWallMs": 0.01412475586
+          },
+          {
+            "gpuMs": 0.003818999976,
+            "wallMs": 0.003821972656,
+            "directGpuMs": 0.01390804723,
+            "directWallMs": 0.01391152344
+          },
+          {
+            "gpuMs": 0.003888453124,
+            "wallMs": 0.003891552734,
+            "directGpuMs": 0.01363385934,
+            "directWallMs": 0.01363691406
+          },
+          {
+            "gpuMs": 0.003971296828,
+            "wallMs": 0.003974804687,
+            "directGpuMs": 0.013308594,
+            "directWallMs": 0.01331318359
+          },
+          {
+            "gpuMs": 0.004024796654,
+            "wallMs": 0.004028222656,
+            "directGpuMs": 0.01394895278,
+            "directWallMs": 0.0139527832
+          },
+          {
+            "gpuMs": 0.003817390651,
+            "wallMs": 0.003820751953,
+            "directGpuMs": 0.01381573454,
+            "directWallMs": 0.01381914063
+          },
+          {
+            "gpuMs": 0.003818124998,
+            "wallMs": 0.003821044922,
+            "directGpuMs": 0.01394868735,
+            "directWallMs": 0.01395219727
+          },
+          {
+            "gpuMs": 0.003818796948,
+            "wallMs": 0.003821777344,
+            "directGpuMs": 0.01389850024,
+            "directWallMs": 0.0139019043
+          }
+        ]
+      },
+      "ratio": 1.0725144941306797
+    },
+    {
+      "key": "small-transpose",
+      "id": "transpose",
+      "scalars": {
+        "width": 512,
+        "height": 512
+      },
+      "webgpu": {
+        "key": "small-transpose",
+        "id": "transpose",
+        "scalars": {
+          "width": 512,
+          "height": 512
+        },
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "groups": [
+          16,
+          16
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "output": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0,
+            "maxRel": 0
+          }
+        },
+        "gpuMedianMs": 0.00176,
+        "wallMedianMs": 0.0030664062505820766,
+        "timings": [
+          {
+            "gpuMs": 0.00176,
+            "wallMs": 0.0029199218697613105
+          },
+          {
+            "gpuMs": 0.00192,
+            "wallMs": 0.002722167977481149
+          },
+          {
+            "gpuMs": 0.001824,
+            "wallMs": 0.004074707030667923
+          },
+          {
+            "gpuMs": 0.001952,
+            "wallMs": 0.0028369140636641532
+          },
+          {
+            "gpuMs": 0.001728,
+            "wallMs": 0.0035937500069849193
+          },
+          {
+            "gpuMs": 0.001856,
+            "wallMs": 0.003928222649847157
+          },
+          {
+            "gpuMs": 0.00176,
+            "wallMs": 0.0030664062505820766
+          },
+          {
+            "gpuMs": 0.00176,
+            "wallMs": 0.0031054687569849193
+          },
+          {
+            "gpuMs": 0.00176,
+            "wallMs": 0.0026025390543509275
+          }
+        ]
+      },
+      "cuda": {
+        "key": "small-transpose",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.001207937486,
+        "wallMedianMs": 0.001210888672,
+        "directGpuMedianMs": 0.00673412485,
+        "directWallMedianMs": 0.006737695312,
+        "timings": [
+          {
+            "gpuMs": 0.001380703179,
+            "wallMs": 0.001384814453,
+            "directGpuMs": 0.006940734573,
+            "directWallMs": 0.006944335937
+          },
+          {
+            "gpuMs": 0.00121067185,
+            "wallMs": 0.001213916016,
+            "directGpuMs": 0.00673412485,
+            "directWallMs": 0.006737695312
+          },
+          {
+            "gpuMs": 0.001210937509,
+            "wallMs": 0.001213916016,
+            "directGpuMs": 0.006727218628,
+            "directWallMs": 0.006730712891
+          },
+          {
+            "gpuMs": 0.001207937486,
+            "wallMs": 0.001210888672,
+            "directGpuMs": 0.006733125076,
+            "directWallMs": 0.006736572266
+          },
+          {
+            "gpuMs": 0.001206937479,
+            "wallMs": 0.001209960938,
+            "directGpuMs": 0.006495609414,
+            "directWallMs": 0.006498974609
+          },
+          {
+            "gpuMs": 0.001207718742,
+            "wallMs": 0.001210644531,
+            "directGpuMs": 0.006499202922,
+            "directWallMs": 0.006502050781
+          },
+          {
+            "gpuMs": 0.001207578112,
+            "wallMs": 0.001210546875,
+            "directGpuMs": 0.006990422029,
+            "directWallMs": 0.006993310547
+          },
+          {
+            "gpuMs": 0.001206703135,
+            "wallMs": 0.001209375,
+            "directGpuMs": 0.007023390848,
+            "directWallMs": 0.007026464844
+          },
+          {
+            "gpuMs": 0.001208031201,
+            "wallMs": 0.0012109375,
+            "directGpuMs": 0.007060062606,
+            "directWallMs": 0.007064453125
+          }
+        ]
+      },
+      "ratio": 1.457029043637114
+    },
+    {
+      "key": "small-particles",
+      "id": "particles",
+      "scalars": {
+        "n": 65536,
+        "dt": 0.01600000075995922,
+        "time": 2.5,
+        "attraction": 1
+      },
+      "webgpu": {
+        "key": "small-particles",
+        "id": "particles",
+        "scalars": {
+          "n": 65536,
+          "dt": 0.01600000075995922,
+          "time": 2.5,
+          "attraction": 1
+        },
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          512
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "position": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 1.1920928955078125e-7,
+            "maxRel": 0.000014451222672921183
+          },
+          "velocity": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 1.1920928955078125e-7,
+            "maxRel": 0.00008962848034591471
+          }
+        },
+        "gpuMedianMs": 0.00144,
+        "wallMedianMs": 0.0033105468755820766,
+        "timings": [
+          {
+            "gpuMs": 0.001504,
+            "wallMs": 0.004060058592585847
+          },
+          {
+            "gpuMs": 0.00144,
+            "wallMs": 0.0030249023548094556
+          },
+          {
+            "gpuMs": 0.001536,
+            "wallMs": 0.003361816401593387
+          },
+          {
+            "gpuMs": 0.00144,
+            "wallMs": 0.0033349609293509275
+          },
+          {
+            "gpuMs": 0.00144,
+            "wallMs": 0.0031103515648283064
+          },
+          {
+            "gpuMs": 0.001408,
+            "wallMs": 0.0033105468755820766
+          },
+          {
+            "gpuMs": 0.00144,
+            "wallMs": 0.0031225585989886895
+          },
+          {
+            "gpuMs": 0.00144,
+            "wallMs": 0.0037841796875
+          },
+          {
+            "gpuMs": 0.00144,
+            "wallMs": 0.0023828124976716936
+          }
+        ]
+      },
+      "cuda": {
+        "key": "small-particles",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.001740109408,
+        "wallMedianMs": 0.001743164062,
+        "directGpuMedianMs": 0.006741437595,
+        "directWallMedianMs": 0.006744287109,
+        "timings": [
+          {
+            "gpuMs": 0.001816859352,
+            "wallMs": 0.001862792969,
+            "directGpuMs": 0.007195843849,
+            "directWallMs": 0.007199658203
+          },
+          {
+            "gpuMs": 0.001740078093,
+            "wallMs": 0.001743164062,
+            "directGpuMs": 0.007450171746,
+            "directWallMs": 0.007453662109
+          },
+          {
+            "gpuMs": 0.001740109408,
+            "wallMs": 0.001743115234,
+            "directGpuMs": 0.006813750137,
+            "directWallMs": 0.006817236328
+          },
+          {
+            "gpuMs": 0.001739515574,
+            "wallMs": 0.001742480469,
+            "directGpuMs": 0.007075515576,
+            "directWallMs": 0.007078955078
+          },
+          {
+            "gpuMs": 0.001740687527,
+            "wallMs": 0.001743701172,
+            "directGpuMs": 0.006648578215,
+            "directWallMs": 0.006652148437
+          },
+          {
+            "gpuMs": 0.001741890679,
+            "wallMs": 0.001744873047,
+            "directGpuMs": 0.006608500145,
+            "directWallMs": 0.006611279297
+          },
+          {
+            "gpuMs": 0.001739484374,
+            "wallMs": 0.001742382813,
+            "directGpuMs": 0.006660671905,
+            "directWallMs": 0.006664257813
+          },
+          {
+            "gpuMs": 0.001741953078,
+            "wallMs": 0.001744873047,
+            "directGpuMs": 0.006681062281,
+            "directWallMs": 0.006684130859
+          },
+          {
+            "gpuMs": 0.001739906264,
+            "wallMs": 0.001742871094,
+            "directGpuMs": 0.006741437595,
+            "directWallMs": 0.006744287109
+          }
+        ]
+      },
+      "ratio": 0.827534173069651
+    },
+    {
+      "key": "large-saxpy",
+      "id": "saxpy",
+      "scalars": {
+        "a": 0.125,
+        "n": 4194304
+      },
+      "webgpu": {
+        "key": "large-saxpy",
+        "id": "saxpy",
+        "scalars": {
+          "a": 0.125,
+          "n": 4194304
+        },
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          32768
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "y": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0,
+            "maxRel": 0
+          }
+        },
+        "gpuMedianMs": 0.016256,
+        "wallMedianMs": 0.017514648439828306,
+        "timings": [
+          {
+            "gpuMs": 0.016288,
+            "wallMs": 0.017548828123835847
+          },
+          {
+            "gpuMs": 0.016256,
+            "wallMs": 0.01757568358152639
+          },
+          {
+            "gpuMs": 0.016256,
+            "wallMs": 0.017514648439828306
+          },
+          {
+            "gpuMs": 0.01616,
+            "wallMs": 0.017519531247671694
+          },
+          {
+            "gpuMs": 0.016256,
+            "wallMs": 0.017458496091421694
+          },
+          {
+            "gpuMs": 0.01616,
+            "wallMs": 0.017082519523683004
+          },
+          {
+            "gpuMs": 0.016256,
+            "wallMs": 0.017592773438082077
+          },
+          {
+            "gpuMs": 0.01616,
+            "wallMs": 0.017478027337347157
+          },
+          {
+            "gpuMs": 0.016224,
+            "wallMs": 0.01750732421351131
+          }
+        ]
+      },
+      "cuda": {
+        "key": "large-saxpy",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.01615923457,
+        "wallMedianMs": 0.01619003906,
+        "directGpuMedianMs": 0.01887839101,
+        "directWallMedianMs": 0.01889189453,
+        "timings": [
+          {
+            "gpuMs": 0.01607945375,
+            "wallMs": 0.0161222168,
+            "directGpuMs": 0.01882496849,
+            "directWallMs": 0.01882988281
+          },
+          {
+            "gpuMs": 0.01615923457,
+            "wallMs": 0.01616376953,
+            "directGpuMs": 0.01887839101,
+            "directWallMs": 0.01888320313
+          },
+          {
+            "gpuMs": 0.0161049217,
+            "wallMs": 0.01614575195,
+            "directGpuMs": 0.01888520271,
+            "directWallMs": 0.0189440918
+          },
+          {
+            "gpuMs": 0.01620045304,
+            "wallMs": 0.01620537109,
+            "directGpuMs": 0.01895223372,
+            "directWallMs": 0.01895722656
+          },
+          {
+            "gpuMs": 0.0161400307,
+            "wallMs": 0.01619003906,
+            "directGpuMs": 0.01883537509,
+            "directWallMs": 0.01889399414
+          },
+          {
+            "gpuMs": 0.01619631238,
+            "wallMs": 0.0162003418,
+            "directGpuMs": 0.01885263994,
+            "directWallMs": 0.01885688477
+          },
+          {
+            "gpuMs": 0.01632850058,
+            "wallMs": 0.01641547852,
+            "directGpuMs": 0.01891811006,
+            "directWallMs": 0.01892285156
+          },
+          {
+            "gpuMs": 0.01620539092,
+            "wallMs": 0.01620961914,
+            "directGpuMs": 0.01888771914,
+            "directWallMs": 0.01889189453
+          },
+          {
+            "gpuMs": 0.01605537534,
+            "wallMs": 0.01613193359,
+            "directGpuMs": 0.01881396957,
+            "directWallMs": 0.01886923828
+          }
+        ]
+      },
+      "ratio": 1.0059882434146756
+    },
+    {
+      "key": "large-saxpy_vec4",
+      "id": "saxpy_vec4",
+      "scalars": {
+        "a": 0.125,
+        "n4": 1048576
+      },
+      "webgpu": {
+        "key": "large-saxpy_vec4",
+        "id": "saxpy_vec4",
+        "scalars": {
+          "a": 0.125,
+          "n4": 1048576
+        },
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          8192
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "y": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0,
+            "maxRel": 0
+          }
+        },
+        "gpuMedianMs": 0.010016,
+        "wallMedianMs": 0.011249999995925464,
+        "timings": [
+          {
+            "gpuMs": 0.009984,
+            "wallMs": 0.011147460929350927
+          },
+          {
+            "gpuMs": 0.009952,
+            "wallMs": 0.011249999995925464
+          },
+          {
+            "gpuMs": 0.010016,
+            "wallMs": 0.011621093755820766
+          },
+          {
+            "gpuMs": 0.010048,
+            "wallMs": 0.012238769530085847
+          },
+          {
+            "gpuMs": 0.010016,
+            "wallMs": 0.01094970702251885
+          },
+          {
+            "gpuMs": 0.010016,
+            "wallMs": 0.011640624987194315
+          },
+          {
+            "gpuMs": 0.010048,
+            "wallMs": 0.01173583984200377
+          },
+          {
+            "gpuMs": 0.010016,
+            "wallMs": 0.011164550771354698
+          },
+          {
+            "gpuMs": 0.009984,
+            "wallMs": 0.011137695313664153
+          }
+        ]
+      },
+      "cuda": {
+        "key": "large-saxpy_vec4",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.01007456239,
+        "wallMedianMs": 0.01007963867,
+        "directGpuMedianMs": 0.01267342176,
+        "directWallMedianMs": 0.01270795898,
+        "timings": [
+          {
+            "gpuMs": 0.01031648461,
+            "wallMs": 0.01032163086,
+            "directGpuMs": 0.01267342176,
+            "directWallMs": 0.01273310547
+          },
+          {
+            "gpuMs": 0.01023131236,
+            "wallMs": 0.01023681641,
+            "directGpuMs": 0.01261187531,
+            "directWallMs": 0.01266845703
+          },
+          {
+            "gpuMs": 0.0101924222,
+            "wallMs": 0.0101972168,
+            "directGpuMs": 0.01258434355,
+            "directWallMs": 0.01264160156
+          },
+          {
+            "gpuMs": 0.01001531258,
+            "wallMs": 0.01001962891,
+            "directGpuMs": 0.01247334387,
+            "directWallMs": 0.01253022461
+          },
+          {
+            "gpuMs": 0.01003831252,
+            "wallMs": 0.01004287109,
+            "directGpuMs": 0.01254721917,
+            "directWallMs": 0.01260512695
+          },
+          {
+            "gpuMs": 0.009966859594,
+            "wallMs": 0.009971630859,
+            "directGpuMs": 0.01270365622,
+            "directWallMs": 0.01270795898
+          },
+          {
+            "gpuMs": 0.01007456239,
+            "wallMs": 0.01007963867,
+            "directGpuMs": 0.01271198411,
+            "directWallMs": 0.01271689453
+          },
+          {
+            "gpuMs": 0.01001378149,
+            "wallMs": 0.01001733398,
+            "directGpuMs": 0.01278404705,
+            "directWallMs": 0.01278764648
+          },
+          {
+            "gpuMs": 0.01010475028,
+            "wallMs": 0.01010859375,
+            "directGpuMs": 0.01288948394,
+            "directWallMs": 0.01289335937
+          }
+        ]
+      },
+      "ratio": 0.9941871033467292
+    },
+    {
+      "key": "large-matmul_naive",
+      "id": "matmul_naive",
+      "scalars": {
+        "M": 512,
+        "N": 512,
+        "K": 512
+      },
+      "webgpu": {
+        "key": "large-matmul_naive",
+        "id": "matmul_naive",
+        "scalars": {
+          "M": 512,
+          "N": 512,
+          "K": 512
+        },
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          64,
+          64
+        ],
+        "iterations": 512,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "C": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0.0000324249267578125,
+            "maxRel": 0.0155089697832781
+          }
+        },
+        "gpuMedianMs": 0.231424,
+        "wallMedianMs": 0.23583007813431323,
+        "timings": [
+          {
+            "gpuMs": 0.231552,
+            "wallMs": 0.23476562497671694
+          },
+          {
+            "gpuMs": 0.231552,
+            "wallMs": 0.23629882815293968
+          },
+          {
+            "gpuMs": 0.23168,
+            "wallMs": 0.2344921875046566
+          },
+          {
+            "gpuMs": 0.230912,
+            "wallMs": 0.23434570309473202
+          },
+          {
+            "gpuMs": 0.230528,
+            "wallMs": 0.23232421872671694
+          },
+          {
+            "gpuMs": 0.230912,
+            "wallMs": 0.23583007813431323
+          },
+          {
+            "gpuMs": 0.23104,
+            "wallMs": 0.236572265625
+          },
+          {
+            "gpuMs": 0.232064,
+            "wallMs": 0.23811523435870185
+          },
+          {
+            "gpuMs": 0.231424,
+            "wallMs": 0.238037109375
+          }
+        ]
+      },
+      "cuda": {
+        "key": "large-matmul_naive",
+        "verified": true,
+        "iterations": 512,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.1071816906,
+        "wallMedianMs": 0.1071992188,
+        "directGpuMedianMs": 0.1096369997,
+        "directWallMedianMs": 0.1097996094,
+        "timings": [
+          {
+            "gpuMs": 0.107058309,
+            "wallMs": 0.1070792969,
+            "directGpuMs": 0.1095702499,
+            "directWallMs": 0.1097996094
+          },
+          {
+            "gpuMs": 0.1070136279,
+            "wallMs": 0.1070326172,
+            "directGpuMs": 0.1096369997,
+            "directWallMs": 0.1096566406
+          },
+          {
+            "gpuMs": 0.1069503725,
+            "wallMs": 0.1071125,
+            "directGpuMs": 0.1093476266,
+            "directWallMs": 0.1093636719
+          },
+          {
+            "gpuMs": 0.1077056229,
+            "wallMs": 0.1077226563,
+            "directGpuMs": 0.1086299345,
+            "directWallMs": 0.1086609375
+          },
+          {
+            "gpuMs": 0.1071008742,
+            "wallMs": 0.1071205078,
+            "directGpuMs": 0.1099029407,
+            "directWallMs": 0.1099222656
+          },
+          {
+            "gpuMs": 0.1071816906,
+            "wallMs": 0.1071992188,
+            "directGpuMs": 0.1088791862,
+            "directWallMs": 0.1088943359
+          },
+          {
+            "gpuMs": 0.1079326868,
+            "wallMs": 0.1079498047,
+            "directGpuMs": 0.1099477485,
+            "directWallMs": 0.1099640625
+          },
+          {
+            "gpuMs": 0.1085341871,
+            "wallMs": 0.1085494141,
+            "directGpuMs": 0.1110989973,
+            "directWallMs": 0.1111255859
+          },
+          {
+            "gpuMs": 0.1078167483,
+            "wallMs": 0.1078347656,
+            "directGpuMs": 0.1106809974,
+            "directWallMs": 0.1106990234
+          }
+        ]
+      },
+      "ratio": 2.1591747499455844
+    },
+    {
+      "key": "large-matmul_tiled",
+      "id": "matmul_tiled",
+      "scalars": {
+        "M": 512,
+        "N": 512,
+        "K": 512
+      },
+      "webgpu": {
+        "key": "large-matmul_tiled",
+        "id": "matmul_tiled",
+        "scalars": {
+          "M": 512,
+          "N": 512,
+          "K": 512
+        },
+        "block": [
+          16,
+          16,
+          1
+        ],
+        "groups": [
+          32,
+          32
+        ],
+        "iterations": 512,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "C": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0.0000324249267578125,
+            "maxRel": 0.0155089697832781
+          }
+        },
+        "gpuMedianMs": 0.064256,
+        "wallMedianMs": 0.06685546872904524,
+        "timings": [
+          {
+            "gpuMs": 0.064,
+            "wallMs": 0.06685546872904524
+          },
+          {
+            "gpuMs": 0.063616,
+            "wallMs": 0.06832031247904524
+          },
+          {
+            "gpuMs": 0.06464,
+            "wallMs": 0.06649414059938863
+          },
+          {
+            "gpuMs": 0.064768,
+            "wallMs": 0.06823242187965661
+          },
+          {
+            "gpuMs": 0.064256,
+            "wallMs": 0.0667089843773283
+          },
+          {
+            "gpuMs": 0.064384,
+            "wallMs": 0.06591796875
+          },
+          {
+            "gpuMs": 0.06464,
+            "wallMs": 0.06981445313431323
+          },
+          {
+            "gpuMs": 0.064256,
+            "wallMs": 0.06580078124534339
+          },
+          {
+            "gpuMs": 0.064128,
+            "wallMs": 0.06917968747438863
+          }
+        ]
+      },
+      "cuda": {
+        "key": "large-matmul_tiled",
+        "verified": true,
+        "iterations": 512,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.06308462471,
+        "wallMedianMs": 0.06310820312,
+        "directGpuMedianMs": 0.06520231068,
+        "directWallMedianMs": 0.06530332031,
+        "timings": [
+          {
+            "gpuMs": 0.06309762597,
+            "wallMs": 0.06311582031,
+            "directGpuMs": 0.06520231068,
+            "directWallMs": 0.06522050781
+          },
+          {
+            "gpuMs": 0.06308462471,
+            "wallMs": 0.06310253906,
+            "directGpuMs": 0.06489868462,
+            "directWallMs": 0.06491640625
+          },
+          {
+            "gpuMs": 0.06298668683,
+            "wallMs": 0.06315800781,
+            "directGpuMs": 0.06505431235,
+            "directWallMs": 0.06527578125
+          },
+          {
+            "gpuMs": 0.06333706528,
+            "wallMs": 0.06351132813,
+            "directGpuMs": 0.06511956453,
+            "directWallMs": 0.06534238281
+          },
+          {
+            "gpuMs": 0.06221231073,
+            "wallMs": 0.06238398437,
+            "directGpuMs": 0.06609806418,
+            "directWallMs": 0.06611894531
+          },
+          {
+            "gpuMs": 0.06231449917,
+            "wallMs": 0.06247539063,
+            "directGpuMs": 0.06614762545,
+            "directWallMs": 0.06616621094
+          },
+          {
+            "gpuMs": 0.06225531176,
+            "wallMs": 0.06227558594,
+            "directGpuMs": 0.06515468657,
+            "directWallMs": 0.06517363281
+          },
+          {
+            "gpuMs": 0.06309218705,
+            "wallMs": 0.06310820312,
+            "directGpuMs": 0.06528750062,
+            "directWallMs": 0.06530332031
+          },
+          {
+            "gpuMs": 0.06323968619,
+            "wallMs": 0.06325527344,
+            "directGpuMs": 0.06535500288,
+            "directWallMs": 0.06537207031
+          }
+        ]
+      },
+      "ratio": 1.0185683166918216
+    },
+    {
+      "key": "large-matmul_register",
+      "id": "matmul_register",
+      "scalars": {
+        "M": 512,
+        "N": 512,
+        "K": 512
+      },
+      "webgpu": {
+        "key": "large-matmul_register",
+        "id": "matmul_register",
+        "scalars": {
+          "M": 512,
+          "N": 512,
+          "K": 512
+        },
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          32,
+          32
+        ],
+        "iterations": 512,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "C": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0.0000324249267578125,
+            "maxRel": 0.0155089697832781
+          }
+        },
+        "gpuMedianMs": 0.046208,
+        "wallMedianMs": 0.04900390625698492,
+        "timings": [
+          {
+            "gpuMs": 0.047488,
+            "wallMs": 0.051025390625
+          },
+          {
+            "gpuMs": 0.045952,
+            "wallMs": 0.04889648436801508
+          },
+          {
+            "gpuMs": 0.045952,
+            "wallMs": 0.04893554688896984
+          },
+          {
+            "gpuMs": 0.046464,
+            "wallMs": 0.050751953094732016
+          },
+          {
+            "gpuMs": 0.04608,
+            "wallMs": 0.04900390625698492
+          },
+          {
+            "gpuMs": 0.046976,
+            "wallMs": 0.05038085940759629
+          },
+          {
+            "gpuMs": 0.046336,
+            "wallMs": 0.048818359384313226
+          },
+          {
+            "gpuMs": 0.046208,
+            "wallMs": 0.04896484379423782
+          },
+          {
+            "gpuMs": 0.04608,
+            "wallMs": 0.05017578124534339
+          }
+        ]
+      },
+      "cuda": {
+        "key": "large-matmul_register",
+        "verified": true,
+        "iterations": 512,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.04308368638,
+        "wallMedianMs": 0.04318808594,
+        "directGpuMedianMs": 0.04582349956,
+        "directWallMedianMs": 0.04589785156,
+        "timings": [
+          {
+            "gpuMs": 0.0441048108,
+            "wallMs": 0.04412304688,
+            "directGpuMs": 0.04549499974,
+            "directWallMs": 0.0455171875
+          },
+          {
+            "gpuMs": 0.04363143817,
+            "wallMs": 0.04365078125,
+            "directGpuMs": 0.04535562545,
+            "directWallMs": 0.04568632813
+          },
+          {
+            "gpuMs": 0.04297662526,
+            "wallMs": 0.04299355469,
+            "directGpuMs": 0.04672574997,
+            "directWallMs": 0.046746875
+          },
+          {
+            "gpuMs": 0.04308368638,
+            "wallMs": 0.04310117187,
+            "directGpuMs": 0.04606231302,
+            "directWallMs": 0.04607949219
+          },
+          {
+            "gpuMs": 0.04301756248,
+            "wallMs": 0.04318808594,
+            "directGpuMs": 0.04575987533,
+            "directWallMs": 0.04577832031
+          },
+          {
+            "gpuMs": 0.04400868714,
+            "wallMs": 0.044028125,
+            "directGpuMs": 0.04587968811,
+            "directWallMs": 0.04589785156
+          },
+          {
+            "gpuMs": 0.04303700104,
+            "wallMs": 0.04305527344,
+            "directGpuMs": 0.04582349956,
+            "directWallMs": 0.04636054687
+          },
+          {
+            "gpuMs": 0.04317462444,
+            "wallMs": 0.04318867188,
+            "directGpuMs": 0.04624768719,
+            "directWallMs": 0.04626503906
+          },
+          {
+            "gpuMs": 0.04292468727,
+            "wallMs": 0.04309257813,
+            "directGpuMs": 0.04570674896,
+            "directWallMs": 0.045725
+          }
+        ]
+      },
+      "ratio": 1.072517323435219
+    },
+    {
+      "key": "large-reduce_sum",
+      "id": "reduce_sum",
+      "scalars": {
+        "n": 4194304
+      },
+      "webgpu": {
+        "key": "large-reduce_sum",
+        "id": "reduce_sum",
+        "scalars": {
+          "n": 4194304
+        },
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          16384
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "output": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0,
+            "maxRel": 0
+          }
+        },
+        "gpuMedianMs": 0.020608,
+        "wallMedianMs": 0.025571289064828306,
+        "timings": [
+          {
+            "gpuMs": 0.020512,
+            "wallMs": 0.025595703118597157
+          },
+          {
+            "gpuMs": 0.020704,
+            "wallMs": 0.026352539061917923
+          },
+          {
+            "gpuMs": 0.020608,
+            "wallMs": 0.025405273438082077
+          },
+          {
+            "gpuMs": 0.02048,
+            "wallMs": 0.025383300773683004
+          },
+          {
+            "gpuMs": 0.020768,
+            "wallMs": 0.025883789072395302
+          },
+          {
+            "gpuMs": 0.02048,
+            "wallMs": 0.025571289064828306
+          },
+          {
+            "gpuMs": 0.02064,
+            "wallMs": 0.025957031262805685
+          },
+          {
+            "gpuMs": 0.020672,
+            "wallMs": 0.024934082030085847
+          },
+          {
+            "gpuMs": 0.020512,
+            "wallMs": 0.02541748047224246
+          }
+        ]
+      },
+      "cuda": {
+        "key": "large-reduce_sum",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.01871031336,
+        "wallMedianMs": 0.01871420898,
+        "directGpuMedianMs": 0.02536242269,
+        "directWallMedianMs": 0.02536655273,
+        "timings": [
+          {
+            "gpuMs": 0.01864484325,
+            "wallMs": 0.01868706055,
+            "directGpuMs": 0.02519448474,
+            "directWallMs": 0.02520068359
+          },
+          {
+            "gpuMs": 0.01865684427,
+            "wallMs": 0.01866132813,
+            "directGpuMs": 0.02348562516,
+            "directWallMs": 0.02349023437
+          },
+          {
+            "gpuMs": 0.01879790612,
+            "wallMs": 0.01880268555,
+            "directGpuMs": 0.02552993782,
+            "directWallMs": 0.02558779297
+          },
+          {
+            "gpuMs": 0.01866976544,
+            "wallMs": 0.0186746582,
+            "directGpuMs": 0.02522610873,
+            "directWallMs": 0.02523076172
+          },
+          {
+            "gpuMs": 0.01875364035,
+            "wallMs": 0.01875830078,
+            "directGpuMs": 0.02480393834,
+            "directWallMs": 0.02480878906
+          },
+          {
+            "gpuMs": 0.01871031336,
+            "wallMs": 0.01871420898,
+            "directGpuMs": 0.02536242269,
+            "directWallMs": 0.02536655273
+          },
+          {
+            "gpuMs": 0.01882526651,
+            "wallMs": 0.01882988281,
+            "directGpuMs": 0.02647646889,
+            "directWallMs": 0.026534375
+          },
+          {
+            "gpuMs": 0.01867318712,
+            "wallMs": 0.01867841797,
+            "directGpuMs": 0.02561918832,
+            "directWallMs": 0.02562387695
+          },
+          {
+            "gpuMs": 0.01886068657,
+            "wallMs": 0.01886777344,
+            "directGpuMs": 0.02590454742,
+            "directWallMs": 0.025909375
+          }
+        ]
+      },
+      "ratio": 1.1014246316182488
+    },
+    {
+      "key": "large-convolution",
+      "id": "convolution",
+      "scalars": {
+        "n": 4194304
+      },
+      "webgpu": {
+        "key": "large-convolution",
+        "id": "convolution",
+        "scalars": {
+          "n": 4194304
+        },
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          32768
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "output": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0,
+            "maxRel": 0
+          }
+        },
+        "gpuMedianMs": 0.021088,
+        "wallMedianMs": 0.02223388671700377,
+        "timings": [
+          {
+            "gpuMs": 0.021088,
+            "wallMs": 0.022175292964675464
+          },
+          {
+            "gpuMs": 0.021088,
+            "wallMs": 0.022988281256402843
+          },
+          {
+            "gpuMs": 0.020896,
+            "wallMs": 0.02223388671700377
+          },
+          {
+            "gpuMs": 0.021184,
+            "wallMs": 0.022192382806679234
+          },
+          {
+            "gpuMs": 0.020992,
+            "wallMs": 0.021896972655667923
+          },
+          {
+            "gpuMs": 0.02112,
+            "wallMs": 0.022863769525429234
+          },
+          {
+            "gpuMs": 0.021248,
+            "wallMs": 0.02239257813198492
+          },
+          {
+            "gpuMs": 0.02096,
+            "wallMs": 0.02220947266323492
+          },
+          {
+            "gpuMs": 0.02112,
+            "wallMs": 0.022355957044055685
+          }
+        ]
+      },
+      "cuda": {
+        "key": "large-convolution",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.01638682745,
+        "wallMedianMs": 0.01639956055,
+        "directGpuMedianMs": 0.01899228059,
+        "directWallMedianMs": 0.0189965332,
+        "timings": [
+          {
+            "gpuMs": 0.0165521875,
+            "wallMs": 0.01655795898,
+            "directGpuMs": 0.01888399944,
+            "directWallMs": 0.01888876953
+          },
+          {
+            "gpuMs": 0.01638682745,
+            "wallMs": 0.01639047852,
+            "directGpuMs": 0.01908179745,
+            "directWallMs": 0.01908598633
+          },
+          {
+            "gpuMs": 0.01634482853,
+            "wallMs": 0.01635058594,
+            "directGpuMs": 0.01884492114,
+            "directWallMs": 0.01884990234
+          },
+          {
+            "gpuMs": 0.01638296805,
+            "wallMs": 0.01638735352,
+            "directGpuMs": 0.0191539228,
+            "directWallMs": 0.01915888672
+          },
+          {
+            "gpuMs": 0.01639353111,
+            "wallMs": 0.01639956055,
+            "directGpuMs": 0.01891103201,
+            "directWallMs": 0.01891577148
+          },
+          {
+            "gpuMs": 0.01634432748,
+            "wallMs": 0.01634838867,
+            "directGpuMs": 0.01904370263,
+            "directWallMs": 0.01904819336
+          },
+          {
+            "gpuMs": 0.01638253033,
+            "wallMs": 0.01642607422,
+            "directGpuMs": 0.01888701506,
+            "directWallMs": 0.01889179687
+          },
+          {
+            "gpuMs": 0.01648774929,
+            "wallMs": 0.01649165039,
+            "directGpuMs": 0.01909934357,
+            "directWallMs": 0.01910375977
+          },
+          {
+            "gpuMs": 0.01644218713,
+            "wallMs": 0.0164465332,
+            "directGpuMs": 0.01899228059,
+            "directWallMs": 0.0189965332
+          }
+        ]
+      },
+      "ratio": 1.286887291902253
+    },
+    {
+      "key": "large-histogram",
+      "id": "histogram",
+      "scalars": {
+        "n": 4194304
+      },
+      "webgpu": {
+        "key": "large-histogram",
+        "id": "histogram",
+        "scalars": {
+          "n": 4194304
+        },
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          256
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "bins": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0,
+            "maxRel": 0
+          }
+        },
+        "gpuMedianMs": 0.024704,
+        "wallMedianMs": 0.02785156251047738,
+        "timings": [
+          {
+            "gpuMs": 0.024992,
+            "wallMs": 0.027839355476316996
+          },
+          {
+            "gpuMs": 0.024768,
+            "wallMs": 0.028872070310171694
+          },
+          {
+            "gpuMs": 0.024704,
+            "wallMs": 0.028374023429933004
+          },
+          {
+            "gpuMs": 0.02464,
+            "wallMs": 0.028105468751164153
+          },
+          {
+            "gpuMs": 0.024704,
+            "wallMs": 0.028332519519608468
+          },
+          {
+            "gpuMs": 0.0248,
+            "wallMs": 0.02785156251047738
+          },
+          {
+            "gpuMs": 0.024736,
+            "wallMs": 0.02739501952601131
+          },
+          {
+            "gpuMs": 0.024672,
+            "wallMs": 0.027355957034160383
+          },
+          {
+            "gpuMs": 0.024704,
+            "wallMs": 0.027785644531832077
+          }
+        ]
+      },
+      "cuda": {
+        "key": "large-histogram",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.01986296847,
+        "wallMedianMs": 0.01986689453,
+        "directGpuMedianMs": 0.02335803211,
+        "directWallMedianMs": 0.0233628418,
+        "timings": [
+          {
+            "gpuMs": 0.01973018795,
+            "wallMs": 0.01973608398,
+            "directGpuMs": 0.02417176589,
+            "directWallMs": 0.02417641602
+          },
+          {
+            "gpuMs": 0.01986296847,
+            "wallMs": 0.01986689453,
+            "directGpuMs": 0.0231561251,
+            "directWallMs": 0.0231605957
+          },
+          {
+            "gpuMs": 0.01989745349,
+            "wallMs": 0.01990170898,
+            "directGpuMs": 0.02450182848,
+            "directWallMs": 0.02450629883
+          },
+          {
+            "gpuMs": 0.01985967159,
+            "wallMs": 0.01986416016,
+            "directGpuMs": 0.02324009314,
+            "directWallMs": 0.02324462891
+          },
+          {
+            "gpuMs": 0.01990901493,
+            "wallMs": 0.01991391602,
+            "directGpuMs": 0.02504923381,
+            "directWallMs": 0.02505385742
+          },
+          {
+            "gpuMs": 0.01975598373,
+            "wallMs": 0.01976000977,
+            "directGpuMs": 0.02328406274,
+            "directWallMs": 0.02328818359
+          },
+          {
+            "gpuMs": 0.01986385882,
+            "wallMs": 0.01986826172,
+            "directGpuMs": 0.02472393773,
+            "directWallMs": 0.0247284668
+          },
+          {
+            "gpuMs": 0.01975418814,
+            "wallMs": 0.01975805664,
+            "directGpuMs": 0.02318171784,
+            "directWallMs": 0.02318588867
+          },
+          {
+            "gpuMs": 0.01994650066,
+            "wallMs": 0.01995048828,
+            "directGpuMs": 0.02335803211,
+            "directWallMs": 0.0233628418
+          }
+        ]
+      },
+      "ratio": 1.2437214526777125
+    },
+    {
+      "key": "large-transpose",
+      "id": "transpose",
+      "scalars": {
+        "width": 2048,
+        "height": 2048
+      },
+      "webgpu": {
+        "key": "large-transpose",
+        "id": "transpose",
+        "scalars": {
+          "width": 2048,
+          "height": 2048
+        },
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "groups": [
+          64,
+          64
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "output": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 0,
+            "maxRel": 0
+          }
+        },
+        "gpuMedianMs": 0.013408,
+        "wallMedianMs": 0.01504150390974246,
+        "timings": [
+          {
+            "gpuMs": 0.013312,
+            "wallMs": 0.014355468752910383
+          },
+          {
+            "gpuMs": 0.013408,
+            "wallMs": 0.01469970702601131
+          },
+          {
+            "gpuMs": 0.013344,
+            "wallMs": 0.01518798827601131
+          },
+          {
+            "gpuMs": 0.013504,
+            "wallMs": 0.015036621101899073
+          },
+          {
+            "gpuMs": 0.013568,
+            "wallMs": 0.01569580078648869
+          },
+          {
+            "gpuMs": 0.013536,
+            "wallMs": 0.015849609379074536
+          },
+          {
+            "gpuMs": 0.013408,
+            "wallMs": 0.015534667967585847
+          },
+          {
+            "gpuMs": 0.0136,
+            "wallMs": 0.014619140623835847
+          },
+          {
+            "gpuMs": 0.013344,
+            "wallMs": 0.01504150390974246
+          }
+        ]
+      },
+      "cuda": {
+        "key": "large-transpose",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.009157343768,
+        "wallMedianMs": 0.009173876953,
+        "directGpuMedianMs": 0.01115904655,
+        "directWallMedianMs": 0.01116298828,
+        "timings": [
+          {
+            "gpuMs": 0.009198062122,
+            "wallMs": 0.009203076172,
+            "directGpuMs": 0.01090398431,
+            "directWallMs": 0.0109090332
+          },
+          {
+            "gpuMs": 0.0090964064,
+            "wallMs": 0.009101708984,
+            "directGpuMs": 0.01072853152,
+            "directWallMs": 0.01073330078
+          },
+          {
+            "gpuMs": 0.009157343768,
+            "wallMs": 0.009162255859,
+            "directGpuMs": 0.01061890647,
+            "directWallMs": 0.01067446289
+          },
+          {
+            "gpuMs": 0.009200000204,
+            "wallMs": 0.009204785156,
+            "directGpuMs": 0.01283151563,
+            "directWallMs": 0.01283637695
+          },
+          {
+            "gpuMs": 0.009120780975,
+            "wallMs": 0.009124755859,
+            "directGpuMs": 0.01229884382,
+            "directWallMs": 0.01230317383
+          },
+          {
+            "gpuMs": 0.00917406287,
+            "wallMs": 0.00917734375,
+            "directGpuMs": 0.0132477656,
+            "directWallMs": 0.01325498047
+          },
+          {
+            "gpuMs": 0.009143234231,
+            "wallMs": 0.009185498047,
+            "directGpuMs": 0.01063535921,
+            "directWallMs": 0.01069428711
+          },
+          {
+            "gpuMs": 0.00917006284,
+            "wallMs": 0.009173876953,
+            "directGpuMs": 0.01115904655,
+            "directWallMs": 0.01116298828
+          },
+          {
+            "gpuMs": 0.009065062739,
+            "wallMs": 0.009069189453,
+            "directGpuMs": 0.01262364071,
+            "directWallMs": 0.01262792969
+          }
+        ]
+      },
+      "ratio": 1.46418004387405
+    },
+    {
+      "key": "large-particles",
+      "id": "particles",
+      "scalars": {
+        "n": 262144,
+        "dt": 0.01600000075995922,
+        "time": 2.5,
+        "attraction": 1
+      },
+      "webgpu": {
+        "key": "large-particles",
+        "id": "particles",
+        "scalars": {
+          "n": 262144,
+          "dt": 0.01600000075995922,
+          "time": 2.5,
+          "attraction": 1
+        },
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          2048
+        ],
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "checks": {
+          "position": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 1.1920928955078125e-7,
+            "maxRel": 0.00007735700506432476
+          },
+          "velocity": {
+            "pass": true,
+            "failures": 0,
+            "first": null,
+            "maxAbs": 1.1920928955078125e-7,
+            "maxRel": 0.000103556390861479
+          }
+        },
+        "gpuMedianMs": 0.004512,
+        "wallMedianMs": 0.006220703115104698,
+        "timings": [
+          {
+            "gpuMs": 0.004512,
+            "wallMs": 0.006369628899847157
+          },
+          {
+            "gpuMs": 0.004512,
+            "wallMs": 0.006633300785324536
+          },
+          {
+            "gpuMs": 0.004512,
+            "wallMs": 0.006232910149265081
+          },
+          {
+            "gpuMs": 0.004704,
+            "wallMs": 0.005700683599570766
+          },
+          {
+            "gpuMs": 0.004736,
+            "wallMs": 0.005827636719914153
+          },
+          {
+            "gpuMs": 0.00464,
+            "wallMs": 0.006188964849570766
+          },
+          {
+            "gpuMs": 0.004512,
+            "wallMs": 0.00630371093575377
+          },
+          {
+            "gpuMs": 0.004512,
+            "wallMs": 0.006220703115104698
+          },
+          {
+            "gpuMs": 0.004672,
+            "wallMs": 0.005908203122089617
+          }
+        ]
+      },
+      "cuda": {
+        "key": "large-particles",
+        "verified": true,
+        "iterations": 2048,
+        "samples": 9,
+        "warmup": 5,
+        "gpuMedianMs": 0.004932296928,
+        "wallMedianMs": 0.004936328125,
+        "directGpuMedianMs": 0.007679250091,
+        "directWallMedianMs": 0.007684863281,
+        "timings": [
+          {
+            "gpuMs": 0.005028468557,
+            "wallMs": 0.005033007813,
+            "directGpuMs": 0.007743296679,
+            "directWallMs": 0.007747216797
+          },
+          {
+            "gpuMs": 0.004994640592,
+            "wallMs": 0.004998242187,
+            "directGpuMs": 0.007768999785,
+            "directWallMs": 0.007772900391
+          },
+          {
+            "gpuMs": 0.0047246092,
+            "wallMs": 0.004728173828,
+            "directGpuMs": 0.007681765594,
+            "directWallMs": 0.007684863281
+          },
+          {
+            "gpuMs": 0.004932296928,
+            "wallMs": 0.004936328125,
+            "directGpuMs": 0.007632109337,
+            "directWallMs": 0.007636328125
+          },
+          {
+            "gpuMs": 0.004910390824,
+            "wallMs": 0.004914453125,
+            "directGpuMs": 0.00764790643,
+            "directWallMs": 0.0077046875
+          },
+          {
+            "gpuMs": 0.004726406187,
+            "wallMs": 0.004729638672,
+            "directGpuMs": 0.007745906245,
+            "directWallMs": 0.007749169922
+          },
+          {
+            "gpuMs": 0.004973093979,
+            "wallMs": 0.004977099609,
+            "directGpuMs": 0.007679250091,
+            "directWallMs": 0.007683056641
+          },
+          {
+            "gpuMs": 0.004725125153,
+            "wallMs": 0.004727880859,
+            "directGpuMs": 0.00763392169,
+            "directWallMs": 0.007637109375
+          },
+          {
+            "gpuMs": 0.004959781189,
+            "wallMs": 0.00496328125,
+            "directGpuMs": 0.007568031084,
+            "directWallMs": 0.007572021484
+          }
+        ]
+      },
+      "ratio": 0.9147867749781995
+    }
+  ]
+}

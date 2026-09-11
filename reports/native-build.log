@@ -1,0 +1,10 @@
+Prepared 20 matched cases and native CUDA launcher.
+**********************************************************************
+** Visual Studio 2026 Developer Command Prompt v18.8.0
+** Copyright (c) 2026 Microsoft Corporation
+**********************************************************************
+[vcvarsall.bat] Environment initialized for: 'x64'
+native-generated.cu
+tmpxft_0000e2b4_00000000-8_native-generated.cudafe1.cpp
+native-reference.cu
+tmpxft_000080e4_00000000-8_native-reference.cudafe1.cpp

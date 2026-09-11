@@ -1,0 +1,23 @@
+GPU: NVIDIA GeForce RTX 5080 SM 12.0
+PASS reports/comparison-inputs/small-saxpy-y-expected.bin max_abs_error=0
+PASS reports/comparison-inputs/small-saxpy_vec4-y-expected.bin max_abs_error=0
+PASS reports/comparison-inputs/small-matmul_naive-C-expected.bin max_abs_error=6.67572e-06
+PASS reports/comparison-inputs/small-matmul_tiled-C-expected.bin max_abs_error=6.67572e-06
+PASS reports/comparison-inputs/small-matmul_register-C-expected.bin max_abs_error=6.67572e-06
+PASS reports/comparison-inputs/small-reduce_sum-output-expected.bin max_abs_error=0
+PASS reports/comparison-inputs/small-convolution-output-expected.bin max_abs_error=0
+PASS reports/comparison-inputs/small-histogram-bins-expected.bin max_abs_error=0
+PASS reports/comparison-inputs/small-transpose-output-expected.bin max_abs_error=0
+PASS reports/comparison-inputs/small-particles-position-expected.bin max_abs_error=1.19209e-07
+PASS reports/comparison-inputs/small-particles-velocity-expected.bin max_abs_error=1.19209e-07
+PASS reports/comparison-inputs/large-saxpy-y-expected.bin max_abs_error=0
+PASS reports/comparison-inputs/large-saxpy_vec4-y-expected.bin max_abs_error=0
+PASS reports/comparison-inputs/large-matmul_naive-C-expected.bin max_abs_error=3.24249e-05
+PASS reports/comparison-inputs/large-matmul_tiled-C-expected.bin max_abs_error=3.24249e-05
+PASS reports/comparison-inputs/large-matmul_register-C-expected.bin max_abs_error=3.24249e-05
+PASS reports/comparison-inputs/large-reduce_sum-output-expected.bin max_abs_error=0
+PASS reports/comparison-inputs/large-convolution-output-expected.bin max_abs_error=0
+PASS reports/comparison-inputs/large-histogram-bins-expected.bin max_abs_error=0
+PASS reports/comparison-inputs/large-transpose-output-expected.bin max_abs_error=0
+PASS reports/comparison-inputs/large-particles-position-expected.bin max_abs_error=1.19209e-07
+PASS reports/comparison-inputs/large-particles-velocity-expected.bin max_abs_error=1.19209e-07

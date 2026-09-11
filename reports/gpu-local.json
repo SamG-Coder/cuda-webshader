@@ -1,0 +1,1609 @@
+{
+  "schema": "cuda-webshader.correctness.v1",
+  "mode": "REAL WebGPU execution",
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 256,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "date": "2026-09-11T21:34:37.525Z",
+  "total": 79,
+  "passed": 79,
+  "failed": 0,
+  "wallMs": 283.4650000035763,
+  "results": [
+    {
+      "name": "SAXPY n=0",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 15.645000010728836
+    },
+    {
+      "name": "SAXPY n=1",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.7150000035762787
+    },
+    {
+      "name": "SAXPY n=2",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.6299999952316284
+    },
+    {
+      "name": "SAXPY n=63",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.719999998807907
+    },
+    {
+      "name": "SAXPY n=127",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 1.0499999821186066
+    },
+    {
+      "name": "SAXPY n=128",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.4950000047683716
+    },
+    {
+      "name": "SAXPY n=129",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.020000010728836
+    },
+    {
+      "name": "SAXPY n=257",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.5800000131130219
+    },
+    {
+      "name": "SAXPY n=1031",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.6100000143051147
+    },
+    {
+      "name": "float4 SAXPY records=0",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 8.8299999833107
+    },
+    {
+      "name": "float4 SAXPY records=1",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.6099999845027924
+    },
+    {
+      "name": "float4 SAXPY records=31",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.415000021457672
+    },
+    {
+      "name": "float4 SAXPY records=128",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.8100000023841858
+    },
+    {
+      "name": "float4 SAXPY records=129",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.125
+    },
+    {
+      "name": "float4 SAXPY records=257",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.5400000214576721
+    },
+    {
+      "name": "matmul_naive 1×1×1",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 11.465000003576279
+    },
+    {
+      "name": "matmul_tiled 1×1×1",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 13
+    },
+    {
+      "name": "matmul_register 1×1×1",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 23.974999994039536
+    },
+    {
+      "name": "matmul_naive 3×5×7",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 2.988747068412719e-7
+        }
+      },
+      "wallMs": 0.7349999845027924
+    },
+    {
+      "name": "matmul_tiled 3×5×7",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 2.988747068412719e-7
+        }
+      },
+      "wallMs": 0.7199999988079071
+    },
+    {
+      "name": "matmul_register 3×5×7",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 2.988747068412719e-7
+        }
+      },
+      "wallMs": 1.1150000095367432
+    },
+    {
+      "name": "matmul_naive 16×16×16",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 4.76837158203125e-7,
+          "maxRel": 0.000007962963505512887
+        }
+      },
+      "wallMs": 0.48000001907348633
+    },
+    {
+      "name": "matmul_tiled 16×16×16",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 4.76837158203125e-7,
+          "maxRel": 0.000007962963505512887
+        }
+      },
+      "wallMs": 0.6949999928474426
+    },
+    {
+      "name": "matmul_register 16×16×16",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 4.76837158203125e-7,
+          "maxRel": 0.000007962963505512887
+        }
+      },
+      "wallMs": 4.645000010728836
+    },
+    {
+      "name": "matmul_naive 17×19×23",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 7.152557373046875e-7,
+          "maxRel": 0.00017283374599630626
+        }
+      },
+      "wallMs": 2.8700000047683716
+    },
+    {
+      "name": "matmul_tiled 17×19×23",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 7.152557373046875e-7,
+          "maxRel": 0.00017283374599630626
+        }
+      },
+      "wallMs": 3.0699999928474426
+    },
+    {
+      "name": "matmul_register 17×19×23",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 7.152557373046875e-7,
+          "maxRel": 0.00017283374599630626
+        }
+      },
+      "wallMs": 1.4550000131130219
+    },
+    {
+      "name": "matmul_naive 31×9×5",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.1920928955078125e-7,
+          "maxRel": 0.000004401365831844938
+        }
+      },
+      "wallMs": 2.520000010728836
+    },
+    {
+      "name": "matmul_tiled 31×9×5",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.1920928955078125e-7,
+          "maxRel": 0.000004401365831844938
+        }
+      },
+      "wallMs": 0.7999999821186066
+    },
+    {
+      "name": "matmul_register 31×9×5",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.1920928955078125e-7,
+          "maxRel": 0.000004401365831844938
+        }
+      },
+      "wallMs": 5.054999977350235
+    },
+    {
+      "name": "matmul_naive 0×5×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.014999985694885
+    },
+    {
+      "name": "matmul_tiled 0×5×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.7150000035762787
+    },
+    {
+      "name": "matmul_register 0×5×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.6599999964237213
+    },
+    {
+      "name": "matmul_naive 5×0×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.5399999916553497
+    },
+    {
+      "name": "matmul_tiled 5×0×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.8650000095367432
+    },
+    {
+      "name": "matmul_register 5×0×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.8499999940395355
+    },
+    {
+      "name": "matmul_naive 5×7×0",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 1.1850000023841858
+    },
+    {
+      "name": "matmul_tiled 5×7×0",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.6650000214576721
+    },
+    {
+      "name": "matmul_register 5×7×0",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 1.0349999964237213
+    },
+    {
+      "name": "Reduction partials n=0",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 7.825000017881393
+    },
+    {
+      "name": "Reduction partials n=1",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.5949999988079071
+    },
+    {
+      "name": "Reduction partials n=2",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.574999988079071
+    },
+    {
+      "name": "Reduction partials n=127",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.49000000953674316
+    },
+    {
+      "name": "Reduction partials n=128",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.5600000023841858
+    },
+    {
+      "name": "Reduction partials n=129",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.6349999904632568
+    },
+    {
+      "name": "Reduction partials n=255",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.5699999928474426
+    },
+    {
+      "name": "Reduction partials n=256",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.5400000214576721
+    },
+    {
+      "name": "Reduction partials n=257",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.554999977350235
+    },
+    {
+      "name": "Reduction partials n=1031",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.8799999952316284
+    },
+    {
+      "name": "Convolution + halo n=0",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 10.965000003576279
+    },
+    {
+      "name": "Convolution + halo n=1",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.759999990463257
+    },
+    {
+      "name": "Convolution + halo n=2",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.1350000202655792
+    },
+    {
+      "name": "Convolution + halo n=3",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.229999989271164
+    },
+    {
+      "name": "Convolution + halo n=127",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.000001985454559894215
+        }
+      },
+      "wallMs": 2.6500000059604645
+    },
+    {
+      "name": "Convolution + halo n=128",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.000001985454559894215
+        }
+      },
+      "wallMs": 4.629999995231628
+    },
+    {
+      "name": "Convolution + halo n=129",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.000001985454559894215
+        }
+      },
+      "wallMs": 3.024999976158142
+    },
+    {
+      "name": "Convolution + halo n=259",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.000002949040578798364
+        }
+      },
+      "wallMs": 2.959999978542328
+    },
+    {
+      "name": "Histogram grid-stride n=0",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 13.804999977350235
+    },
+    {
+      "name": "Histogram grid-stride n=1",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.6099999845027924
+    },
+    {
+      "name": "Histogram grid-stride n=127",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.5900000035762787
+    },
+    {
+      "name": "Histogram grid-stride n=128",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.6200000047683716
+    },
+    {
+      "name": "Histogram grid-stride n=129",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.5800000131130219
+    },
+    {
+      "name": "Histogram grid-stride n=1031",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.0999999940395355
+    },
+    {
+      "name": "Histogram grid-stride n=4099",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.530000001192093
+    },
+    {
+      "name": "Transpose 1×1",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 11.53999999165535
+    },
+    {
+      "name": "Transpose 7×19",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.7149999737739563
+    },
+    {
+      "name": "Transpose 33×35",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.665000021457672
+    },
+    {
+      "name": "Transpose 64×9",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.604999989271164
+    },
+    {
+      "name": "Transpose 0×5",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.509999990463257
+    },
+    {
+      "name": "Transpose 5×0",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.8300000131130219
+    },
+    {
+      "name": "Particle float4 interop n=1, dt=0.016",
+      "pass": true,
+      "checks": {
+        "position": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        },
+        "velocity": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.4901161193847656e-8,
+          "maxRel": 6.473254873600313e-8
+        }
+      },
+      "wallMs": 13.724999994039536
+    },
+    {
+      "name": "Particle float4 interop n=17, dt=0.016",
+      "pass": true,
+      "checks": {
+        "position": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 2.9802322387695312e-8,
+          "maxRel": 1.1298011606447323e-7
+        },
+        "velocity": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 1.0583948172522589e-7
+        }
+      },
+      "wallMs": 3.0250000059604645
+    },
+    {
+      "name": "Particle float4 interop n=129, dt=0.033",
+      "pass": true,
+      "checks": {
+        "position": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.0000034511987865248366
+        },
+        "velocity": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.1920928955078125e-7,
+          "maxRel": 0.00001895253120455294
+        }
+      },
+      "wallMs": 4.594999998807907
+    },
+    {
+      "name": "Particle float4 interop n=17, dt=0",
+      "pass": true,
+      "checks": {
+        "position": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        },
+        "velocity": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 5.879999995231628
+    },
+    {
+      "name": "Two parameter versions in one batch retain their own snapshots",
+      "pass": true,
+      "wallMs": 4.4549999833106995
+    },
+    {
+      "name": "Reusable hierarchical reduction, including empty and singleton inputs",
+      "pass": true,
+      "wallMs": 2.1749999821186066
+    },
+    {
+      "name": "SAXPY workgroup specialization 64",
+      "pass": true,
+      "wallMs": 8.794999986886978
+    },
+    {
+      "name": "SAXPY workgroup specialization 256",
+      "pass": true,
+      "wallMs": 7.015000015497208
+    },
+    {
+      "name": "Three r186 compute-to-render shared-buffer pixel test",
+      "pass": true,
+      "mode": "REAL WebGPU render readback",
+      "cpuUploadAfterCompute": false
+    }
+  ],
+  "benchmarks": {
+    "schema": "cuda-webshader.benchmark.v1",
+    "mode": "REAL measured WebGPU; not estimated CUDA speed",
+    "date": "2026-09-11T21:34:38.034Z",
+    "device": {
+      "vendor": "nvidia",
+      "architecture": "blackwell",
+      "device": "",
+      "description": "",
+      "features": [
+        "core-features-and-limits",
+        "timestamp-query"
+      ],
+      "timestampQuery": true,
+      "limits": {
+        "maxComputeInvocationsPerWorkgroup": 256,
+        "maxComputeWorkgroupStorageSize": 16384,
+        "maxStorageBufferBindingSize": 268435456
+      }
+    },
+    "n": 262144,
+    "matrixSize": 128,
+    "results": [
+      {
+        "name": "saxpy / 64",
+        "family": "saxpy",
+        "id": "saxpy",
+        "workgroupSize": [
+          64,
+          1,
+          1
+        ],
+        "elements": 262144,
+        "verified": true,
+        "iterations": 2048,
+        "samples": 3,
+        "warmup": 3,
+        "timestampQuery": true,
+        "gpuMedianMs": 0.002272,
+        "wallMedianMs": 0.0038061523373471573,
+        "metric": "GPU timestamp (amortized per dispatch)",
+        "medianMs": 0.002272,
+        "timings": [
+          {
+            "wallBatchMs": 8.644999980926514,
+            "gpuBatchMs": 4.784128,
+            "wallPerDispatchMs": 0.004221191396936774,
+            "gpuPerDispatchMs": 0.002336
+          },
+          {
+            "wallBatchMs": 7.794999986886978,
+            "gpuBatchMs": 4.456448,
+            "wallPerDispatchMs": 0.0038061523373471573,
+            "gpuPerDispatchMs": 0.002176
+          },
+          {
+            "wallBatchMs": 6.925000011920929,
+            "gpuBatchMs": 4.653056,
+            "wallPerDispatchMs": 0.003381347662070766,
+            "gpuPerDispatchMs": 0.002272
+          }
+        ],
+        "notes": [
+          "Compilation, allocation and initial data upload are outside the timed section.",
+          "Wall time includes JS encoding, uniform uploads, submission and completion waiting.",
+          "GPU timestamps include compute-pass execution; privacy quantization and caches affect short workloads.",
+          "Repeated dispatches reuse buffers. Effective bandwidth is a logical byte-rate, not measured DRAM traffic."
+        ],
+        "effectiveGBs": 1384.5633802816901,
+        "gflops": 230.7605633802817
+      },
+      {
+        "name": "saxpy / 128",
+        "family": "saxpy",
+        "id": "saxpy",
+        "workgroupSize": [
+          128,
+          1,
+          1
+        ],
+        "elements": 262144,
+        "verified": true,
+        "iterations": 2048,
+        "samples": 3,
+        "warmup": 3,
+        "timestampQuery": true,
+        "gpuMedianMs": 0.001664,
+        "wallMedianMs": 0.00341796875,
+        "metric": "GPU timestamp (amortized per dispatch)",
+        "medianMs": 0.001664,
+        "timings": [
+          {
+            "wallBatchMs": 6.300000011920929,
+            "gpuBatchMs": 3.407872,
+            "wallPerDispatchMs": 0.003076171880820766,
+            "gpuPerDispatchMs": 0.001664
+          },
+          {
+            "wallBatchMs": 7,
+            "gpuBatchMs": 3.342336,
+            "wallPerDispatchMs": 0.00341796875,
+            "gpuPerDispatchMs": 0.001632
+          },
+          {
+            "wallBatchMs": 8.340000003576279,
+            "gpuBatchMs": 3.60448,
+            "wallPerDispatchMs": 0.00407226562674623,
+            "gpuPerDispatchMs": 0.00176
+          }
+        ],
+        "notes": [
+          "Compilation, allocation and initial data upload are outside the timed section.",
+          "Wall time includes JS encoding, uniform uploads, submission and completion waiting.",
+          "GPU timestamps include compute-pass execution; privacy quantization and caches affect short workloads.",
+          "Repeated dispatches reuse buffers. Effective bandwidth is a logical byte-rate, not measured DRAM traffic."
+        ],
+        "effectiveGBs": 1890.4615384615386,
+        "gflops": 315.0769230769231
+      },
+      {
+        "name": "saxpy / 256",
+        "family": "saxpy",
+        "id": "saxpy",
+        "workgroupSize": [
+          256,
+          1,
+          1
+        ],
+        "elements": 262144,
+        "verified": true,
+        "iterations": 2048,
+        "samples": 3,
+        "warmup": 3,
+        "timestampQuery": true,
+        "gpuMedianMs": 0.001504,
+        "wallMedianMs": 0.0031274414068320766,
+        "metric": "GPU timestamp (amortized per dispatch)",
+        "medianMs": 0.001504,
+        "timings": [
+          {
+            "wallBatchMs": 5.629999995231628,
+            "gpuBatchMs": 3.014656,
+            "wallPerDispatchMs": 0.0027490234351716936,
+            "gpuPerDispatchMs": 0.001472
+          },
+          {
+            "wallBatchMs": 7.905000001192093,
+            "gpuBatchMs": 3.080192,
+            "wallPerDispatchMs": 0.0038598632818320766,
+            "gpuPerDispatchMs": 0.001504
+          },
+          {
+            "wallBatchMs": 6.405000001192093,
+            "gpuBatchMs": 3.407872,
+            "wallPerDispatchMs": 0.0031274414068320766,
+            "gpuPerDispatchMs": 0.001664
+          }
+        ],
+        "notes": [
+          "Compilation, allocation and initial data upload are outside the timed section.",
+          "Wall time includes JS encoding, uniform uploads, submission and completion waiting.",
+          "GPU timestamps include compute-pass execution; privacy quantization and caches affect short workloads.",
+          "Repeated dispatches reuse buffers. Effective bandwidth is a logical byte-rate, not measured DRAM traffic."
+        ],
+        "effectiveGBs": 2091.574468085106,
+        "gflops": 348.59574468085106
+      },
+      {
+        "name": "saxpy_vec4 / 64",
+        "family": "saxpy",
+        "id": "saxpy_vec4",
+        "workgroupSize": [
+          64,
+          1,
+          1
+        ],
+        "elements": 262144,
+        "verified": true,
+        "iterations": 2048,
+        "samples": 3,
+        "warmup": 3,
+        "timestampQuery": true,
+        "gpuMedianMs": 0.00144,
+        "wallMedianMs": 0.0028417968715075403,
+        "metric": "GPU timestamp (amortized per dispatch)",
+        "medianMs": 0.00144,
+        "timings": [
+          {
+            "wallBatchMs": 5.819999992847443,
+            "gpuBatchMs": 3.211264,
+            "wallPerDispatchMs": 0.0028417968715075403,
+            "gpuPerDispatchMs": 0.001568
+          },
+          {
+            "wallBatchMs": 6.91499999165535,
+            "gpuBatchMs": 2.94912,
+            "wallPerDispatchMs": 0.0033764648396754637,
+            "gpuPerDispatchMs": 0.00144
+          },
+          {
+            "wallBatchMs": 5.810000002384186,
+            "gpuBatchMs": 2.94912,
+            "wallPerDispatchMs": 0.0028369140636641532,
+            "gpuPerDispatchMs": 0.00144
+          }
+        ],
+        "notes": [
+          "Compilation, allocation and initial data upload are outside the timed section.",
+          "Wall time includes JS encoding, uniform uploads, submission and completion waiting.",
+          "GPU timestamps include compute-pass execution; privacy quantization and caches affect short workloads.",
+          "Repeated dispatches reuse buffers. Effective bandwidth is a logical byte-rate, not measured DRAM traffic."
+        ],
+        "effectiveGBs": 2184.5333333333333,
+        "gflops": 364.0888888888889
+      },
+      {
+        "name": "saxpy_vec4 / 128",
+        "family": "saxpy",
+        "id": "saxpy_vec4",
+        "workgroupSize": [
+          128,
+          1,
+          1
+        ],
+        "elements": 262144,
+        "verified": true,
+        "iterations": 2048,
+        "samples": 3,
+        "warmup": 3,
+        "timestampQuery": true,
+        "gpuMedianMs": 0.00144,
+        "wallMedianMs": 0.003369140627910383,
+        "metric": "GPU timestamp (amortized per dispatch)",
+        "medianMs": 0.00144,
+        "timings": [
+          {
+            "wallBatchMs": 4.9549999833106995,
+            "gpuBatchMs": 2.883584,
+            "wallPerDispatchMs": 0.0024194335856009275,
+            "gpuPerDispatchMs": 0.001408
+          },
+          {
+            "wallBatchMs": 7.419999986886978,
+            "gpuBatchMs": 2.94912,
+            "wallPerDispatchMs": 0.0036230468685971573,
+            "gpuPerDispatchMs": 0.00144
+          },
+          {
+            "wallBatchMs": 6.9000000059604645,
+            "gpuBatchMs": 2.94912,
+            "wallPerDispatchMs": 0.003369140627910383,
+            "gpuPerDispatchMs": 0.00144
+          }
+        ],
+        "notes": [
+          "Compilation, allocation and initial data upload are outside the timed section.",
+          "Wall time includes JS encoding, uniform uploads, submission and completion waiting.",
+          "GPU timestamps include compute-pass execution; privacy quantization and caches affect short workloads.",
+          "Repeated dispatches reuse buffers. Effective bandwidth is a logical byte-rate, not measured DRAM traffic."
+        ],
+        "effectiveGBs": 2184.5333333333333,
+        "gflops": 364.0888888888889
+      },
+      {
+        "name": "saxpy_vec4 / 256",
+        "family": "saxpy",
+        "id": "saxpy_vec4",
+        "workgroupSize": [
+          256,
+          1,
+          1
+        ],
+        "elements": 262144,
+        "verified": true,
+        "iterations": 2048,
+        "samples": 3,
+        "warmup": 3,
+        "timestampQuery": true,
+        "gpuMedianMs": 0.00144,
+        "wallMedianMs": 0.0033959961001528427,
+        "metric": "GPU timestamp (amortized per dispatch)",
+        "medianMs": 0.00144,
+        "timings": [
+          {
+            "wallBatchMs": 8.15499997138977,
+            "gpuBatchMs": 2.94912,
+            "wallPerDispatchMs": 0.003981933579780161,
+            "gpuPerDispatchMs": 0.00144
+          },
+          {
+            "wallBatchMs": 6.854999989271164,
+            "gpuBatchMs": 2.94912,
+            "wallPerDispatchMs": 0.0033471679635113105,
+            "gpuPerDispatchMs": 0.00144
+          },
+          {
+            "wallBatchMs": 6.955000013113022,
+            "gpuBatchMs": 3.2768,
+            "wallPerDispatchMs": 0.0033959961001528427,
+            "gpuPerDispatchMs": 0.0016
+          }
+        ],
+        "notes": [
+          "Compilation, allocation and initial data upload are outside the timed section.",
+          "Wall time includes JS encoding, uniform uploads, submission and completion waiting.",
+          "GPU timestamps include compute-pass execution; privacy quantization and caches affect short workloads.",
+          "Repeated dispatches reuse buffers. Effective bandwidth is a logical byte-rate, not measured DRAM traffic."
+        ],
+        "effectiveGBs": 2184.5333333333333,
+        "gflops": 364.0888888888889
+      },
+      {
+        "name": "matmul_naive",
+        "family": "matmul",
+        "id": "matmul_naive",
+        "workgroupSize": [
+          8,
+          8,
+          1
+        ],
+        "shape": [
+          128,
+          128,
+          128
+        ],
+        "verified": true,
+        "iterations": 280,
+        "samples": 3,
+        "warmup": 3,
+        "timestampQuery": true,
+        "gpuMedianMs": 0.019426742857142857,
+        "wallMedianMs": 0.02475000002554485,
+        "metric": "GPU timestamp (amortized per dispatch)",
+        "medianMs": 0.019426742857142857,
+        "timings": [
+          {
+            "wallBatchMs": 6.9000000059604645,
+            "gpuBatchMs": 5.439488,
+            "wallPerDispatchMs": 0.024642857164144515,
+            "gpuPerDispatchMs": 0.019426742857142857
+          },
+          {
+            "wallBatchMs": 7.9000000059604645,
+            "gpuBatchMs": 5.832704,
+            "wallPerDispatchMs": 0.028214285735573087,
+            "gpuPerDispatchMs": 0.020831085714285713
+          },
+          {
+            "wallBatchMs": 6.930000007152557,
+            "gpuBatchMs": 5.373952,
+            "wallPerDispatchMs": 0.02475000002554485,
+            "gpuPerDispatchMs": 0.019192685714285715
+          }
+        ],
+        "notes": [
+          "Compilation, allocation and initial data upload are outside the timed section.",
+          "Wall time includes JS encoding, uniform uploads, submission and completion waiting.",
+          "GPU timestamps include compute-pass execution; privacy quantization and caches affect short workloads.",
+          "Repeated dispatches reuse buffers. Effective bandwidth is a logical byte-rate, not measured DRAM traffic."
+        ],
+        "gflops": 215.90361445783134
+      },
+      {
+        "name": "matmul_tiled",
+        "family": "matmul",
+        "id": "matmul_tiled",
+        "workgroupSize": [
+          16,
+          16,
+          1
+        ],
+        "shape": [
+          128,
+          128,
+          128
+        ],
+        "verified": true,
+        "iterations": 512,
+        "samples": 3,
+        "warmup": 3,
+        "timestampQuery": true,
+        "gpuMedianMs": 0.003328,
+        "wallMedianMs": 0.007666015648283064,
+        "metric": "GPU timestamp (amortized per dispatch)",
+        "medianMs": 0.003328,
+        "timings": [
+          {
+            "wallBatchMs": 3.969999998807907,
+            "gpuBatchMs": 1.703936,
+            "wallPerDispatchMs": 0.0077539062476716936,
+            "gpuPerDispatchMs": 0.003328
+          },
+          {
+            "wallBatchMs": 3.8550000190734863,
+            "gpuBatchMs": 1.703936,
+            "wallPerDispatchMs": 0.007529296912252903,
+            "gpuPerDispatchMs": 0.003328
+          },
+          {
+            "wallBatchMs": 3.925000011920929,
+            "gpuBatchMs": 1.703936,
+            "wallPerDispatchMs": 0.007666015648283064,
+            "gpuPerDispatchMs": 0.003328
+          }
+        ],
+        "notes": [
+          "Compilation, allocation and initial data upload are outside the timed section.",
+          "Wall time includes JS encoding, uniform uploads, submission and completion waiting.",
+          "GPU timestamps include compute-pass execution; privacy quantization and caches affect short workloads.",
+          "Repeated dispatches reuse buffers. Effective bandwidth is a logical byte-rate, not measured DRAM traffic."
+        ],
+        "gflops": 1260.3076923076924
+      },
+      {
+        "name": "matmul_register",
+        "family": "matmul",
+        "id": "matmul_register",
+        "workgroupSize": [
+          8,
+          8,
+          1
+        ],
+        "shape": [
+          128,
+          128,
+          128
+        ],
+        "verified": true,
+        "iterations": 512,
+        "samples": 3,
+        "warmup": 3,
+        "timestampQuery": true,
+        "gpuMedianMs": 0.005888,
+        "wallMedianMs": 0.011376953159924597,
+        "metric": "GPU timestamp (amortized per dispatch)",
+        "medianMs": 0.005888,
+        "timings": [
+          {
+            "wallBatchMs": 5.890000015497208,
+            "gpuBatchMs": 2.94912,
+            "wallPerDispatchMs": 0.011503906280267984,
+            "gpuPerDispatchMs": 0.00576
+          },
+          {
+            "wallBatchMs": 3.7999999821186066,
+            "gpuBatchMs": 3.014656,
+            "wallPerDispatchMs": 0.0074218749650754035,
+            "gpuPerDispatchMs": 0.005888
+          },
+          {
+            "wallBatchMs": 5.825000017881393,
+            "gpuBatchMs": 3.342336,
+            "wallPerDispatchMs": 0.011376953159924597,
+            "gpuPerDispatchMs": 0.006528
+          }
+        ],
+        "notes": [
+          "Compilation, allocation and initial data upload are outside the timed section.",
+          "Wall time includes JS encoding, uniform uploads, submission and completion waiting.",
+          "GPU timestamps include compute-pass execution; privacy quantization and caches affect short workloads.",
+          "Repeated dispatches reuse buffers. Effective bandwidth is a logical byte-rate, not measured DRAM traffic."
+        ],
+        "gflops": 712.3478260869565
+      }
+    ],
+    "choices": {
+      "saxpy": {
+        "id": "saxpy_vec4",
+        "workgroupSize": [
+          64,
+          1,
+          1
+        ],
+        "rankingMetric": "gpuMedianMs",
+        "medianMs": 0.00144,
+        "baselineSpeedup": null
+      },
+      "matmul": {
+        "id": "matmul_tiled",
+        "workgroupSize": [
+          16,
+          16,
+          1
+        ],
+        "rankingMetric": "gpuMedianMs",
+        "medianMs": 0.003328,
+        "baselineSpeedup": 5.837362637362638
+      }
+    },
+    "skipped": []
+  },
+  "softwareAdapterRequested": false
+}

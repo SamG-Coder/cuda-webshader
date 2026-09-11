@@ -1,0 +1,11 @@
+PASS C++ syntax only: saxpy.cu
+PASS C++ syntax only: saxpy_vec4.cu
+PASS C++ syntax only: matmul_naive.cu
+PASS C++ syntax only: matmul_tiled.cu
+PASS C++ syntax only: matmul_register.cu
+PASS C++ syntax only: reduce_sum.cu
+PASS C++ syntax only: convolution.cu
+PASS C++ syntax only: histogram.cu
+PASS C++ syntax only: transpose.cu
+PASS C++ syntax only: particles.cu
+10/10 C++ syntax checks passed. No GPU execution performed.

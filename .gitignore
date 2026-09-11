@@ -1,0 +1,22 @@
+node_modules/
+dist/
+playwright-report/
+test-results/
+reports/benchmark-local.json
+native-reference
+native-reference.exe
+.DS_Store
+
+# Regenerable benchmark data and local build/server artifacts.
+reports/comparison-inputs/*.bin
+reports/server*.log
+reports/gpu-run.log
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+.env
+.env.*
+!.env.example

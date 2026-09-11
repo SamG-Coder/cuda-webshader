@@ -1,0 +1,29 @@
+{
+  "mode": "Node HTTP; no browser navigation or GPU execution",
+  "checks": [
+    {
+      "path": "/",
+      "pass": true
+    },
+    {
+      "path": "/src/compiler/worker.js",
+      "pass": true
+    },
+    {
+      "path": "/kernels/saxpy.cu",
+      "pass": true
+    },
+    {
+      "path": "/generated/saxpy.json",
+      "pass": true
+    },
+    {
+      "path": "missing resource -> 404",
+      "pass": true
+    },
+    {
+      "path": "encoded directory traversal -> 403",
+      "pass": true
+    }
+  ]
+}

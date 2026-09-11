@@ -1,0 +1,60 @@
+{
+  "version": "0.1.0",
+  "name": "matmul_register",
+  "entryPoint": "main",
+  "wgsl": "// CUDA WebShader 0.1.0. Generated from kernel matmul_register.\n@group(0) @binding(0) var<storage, read> b_A: array<f32>;\n@group(0) @binding(1) var<storage, read> b_B: array<f32>;\n@group(0) @binding(2) var<storage, read_write> b_C: array<f32>;\nstruct CWParams {\n  p_M: u32,\n  p_N: u32,\n  p_K: u32,\n  cw_pad_12: u32,\n}\n@group(0) @binding(3) var<uniform> cw_params: CWParams;\nconst cw_block_size: vec3<u32> = vec3<u32>(8u, 8u, 1u);\nvar<workgroup> s_tileA: array<array<f32, 16>, 16>;\nvar<workgroup> s_tileB: array<array<f32, 16>, 16>;\n\n\n@compute @workgroup_size(8, 8, 1)\nfn main(\n  @builtin(local_invocation_id) cw_thread: vec3<u32>,\n  @builtin(workgroup_id) cw_block: vec3<u32>,\n  @builtin(num_workgroups) cw_grid: vec3<u32>\n) {\n  var v_tx: u32 = cw_thread.x;\n  var v_ty: u32 = cw_thread.y;\n  var v_row0: u32 = ((cw_block.y * u32(16i)) + v_ty);\n  var v_row1: u32 = (v_row0 + u32(8i));\n  var v_col0: u32 = ((cw_block.x * u32(16i)) + v_tx);\n  var v_col1: u32 = (v_col0 + u32(8i));\n  var v_c00: f32 = 0.0f;\n  var v_c01: f32 = 0.0f;\n  var v_c10: f32 = 0.0f;\n  var v_c11: f32 = 0.0f;\n  {\n    var v_base: u32 = u32(0i);\n    loop {\n      if (!(v_base < cw_params.p_K)) { break; }\n      var cw_tmp_0: f32;\n      if (((v_row0 < cw_params.p_M) && ((v_base + v_tx) < cw_params.p_K))) {\n        cw_tmp_0 = b_A[(((v_row0 * cw_params.p_K) + v_base) + v_tx)];\n      } else {\n        cw_tmp_0 = 0.0f;\n      }\n      s_tileA[v_ty][v_tx] = cw_tmp_0;\n      var cw_tmp_1: f32;\n      if (((v_row0 < cw_params.p_M) && (((v_base + v_tx) + u32(8i)) < cw_params.p_K))) {\n        cw_tmp_1 = b_A[((((v_row0 * cw_params.p_K) + v_base) + v_tx) + u32(8i))];\n      } else {\n        cw_tmp_1 = 0.0f;\n      }\n      s_tileA[v_ty][(v_tx + u32(8i))] = cw_tmp_1;\n      var cw_tmp_2: f32;\n      if (((v_row1 < cw_params.p_M) && ((v_base + v_tx) < cw_params.p_K))) {\n        cw_tmp_2 = b_A[(((v_row1 * cw_params.p_K) + v_base) + v_tx)];\n      } else {\n        cw_tmp_2 = 0.0f;\n      }\n      s_tileA[(v_ty + u32(8i))][v_tx] = cw_tmp_2;\n      var cw_tmp_3: f32;\n      if (((v_row1 < cw_params.p_M) && (((v_base + v_tx) + u32(8i)) < cw_params.p_K))) {\n        cw_tmp_3 = b_A[((((v_row1 * cw_params.p_K) + v_base) + v_tx) + u32(8i))];\n      } else {\n        cw_tmp_3 = 0.0f;\n      }\n      s_tileA[(v_ty + u32(8i))][(v_tx + u32(8i))] = cw_tmp_3;\n      var cw_tmp_4: f32;\n      if ((((v_base + v_ty) < cw_params.p_K) && (v_col0 < cw_params.p_N))) {\n        cw_tmp_4 = b_B[(((v_base + v_ty) * cw_params.p_N) + v_col0)];\n      } else {\n        cw_tmp_4 = 0.0f;\n      }\n      s_tileB[v_ty][v_tx] = cw_tmp_4;\n      var cw_tmp_5: f32;\n      if ((((v_base + v_ty) < cw_params.p_K) && (v_col1 < cw_params.p_N))) {\n        cw_tmp_5 = b_B[(((v_base + v_ty) * cw_params.p_N) + v_col1)];\n      } else {\n        cw_tmp_5 = 0.0f;\n      }\n      s_tileB[v_ty][(v_tx + u32(8i))] = cw_tmp_5;\n      var cw_tmp_6: f32;\n      if (((((v_base + v_ty) + u32(8i)) < cw_params.p_K) && (v_col0 < cw_params.p_N))) {\n        cw_tmp_6 = b_B[((((v_base + v_ty) + u32(8i)) * cw_params.p_N) + v_col0)];\n      } else {\n        cw_tmp_6 = 0.0f;\n      }\n      s_tileB[(v_ty + u32(8i))][v_tx] = cw_tmp_6;\n      var cw_tmp_7: f32;\n      if (((((v_base + v_ty) + u32(8i)) < cw_params.p_K) && (v_col1 < cw_params.p_N))) {\n        cw_tmp_7 = b_B[((((v_base + v_ty) + u32(8i)) * cw_params.p_N) + v_col1)];\n      } else {\n        cw_tmp_7 = 0.0f;\n      }\n      s_tileB[(v_ty + u32(8i))][(v_tx + u32(8i))] = cw_tmp_7;\n      workgroupBarrier();\n      {\n        var v_k: u32 = u32(0i);\n        loop {\n          if (!(v_k < u32(16i))) { break; }\n          var v_a0: f32 = s_tileA[v_ty][v_k];\n          var v_a1: f32 = s_tileA[(v_ty + u32(8i))][v_k];\n          var v_b0: f32 = s_tileB[v_k][v_tx];\n          var v_b1: f32 = s_tileB[v_k][(v_tx + u32(8i))];\n          v_c00 = fma(v_a0, v_b0, v_c00);\n          v_c01 = fma(v_a0, v_b1, v_c01);\n          v_c10 = fma(v_a1, v_b0, v_c10);\n          v_c11 = fma(v_a1, v_b1, v_c11);\n          continuing {\n            v_k += u32(1);\n          }\n        }\n      }\n      workgroupBarrier();\n      continuing {\n        v_base = (v_base + u32(16i));\n      }\n    }\n  }\n  if (((v_row0 < cw_params.p_M) && (v_col0 < cw_params.p_N))) {\n    b_C[((v_row0 * cw_params.p_N) + v_col0)] = v_c00;\n  }\n  if (((v_row0 < cw_params.p_M) && (v_col1 < cw_params.p_N))) {\n    b_C[((v_row0 * cw_params.p_N) + v_col1)] = v_c01;\n  }\n  if (((v_row1 < cw_params.p_M) && (v_col0 < cw_params.p_N))) {\n    b_C[((v_row1 * cw_params.p_N) + v_col0)] = v_c10;\n  }\n  if (((v_row1 < cw_params.p_M) && (v_col1 < cw_params.p_N))) {\n    b_C[((v_row1 * cw_params.p_N) + v_col1)] = v_c11;\n  }\n}\n",
+  "metadata": {
+    "workgroupSize": [
+      8,
+      8,
+      1
+    ],
+    "bindings": [
+      {
+        "name": "A",
+        "elementType": "f32",
+        "stride": 4,
+        "binding": 0,
+        "readOnly": true,
+        "atomic": false
+      },
+      {
+        "name": "B",
+        "elementType": "f32",
+        "stride": 4,
+        "binding": 1,
+        "readOnly": true,
+        "atomic": false
+      },
+      {
+        "name": "C",
+        "elementType": "f32",
+        "stride": 4,
+        "binding": 2,
+        "readOnly": false,
+        "atomic": false
+      }
+    ],
+    "scalars": [
+      {
+        "name": "M",
+        "type": "u32",
+        "offset": 0
+      },
+      {
+        "name": "N",
+        "type": "u32",
+        "offset": 4
+      },
+      {
+        "name": "K",
+        "type": "u32",
+        "offset": 8
+      }
+    ],
+    "uniformSize": 16,
+    "uniformBinding": 3,
+    "workgroupStorageBytes": 2048,
+    "barrier": "workgroup"
+  }
+}

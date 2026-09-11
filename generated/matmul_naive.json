@@ -1,0 +1,60 @@
+{
+  "version": "0.1.0",
+  "name": "matmul_naive",
+  "entryPoint": "main",
+  "wgsl": "// CUDA WebShader 0.1.0. Generated from kernel matmul_naive.\n@group(0) @binding(0) var<storage, read> b_A: array<f32>;\n@group(0) @binding(1) var<storage, read> b_B: array<f32>;\n@group(0) @binding(2) var<storage, read_write> b_C: array<f32>;\nstruct CWParams {\n  p_M: u32,\n  p_N: u32,\n  p_K: u32,\n  cw_pad_12: u32,\n}\n@group(0) @binding(3) var<uniform> cw_params: CWParams;\nconst cw_block_size: vec3<u32> = vec3<u32>(8u, 8u, 1u);\n\n\n@compute @workgroup_size(8, 8, 1)\nfn main(\n  @builtin(local_invocation_id) cw_thread: vec3<u32>,\n  @builtin(workgroup_id) cw_block: vec3<u32>,\n  @builtin(num_workgroups) cw_grid: vec3<u32>\n) {\n  var v_row: u32 = ((cw_block.y * cw_block_size.y) + cw_thread.y);\n  var v_col: u32 = ((cw_block.x * cw_block_size.x) + cw_thread.x);\n  if (((v_row < cw_params.p_M) && (v_col < cw_params.p_N))) {\n    var v_sum: f32 = 0.0f;\n    {\n      var v_k: u32 = u32(0i);\n      loop {\n        if (!(v_k < cw_params.p_K)) { break; }\n        v_sum = fma(b_A[((v_row * cw_params.p_K) + v_k)], b_B[((v_k * cw_params.p_N) + v_col)], v_sum);\n        continuing {\n          v_k += u32(1);\n        }\n      }\n    }\n    b_C[((v_row * cw_params.p_N) + v_col)] = v_sum;\n  }\n}\n",
+  "metadata": {
+    "workgroupSize": [
+      8,
+      8,
+      1
+    ],
+    "bindings": [
+      {
+        "name": "A",
+        "elementType": "f32",
+        "stride": 4,
+        "binding": 0,
+        "readOnly": true,
+        "atomic": false
+      },
+      {
+        "name": "B",
+        "elementType": "f32",
+        "stride": 4,
+        "binding": 1,
+        "readOnly": true,
+        "atomic": false
+      },
+      {
+        "name": "C",
+        "elementType": "f32",
+        "stride": 4,
+        "binding": 2,
+        "readOnly": false,
+        "atomic": false
+      }
+    ],
+    "scalars": [
+      {
+        "name": "M",
+        "type": "u32",
+        "offset": 0
+      },
+      {
+        "name": "N",
+        "type": "u32",
+        "offset": 4
+      },
+      {
+        "name": "K",
+        "type": "u32",
+        "offset": 8
+      }
+    ],
+    "uniformSize": 16,
+    "uniformBinding": 3,
+    "workgroupStorageBytes": 0,
+    "barrier": "workgroup"
+  }
+}

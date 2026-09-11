@@ -1,0 +1,42 @@
+{
+  "version": "0.1.0",
+  "name": "reduce_sum",
+  "entryPoint": "main",
+  "wgsl": "// CUDA WebShader 0.1.0. Generated from kernel reduce_sum.\n@group(0) @binding(0) var<storage, read> b_input: array<f32>;\n@group(0) @binding(1) var<storage, read_write> b_output: array<f32>;\nstruct CWParams {\n  p_n: u32,\n  cw_pad_4: u32,\n  cw_pad_8: u32,\n  cw_pad_12: u32,\n}\n@group(0) @binding(2) var<uniform> cw_params: CWParams;\nconst cw_block_size: vec3<u32> = vec3<u32>(128u, 1u, 1u);\nvar<workgroup> s_partial: array<f32, 128>;\n\n\n@compute @workgroup_size(128, 1, 1)\nfn main(\n  @builtin(local_invocation_id) cw_thread: vec3<u32>,\n  @builtin(workgroup_id) cw_block: vec3<u32>,\n  @builtin(num_workgroups) cw_grid: vec3<u32>\n) {\n  var v_lane: u32 = cw_thread.x;\n  var v_i: u32 = (((cw_block.x * u32(128i)) * u32(2i)) + v_lane);\n  var v_sum: f32 = 0.0f;\n  if ((v_i < cw_params.p_n)) {\n    v_sum = b_input[v_i];\n  }\n  if (((v_i + u32(128i)) < cw_params.p_n)) {\n    v_sum = (v_sum + b_input[(v_i + u32(128i))]);\n  }\n  s_partial[v_lane] = v_sum;\n  workgroupBarrier();\n  {\n    var v_stride: u32 = u32((128i / 2i));\n    loop {\n      if (!(v_stride > u32(0i))) { break; }\n      if ((v_lane < v_stride)) {\n        s_partial[v_lane] = (s_partial[v_lane] + s_partial[(v_lane + v_stride)]);\n      }\n      workgroupBarrier();\n      continuing {\n        v_stride = (v_stride >> u32(1i));\n      }\n    }\n  }\n  if ((v_lane == u32(0i))) {\n    b_output[cw_block.x] = s_partial[0i];\n  }\n}\n",
+  "metadata": {
+    "workgroupSize": [
+      128,
+      1,
+      1
+    ],
+    "bindings": [
+      {
+        "name": "input",
+        "elementType": "f32",
+        "stride": 4,
+        "binding": 0,
+        "readOnly": true,
+        "atomic": false
+      },
+      {
+        "name": "output",
+        "elementType": "f32",
+        "stride": 4,
+        "binding": 1,
+        "readOnly": false,
+        "atomic": false
+      }
+    ],
+    "scalars": [
+      {
+        "name": "n",
+        "type": "u32",
+        "offset": 0
+      }
+    ],
+    "uniformSize": 16,
+    "uniformBinding": 2,
+    "workgroupStorageBytes": 512,
+    "barrier": "workgroup"
+  }
+}

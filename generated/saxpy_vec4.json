@@ -1,0 +1,47 @@
+{
+  "version": "0.1.0",
+  "name": "saxpy_vec4",
+  "entryPoint": "main",
+  "wgsl": "// CUDA WebShader 0.1.0. Generated from kernel saxpy_vec4.\n@group(0) @binding(0) var<storage, read> b_x: array<vec4<f32>>;\n@group(0) @binding(1) var<storage, read_write> b_y: array<vec4<f32>>;\nstruct CWParams {\n  p_a: f32,\n  p_n4: u32,\n  cw_pad_8: u32,\n  cw_pad_12: u32,\n}\n@group(0) @binding(2) var<uniform> cw_params: CWParams;\nconst cw_block_size: vec3<u32> = vec3<u32>(128u, 1u, 1u);\n\n\n@compute @workgroup_size(128, 1, 1)\nfn main(\n  @builtin(local_invocation_id) cw_thread: vec3<u32>,\n  @builtin(workgroup_id) cw_block: vec3<u32>,\n  @builtin(num_workgroups) cw_grid: vec3<u32>\n) {\n  var v_i: u32 = ((cw_block.x * cw_block_size.x) + cw_thread.x);\n  if ((v_i < cw_params.p_n4)) {\n    var v_xv: vec4<f32> = b_x[v_i];\n    var v_yv: vec4<f32> = b_y[v_i];\n    b_y[v_i] = vec4<f32>(fma(cw_params.p_a, v_xv.x, v_yv.x), fma(cw_params.p_a, v_xv.y, v_yv.y), fma(cw_params.p_a, v_xv.z, v_yv.z), fma(cw_params.p_a, v_xv.w, v_yv.w));\n  }\n}\n",
+  "metadata": {
+    "workgroupSize": [
+      128,
+      1,
+      1
+    ],
+    "bindings": [
+      {
+        "name": "x",
+        "elementType": "vec4<f32>",
+        "stride": 16,
+        "binding": 0,
+        "readOnly": true,
+        "atomic": false
+      },
+      {
+        "name": "y",
+        "elementType": "vec4<f32>",
+        "stride": 16,
+        "binding": 1,
+        "readOnly": false,
+        "atomic": false
+      }
+    ],
+    "scalars": [
+      {
+        "name": "a",
+        "type": "f32",
+        "offset": 0
+      },
+      {
+        "name": "n4",
+        "type": "u32",
+        "offset": 4
+      }
+    ],
+    "uniformSize": 16,
+    "uniformBinding": 2,
+    "workgroupStorageBytes": 0,
+    "barrier": "workgroup-and-storage"
+  }
+}

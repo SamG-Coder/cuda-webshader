@@ -1,0 +1,610 @@
+[
+  {
+    "key": "small-saxpy",
+    "id": "saxpy",
+    "scalars": {
+      "a": 0.125,
+      "n": 262144
+    },
+    "groups": [
+      2048
+    ],
+    "block": [
+      128,
+      1,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "x": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      },
+      "y": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      }
+    }
+  },
+  {
+    "key": "small-saxpy_vec4",
+    "id": "saxpy_vec4",
+    "scalars": {
+      "a": 0.125,
+      "n4": 65536
+    },
+    "groups": [
+      512
+    ],
+    "block": [
+      128,
+      1,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "x": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      },
+      "y": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      }
+    }
+  },
+  {
+    "key": "small-matmul_naive",
+    "id": "matmul_naive",
+    "scalars": {
+      "M": 128,
+      "N": 128,
+      "K": 128
+    },
+    "groups": [
+      16,
+      16
+    ],
+    "block": [
+      8,
+      8,
+      1
+    ],
+    "iterations": 512,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "A": {
+        "type": "Float32Array",
+        "bytes": 65536
+      },
+      "B": {
+        "type": "Float32Array",
+        "bytes": 65536
+      },
+      "C": {
+        "type": "Float32Array",
+        "bytes": 65536
+      }
+    }
+  },
+  {
+    "key": "small-matmul_tiled",
+    "id": "matmul_tiled",
+    "scalars": {
+      "M": 128,
+      "N": 128,
+      "K": 128
+    },
+    "groups": [
+      8,
+      8
+    ],
+    "block": [
+      16,
+      16,
+      1
+    ],
+    "iterations": 512,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "A": {
+        "type": "Float32Array",
+        "bytes": 65536
+      },
+      "B": {
+        "type": "Float32Array",
+        "bytes": 65536
+      },
+      "C": {
+        "type": "Float32Array",
+        "bytes": 65536
+      }
+    }
+  },
+  {
+    "key": "small-matmul_register",
+    "id": "matmul_register",
+    "scalars": {
+      "M": 128,
+      "N": 128,
+      "K": 128
+    },
+    "groups": [
+      8,
+      8
+    ],
+    "block": [
+      8,
+      8,
+      1
+    ],
+    "iterations": 512,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "A": {
+        "type": "Float32Array",
+        "bytes": 65536
+      },
+      "B": {
+        "type": "Float32Array",
+        "bytes": 65536
+      },
+      "C": {
+        "type": "Float32Array",
+        "bytes": 65536
+      }
+    }
+  },
+  {
+    "key": "small-reduce_sum",
+    "id": "reduce_sum",
+    "scalars": {
+      "n": 262144
+    },
+    "groups": [
+      1024
+    ],
+    "block": [
+      128,
+      1,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "input": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      }
+    }
+  },
+  {
+    "key": "small-convolution",
+    "id": "convolution",
+    "scalars": {
+      "n": 262144
+    },
+    "groups": [
+      2048
+    ],
+    "block": [
+      128,
+      1,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "input": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      },
+      "output": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      }
+    }
+  },
+  {
+    "key": "small-histogram",
+    "id": "histogram",
+    "scalars": {
+      "n": 262144
+    },
+    "groups": [
+      256
+    ],
+    "block": [
+      128,
+      1,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "input": {
+        "type": "Uint32Array",
+        "bytes": 1048576
+      },
+      "bins": {
+        "type": "Uint32Array",
+        "bytes": 1024
+      }
+    }
+  },
+  {
+    "key": "small-transpose",
+    "id": "transpose",
+    "scalars": {
+      "width": 512,
+      "height": 512
+    },
+    "groups": [
+      16,
+      16
+    ],
+    "block": [
+      32,
+      8,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "input": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      },
+      "output": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      }
+    }
+  },
+  {
+    "key": "small-particles",
+    "id": "particles",
+    "scalars": {
+      "n": 65536,
+      "dt": 0.01600000075995922,
+      "time": 2.5,
+      "attraction": 1
+    },
+    "groups": [
+      512
+    ],
+    "block": [
+      128,
+      1,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "position": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      },
+      "velocity": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      }
+    }
+  },
+  {
+    "key": "large-saxpy",
+    "id": "saxpy",
+    "scalars": {
+      "a": 0.125,
+      "n": 4194304
+    },
+    "groups": [
+      32768
+    ],
+    "block": [
+      128,
+      1,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "x": {
+        "type": "Float32Array",
+        "bytes": 16777216
+      },
+      "y": {
+        "type": "Float32Array",
+        "bytes": 16777216
+      }
+    }
+  },
+  {
+    "key": "large-saxpy_vec4",
+    "id": "saxpy_vec4",
+    "scalars": {
+      "a": 0.125,
+      "n4": 1048576
+    },
+    "groups": [
+      8192
+    ],
+    "block": [
+      128,
+      1,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "x": {
+        "type": "Float32Array",
+        "bytes": 16777216
+      },
+      "y": {
+        "type": "Float32Array",
+        "bytes": 16777216
+      }
+    }
+  },
+  {
+    "key": "large-matmul_naive",
+    "id": "matmul_naive",
+    "scalars": {
+      "M": 512,
+      "N": 512,
+      "K": 512
+    },
+    "groups": [
+      64,
+      64
+    ],
+    "block": [
+      8,
+      8,
+      1
+    ],
+    "iterations": 512,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "A": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      },
+      "B": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      },
+      "C": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      }
+    }
+  },
+  {
+    "key": "large-matmul_tiled",
+    "id": "matmul_tiled",
+    "scalars": {
+      "M": 512,
+      "N": 512,
+      "K": 512
+    },
+    "groups": [
+      32,
+      32
+    ],
+    "block": [
+      16,
+      16,
+      1
+    ],
+    "iterations": 512,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "A": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      },
+      "B": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      },
+      "C": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      }
+    }
+  },
+  {
+    "key": "large-matmul_register",
+    "id": "matmul_register",
+    "scalars": {
+      "M": 512,
+      "N": 512,
+      "K": 512
+    },
+    "groups": [
+      32,
+      32
+    ],
+    "block": [
+      8,
+      8,
+      1
+    ],
+    "iterations": 512,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "A": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      },
+      "B": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      },
+      "C": {
+        "type": "Float32Array",
+        "bytes": 1048576
+      }
+    }
+  },
+  {
+    "key": "large-reduce_sum",
+    "id": "reduce_sum",
+    "scalars": {
+      "n": 4194304
+    },
+    "groups": [
+      16384
+    ],
+    "block": [
+      128,
+      1,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "input": {
+        "type": "Float32Array",
+        "bytes": 16777216
+      }
+    }
+  },
+  {
+    "key": "large-convolution",
+    "id": "convolution",
+    "scalars": {
+      "n": 4194304
+    },
+    "groups": [
+      32768
+    ],
+    "block": [
+      128,
+      1,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "input": {
+        "type": "Float32Array",
+        "bytes": 16777216
+      },
+      "output": {
+        "type": "Float32Array",
+        "bytes": 16777216
+      }
+    }
+  },
+  {
+    "key": "large-histogram",
+    "id": "histogram",
+    "scalars": {
+      "n": 4194304
+    },
+    "groups": [
+      256
+    ],
+    "block": [
+      128,
+      1,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "input": {
+        "type": "Uint32Array",
+        "bytes": 16777216
+      },
+      "bins": {
+        "type": "Uint32Array",
+        "bytes": 1024
+      }
+    }
+  },
+  {
+    "key": "large-transpose",
+    "id": "transpose",
+    "scalars": {
+      "width": 2048,
+      "height": 2048
+    },
+    "groups": [
+      64,
+      64
+    ],
+    "block": [
+      32,
+      8,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "input": {
+        "type": "Float32Array",
+        "bytes": 16777216
+      },
+      "output": {
+        "type": "Float32Array",
+        "bytes": 16777216
+      }
+    }
+  },
+  {
+    "key": "large-particles",
+    "id": "particles",
+    "scalars": {
+      "n": 262144,
+      "dt": 0.01600000075995922,
+      "time": 2.5,
+      "attraction": 1
+    },
+    "groups": [
+      2048
+    ],
+    "block": [
+      128,
+      1,
+      1
+    ],
+    "iterations": 2048,
+    "samples": 9,
+    "warmup": 5,
+    "buffers": {
+      "position": {
+        "type": "Float32Array",
+        "bytes": 4194304
+      },
+      "velocity": {
+        "type": "Float32Array",
+        "bytes": 4194304
+      }
+    }
+  }
+]
