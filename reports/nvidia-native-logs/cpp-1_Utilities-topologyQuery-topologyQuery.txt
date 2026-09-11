@@ -1,0 +1,3 @@
+GPU0 <-> CPU:
+  * Atomic Supported: no
+

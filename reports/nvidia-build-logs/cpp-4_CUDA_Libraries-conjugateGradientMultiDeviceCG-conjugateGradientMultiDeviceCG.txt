@@ -1,0 +1,6 @@
+[  0%] Building CUDA object cpp/4_CUDA_Libraries/conjugateGradientMultiDeviceCG/CMakeFiles/conjugateGradientMultiDeviceCG.dir/conjugateGradientMultiDeviceCG.cu.obj
+conjugateGradientMultiDeviceCG.cu
+tmpxft_0000958c_00000000-7_conjugateGradientMultiDeviceCG.cudafe1.cpp
+[100%] Linking CUDA executable conjugateGradientMultiDeviceCG.exe
+[100%] Built target conjugateGradientMultiDeviceCG
+

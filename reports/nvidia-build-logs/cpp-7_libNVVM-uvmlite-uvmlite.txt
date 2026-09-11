@@ -1,0 +1,5 @@
+Building C object cpp/7_libNVVM/uvmlite/CMakeFiles/uvmlite.dir/uvmlite.c.obj
+uvmlite.c
+Linking C executable uvmlite.exe
+Built target uvmlite
+

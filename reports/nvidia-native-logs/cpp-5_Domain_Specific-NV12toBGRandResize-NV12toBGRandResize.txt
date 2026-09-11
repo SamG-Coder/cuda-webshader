@@ -1,0 +1,11 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+
+TEST#1:
+  CUDA resize nv12(32x32 --> 16x16), batch: 1, average time: 0.052 ms ==> 0.052 ms/frame
+  CUDA convert nv12(16x16) to bgr(16x16), batch: 1, average time: 0.023 ms ==> 0.023 ms/frame
+
+TEST#2:
+  CUDA convert nv12(32x32) to bgr(32x32), batch: 1, average time: 0.014 ms ==> 0.014 ms/frame
+  CUDA resize bgr(32x32 --> 16x16), batch: 1, average time: 0.040 ms ==> 0.040 ms/frame
+

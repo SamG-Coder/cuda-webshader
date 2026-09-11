@@ -1,0 +1,16 @@
+[ 50%] Building CXX object cpp/5_Domain_Specific/simpleD3D11Texture/CMakeFiles/simpleD3D11Texture.dir/simpleD3D11Texture.cpp.obj
+simpleD3D11Texture.cpp
+[ 50%] Building CXX object cpp/5_Domain_Specific/simpleD3D11Texture/CMakeFiles/simpleD3D11Texture.dir/__/__/__/Common/rendercheck_d3d11.cpp.obj
+rendercheck_d3d11.cpp
+[ 50%] Building CUDA object cpp/5_Domain_Specific/simpleD3D11Texture/CMakeFiles/simpleD3D11Texture.dir/texture_2d.cu.obj
+texture_2d.cu
+tmpxft_00002b70_00000000-7_texture_2d.cudafe1.cpp
+[ 50%] Building CUDA object cpp/5_Domain_Specific/simpleD3D11Texture/CMakeFiles/simpleD3D11Texture.dir/texture_3d.cu.obj
+texture_3d.cu
+tmpxft_0000ac30_00000000-7_texture_3d.cudafe1.cpp
+[100%] Building CUDA object cpp/5_Domain_Specific/simpleD3D11Texture/CMakeFiles/simpleD3D11Texture.dir/texture_cube.cu.obj
+texture_cube.cu
+tmpxft_000045a8_00000000-7_texture_cube.cudafe1.cpp
+[100%] Linking CXX executable simpleD3D11Texture.exe
+[100%] Built target simpleD3D11Texture
+

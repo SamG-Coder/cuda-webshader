@@ -1,0 +1,12 @@
+newdelete Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+ > Container = Vector test OK
+
+ > Container = Vector, using placement new on SMEM buffer test OK
+
+ > Container = Vector, with user defined datatype test OK
+
+Test Summary: 3/3 succesfully run
+

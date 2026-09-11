@@ -1,0 +1,6 @@
+[100%] Building CUDA object cpp/4_CUDA_Libraries/cubDeviceFind/CMakeFiles/cubDeviceFind.dir/cubDeviceFind.cu.obj
+cubDeviceFind.cu
+tmpxft_00003178_00000000-7_cubDeviceFind.cudafe1.cpp
+[100%] Linking CUDA executable cubDeviceFind.exe
+[100%] Built target cubDeviceFind
+

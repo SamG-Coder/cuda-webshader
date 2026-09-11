@@ -1,0 +1,10 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Generic memory compression support is available
+Running saxpy on 167772160 bytes of Compressible memory
+Running saxpy with 168 blocks x 768 threads = 0.064 ms 7.920 TB/s
+Running saxpy on 167772160 bytes of Non-Compressible memory
+Running saxpy with 168 blocks x 768 threads = 0.604 ms 0.833 TB/s
+
+NOTE: The CUDA Samples are not meant for performance measurements. Results may vary when GPU Boost is enabled.
+

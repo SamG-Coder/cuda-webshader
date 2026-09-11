@@ -1,0 +1,6 @@
+Building CUDA object cpp/4_CUDA_Libraries/cubDeviceSegmentedScan/CMakeFiles/cubDeviceSegmentedScan.dir/cubDeviceSegmentedScan.cu.obj
+cubDeviceSegmentedScan.cu
+tmpxft_00009af4_00000000-7_cubDeviceSegmentedScan.cudafe1.cpp
+Linking CUDA executable cubDeviceSegmentedScan.exe
+Built target cubDeviceSegmentedScan
+

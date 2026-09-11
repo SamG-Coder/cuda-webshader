@@ -1,0 +1,20 @@
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\2_Concepts_and_Techniques\scalarProd\scalarProd.exe Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Initializing data...
+...allocating CPU memory.
+...allocating GPU memory.
+...generating input data in CPU mem.
+...copying input data to GPU mem.
+Data init done.
+Executing GPU kernel...
+GPU time: 0.553200 msecs.
+Reading back GPU result...
+Checking GPU results...
+..running CPU scalar product calculation
+...comparing the results
+Shutting down...
+L1 error: 2.857647E-08
+Test passed
+

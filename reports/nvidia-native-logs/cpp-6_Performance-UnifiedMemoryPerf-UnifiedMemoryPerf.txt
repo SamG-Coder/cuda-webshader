@@ -1,0 +1,18 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Running ........................................................
+
+Overall Time For matrixMultiplyPerf 
+
+Printing Average of 1 measurements in (ms)
+Size_KB	 UMhint	UMhntAs	 UMeasy	  0Copy	MemCopy	CpAsync	CpHpglk	CpPglAs
+4	  0.649	  0.680	  0.613	  0.150	  0.440	  0.155	  0.225	  0.358
+16	  0.604	  0.612	  0.601	  0.145	  0.239	  0.180	  0.312	  0.308
+64	  0.619	  0.727	  0.596	  0.197	  0.198	  0.196	  0.217	  0.224
+256	  2.057	  2.159	  1.978	  0.569	  0.240	  0.229	  0.284	  0.317
+1024	  8.249	  8.269	  8.364	  3.062	  0.918	  0.518	  0.571	  0.677
+4096	 32.923	 32.714	 31.244	 22.955	  2.320	  2.326	  1.967	  2.380
+16384	135.249	130.324	126.807	147.801	 12.293	  9.936	  8.988	  9.648
+
+NOTE: The CUDA Samples are not meant for performance measurements. Results may vary when GPU Boost is enabled.
+

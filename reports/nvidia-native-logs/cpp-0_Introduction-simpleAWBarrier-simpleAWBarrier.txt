@@ -1,0 +1,7 @@
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\0_Introduction\simpleAWBarrier\simpleAWBarrier.exe starting...
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Launching normVecByDotProductAWBarrier kernel with numBlocks = 168 blockSize = 768
+Result = PASSED
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\0_Introduction\simpleAWBarrier\simpleAWBarrier.exe completed, returned OK
+

@@ -1,0 +1,12 @@
+simpleTexture starting...
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Loaded 'teapot512.pgm', 512 x 512 pixels
+Processing time: 0.012700 (ms)
+20641.26 Mpixels/sec
+Wrote './teapot512_out.pgm'
+Comparing files
+	output:    <./teapot512_out.pgm>
+	reference: <./ref_rotated.pgm>
+simpleTexture completed, returned OK
+

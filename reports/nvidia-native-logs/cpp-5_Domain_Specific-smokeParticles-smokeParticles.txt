@@ -1,0 +1,17 @@
+CUDA Smoke Particles Starting...
+
+NOTE: The CUDA Samples are not meant for performance measurements. Results may vary when GPU Boost is enabled.
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+sdkDumpBin: <smokeParticles_pos.bin>
+sdkDumpBin: <smokeParticles_vel.bin>
+> compareBin2Bin <float> nelements=1048576, epsilon=10.00, threshold=0.40
+   src_file <smokeParticles_pos.bin>, size=1048576 bytes
+   ref_file <./data/ref_smokePart_pos.bin>, size=1048576 bytes
+  OK
+> compareBin2Bin <float> nelements=1048576, epsilon=10.00, threshold=0.40
+   src_file <smokeParticles_vel.bin>, size=1048576 bytes
+   ref_file <./data/ref_smokePart_vel.bin>, size=1048576 bytes
+  OK
+

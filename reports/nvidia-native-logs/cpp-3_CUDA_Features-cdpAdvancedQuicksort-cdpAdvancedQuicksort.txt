@@ -1,0 +1,7 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+GPU device NVIDIA GeForce RTX 5080 has compute capabilities (SM 12.0)
+Running qsort on 1000000 elements with seed 0, on NVIDIA GeForce RTX 5080
+    cdpAdvancedQuicksort PASSED
+Sorted 1000000 elems in 11.940 ms (83.754 Melems/sec)
+

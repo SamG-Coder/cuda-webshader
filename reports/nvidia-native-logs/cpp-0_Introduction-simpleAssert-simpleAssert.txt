@@ -1,0 +1,19 @@
+simpleAssert starting...
+
+GPU Device 0: with compute capability 12.0 and Number of SMs 84
+
+Launch kernel to generate assertion failures
+
+-- Begin assert output
+
+
+-- End assert output
+
+Device assert failed as expected, CUDA error message is: device-side assert triggered
+
+simpleAssert completed, returned OK
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\0_Introduction\simpleAssert\simpleAssert.cu:46: block: [1,0,0], thread: [28,0,0] Assertion `gtid < N` failed.
+D:\cuda-webshader\.local\nvidia-audit\cpp\0_Introduction\simpleAssert\simpleAssert.cu:46: block: [1,0,0], thread: [29,0,0] Assertion `gtid < N` failed.
+D:\cuda-webshader\.local\nvidia-audit\cpp\0_Introduction\simpleAssert\simpleAssert.cu:46: block: [1,0,0], thread: [30,0,0] Assertion `gtid < N` failed.
+D:\cuda-webshader\.local\nvidia-audit\cpp\0_Introduction\simpleAssert\simpleAssert.cu:46: block: [1,0,0], thread: [31,0,0] Assertion `gtid < N` failed.

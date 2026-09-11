@@ -1,0 +1,11 @@
+[  0%] Building CXX object cpp/6_Performance/UnifiedMemoryPerf/CMakeFiles/UnifiedMemoryPerf.dir/helperFunctions.cpp.obj
+helperFunctions.cpp
+[100%] Building CUDA object cpp/6_Performance/UnifiedMemoryPerf/CMakeFiles/UnifiedMemoryPerf.dir/matrixMultiplyPerf.cu.obj
+matrixMultiplyPerf.cu
+tmpxft_00008d70_00000000-7_matrixMultiplyPerf.cudafe1.cpp
+[100%] Building CUDA object cpp/6_Performance/UnifiedMemoryPerf/CMakeFiles/UnifiedMemoryPerf.dir/commonKernels.cu.obj
+commonKernels.cu
+tmpxft_000079f8_00000000-7_commonKernels.cudafe1.cpp
+[100%] Linking CXX executable UnifiedMemoryPerf.exe
+[100%] Built target UnifiedMemoryPerf
+

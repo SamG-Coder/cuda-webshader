@@ -1,0 +1,14 @@
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\5_Domain_Specific\bilateralFilter\bilateralFilter.exe Starting...
+
+Loading ./data/nature_monte.bmp...
+BMP width: 640
+BMP height: 480
+BMP file loaded successfully!
+Loaded './data/nature_monte.bmp', 640 x 480 pixels
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+[runSingleTest]: [CUDA Bilateral Filter]
+CUDA Bilateral Filter (radius=5) (passes=1) Image is Matching  <ref_05.ppm>
+
+

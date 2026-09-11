@@ -1,0 +1,14 @@
+CUDA bindlessTexture Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+  Device 0: <       Blackwell >, Compute SM 12.0 detected
+Loaded './data/flower.ppm', 600 x 450 pixels
+Loaded './data/person.ppm', 600 x 450 pixels
+Loaded './data/sponge.ppm', 640 x 480 pixels
+sdkDumpBin: <bindlessTexture.bin>
+> compareBin2Bin <float> nelements=262144, epsilon=5.00, threshold=0.15
+   src_file <bindlessTexture.bin>, size=1048576 bytes
+   ref_file <././data/ref_bindlessTexture.bin>, size=1048576 bytes
+  OK
+

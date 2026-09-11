@@ -1,0 +1,12 @@
+[  0%] Building CXX object cpp/5_Domain_Specific/MonteCarloMultiGPU/CMakeFiles/MonteCarloMultiGPU.dir/MonteCarlo_gold.cpp.obj
+MonteCarlo_gold.cpp
+[  0%] Building CUDA object cpp/5_Domain_Specific/MonteCarloMultiGPU/CMakeFiles/MonteCarloMultiGPU.dir/MonteCarlo_kernel.cu.obj
+MonteCarlo_kernel.cu
+tmpxft_0000703c_00000000-7_MonteCarlo_kernel.cudafe1.cpp
+[  0%] Building CXX object cpp/5_Domain_Specific/MonteCarloMultiGPU/CMakeFiles/MonteCarloMultiGPU.dir/multithreading.cpp.obj
+multithreading.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/MonteCarloMultiGPU/CMakeFiles/MonteCarloMultiGPU.dir/MonteCarloMultiGPU.cpp.obj
+MonteCarloMultiGPU.cpp
+[100%] Linking CXX executable MonteCarloMultiGPU.exe
+[100%] Built target MonteCarloMultiGPU
+

@@ -1,0 +1,17 @@
+GPU Device 0: compute capability 12.0, 84 SMs
+
+Reducing 16777216 elements
+Threads per block   : 512
+Graph launch iterations: 3
+
+=== Explicit Graph Construction ===
+Graph node count: 5
+[cudaGraphsManual] Host callback final reduced sum = 65281.992188
+[cudaGraphsManual] Host callback final reduced sum = 65281.992188
+[cudaGraphsManual] Host callback final reduced sum = 65281.992188
+
+Cloned graph:
+[cudaGraphsManual] Host callback final reduced sum = 65281.992188
+[cudaGraphsManual] Host callback final reduced sum = 65281.992188
+[cudaGraphsManual] Host callback final reduced sum = 65281.992188
+

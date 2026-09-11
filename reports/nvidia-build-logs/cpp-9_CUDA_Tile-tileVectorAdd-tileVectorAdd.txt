@@ -1,0 +1,6 @@
+[  0%] Building CUDA object cpp/9_CUDA_Tile/tileVectorAdd/CMakeFiles/tileVectorAdd.dir/tileVectorAdd.cu.obj
+tileVectorAdd.cu
+tmpxft_00003cf8_00000000-8_tileVectorAdd.cudafe1.cpp
+[100%] Linking CUDA executable tileVectorAdd.exe
+[100%] Built target tileVectorAdd
+

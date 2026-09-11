@@ -1,0 +1,11 @@
+Hello, SIMT!
+[SIMT] *x == 0
+[SIMT] *x = 100
+
+Hello, Tile!
+[Tile] *x == 100
+[Tile] *x = 200
+
+Hello, Host!
+[Host] *x == 200
+

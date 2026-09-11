@@ -1,0 +1,27 @@
+=== Atomic vs. non-atomic operations (intrinsics, cuda::std::atomic_ref, cuda::atomic_ref) ===
+
+GPU Device 0: with compute capability 12.0 and Number of SMs 84
+
+1000000 total threads in 1000 blocks writing into 10 array elements
+
+[add] expected: every element = 100000
+non-atomic                           (0.594432 ms): { 34 34 34 34 34 34 34 34 34 34 }
+atomicAdd()                          (0.150048 ms): { 100000 100000 100000 100000 100000 100000 100000 100000 100000 100000 }
+cuda::std::atomic_ref::fetch_add()   (0.138464 ms): { 100000 100000 100000 100000 100000 100000 100000 100000 100000 100000 }
+cuda::atomic_ref::fetch_add()        (0.139712 ms): { 100000 100000 100000 100000 100000 100000 100000 100000 100000 100000 }
+
+[max] expected: element i = 999990 + i
+non-atomic                                     (0.010816 ms): { 999360 999361 999352 999353 999354 999355 999356 999357 999358 999359 }
+atomicMax()                                    (0.146528 ms): { 999990 999991 999992 999993 999994 999995 999996 999997 999998 999999 }
+cuda::std::atomic_ref::compare_exchange_weak() (0.322592 ms): { 999990 999991 999992 999993 999994 999995 999996 999997 999998 999999 }
+cuda::atomic_ref::compare_exchange_weak()      (0.313888 ms): { 999990 999991 999992 999993 999994 999995 999996 999997 999998 999999 }
+
+[CAS] expected: every element = 100000
+non-atomic                                     (0.021728 ms): { 34 34 34 34 34 34 34 34 34 34 }
+atomicCAS()                                    (1155.1 ms): { 100000 100000 100000 100000 100000 100000 100000 100000 100000 100000 }
+cuda::std::atomic_ref::compare_exchange_weak() (864.589 ms): { 100000 100000 100000 100000 100000 100000 100000 100000 100000 100000 }
+cuda::atomic_ref::compare_exchange_weak()      (871.555 ms): { 100000 100000 100000 100000 100000 100000 100000 100000 100000 100000 }
+
+The non-atomic kernels lose updates when threads race on the same
+element; the atomic kernels match the expected values exactly.
+

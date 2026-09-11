@@ -1,0 +1,6 @@
+Building CUDA object cpp/9_CUDA_Tile/tileRope/CMakeFiles/tileRope.dir/tileRope.cu.obj
+tileRope.cu
+tmpxft_00005a68_00000000-8_tileRope.cudafe1.cpp
+Linking CUDA executable tileRope.exe
+Built target tileRope
+

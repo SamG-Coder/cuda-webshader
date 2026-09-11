@@ -1,0 +1,10 @@
+Building CUDA PTX: D:/cuda-webshader/.local/nvidia-audit-build/cpp/3_CUDA_Features/ptxjit/ptxjit_kernel64.ptx
+ptxjit_kernel.cu
+Built target generate_ptxjit_ptx
+Building CXX object cpp/3_CUDA_Features/ptxjit/CMakeFiles/ptxjit.dir/ptxjit.cpp.obj
+ptxjit.cpp
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\ptxjit\ptxjit.cpp(117): warning C4312: 'type cast': conversion from 'long' to 'void *' of greater size
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\ptxjit\ptxjit.cpp(123): warning C4312: 'type cast': conversion from 'long' to 'void *' of greater size
+Linking CXX executable ptxjit.exe
+Built target ptxjit
+

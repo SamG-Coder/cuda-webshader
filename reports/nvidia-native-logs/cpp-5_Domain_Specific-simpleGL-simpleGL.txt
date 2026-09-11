@@ -1,0 +1,11 @@
+simpleGL (VBO) starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+sdkDumpBin: <simpleGL.bin>
+> compareBin2Bin <float> nelements=262144, epsilon=10.00, threshold=0.30
+   src_file <simpleGL.bin>, size=262144 bytes
+   ref_file <././data/ref_simpleGL.bin>, size=262144 bytes
+  OK
+simpleGL (VBO) completed, returned OK
+

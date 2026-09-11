@@ -1,0 +1,15 @@
+reductionMultiBlockCG Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+33554432 elements
+numThreads: 768
+numBlocks: 84
+
+Launching SinglePass Multi Block Cooperative Groups kernel
+Average time: 0.210094 ms
+Bandwidth:    638.845973 GB/s
+
+GPU result = 130563.984375000000
+CPU result = 130563.984375000000
+

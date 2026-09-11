@@ -1,0 +1,10 @@
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\2_Concepts_and_Techniques\radixSortThrust\radixSortThrust.exe Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+
+Sorting 1048576 32-bit unsigned int keys and values
+
+radixSortThrust, Throughput = 1604.4945 MElements/s, Time = 0.00065 s, Size = 1048576 elements
+Test passed
+

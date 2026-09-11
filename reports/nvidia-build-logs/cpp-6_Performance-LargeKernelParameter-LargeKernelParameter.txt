@@ -1,0 +1,6 @@
+Building CUDA object cpp/6_Performance/LargeKernelParameter/CMakeFiles/LargeKernelParameter.dir/LargeKernelParameter.cu.obj
+LargeKernelParameter.cu
+tmpxft_0000d7dc_00000000-7_LargeKernelParameter.cudafe1.cpp
+Linking CUDA executable LargeKernelParameter.exe
+Built target LargeKernelParameter
+

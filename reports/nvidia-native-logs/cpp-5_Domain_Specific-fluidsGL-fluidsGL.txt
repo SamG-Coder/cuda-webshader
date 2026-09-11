@@ -1,0 +1,19 @@
+fluidsGL Starting...
+
+NOTE: The CUDA Samples are not meant for performance measurements. Results may vary when GPU Boost is enabled.
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+CUDA device [NVIDIA GeForce RTX 5080] has 84 Multi-Processors
+> (Frame 100) Readback BackBuffer
+> Saving PPM: <fluidsGL.ppm>
+   src_file <fluidsGL.ppm>
+   ref_file <./data/ref_fluidsGL.ppm>
+23.62(%) of bytes mismatched (count=247636)
+[fluidsGL] - Test Results: 0 Failures
+
+> Compare (a)rendered:  <fluidsGL.ppm>
+>         (b)reference: <./data/ref_fluidsGL.ppm>
+PPMvsPPM: comparing images size (512,512) epsilon(1), threshold(25%)
+    OK
+

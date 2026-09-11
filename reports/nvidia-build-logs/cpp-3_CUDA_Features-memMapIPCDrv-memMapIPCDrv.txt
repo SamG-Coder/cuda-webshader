@@ -1,0 +1,10 @@
+[ 50%] Building CUDA PTX: D:/cuda-webshader/.local/nvidia-audit-build/cpp/3_CUDA_Features/memMapIPCDrv/memMapIpc_kernel64.ptx
+memMapIpc_kernel.cu
+[ 50%] Built target generate_memMapIpc_ptx
+[100%] Building CXX object cpp/3_CUDA_Features/memMapIPCDrv/CMakeFiles/memMapIPCDrv.dir/memMapIpc.cpp.obj
+memMapIpc.cpp
+[100%] Building CXX object cpp/3_CUDA_Features/memMapIPCDrv/CMakeFiles/memMapIPCDrv.dir/__/__/__/Common/helper_multiprocess.cpp.obj
+helper_multiprocess.cpp
+[100%] Linking CXX executable memMapIPCDrv.exe
+[100%] Built target memMapIPCDrv
+

@@ -1,0 +1,7 @@
+Vector Addition (Driver API)
+> Using CUDA Device [0]: NVIDIA GeForce RTX 5080
+Device 0 VIRTUAL ADDRESS MANAGEMENT SUPPORTED = 1.
+> findModulePath found file at <./vectorAdd_kernel64.fatbin>
+> initCUDA loading module: <./vectorAdd_kernel64.fatbin>
+Result = PASS
+

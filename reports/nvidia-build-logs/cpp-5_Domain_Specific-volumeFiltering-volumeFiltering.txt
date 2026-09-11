@@ -1,0 +1,13 @@
+[  0%] Building CXX object cpp/5_Domain_Specific/volumeFiltering/CMakeFiles/volumeFiltering.dir/volume.cpp.obj
+volume.cpp
+[100%] Building CUDA object cpp/5_Domain_Specific/volumeFiltering/CMakeFiles/volumeFiltering.dir/volumeFilter_kernel.cu.obj
+volumeFilter_kernel.cu
+tmpxft_000009b0_00000000-7_volumeFilter_kernel.cudafe1.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/volumeFiltering/CMakeFiles/volumeFiltering.dir/volumeFiltering.cpp.obj
+volumeFiltering.cpp
+[100%] Building CUDA object cpp/5_Domain_Specific/volumeFiltering/CMakeFiles/volumeFiltering.dir/volumeRender_kernel.cu.obj
+volumeRender_kernel.cu
+tmpxft_00004f58_00000000-7_volumeRender_kernel.cudafe1.cpp
+[100%] Linking CXX executable volumeFiltering.exe
+[100%] Built target volumeFiltering
+

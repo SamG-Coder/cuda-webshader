@@ -1,0 +1,4 @@
+Random sparse matrix: rows=100000, cols=100000, nnz=1598745, avg nnz/row=16.0
+Tile configuration: ROWS=64, COLS=16 (1563 slices)
+Success! Tile SpMV matches the CPU reference.
+

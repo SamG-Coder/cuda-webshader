@@ -1,0 +1,20 @@
+Building CUDA object cpp/3_CUDA_Features/simpleCudaGraphs/CMakeFiles/simpleCudaGraphs_explicit.dir/simpleCudaGraphs_explicit.cu.obj
+simpleCudaGraphs_explicit.cu
+tmpxft_0000ddf4_00000000-7_simpleCudaGraphs_explicit.cudafe1.cpp
+Linking CUDA device code CMakeFiles\simpleCudaGraphs_explicit.dir\cmake_device_link.obj
+simpleCudaGraphs_explicit.cu.obj
+cudadevrt.lib
+cudart.lib
+kernel32.lib
+user32.lib
+gdi32.lib
+winspool.lib
+shell32.lib
+ole32.lib
+oleaut32.lib
+uuid.lib
+comdlg32.lib
+advapi32.lib
+Linking CUDA executable simpleCudaGraphs_explicit.exe
+Built target simpleCudaGraphs_explicit
+

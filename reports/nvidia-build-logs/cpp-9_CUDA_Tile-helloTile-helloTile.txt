@@ -1,0 +1,6 @@
+Building CUDA object cpp/9_CUDA_Tile/helloTile/CMakeFiles/helloTile.dir/helloTile.cu.obj
+helloTile.cu
+tmpxft_0000338c_00000000-8_helloTile.cudafe1.cpp
+Linking CUDA executable helloTile.exe
+Built target helloTile
+

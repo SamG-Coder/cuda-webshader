@@ -1,0 +1,8 @@
+[  0%] Building CUDA object cpp/5_Domain_Specific/fastWalshTransform/CMakeFiles/fastWalshTransform.dir/fastWalshTransform.cu.obj
+fastWalshTransform.cu
+tmpxft_00003c2c_00000000-7_fastWalshTransform.cudafe1.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/fastWalshTransform/CMakeFiles/fastWalshTransform.dir/fastWalshTransform_gold.cpp.obj
+fastWalshTransform_gold.cpp
+[100%] Linking CXX executable fastWalshTransform.exe
+[100%] Built target fastWalshTransform
+

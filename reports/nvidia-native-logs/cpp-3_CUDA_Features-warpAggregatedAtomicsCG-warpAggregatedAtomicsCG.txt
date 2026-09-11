@@ -1,0 +1,6 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+CPU max matches GPU max
+
+Warp Aggregated Atomics PASSED 
+

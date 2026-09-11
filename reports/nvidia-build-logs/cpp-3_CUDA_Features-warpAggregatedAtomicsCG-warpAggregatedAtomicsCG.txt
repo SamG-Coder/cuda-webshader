@@ -1,0 +1,6 @@
+[  0%] Building CUDA object cpp/3_CUDA_Features/warpAggregatedAtomicsCG/CMakeFiles/warpAggregatedAtomicsCG.dir/warpAggregatedAtomicsCG.cu.obj
+warpAggregatedAtomicsCG.cu
+tmpxft_0000e0bc_00000000-7_warpAggregatedAtomicsCG.cudafe1.cpp
+[100%] Linking CUDA executable warpAggregatedAtomicsCG.exe
+[100%] Built target warpAggregatedAtomicsCG
+

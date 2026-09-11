@@ -1,0 +1,20 @@
+CUDA Particles Simulation Starting...
+
+NOTE: The CUDA Samples are not meant for performance measurements. Results may vary when GPU Boost is enabled.
+
+grid: 64 x 64 x 64 = 262144 cells
+particles: 16384
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Run 16384 particles simulation for 1 iterations...
+
+particles, Throughput = 37612.4861 KParticles/s, Time = 0.00044 s, Size = 16384 particles, NumDevsUsed = 1, Workgroup = 0
+
+Checking result...
+
+sdkDumpBin: <particles.bin>
+> compareBin2Bin <float> nelements=65536, epsilon=5.00, threshold=0.30
+   src_file <particles.bin>, size=262144 bytes
+   ref_file <./data/ref_particles.bin>, size=262144 bytes
+  OK
+

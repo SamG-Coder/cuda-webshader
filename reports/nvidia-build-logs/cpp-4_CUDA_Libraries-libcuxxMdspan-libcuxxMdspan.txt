@@ -1,0 +1,6 @@
+Building CUDA object cpp/4_CUDA_Libraries/libcuxxMdspan/CMakeFiles/libcuxxMdspan.dir/libcuxxMdspan.cu.obj
+libcuxxMdspan.cu
+tmpxft_00002544_00000000-7_libcuxxMdspan.cudafe1.cpp
+Linking CUDA executable libcuxxMdspan.exe
+Built target libcuxxMdspan
+

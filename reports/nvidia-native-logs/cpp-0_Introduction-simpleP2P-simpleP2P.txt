@@ -1,0 +1,6 @@
+[D:\cuda-webshader\.local\nvidia-audit-build\cpp\0_Introduction\simpleP2P\simpleP2P.exe] - Starting...
+Checking for multiple GPUs...
+CUDA-capable device count: 1
+Two or more GPUs with Peer-to-Peer access capability are required for D:\cuda-webshader\.local\nvidia-audit-build\cpp\0_Introduction\simpleP2P\simpleP2P.exe.
+Waiving test.
+

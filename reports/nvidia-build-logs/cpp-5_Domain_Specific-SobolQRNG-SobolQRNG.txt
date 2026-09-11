@@ -1,0 +1,12 @@
+[  0%] Building CXX object cpp/5_Domain_Specific/SobolQRNG/CMakeFiles/SobolQRNG.dir/sobol_gold.cpp.obj
+sobol_gold.cpp
+[  0%] Building CUDA object cpp/5_Domain_Specific/SobolQRNG/CMakeFiles/SobolQRNG.dir/sobol_gpu.cu.obj
+sobol_gpu.cu
+tmpxft_0000471c_00000000-7_sobol_gpu.cudafe1.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/SobolQRNG/CMakeFiles/SobolQRNG.dir/sobol_primitives.cpp.obj
+sobol_primitives.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/SobolQRNG/CMakeFiles/SobolQRNG.dir/sobol.cpp.obj
+sobol.cpp
+[100%] Linking CXX executable SobolQRNG.exe
+[100%] Built target SobolQRNG
+

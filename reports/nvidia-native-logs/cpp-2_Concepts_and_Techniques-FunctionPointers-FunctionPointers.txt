@@ -1,0 +1,9 @@
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\2_Concepts_and_Techniques\FunctionPointers\FunctionPointers.exe Starting...
+
+[CUDA Function Pointers (SobelFilter)] (automated testing w/ readback)
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Reading image: teapot512.pgm
+AutoTest: CUDA Function Pointers (SobelFilter) <No Filtering>
+Test passed!
+

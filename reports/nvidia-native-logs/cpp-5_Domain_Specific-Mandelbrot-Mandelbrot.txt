@@ -1,0 +1,12 @@
+[CUDA Mandelbrot/Julia Set] - Starting...
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+* Running Automatic Test: <CUDA Mandelbrot/Julia Set>
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Data initialization done.
+
+[rendered_image.ppm], Mandelbrot Set, (fp32 single precision) -> Saved File
+2.72(%) of bytes mismatched (count=52153)
+Images "Mandelbrot_fp32.ppm", "rendered_image.ppm" are matching
+

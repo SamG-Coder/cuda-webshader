@@ -1,0 +1,5 @@
+CUDA Clock sample
+GPU Device 0: with compute capability 12.0 and Number of SMs 84
+
+Average clocks/block = 1786.296875
+

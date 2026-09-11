@@ -1,0 +1,38 @@
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\5_Domain_Specific\FDTD3d\FDTD3d.exe Starting...
+
+Set-up, based upon target device GMEM size...
+ getTargetDeviceGlobalMemSize
+ cudaGetDeviceCount
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+ cudaGetDeviceProperties
+ generateRandomData
+
+FDTD on 248 x 248 x 248 volume with symmetric filter radius 4 for 5 timesteps...
+
+fdtdReference...
+ calloc intermediate
+ Host FDTD loop
+	t = 0
+	t = 1
+	t = 2
+	t = 3
+	t = 4
+
+fdtdReference complete
+fdtdGPU...
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+ set block size to 32x16
+ set grid size to 8x16
+ GPU FDTD loop
+	t = 0 launch kernel
+	t = 1 launch kernel
+	t = 2 launch kernel
+	t = 3 launch kernel
+	t = 4 launch kernel
+
+fdtdGPU complete
+
+CompareData (tolerance 0.000100)...
+

@@ -1,0 +1,12 @@
+[globalToShmemAsyncCopy] - Starting...
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+MatrixA(1280,1280), MatrixB(1280,1280)
+Running kernel = 0 - AsyncCopyMultiStageLargeChunk
+Computing result using CUDA Kernel...
+done
+Performance= 3992.36 GFlop/s, Time= 1.051 msec, Size= 4194304000 Ops, WorkgroupSize= 256 threads/block
+Checking computed result for correctness: Result = PASS
+
+NOTE: The CUDA Samples are not meant for performance measurements. Results may vary when GPU Boost is enabled.
+

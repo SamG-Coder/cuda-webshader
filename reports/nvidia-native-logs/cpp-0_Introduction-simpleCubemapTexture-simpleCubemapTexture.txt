@@ -1,0 +1,8 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+CUDA device [NVIDIA GeForce RTX 5080] has 84 Multi-Processors SM 12.0
+Covering Cubemap data array of 64~3 x 1: Grid size is 8 x 8, each block has 8 x 8 threads
+Processing time: 0.010 msec
+2482.42 Mtexlookups/sec
+Comparing kernel output to expected data
+

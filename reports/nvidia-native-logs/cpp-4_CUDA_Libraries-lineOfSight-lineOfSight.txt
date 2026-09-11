@@ -1,0 +1,8 @@
+[D:\cuda-webshader\.local\nvidia-audit-build\cpp\4_CUDA_Libraries\lineOfSight\lineOfSight.exe] - Starting...
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Line of sight
+Average time: 0.123440 ms
+
+Test passed
+

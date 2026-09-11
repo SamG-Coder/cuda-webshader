@@ -1,0 +1,12 @@
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\5_Domain_Specific\dwtHaar1D\dwtHaar1D.exe Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+source file    = "./data/signal.dat"
+reference file = "result.dat"
+gold file      = "./data/regression.gold.dat"
+Reading signal from "./data/signal.dat"
+Writing result to "result.dat"
+Reading reference result from "./data/regression.gold.dat"
+Test success!
+

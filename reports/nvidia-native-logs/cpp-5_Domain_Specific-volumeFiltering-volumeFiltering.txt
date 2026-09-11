@@ -1,0 +1,21 @@
+CUDA 3D Volume Filtering Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Read './data/ref_volumefilter.ppm', 32768 bytes
+Press 
+  'SPACE'     to toggle animation
+  'p'         to toggle pre-integrated transfer function
+  '+' and '-' to change density (0.01 increments)
+  ']' and '[' to change brightness
+  ';' and ''' to modify transfer function offset
+  '.' and ',' to modify transfer function scale
+
+volumeFiltering, Throughput = 3428.0633 MTexels/s, Time = 0.00008 s, Size = 262144 Texels, NumDevsUsed = 1, Workgroup = 256
+16.35(%) of bytes mismatched (count=171455)
+
+> Compare (a)rendered:  <volumefilter.ppm>
+>         (b)reference: <./data/ref_volumefilter.ppm>
+PPMvsPPM: comparing images size (512,512) epsilon(5), threshold(30%)
+    OK
+

@@ -48,6 +48,13 @@ technology; no affiliation, endorsement or trademark rights are granted.
 
 Primary license references:
 
+The extracted NVIDIA kernels in `showcases/nvidia/kernels/` and their translated
+WGSL in `showcases/nvidia/artifacts.json` are also BSD-3-Clause, not MIT. Each
+CUDA file retains the original NVIDIA notice. The artifact manifest records
+the upstream file and entry name; `reports/nvidia-audit.json` records the exact
+upstream revision. The explorer, fixture harness and audit scripts are original
+project code under MIT.
+
 - [MIT license text](https://opensource.org/license/mit)
 - [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 - [NVIDIA CUDA Toolkit EULA](https://docs.nvidia.com/cuda/eula/index.html)

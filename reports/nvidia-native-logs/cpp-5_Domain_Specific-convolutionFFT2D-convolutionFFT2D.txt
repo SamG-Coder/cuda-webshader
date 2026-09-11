@@ -1,0 +1,42 @@
+[D:\cuda-webshader\.local\nvidia-audit-build\cpp\5_Domain_Specific\convolutionFFT2D\convolutionFFT2D.exe] - Starting...
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Testing built-in R2C / C2R FFT-based convolution
+...allocating memory
+...generating random input data
+...creating R2C & C2R FFT plans for 2048 x 2048
+...uploading to GPU and padding convolution kernel and input data
+...transforming convolution kernel
+...running GPU FFT convolution: 34071.550833 MPix/s (0.117400 ms)
+...reading back GPU convolution results
+...running reference CPU convolution
+...comparing the results: rel L2 = 7.815558E-08 (max delta = 7.999698E-07)
+L2norm Error OK
+...shutting down
+Testing custom R2C / C2R FFT-based convolution
+...allocating memory
+...generating random input data
+...creating C2C FFT plan for 2048 x 1024
+...uploading to GPU and padding convolution kernel and input data
+...transforming convolution kernel
+...running GPU FFT convolution: 26881.720331 MPix/s (0.148800 ms)
+...reading back GPU FFT results
+...running reference CPU convolution
+...comparing the results: rel L2 = 8.627709E-08 (max delta = 7.421904E-07)
+L2norm Error OK
+...shutting down
+Testing updated custom R2C / C2R FFT-based convolution
+...allocating memory
+...generating random input data
+...creating C2C FFT plan for 2048 x 1024
+...uploading to GPU and padding convolution kernel and input data
+...transforming convolution kernel
+...running GPU FFT convolution: 38610.037557 MPix/s (0.103600 ms)
+...reading back GPU FFT results
+...running reference CPU convolution
+...comparing the results: rel L2 = 8.600548E-08 (max delta = 7.421904E-07)
+L2norm Error OK
+...shutting down
+Test Summary: 0 errors
+Test passed
+

@@ -1,0 +1,6 @@
+[100%] Building CUDA object cpp/4_CUDA_Libraries/cubDeviceTransform/CMakeFiles/cubDeviceTransform.dir/cubDeviceTransform.cu.obj
+cubDeviceTransform.cu
+tmpxft_00007898_00000000-7_cubDeviceTransform.cudafe1.cpp
+[100%] Linking CUDA executable cubDeviceTransform.exe
+[100%] Built target cubDeviceTransform
+

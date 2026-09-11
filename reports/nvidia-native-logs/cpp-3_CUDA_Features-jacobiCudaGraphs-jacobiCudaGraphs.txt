@@ -1,0 +1,10 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+CPU iterations : 2954
+CPU error : 4.988e-03
+CPU Processing time: 329.845215 (ms)
+GPU iterations : 2954
+GPU error : 4.988e-03
+GPU Processing time: 227.467804 (ms)
+&&&& jacobiCudaGraphs PASSED
+

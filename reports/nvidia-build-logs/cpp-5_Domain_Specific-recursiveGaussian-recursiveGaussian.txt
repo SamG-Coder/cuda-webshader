@@ -1,0 +1,10 @@
+[  0%] Building CUDA object cpp/5_Domain_Specific/recursiveGaussian/CMakeFiles/recursiveGaussian.dir/recursiveGaussian_cuda.cu.obj
+recursiveGaussian_cuda.cu
+tmpxft_00002a20_00000000-7_recursiveGaussian_cuda.cudafe1.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/recursiveGaussian/CMakeFiles/recursiveGaussian.dir/recursiveGaussian.cpp.obj
+recursiveGaussian.cpp
+D:\cuda-webshader\.local\nvidia-audit\cpp\5_Domain_Specific\recursiveGaussian\recursiveGaussian.cpp(80): warning C4005: 'MAX': macro redefinition
+D:\cuda-webshader\.local\nvidia-audit\cpp\5_Domain_Specific\recursiveGaussian\..\..\..\Common\helper_cuda.h(636): note: see previous definition of 'MAX'
+[100%] Linking CXX executable recursiveGaussian.exe
+[100%] Built target recursiveGaussian
+

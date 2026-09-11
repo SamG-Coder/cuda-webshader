@@ -1,0 +1,6 @@
+Building CUDA object cpp/9_CUDA_Tile/tileMatmul/CMakeFiles/tileMatmul.dir/tileMatmul.cu.obj
+tileMatmul.cu
+tmpxft_0000e0cc_00000000-8_tileMatmul.cudafe1.cpp
+Linking CUDA executable tileMatmul.exe
+Built target tileMatmul
+

@@ -1,0 +1,8 @@
+Starting bicubicTexture
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+[CUDA BicubicTexture] (automated testing w/ readback)
+CUDA device [NVIDIA GeForce RTX 5080] has 84 Multi-Processors
+Loaded 'teapot512.pgm', 512 x 512 pixels
+AutoTest: CUDA BicubicTexture Filter Mode: <Bicubic>
+

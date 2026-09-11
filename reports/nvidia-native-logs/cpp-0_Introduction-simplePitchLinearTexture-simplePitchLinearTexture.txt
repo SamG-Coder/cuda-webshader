@@ -1,0 +1,11 @@
+simplePitchLinearTexture starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+
+Bandwidth (GB/s) for pitch linear: 1.72e+03; for array: 1.69e+03
+
+Texture fetch rate (Mpix/s) for pitch linear: 2.15e+05; for array: 2.11e+05
+
+simplePitchLinearTexture completed, returned OK
+

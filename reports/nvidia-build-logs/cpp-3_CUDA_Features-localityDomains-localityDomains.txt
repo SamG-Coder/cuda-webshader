@@ -1,0 +1,60 @@
+[  0%] Building CUDA object cpp/3_CUDA_Features/localityDomains/CMakeFiles/localityDomains.dir/localityDomains.cu.obj
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(61): error: identifier "cudaDevAttrLocalityDomainCount" is undefined
+          cudaDeviceGetAttribute(&localityDomainCount, cudaDevAttrLocalityDomainCount, dev);
+                                                       ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(62): error: identifier "cudaDevAttrLocalityDomainMultiprocessorCount" is undefined
+          cudaDeviceGetAttribute(&localityDomainSmCount, cudaDevAttrLocalityDomainMultiprocessorCount, dev);
+                                                         ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(78): error: identifier "cudaDevSmResourceGroupLocalityDomainId" is undefined
+              params[i].flags            = cudaDevSmResourceGroupLocalityDomainId;
+                                           ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(79): error: class "cudaDevSmResourceGroupParams_st" has no member "localityDomainId"
+              params[i].localityDomainId = static_cast<unsigned int>(i);
+                        ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(88): error: class "cudaDevSmResource" has no member "localityDomainId"
+              std::cout << " - result[" << i << "]: .localityDomainId = " << result[i].sm.localityDomainId
+                                                                                          ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(108): error: identifier "cudaDevSmResourceGroupLocalityDomainId" is undefined
+              bool isStreamLocalized = (streamSmResource.sm.flags & cudaDevSmResourceGroupLocalityDomainId) != 0;
+                                                                    ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(111): error: class "cudaDevSmResource" has no member "localityDomainId"
+                  unsigned int streamLocalityDomain = streamSmResource.sm.localityDomainId;
+                                                                          ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(128): error: identifier "cudaMemLocationTypeDeviceLocalityDomain" is undefined
+              poolProps.location.type                       = cudaMemLocationTypeDeviceLocalityDomain;
+                                                              ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(129): error: class "cudaMemLocation" has no member "localized"
+              poolProps.location.localized.deviceId         = static_cast<unsigned char>(dev);
+                                 ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(130): error: class "cudaMemLocation" has no member "localized"
+              poolProps.location.localized.localityDomainId = static_cast<unsigned char>(i);
+                                 ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(145): error: class "cudaPointerAttributes" has no member "localityDomainOrdinal"
+              if (pointerAttributes.localityDomainOrdinal == -1) {
+                                    ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(149): error: class "cudaPointerAttributes" has no member "localityDomainOrdinal"
+                  std::cout << " is localized to locality domain " << pointerAttributes.localityDomainOrdinal
+                                                                                        ^
+
+12 errors detected in the compilation of "D:/cuda-webshader/.local/nvidia-audit/cpp/3_CUDA_Features/localityDomains/localityDomains.cu".
+localityDomains.cu
+
+NMAKE : fatal error U1077: '"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin\nvcc.exe" -forward-unknown-to-host-compiler   -D_WINDOWS -Xcompiler=" /EHsc" -Wno-deprecated-gpu-targets -lineinfo -Wno-deprecated-gpu-targets -lineinfo -Xcompiler="-O2 -Ob2" -DNDEBUG -std=c++17 "--generate-code=arch=compute_75,code=[compute_75,sm_75]" "--generate-code=arch=compute_80,code=[compute_80,sm_80]" "--generate-code=arch=compute_86,code=[compute_86,sm_86]" "--generate-code=arch=compute_87,code=[compute_87,sm_87]" "--generate-code=arch=compute_89,code=[compute_89,sm_89]" "--generate-code=arch=compute_90,code=[compute_90,sm_90]" "--generate-code=arch=compute_100,code=[compute_100,sm_100]" "--generate-code=arch=compute_110,code=[compute_110,sm_110]" "--generate-code=arch=compute_120,code=[compute_120,sm_120]" -Xcompiler=-MD -Xcompiler=/Zc:preprocessor --extended-lambda -MD -MT cpp\3_CUDA_Features\localityDomains\CMakeFiles\localityDomains.dir\localityDomains.cu.obj -MF CMakeFiles\localityDomains.dir\localityDomains.cu.obj.d -x cu -rdc=true -c D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu -o CMakeFiles\localityDomains.dir\localityDomains.cu.obj -Xcompiler=-FdCMakeFiles\localityDomains.dir\,-FS' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\bin\HostX64\x64\nmake.exe" -s -f cpp\3_CUDA_Features\localityDomains\CMakeFiles\localityDomains.dir\build.make /nologo -SL                 cpp\3_CUDA_Features\localityDomains\CMakeFiles\localityDomains.dir\build' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\bin\HostX64\x64\nmake.exe" -s -f CMakeFiles\Makefile2 /nologo -SL                 cpp\3_CUDA_Features\localityDomains\CMakeFiles\localityDomains.dir\all' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\bin\HostX64\x64\nmake.exe" -s -f CMakeFiles\Makefile2 /nologo -LS                 localityDomains' : return code '0x2'
+Stop.

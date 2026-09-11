@@ -1,0 +1,7 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Initializing data:
+Running quicksort on 128 elements
+Launching kernel on the GPU
+Validating results: OK
+

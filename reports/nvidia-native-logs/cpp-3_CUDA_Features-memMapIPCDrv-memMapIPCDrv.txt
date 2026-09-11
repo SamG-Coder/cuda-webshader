@@ -1,0 +1,9 @@
+CP: lshmName = memmap_ipc_shm
+> findModulePath found file at <./memMapIpc_kernel64.ptx>
+> initCUDA loading module: <./memMapIpc_kernel64.ptx>
+> PTX JIT log:
+
+Step 0 done
+Process 0: verifying...
+PP: lshmName = memmap_ipc_shm
+

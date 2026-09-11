@@ -1,0 +1,6 @@
+Building CUDA object cpp/3_CUDA_Features/newdelete/CMakeFiles/newdelete.dir/newdelete.cu.obj
+newdelete.cu
+tmpxft_0000909c_00000000-7_newdelete.cudafe1.cpp
+Linking CUDA executable newdelete.exe
+Built target newdelete
+

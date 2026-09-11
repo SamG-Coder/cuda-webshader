@@ -1,0 +1,15 @@
+threadFenceReduction Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+GPU Device supports SM 12.0 compute capability
+
+1048576 elements
+128 threads (max)
+64 blocks
+Average time: 0.021488 ms
+Bandwidth:    195.192854 GB/s
+
+GPU result = 4077.350585937500
+CPU result = 4077.350585937500
+

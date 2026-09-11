@@ -1,0 +1,5 @@
+Starting [conjugateGradientMultiDeviceCG]...
+GPU Device 0: "NVIDIA GeForce RTX 5080" with compute capability 12.0
+No two or more GPUs with same architecture capable of concurrentManagedAccess found. 
+Waiving the sample
+

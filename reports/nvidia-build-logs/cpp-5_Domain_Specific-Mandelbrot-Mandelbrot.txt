@@ -1,0 +1,10 @@
+[  0%] Building CUDA object cpp/5_Domain_Specific/Mandelbrot/CMakeFiles/Mandelbrot.dir/Mandelbrot_cuda.cu.obj
+Mandelbrot_cuda.cu
+tmpxft_0000b3a0_00000000-7_Mandelbrot_cuda.cudafe1.cpp
+[  0%] Building CXX object cpp/5_Domain_Specific/Mandelbrot/CMakeFiles/Mandelbrot.dir/Mandelbrot_gold.cpp.obj
+Mandelbrot_gold.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/Mandelbrot/CMakeFiles/Mandelbrot.dir/Mandelbrot.cpp.obj
+Mandelbrot.cpp
+[100%] Linking CXX executable Mandelbrot.exe
+[100%] Built target Mandelbrot
+

@@ -1,0 +1,9 @@
+[simpleLayeredTexture] - Starting...
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+CUDA device [NVIDIA GeForce RTX 5080] has 84 Multi-Processors SM 12.0
+Covering 2D data array of 512 x 512: Grid size is 64 x 64, each block has 8 x 8 threads
+Processing time: 0.071 msec
+18565.44 Mtexlookups/sec
+Comparing kernel output to expected data
+

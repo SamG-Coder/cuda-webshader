@@ -1,0 +1,11 @@
+simpleTexture3D Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Read './Bucky.raw', 32768 bytes
+sdkDumpBin: <simpleTexture3D.bin>
+> compareBin2Bin <float> nelements=262144, epsilon=5.00, threshold=0.15
+   src_file <simpleTexture3D.bin>, size=1048576 bytes
+   ref_file <././ref_texture3D.bin>, size=1048576 bytes
+  OK
+

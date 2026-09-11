@@ -1,0 +1,7 @@
+[ matrixMulDynlinkJIT (CUDA dynamic linking) ]
+> Device 0: "NVIDIA GeForce RTX 5080" with Compute 12.0 capability
+> Compiling CUDA module
+> PTX JIT log:
+
+Test run success!
+

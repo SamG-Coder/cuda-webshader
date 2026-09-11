@@ -1,0 +1,12 @@
+[  0%] Building CXX object cpp/5_Domain_Specific/bilateralFilter/CMakeFiles/bilateralFilter.dir/bilateralFilter.cpp.obj
+bilateralFilter.cpp
+[  0%] Building CXX object cpp/5_Domain_Specific/bilateralFilter/CMakeFiles/bilateralFilter.dir/bilateralFilter_cpu.cpp.obj
+bilateralFilter_cpu.cpp
+[  0%] Building CUDA object cpp/5_Domain_Specific/bilateralFilter/CMakeFiles/bilateralFilter.dir/bilateral_kernel.cu.obj
+bilateral_kernel.cu
+tmpxft_000028a8_00000000-7_bilateral_kernel.cudafe1.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/bilateralFilter/CMakeFiles/bilateralFilter.dir/bmploader.cpp.obj
+bmploader.cpp
+[100%] Linking CXX executable bilateralFilter.exe
+[100%] Built target bilateralFilter
+

@@ -1,0 +1,10 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+
+Launching 168 blocks with 768 threads...
+
+Array size = 102400 Num of Odds = 51339 Sum of Odds = 1288543 Sum of Evens 1225838
+
+...Done.
+
+

@@ -1,0 +1,18 @@
+CUDA 3D Volume Render Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Read './data/Bucky.raw', 32768 bytes
+Press '+' and '-' to change density (0.01 increments)
+      ']' and '[' to change brightness
+      ';' and ''' to modify transfer function offset
+      '.' and ',' to modify transfer function scale
+
+volumeRender, Throughput = 2148.1931 MTexels/s, Time = 0.00012 s, Size = 262144 Texels, NumDevsUsed = 1, Workgroup = 256
+5.11(%) of bytes mismatched (count=53604)
+
+> Compare (a)rendered:  <volume.ppm>
+>         (b)reference: <./data/ref_volume.ppm>
+PPMvsPPM: comparing images size (512,512) epsilon(5), threshold(30%)
+    OK
+

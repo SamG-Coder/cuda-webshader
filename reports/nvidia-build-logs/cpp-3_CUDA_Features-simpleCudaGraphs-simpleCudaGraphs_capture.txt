@@ -1,0 +1,20 @@
+[  0%] Building CUDA object cpp/3_CUDA_Features/simpleCudaGraphs/CMakeFiles/simpleCudaGraphs_capture.dir/simpleCudaGraphs_capture.cu.obj
+simpleCudaGraphs_capture.cu
+tmpxft_0000d058_00000000-7_simpleCudaGraphs_capture.cudafe1.cpp
+[  0%] Linking CUDA device code CMakeFiles\simpleCudaGraphs_capture.dir\cmake_device_link.obj
+simpleCudaGraphs_capture.cu.obj
+cudadevrt.lib
+cudart.lib
+kernel32.lib
+user32.lib
+gdi32.lib
+winspool.lib
+shell32.lib
+ole32.lib
+oleaut32.lib
+uuid.lib
+comdlg32.lib
+advapi32.lib
+[100%] Linking CUDA executable simpleCudaGraphs_capture.exe
+[100%] Built target simpleCudaGraphs_capture
+

@@ -1,0 +1,16 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Device: NVIDIA GeForce RTX 5080 (Compute Capability 12.0)
+
+cub::DeviceTransform::Transform (N=3 inputs -> 1 output)
+  result = (a + b) * c with c = counting_iterator(100)
+  got      = { 520 111 397 618 }
+  expected = { 520 111 397 618 }  OK
+
+cub::DeviceTransform::Transform (N=2 inputs -> M=2 outputs)
+  op returns cuda::std::tuple{a + b, a - b}
+  sum  = { 5 7 18 8 12 }  expected = { 5 7 18 8 12 }
+  diff = { -3 3 2 6 -6 }  expected = { -3 3 2 6 -6 }  OK
+
+Done
+

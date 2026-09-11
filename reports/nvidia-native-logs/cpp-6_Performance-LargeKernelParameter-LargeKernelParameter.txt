@@ -1,0 +1,4 @@
+Kernel 4KB parameter limit - time (us):53.112
+Kernel 32,764 byte parameter limit - time (us):101.32
+Test passed!
+

@@ -2,9 +2,16 @@
 
 ## [Launch the live showcase explorer ↗](https://samg-coder.github.io/cuda-webshader/)
 
-**[NVIDIA sine-wave showcase](https://samg-coder.github.io/cuda-webshader/showcases/simplegl/)** · **[Particle simulation and kernel lab](https://samg-coder.github.io/cuda-webshader/lab.html)** · **[CUDA vs. WebGPU results](https://samg-coder.github.io/cuda-webshader/reports/performance-comparison.html)**
+**[NVIDIA sine-wave showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=wave)** · **[Particle sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=particles)** · **[CUDA vs. WebGPU results](https://samg-coder.github.io/cuda-webshader/reports/performance-comparison.html)**
 
 ## CUDA sandbox
+
+The main showcase grid contains individual runnable samples; every card opens
+the sandbox directly. The NVIDIA audit covers 208 upstream sample directories,
+350 compiler entry probes, and 18 kernels checked with both native CUDA and
+real NVIDIA WebGPU. See [the audit and remaining blockers](reports/nvidia-audit.md)
+and [reproduction instructions](showcases/nvidia/README.md). These kernel checks
+are separate from full native application execution and from performance tests.
 
 Open `sandbox.html` from the local server, or use the **Sandbox** navigation link.
 The left pane uses Monaco (the editor behind VS Code) with C++ syntax highlighting,
@@ -33,14 +40,14 @@ This is source translation. **It does not run CUDA binaries, PTX, the CUDA drive
 
 ## Validated on an RTX 5080
 
-The project is running locally with installed, locked dependencies. **144 Node tests, 79 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
+The project is running locally with installed, locked dependencies. **148 Node tests, 79 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
 
 Open [the measured comparison](reports/performance-comparison.html) or read [the full methodology and results](reports/performance-comparison.md). All ten kernel sources are compiled by NVCC and translated to WGSL at two workload sizes. Raw GPU timestamps, CUDA event timings, ordinary CUDA launch timings, and verification logs are in `reports/`.
 
 Measured hardware: NVIDIA GeForce RTX 5080, driver 616.64, CUDA Toolkit 13.3, Microsoft Edge 152, Windows WDDM. Results apply to these specific kernels and workloads, not all CUDA code or optimized CUDA libraries. See [VALIDATION.md](VALIDATION.md).
 ## Run
 
-Try the [NVIDIA simpleGL showcase](showcases/simplegl/): an unchanged, BSD-3-Clause-licensed NVIDIA CUDA vertex kernel translated by this compiler and displayed through WebGPU/Three.js. It passed 12 native CUDA and 12 browser GPU checks. See [provenance and instructions](showcases/simplegl/README.md).
+Try the [NVIDIA simpleGL sandbox](sandbox.html?example=wave): an unchanged, BSD-3-Clause-licensed NVIDIA CUDA vertex kernel translated by this compiler and displayed through WebGPU/Three.js. It passed 12 native CUDA and 12 browser GPU checks. See [provenance and instructions](showcases/simplegl/README.md).
 
 Install Node.js 20 or newer. Extract the project, then:
 

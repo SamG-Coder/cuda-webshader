@@ -1,0 +1,6 @@
+Building CUDA object cpp/6_Performance/alignedTypes/CMakeFiles/alignedTypes.dir/alignedTypes.cu.obj
+alignedTypes.cu
+tmpxft_00005ee8_00000000-7_alignedTypes.cudafe1.cpp
+Linking CUDA executable alignedTypes.exe
+Built target alignedTypes
+

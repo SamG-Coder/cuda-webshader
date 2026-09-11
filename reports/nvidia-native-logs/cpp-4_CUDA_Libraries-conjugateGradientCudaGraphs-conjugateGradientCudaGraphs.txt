@@ -1,0 +1,14 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+> GPU device has 84 Multi-Processors, SM 12.0 compute capabilities
+
+iteration =   1, residual = 4.451374e+01
+iteration =   2, residual = 3.248658e+00
+iteration =   3, residual = 2.695777e-01
+iteration =   4, residual = 2.314586e-02
+iteration =   5, residual = 1.997625e-03
+iteration =   6, residual = 1.852079e-04
+iteration =   7, residual = 1.705767e-05
+iteration =   8, residual = 1.618583e-06
+Test Summary:  Error amount = 0.000000
+

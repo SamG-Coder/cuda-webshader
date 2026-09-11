@@ -1,0 +1,1048 @@
+{
+  "results": [
+    {
+      "sample": "cpp/0_Introduction/UnifiedMemoryStreams",
+      "target": "UnifiedMemoryStreams",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/asyncAPI",
+      "target": "asyncAPI",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/clock",
+      "target": "clock",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/cudaOpenMP",
+      "target": "cudaOpenMP",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/fp16ScalarProduct",
+      "target": "fp16ScalarProduct",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/matrixMul",
+      "target": "matrixMul",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/matrixMulDrv",
+      "target": "matrixMulDrv",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/matrixMulDrv",
+      "target": "generate_fatbin_matmulDrv",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-0_Introduction-matrixMulDrv-generate_fatbin_matmulDrv.txt",
+      "tail": "Built target generate_fatbin_matmulDrv\n\n"
+    },
+    {
+      "sample": "cpp/0_Introduction/matrixMulDynlinkJIT",
+      "target": "matrixMulDynlinkJIT",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleAWBarrier",
+      "target": "simpleAWBarrier",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleAssert",
+      "target": "simpleAssert",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleAtomicIntrinsics",
+      "target": "simpleAtomicIntrinsics",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleAttributes",
+      "target": "simpleAttributes",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleCUDA2GL",
+      "target": "simpleCUDA2GL",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleCallback",
+      "target": "simpleCallback",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleCooperativeGroups",
+      "target": "simpleCooperativeGroups",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleCubemapTexture",
+      "target": "simpleCubemapTexture",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleDrvRuntime",
+      "target": "simpleDrvRuntime",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleDrvRuntime",
+      "target": "generate_fatbin_simpleDrv",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-0_Introduction-simpleDrvRuntime-generate_fatbin_simpleDrv.txt",
+      "tail": "Built target generate_fatbin_simpleDrv\n\n"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleIPC",
+      "target": "simpleIPC",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleLayeredTexture",
+      "target": "simpleLayeredTexture",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleMultiCopy",
+      "target": "simpleMultiCopy",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleMultiGPU",
+      "target": "simpleMultiGPU",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleP2P",
+      "target": "simpleP2P",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simplePitchLinearTexture",
+      "target": "simplePitchLinearTexture",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simplePrintf",
+      "target": "simplePrintf",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleStreams",
+      "target": "simpleStreams",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleSurfaceWrite",
+      "target": "simpleSurfaceWrite",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleTexture",
+      "target": "simpleTexture",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleTexture3D",
+      "target": "simpleTexture3D",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleTextureDrv",
+      "target": "simpleTextureDrv",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleTextureDrv",
+      "target": "generate_fatbin_textureDrv",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-0_Introduction-simpleTextureDrv-generate_fatbin_textureDrv.txt",
+      "tail": "[100%] Built target generate_fatbin_textureDrv\n\n"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleVoteIntrinsics",
+      "target": "simpleVoteIntrinsics",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/simpleZeroCopy",
+      "target": "simpleZeroCopy",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/vectorAdd",
+      "target": "vectorAdd",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/vectorAddDrv",
+      "target": "vectorAddDrv",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/vectorAddDrv",
+      "target": "generate_fatbin_vectorAdd",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-0_Introduction-vectorAddDrv-generate_fatbin_vectorAdd.txt",
+      "tail": "Built target generate_fatbin_vectorAdd\n\n"
+    },
+    {
+      "sample": "cpp/0_Introduction/vectorAddMMAP",
+      "target": "vectorAddMMAP",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/0_Introduction/vectorAddMMAP",
+      "target": "generate_fatbin_vectorAddMMAP",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-0_Introduction-vectorAddMMAP-generate_fatbin_vectorAddMMAP.txt",
+      "tail": "Built target generate_fatbin_vectorAddMMAP\n\n"
+    },
+    {
+      "sample": "cpp/0_Introduction/vectorAdd_nvrtc",
+      "target": "vectorAdd_nvrtc",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/1_Utilities/deviceQuery",
+      "target": "deviceQuery",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/1_Utilities/deviceQueryDrv",
+      "target": "deviceQueryDrv",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/1_Utilities/topologyQuery",
+      "target": "topologyQuery",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/FunctionPointers",
+      "target": "FunctionPointers",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/MC_EstimatePiInlineP",
+      "target": "MC_EstimatePiInlineP",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/MC_EstimatePiInlineQ",
+      "target": "MC_EstimatePiInlineQ",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/MC_EstimatePiP",
+      "target": "MC_EstimatePiP",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/MC_EstimatePiQ",
+      "target": "MC_EstimatePiQ",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/MC_SingleAsianOptionP",
+      "target": "MC_SingleAsianOptionP",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/boxFilter",
+      "target": "boxFilter",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/convolutionSeparable",
+      "target": "convolutionSeparable",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/convolutionTexture",
+      "target": "convolutionTexture",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/dct8x8",
+      "target": "dct8x8",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/eigenvalues",
+      "target": "eigenvalues",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/histogram",
+      "target": "histogram",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/imageDenoising",
+      "target": "imageDenoising",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/inlinePTX",
+      "target": "inlinePTX",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/interval",
+      "target": "interval",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/particles",
+      "target": "particles",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/radixSortThrust",
+      "target": "radixSortThrust",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/reduction",
+      "target": "reduction",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/reductionMultiBlockCG",
+      "target": "reductionMultiBlockCG",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/scalarProd",
+      "target": "scalarProd",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/scan",
+      "target": "scan",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/segmentationTreeThrust",
+      "target": "segmentationTreeThrust",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/shfl_scan",
+      "target": "shfl_scan",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/sortingNetworks",
+      "target": "sortingNetworks",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/streamOrderedAllocation",
+      "target": "streamOrderedAllocation",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/streamOrderedAllocationP2P",
+      "target": "streamOrderedAllocationP2P",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/threadFenceReduction",
+      "target": "threadFenceReduction",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/threadMigration",
+      "target": "threadMigration",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/threadMigration",
+      "target": "generate_fatbin_threadMigration",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-2_Concepts_and_Techniques-threadMigration-generate_fatbin_threadMigration.txt",
+      "tail": "Built target generate_fatbin_threadMigration\n\n"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/bf16TensorCoreGemm",
+      "target": "bf16TensorCoreGemm",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/binaryPartitionCG",
+      "target": "binaryPartitionCG",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/bindlessTexture",
+      "target": "bindlessTexture",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/cdpAdvancedQuicksort",
+      "target": "cdpAdvancedQuicksort",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/cdpBezierTessellation",
+      "target": "cdpBezierTessellation",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/cdpQuadtree",
+      "target": "cdpQuadtree",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/cdpSimplePrint",
+      "target": "cdpSimplePrint",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/cdpSimpleQuicksort",
+      "target": "cdpSimpleQuicksort",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/cudaCompressibleMemory",
+      "target": "cudaCompressibleMemory",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/cudaTensorCoreGemm",
+      "target": "cudaTensorCoreGemm",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/dmmaTensorCoreGemm",
+      "target": "dmmaTensorCoreGemm",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/globalToShmemAsyncCopy",
+      "target": "globalToShmemAsyncCopy",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/graphConditionalNodes",
+      "target": "graphConditionalNodes",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/graphMemoryFootprint",
+      "target": "graphMemoryFootprint",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/graphMemoryNodes",
+      "target": "graphMemoryNodes",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/immaTensorCoreGemm",
+      "target": "immaTensorCoreGemm",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/jacobiCudaGraphs",
+      "target": "jacobiCudaGraphs",
+      "status": "built",
+      "evidence": "Executable produced by root build"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/localityDomains",
+      "target": "localityDomains",
+      "status": "build-failed",
+      "log": "nvidia-build-logs/cpp-3_CUDA_Features-localityDomains-localityDomains.txt",
+      "tail": "[  0%] Building CUDA object cpp/3_CUDA_Features/localityDomains/CMakeFiles/localityDomains.dir/localityDomains.cu.obj\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomains\\localityDomains.cu(61): error: identifier \"cudaDevAttrLocalityDomainCount\" is undefined\r\n          cudaDeviceGetAttribute(&localityDomainCount, cudaDevAttrLocalityDomainCount, dev);\r\n                                                       ^\r\n\r\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomains\\localityDomains.cu(62): error: identifier \"cudaDevAttrLocalityDomainMultiprocessorCount\" is undefined\r\n          cudaDeviceGetAttribute(&localityDomainSmCount, cudaDevAttrLocalityDomainMultiprocessorCount, dev);\r\n                                                         ^\r\n\r\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomains\\localityDomains.cu(78): error: identifier \"cudaDevSmResourceGroupLocalityDomainId\" is undefined\r\n              params[i].flags            = cudaDevSmResourceGroupLocalityDomainId;\r\n                                           ^\r\n\r\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomains\\localityDomains.cu(79): error: class \"cudaDevSmResourceGroupParams_st\" has no member \"localityDomainId\"\r\n              params[i].localityDomainId = static_cast<unsigned int>(i);\r\n                        ^\r\n\r\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomains\\localityDomains.cu(88): error: class \"cudaDevSmResource\" has no member \"localityDomainId\"\r\n              std::cout << \" - result[\" << i << \"]: .localityDomainId = \" << result[i].sm.localityDomainId\r\n                                                                                          ^\r\n\r\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomains\\localityDomains.cu(108): error: identifier \"cudaDevSmResourceGroupLocalityDomainId\" is undefined\r\n              bool isStreamLocalized = (streamSmResource.sm.flags & cudaDevSmResourceGroupLocalityDomainId) != 0;\r\n                                                                    ^\r\n\r\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomains\\localityDomains.cu(111): error: class \"cudaDevSmResource\" has no member \"localityDomainId\"\r\n                  unsigned int streamLocalityDomain = streamSmResource.sm.localityDomainId;\r\n                                                                          ^\r\n\r\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomains\\localityDomains.cu(128): error: identifier \"cudaMemLocationTypeDeviceLocalityDomain\" is undefined\r\n              poolProps.location.type                       = cudaMemLocationTypeDeviceLocalityDomain;\r\n                                                              ^\r\n\r\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomains\\localityDomains.cu(129): error: class \"cudaMemLocation\" has no member \"localized\"\r\n              poolProps.location.localized.deviceId         = static_cast<unsigned char>(dev);\r\n                                 ^\r\n\r\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomains\\localityDomains.cu(130): error: class \"cudaMemLocation\" has no member \"localized\"\r\n              poolProps.location.localized.localityDomainId = static_cast<unsigned char>(i);\r\n                                 ^\r\n\r\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomains\\localityDomains.cu(145): error: class \"cudaPointerAttributes\" has no member \"localityDomainOrdinal\"\r\n              if (pointerAttributes.localityDomainOrdinal == -1) {\r\n                                    ^\r\n\r\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomains\\localityDomains.cu(149): error: class \"cudaPointerAttributes\" has no member \"localityDomainOrdinal\"\r\n                  std::cout << \" is localized to locality domain \" << pointerAttributes.localityDomainOrdinal\r\n                                                                                        ^\r\n\r\n12 errors detected in the compilation of \"D:/cuda-webshader/.local/nvidia-audit/cpp/3_CUDA_Features/localityDomains/localityDomains.cu\".\r\nlocalityDomains.cu\r\n\nNMAKE : fatal error U1077: '\"C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3\\bin\\nvcc.exe\" -forward-unknown-to-host-compiler   -D_WINDOWS -Xcompiler=\" /EHsc\" -Wno-deprecated-gpu-targets -lineinfo -Wno-deprecated-gpu-targets -lineinfo -Xcompiler=\"-O2 -Ob2\" -DNDEBUG -std=c++17 \"--generate-code=arch=compute_75,code=[compute_75,sm_75]\" \"--generate-code=arch=compute_80,code=[compute_80,sm_80]\" \"--generate-code=arch=compute_86,code=[compute_86,sm_86]\" \"--generate-code=arch=compute_87,code=[compute_87,sm_87]\" \"--generate-code=arch=compute_89,code=[compute_89,sm_89]\" \"--generate-code=arch=compute_90,code=[compute_90,sm_90]\" \"--generate-code=arch=compute_100,code=[compute_100,sm_100]\" \"--generate-code=arch=compute_110,code=[compute_110,sm_110]\" \"--generate-code=arch=compute_120,code=[compute_120,sm_120]\" -Xcompiler=-MD -Xcompiler=/Zc:preprocessor --extended-lambda -MD -MT cpp\\3_CUDA_Features\\localityDomains\\CMakeFiles\\localityDomains.dir\\localityDomains.cu.obj -MF CMakeFiles\\localityDomains.dir\\localityDomains.cu.obj.d -x cu -rdc=true -c D:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomains\\localityDomains.cu -o CMakeFiles\\localityDomains.dir\\localityDomains.cu.obj -Xcompiler=-FdCMakeFiles\\localityDomains.dir\\,-FS' : return code '0x2'\r\nStop.\r\nNMAKE : fatal error U1077: '\"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\nmake.exe\" -s -f cpp\\3_CUDA_Features\\localityDomains\\CMakeFiles\\localityDomains.dir\\build.make /nologo -SL                 cpp\\3_CUDA_Features\\localityDomains\\CMakeFiles\\localityDomains.dir\\build' : return code '0x2'\r\nStop.\r\nNMAKE : fatal error U1077: '\"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\nmake.exe\" -s -f CMakeFiles\\Makefile2 /nologo -SL                 cpp\\3_CUDA_Features\\localityDomains\\CMakeFiles\\localityDomains.dir\\all' : return code '0x2'\r\nStop.\r\nNMAKE : fatal error U1077: '\"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\nmake.exe\" -s -f CMakeFiles\\Makefile2 /nologo -LS                 localityDomains' : return code '0x2'\r\nStop.\r\n"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/localityDomainsDrv",
+      "target": "localityDomainsDrv",
+      "status": "build-failed",
+      "log": "nvidia-build-logs/cpp-3_CUDA_Features-localityDomainsDrv-localityDomainsDrv.txt",
+      "tail": "Building CXX object cpp/3_CUDA_Features/localityDomainsDrv/CMakeFiles/localityDomainsDrv.dir/localityDomainsDrv.cpp.obj\nlocalityDomainsDrv.cpp\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(57): error C2065: 'CU_DEVICE_ATTRIBUTE_LOCALITY_DOMAIN_COUNT': undeclared identifier\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(59): error C2065: 'CU_DEVICE_ATTRIBUTE_LOCALITY_DOMAIN_MULTIPROCESSOR_COUNT': undeclared identifier\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(75): error C2065: 'CU_DEV_SM_RESOURCE_GROUP_LOCALITY_DOMAIN_ID': undeclared identifier\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(76): error C2039: 'localityDomainId': is not a member of 'CU_DEV_SM_RESOURCE_GROUP_PARAMS_st'\nC:\\PROGRA~1\\NVIDIA~2\\CUDA\\v13.3\\include\\cuda.h(26586): note: see declaration of 'CU_DEV_SM_RESOURCE_GROUP_PARAMS_st'\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(85): error C2039: 'localityDomainId': is not a member of 'CUdevSmResource_st'\nC:\\PROGRA~1\\NVIDIA~2\\CUDA\\v13.3\\include\\cuda.h(26546): note: see declaration of 'CUdevSmResource_st'\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(105): error C2065: 'CU_DEV_SM_RESOURCE_GROUP_LOCALITY_DOMAIN_ID': undeclared identifier\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(108): error C2039: 'localityDomainId': is not a member of 'CUdevSmResource_st'\nC:\\PROGRA~1\\NVIDIA~2\\CUDA\\v13.3\\include\\cuda.h(26546): note: see declaration of 'CUdevSmResource_st'\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(126): error C2065: 'CU_MEM_LOCATION_TYPE_DEVICE_LOCALITY_DOMAIN': undeclared identifier\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(127): error C2039: 'localized': is not a member of 'CUmemLocation_st'\nC:\\PROGRA~1\\NVIDIA~2\\CUDA\\v13.3\\include\\cuda.h(4429): note: see declaration of 'CUmemLocation_st'\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(128): error C2039: 'localized': is not a member of 'CUmemLocation_st'\nC:\\PROGRA~1\\NVIDIA~2\\CUDA\\v13.3\\include\\cuda.h(4429): note: see declaration of 'CUmemLocation_st'\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(143): error C2065: 'CU_MEM_LOCATION_TYPE_DEVICE_LOCALITY_DOMAIN': undeclared identifier\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(144): error C2039: 'localized': is not a member of 'CUmemLocation_st'\nC:\\PROGRA~1\\NVIDIA~2\\CUDA\\v13.3\\include\\cuda.h(4429): note: see declaration of 'CUmemLocation_st'\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(145): error C2039: 'localized': is not a member of 'CUmemLocation_st'\nC:\\PROGRA~1\\NVIDIA~2\\CUDA\\v13.3\\include\\cuda.h(4429): note: see declaration of 'CUmemLocation_st'\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(150): error C2065: 'CU_MEM_LOCATION_TYPE_DEVICE_LOCALITY_DOMAIN': undeclared identifier\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(151): error C2039: 'localized': is not a member of 'CUmemLocation_st'\nC:\\PROGRA~1\\NVIDIA~2\\CUDA\\v13.3\\include\\cuda.h(4429): note: see declaration of 'CUmemLocation_st'\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(152): error C2039: 'localized': is not a member of 'CUmemLocation_st'\nC:\\PROGRA~1\\NVIDIA~2\\CUDA\\v13.3\\include\\cuda.h(4429): note: see declaration of 'CUmemLocation_st'\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\localityDomainsDrv\\localityDomainsDrv.cpp(163): error C2065: 'CU_POINTER_ATTRIBUTE_LOCALITY_DOMAIN_ORDINAL': undeclared identifier\n\nNMAKE : fatal error U1077: '\"C:\\Program Files\\CMake\\bin\\cmake.exe\" -E cmake_cl_compile_depends --dep-file=CMakeFiles\\localityDomainsDrv.dir\\localityDomainsDrv.cpp.obj.d --working-dir=D:\\cuda-webshader\\.local\\nvidia-audit-build\\cpp\\3_CUDA_Features\\localityDomainsDrv --filter-prefix=\"Note: including file: \" -- \"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe\" @C:\\Users\\samue\\AppData\\Local\\Temp\\nm2339.tmp' : return code '0x2'\r\nStop.\r\nNMAKE : fatal error U1077: '\"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\nmake.exe\" -s -f cpp\\3_CUDA_Features\\localityDomainsDrv\\CMakeFiles\\localityDomainsDrv.dir\\build.make /nologo -SL                 cpp\\3_CUDA_Features\\localityDomainsDrv\\CMakeFiles\\localityDomainsDrv.dir\\build' : return code '0x2'\r\nStop.\r\nNMAKE : fatal error U1077: '\"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\nmake.exe\" -s -f CMakeFiles\\Makefile2 /nologo -SL                 cpp\\3_CUDA_Features\\localityDomainsDrv\\CMakeFiles\\localityDomainsDrv.dir\\all' : return code '0x2'\r\nStop.\r\nNMAKE : fatal error U1077: '\"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\nmake.exe\" -s -f CMakeFiles\\Makefile2 /nologo -LS                 localityDomainsDrv' : return code '0x2'\r\nStop.\r\n"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/memMapIPCDrv",
+      "target": "memMapIPCDrv",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-3_CUDA_Features-memMapIPCDrv-memMapIPCDrv.txt",
+      "tail": "[ 50%] Building CUDA PTX: D:/cuda-webshader/.local/nvidia-audit-build/cpp/3_CUDA_Features/memMapIPCDrv/memMapIpc_kernel64.ptx\nmemMapIpc_kernel.cu\r\n[ 50%] Built target generate_memMapIpc_ptx\n[100%] Building CXX object cpp/3_CUDA_Features/memMapIPCDrv/CMakeFiles/memMapIPCDrv.dir/memMapIpc.cpp.obj\nmemMapIpc.cpp\n[100%] Building CXX object cpp/3_CUDA_Features/memMapIPCDrv/CMakeFiles/memMapIPCDrv.dir/__/__/__/Common/helper_multiprocess.cpp.obj\nhelper_multiprocess.cpp\n[100%] Linking CXX executable memMapIPCDrv.exe\n[100%] Built target memMapIPCDrv\n\n"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/memMapIPCDrv",
+      "target": "generate_memMapIpc_ptx",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-3_CUDA_Features-memMapIPCDrv-generate_memMapIpc_ptx.txt",
+      "tail": "[100%] Built target generate_memMapIpc_ptx\n\n"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/newdelete",
+      "target": "newdelete",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-3_CUDA_Features-newdelete-newdelete.txt",
+      "tail": "Building CUDA object cpp/3_CUDA_Features/newdelete/CMakeFiles/newdelete.dir/newdelete.cu.obj\nnewdelete.cu\r\ntmpxft_0000909c_00000000-7_newdelete.cudafe1.cpp\r\nLinking CUDA executable newdelete.exe\nBuilt target newdelete\n\n"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/ptxjit",
+      "target": "ptxjit",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-3_CUDA_Features-ptxjit-ptxjit.txt",
+      "tail": "Building CUDA PTX: D:/cuda-webshader/.local/nvidia-audit-build/cpp/3_CUDA_Features/ptxjit/ptxjit_kernel64.ptx\nptxjit_kernel.cu\r\nBuilt target generate_ptxjit_ptx\nBuilding CXX object cpp/3_CUDA_Features/ptxjit/CMakeFiles/ptxjit.dir/ptxjit.cpp.obj\nptxjit.cpp\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\ptxjit\\ptxjit.cpp(117): warning C4312: 'type cast': conversion from 'long' to 'void *' of greater size\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\3_CUDA_Features\\ptxjit\\ptxjit.cpp(123): warning C4312: 'type cast': conversion from 'long' to 'void *' of greater size\nLinking CXX executable ptxjit.exe\nBuilt target ptxjit\n\n"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/ptxjit",
+      "target": "generate_ptxjit_ptx",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-3_CUDA_Features-ptxjit-generate_ptxjit_ptx.txt",
+      "tail": "Built target generate_ptxjit_ptx\n\n"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/simpleCudaGraphs",
+      "target": "simpleCudaGraphs_explicit",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-3_CUDA_Features-simpleCudaGraphs-simpleCudaGraphs_explicit.txt",
+      "tail": "Building CUDA object cpp/3_CUDA_Features/simpleCudaGraphs/CMakeFiles/simpleCudaGraphs_explicit.dir/simpleCudaGraphs_explicit.cu.obj\nsimpleCudaGraphs_explicit.cu\r\ntmpxft_0000ddf4_00000000-7_simpleCudaGraphs_explicit.cudafe1.cpp\r\nLinking CUDA device code CMakeFiles\\simpleCudaGraphs_explicit.dir\\cmake_device_link.obj\nsimpleCudaGraphs_explicit.cu.obj\r\ncudadevrt.lib\r\ncudart.lib\r\nkernel32.lib\r\nuser32.lib\r\ngdi32.lib\r\nwinspool.lib\r\nshell32.lib\r\nole32.lib\r\noleaut32.lib\r\nuuid.lib\r\ncomdlg32.lib\r\nadvapi32.lib\r\nLinking CUDA executable simpleCudaGraphs_explicit.exe\nBuilt target simpleCudaGraphs_explicit\n\n"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/simpleCudaGraphs",
+      "target": "simpleCudaGraphs_capture",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-3_CUDA_Features-simpleCudaGraphs-simpleCudaGraphs_capture.txt",
+      "tail": "[  0%] Building CUDA object cpp/3_CUDA_Features/simpleCudaGraphs/CMakeFiles/simpleCudaGraphs_capture.dir/simpleCudaGraphs_capture.cu.obj\nsimpleCudaGraphs_capture.cu\r\ntmpxft_0000d058_00000000-7_simpleCudaGraphs_capture.cudafe1.cpp\r\n[  0%] Linking CUDA device code CMakeFiles\\simpleCudaGraphs_capture.dir\\cmake_device_link.obj\nsimpleCudaGraphs_capture.cu.obj\r\ncudadevrt.lib\r\ncudart.lib\r\nkernel32.lib\r\nuser32.lib\r\ngdi32.lib\r\nwinspool.lib\r\nshell32.lib\r\nole32.lib\r\noleaut32.lib\r\nuuid.lib\r\ncomdlg32.lib\r\nadvapi32.lib\r\n[100%] Linking CUDA executable simpleCudaGraphs_capture.exe\n[100%] Built target simpleCudaGraphs_capture\n\n"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/tf32TensorCoreGemm",
+      "target": "tf32TensorCoreGemm",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-3_CUDA_Features-tf32TensorCoreGemm-tf32TensorCoreGemm.txt",
+      "tail": "Building CUDA object cpp/3_CUDA_Features/tf32TensorCoreGemm/CMakeFiles/tf32TensorCoreGemm.dir/tf32TensorCoreGemm.cu.obj\ntf32TensorCoreGemm.cu\r\ntmpxft_00006a00_00000000-7_tf32TensorCoreGemm.cudafe1.cpp\r\nLinking CUDA executable tf32TensorCoreGemm.exe\nBuilt target tf32TensorCoreGemm\n\n"
+    },
+    {
+      "sample": "cpp/3_CUDA_Features/warpAggregatedAtomicsCG",
+      "target": "warpAggregatedAtomicsCG",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-3_CUDA_Features-warpAggregatedAtomicsCG-warpAggregatedAtomicsCG.txt",
+      "tail": "[  0%] Building CUDA object cpp/3_CUDA_Features/warpAggregatedAtomicsCG/CMakeFiles/warpAggregatedAtomicsCG.dir/warpAggregatedAtomicsCG.cu.obj\nwarpAggregatedAtomicsCG.cu\r\ntmpxft_0000e0bc_00000000-7_warpAggregatedAtomicsCG.cudafe1.cpp\r\n[100%] Linking CUDA executable warpAggregatedAtomicsCG.exe\n[100%] Built target warpAggregatedAtomicsCG\n\n"
+    },
+    {
+      "sample": "cpp/4_CUDA_Libraries/conjugateGradientCudaGraphs",
+      "target": "conjugateGradientCudaGraphs",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-4_CUDA_Libraries-conjugateGradientCudaGraphs-conjugateGradientCudaGraphs.txt",
+      "tail": "[  0%] Building CUDA object cpp/4_CUDA_Libraries/conjugateGradientCudaGraphs/CMakeFiles/conjugateGradientCudaGraphs.dir/conjugateGradientCudaGraphs.cu.obj\nconjugateGradientCudaGraphs.cu\r\ntmpxft_0000a1b4_00000000-7_conjugateGradientCudaGraphs.cudafe1.cpp\r\n[  0%] Linking CUDA device code CMakeFiles\\conjugateGradientCudaGraphs.dir\\cmake_device_link.obj\nconjugateGradientCudaGraphs.cu.obj\r\ncublas.lib\r\ncusparse.lib\r\ncublasLt.lib\r\nnvJitLink.lib\r\ncudadevrt.lib\r\ncudart.lib\r\nkernel32.lib\r\nuser32.lib\r\ngdi32.lib\r\nwinspool.lib\r\nshell32.lib\r\nole32.lib\r\noleaut32.lib\r\nuuid.lib\r\ncomdlg32.lib\r\nadvapi32.lib\r\n[100%] Linking CUDA executable conjugateGradientCudaGraphs.exe\n[100%] Built target conjugateGradientCudaGraphs\n\n"
+    },
+    {
+      "sample": "cpp/4_CUDA_Libraries/conjugateGradientMultiBlockCG",
+      "target": "conjugateGradientMultiBlockCG",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-4_CUDA_Libraries-conjugateGradientMultiBlockCG-conjugateGradientMultiBlockCG.txt",
+      "tail": "Building CUDA object cpp/4_CUDA_Libraries/conjugateGradientMultiBlockCG/CMakeFiles/conjugateGradientMultiBlockCG.dir/conjugateGradientMultiBlockCG.cu.obj\nconjugateGradientMultiBlockCG.cu\r\ntmpxft_00007b98_00000000-7_conjugateGradientMultiBlockCG.cudafe1.cpp\r\nLinking CUDA executable conjugateGradientMultiBlockCG.exe\nBuilt target conjugateGradientMultiBlockCG\n\n"
+    },
+    {
+      "sample": "cpp/4_CUDA_Libraries/conjugateGradientMultiDeviceCG",
+      "target": "conjugateGradientMultiDeviceCG",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-4_CUDA_Libraries-conjugateGradientMultiDeviceCG-conjugateGradientMultiDeviceCG.txt",
+      "tail": "[  0%] Building CUDA object cpp/4_CUDA_Libraries/conjugateGradientMultiDeviceCG/CMakeFiles/conjugateGradientMultiDeviceCG.dir/conjugateGradientMultiDeviceCG.cu.obj\nconjugateGradientMultiDeviceCG.cu\r\ntmpxft_0000958c_00000000-7_conjugateGradientMultiDeviceCG.cudafe1.cpp\r\n[100%] Linking CUDA executable conjugateGradientMultiDeviceCG.exe\n[100%] Built target conjugateGradientMultiDeviceCG\n\n"
+    },
+    {
+      "sample": "cpp/4_CUDA_Libraries/cubDeviceFind",
+      "target": "cubDeviceFind",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-4_CUDA_Libraries-cubDeviceFind-cubDeviceFind.txt",
+      "tail": "[100%] Building CUDA object cpp/4_CUDA_Libraries/cubDeviceFind/CMakeFiles/cubDeviceFind.dir/cubDeviceFind.cu.obj\ncubDeviceFind.cu\r\ntmpxft_00003178_00000000-7_cubDeviceFind.cudafe1.cpp\r\n[100%] Linking CUDA executable cubDeviceFind.exe\n[100%] Built target cubDeviceFind\n\n"
+    },
+    {
+      "sample": "cpp/4_CUDA_Libraries/cubDeviceSegmentedScan",
+      "target": "cubDeviceSegmentedScan",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-4_CUDA_Libraries-cubDeviceSegmentedScan-cubDeviceSegmentedScan.txt",
+      "tail": "Building CUDA object cpp/4_CUDA_Libraries/cubDeviceSegmentedScan/CMakeFiles/cubDeviceSegmentedScan.dir/cubDeviceSegmentedScan.cu.obj\ncubDeviceSegmentedScan.cu\r\ntmpxft_00009af4_00000000-7_cubDeviceSegmentedScan.cudafe1.cpp\r\nLinking CUDA executable cubDeviceSegmentedScan.exe\nBuilt target cubDeviceSegmentedScan\n\n"
+    },
+    {
+      "sample": "cpp/4_CUDA_Libraries/cubDeviceTransform",
+      "target": "cubDeviceTransform",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-4_CUDA_Libraries-cubDeviceTransform-cubDeviceTransform.txt",
+      "tail": "[100%] Building CUDA object cpp/4_CUDA_Libraries/cubDeviceTransform/CMakeFiles/cubDeviceTransform.dir/cubDeviceTransform.cu.obj\ncubDeviceTransform.cu\r\ntmpxft_00007898_00000000-7_cubDeviceTransform.cudafe1.cpp\r\n[100%] Linking CUDA executable cubDeviceTransform.exe\n[100%] Built target cubDeviceTransform\n\n"
+    },
+    {
+      "sample": "cpp/4_CUDA_Libraries/jitLto",
+      "target": "jitLto",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-4_CUDA_Libraries-jitLto-jitLto.txt",
+      "tail": "[100%] Building CXX object cpp/4_CUDA_Libraries/jitLto/CMakeFiles/jitLto.dir/jitLto.cpp.obj\njitLto.cpp\n[100%] Linking CXX executable jitLto.exe\n[100%] Built target jitLto\n\n"
+    },
+    {
+      "sample": "cpp/4_CUDA_Libraries/libcuxxMdspan",
+      "target": "libcuxxMdspan",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-4_CUDA_Libraries-libcuxxMdspan-libcuxxMdspan.txt",
+      "tail": "Building CUDA object cpp/4_CUDA_Libraries/libcuxxMdspan/CMakeFiles/libcuxxMdspan.dir/libcuxxMdspan.cu.obj\nlibcuxxMdspan.cu\r\ntmpxft_00002544_00000000-7_libcuxxMdspan.cudafe1.cpp\r\nLinking CUDA executable libcuxxMdspan.exe\nBuilt target libcuxxMdspan\n\n"
+    },
+    {
+      "sample": "cpp/4_CUDA_Libraries/libcuxxRandom",
+      "target": "libcuxxRandom",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-4_CUDA_Libraries-libcuxxRandom-libcuxxRandom.txt",
+      "tail": "[100%] Building CUDA object cpp/4_CUDA_Libraries/libcuxxRandom/CMakeFiles/libcuxxRandom.dir/libcuxxRandom.cu.obj\nlibcuxxRandom.cu\r\ntmpxft_0000c248_00000000-7_libcuxxRandom.cudafe1.cpp\r\n[100%] Linking CUDA executable libcuxxRandom.exe\n[100%] Built target libcuxxRandom\n\n"
+    },
+    {
+      "sample": "cpp/4_CUDA_Libraries/lineOfSight",
+      "target": "lineOfSight",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-4_CUDA_Libraries-lineOfSight-lineOfSight.txt",
+      "tail": "utIt, ScanOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, Size=ptrdiff_t, OutputIt=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, ScanOp=cuda::__4::maximum<float>]\" at line 243 of C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3\\bin/../include/cccl\\thrust/system/cuda/detail/scan.h\r\n            instantiation of \"OutputIt thrust::_V_300304_SM_1200::cuda_cub::inclusive_scan(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, ScanOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, OutputIt=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, ScanOp=cuda::__4::maximum<float>]\" at line 67 of C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3\\bin/../include/cccl\\thrust/detail/scan.inl\r\n            instantiation of \"OutputIterator thrust::_V_300304_SM_1200::inclusive_scan(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator, InputIterator, OutputIterator, AssociativeOperator) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, OutputIterator=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, AssociativeOperator=cuda::__4::maximum<float>]\" at line 303 of C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3\\bin/../include/cccl\\thrust/detail/scan.inl\r\n            instantiation of \"OutputIterator thrust::_V_300304_SM_1200::inclusive_scan(InputIterator, InputIterator, OutputIterator, AssociativeOperator) [with InputIterator=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, OutputIterator=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, AssociativeOperator=cuda::__4::maximum<float>]\" at line 235 of D:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\4_CUDA_Libraries\\lineOfSight\\lineOfSight.cu\r\n\r\nC:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3\\bin/../include/cccl\\thrust/system/detail/sequential/scan.h(44): warning #1444-D: type \"thrust::_V_300304_SM_1200::maximum<float>\" was declared deprecated (\"Use cuda::maximum instead\")\r\n    thrust::detail::wrapped_function<BinaryFunction, ValueType> wrapped_binary_op{binary_op};\r\n                                                                ^\r\nC:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3\\bin/../include/cccl\\thrust/functional.h(203): note #3287-D: because of a \"deprecated\" attribute\r\n  using maximum [[deprecated(\"Use cuda::maximum instead\")]] = ::cuda::maximum<T>;\r\n                  ^\r\n          detected during:\r\n            instantiation of \"OutputIterator thrust::_V_300304_SM_1200::system::detail::sequential::inclusive_scan(thrust::_V_300304_SM_1200::system::detail::sequential::execution_policy<DerivedPolicy> &, InputIterator, InputIterator, OutputIterator, BinaryFunction) [with DerivedPolicy=thrust::_V_300304_SM_1200::detail::seq_t, InputIterator=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, OutputIterator=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, BinaryFunction=cuda::__4::maximum<float>]\" at line 67 of C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3\\bin/../include/cccl\\thrust/detail/scan.inl\r\n            instantiation of \"OutputIterator thrust::_V_300304_SM_1200::inclusive_scan(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator, InputIterator, OutputIterator, AssociativeOperator) [with DerivedPolicy=thrust::_V_300304_SM_1200::detail::seq_t, InputIterator=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, OutputIterator=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, AssociativeOperator=cuda::__4::maximum<float>]\" at line 231 of C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3\\bin/../include/cccl\\thrust/system/cuda/detail/scan.h\r\n            instantiation of \"OutputIt thrust::_V_300304_SM_1200::cuda_cub::inclusive_scan_n(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, Size, OutputIt, ScanOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, Size=ptrdiff_t, OutputIt=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, ScanOp=cuda::__4::maximum<float>]\" at line 243 of C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3\\bin/../include/cccl\\thrust/system/cuda/detail/scan.h\r\n            instantiation of \"OutputIt thrust::_V_300304_SM_1200::cuda_cub::inclusive_scan(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, ScanOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, OutputIt=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, ScanOp=cuda::__4::maximum<float>]\" at line 67 of C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3\\bin/../include/cccl\\thrust/detail/scan.inl\r\n            instantiation of \"OutputIterator thrust::_V_300304_SM_1200::inclusive_scan(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator, InputIterator, OutputIterator, AssociativeOperator) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, OutputIterator=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, AssociativeOperator=cuda::__4::maximum<float>]\" at line 303 of C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3\\bin/../include/cccl\\thrust/detail/scan.inl\r\n            instantiation of \"OutputIterator thrust::_V_300304_SM_1200::inclusive_scan(InputIterator, InputIterator, OutputIterator, AssociativeOperator) [with InputIterator=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, OutputIterator=thrust::_V_300304_SM_1200::detail::normal_iterator<thrust::_V_300304_SM_1200::device_ptr<float>>, AssociativeOperator=cuda::__4::maximum<float>]\" at line 235 of D:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\4_CUDA_Libraries\\lineOfSight\\lineOfSight.cu\r\n\r\nlineOfSight.cu\r\ntmpxft_0000799c_00000000-7_lineOfSight.cudafe1.cpp\r\nLinking CUDA executable lineOfSight.exe\nBuilt target lineOfSight\n\n"
+    },
+    {
+      "sample": "cpp/4_CUDA_Libraries/oceanFFT",
+      "target": "oceanFFT",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-4_CUDA_Libraries-oceanFFT-oceanFFT.txt",
+      "tail": "[100%] Building CXX object cpp/4_CUDA_Libraries/oceanFFT/CMakeFiles/oceanFFT.dir/oceanFFT.cpp.obj\noceanFFT.cpp\n[100%] Building CUDA object cpp/4_CUDA_Libraries/oceanFFT/CMakeFiles/oceanFFT.dir/oceanFFT_kernel.cu.obj\noceanFFT_kernel.cu\r\ntmpxft_00008168_00000000-7_oceanFFT_kernel.cudafe1.cpp\r\n[100%] Linking CXX executable oceanFFT.exe\n[100%] Built target oceanFFT\n\n"
+    },
+    {
+      "sample": "cpp/4_CUDA_Libraries/randomFog",
+      "target": "randomFog",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-4_CUDA_Libraries-randomFog-randomFog.txt",
+      "tail": "Building CXX object cpp/4_CUDA_Libraries/randomFog/CMakeFiles/randomFog.dir/randomFog.cpp.obj\nrandomFog.cpp\nBuilding CXX object cpp/4_CUDA_Libraries/randomFog/CMakeFiles/randomFog.dir/rng.cpp.obj\nrng.cpp\nLinking CXX executable randomFog.exe\nBuilt target randomFog\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/BlackScholes",
+      "target": "BlackScholes",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-BlackScholes-BlackScholes.txt",
+      "tail": "Building CUDA object cpp/5_Domain_Specific/BlackScholes/CMakeFiles/BlackScholes.dir/BlackScholes.cu.obj\nBlackScholes.cu\r\ntmpxft_00008c38_00000000-7_BlackScholes.cudafe1.cpp\r\nBuilding CXX object cpp/5_Domain_Specific/BlackScholes/CMakeFiles/BlackScholes.dir/BlackScholes_gold.cpp.obj\nBlackScholes_gold.cpp\nLinking CXX executable BlackScholes.exe\nBuilt target BlackScholes\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/FDTD3d",
+      "target": "FDTD3d",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-FDTD3d-FDTD3d.txt",
+      "tail": "[  0%] Building CXX object cpp/5_Domain_Specific/FDTD3d/CMakeFiles/FDTD3d.dir/src/FDTD3d.cpp.obj\nFDTD3d.cpp\n[100%] Building CUDA object cpp/5_Domain_Specific/FDTD3d/CMakeFiles/FDTD3d.dir/src/FDTD3dGPU.cu.obj\nFDTD3dGPU.cu\r\ntmpxft_0000513c_00000000-7_FDTD3dGPU.cudafe1.cpp\r\n[100%] Building CXX object cpp/5_Domain_Specific/FDTD3d/CMakeFiles/FDTD3d.dir/src/FDTD3dReference.cpp.obj\nFDTD3dReference.cpp\n[100%] Linking CXX executable FDTD3d.exe\n[100%] Built target FDTD3d\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/HSOpticalFlow",
+      "target": "HSOpticalFlow",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-HSOpticalFlow-HSOpticalFlow.txt",
+      "tail": "[  0%] Building CUDA object cpp/5_Domain_Specific/HSOpticalFlow/CMakeFiles/HSOpticalFlow.dir/flowCUDA.cu.obj\nflowCUDA.cu\r\ntmpxft_00004bcc_00000000-7_flowCUDA.cudafe1.cpp\r\n[  0%] Building CXX object cpp/5_Domain_Specific/HSOpticalFlow/CMakeFiles/HSOpticalFlow.dir/flowGold.cpp.obj\nflowGold.cpp\n[100%] Building CXX object cpp/5_Domain_Specific/HSOpticalFlow/CMakeFiles/HSOpticalFlow.dir/main.cpp.obj\nmain.cpp\n[100%] Linking CXX executable HSOpticalFlow.exe\n[100%] Built target HSOpticalFlow\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/Mandelbrot",
+      "target": "Mandelbrot",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-Mandelbrot-Mandelbrot.txt",
+      "tail": "[  0%] Building CUDA object cpp/5_Domain_Specific/Mandelbrot/CMakeFiles/Mandelbrot.dir/Mandelbrot_cuda.cu.obj\nMandelbrot_cuda.cu\r\ntmpxft_0000b3a0_00000000-7_Mandelbrot_cuda.cudafe1.cpp\r\n[  0%] Building CXX object cpp/5_Domain_Specific/Mandelbrot/CMakeFiles/Mandelbrot.dir/Mandelbrot_gold.cpp.obj\nMandelbrot_gold.cpp\n[100%] Building CXX object cpp/5_Domain_Specific/Mandelbrot/CMakeFiles/Mandelbrot.dir/Mandelbrot.cpp.obj\nMandelbrot.cpp\n[100%] Linking CXX executable Mandelbrot.exe\n[100%] Built target Mandelbrot\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/MonteCarloMultiGPU",
+      "target": "MonteCarloMultiGPU",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-MonteCarloMultiGPU-MonteCarloMultiGPU.txt",
+      "tail": "[  0%] Building CXX object cpp/5_Domain_Specific/MonteCarloMultiGPU/CMakeFiles/MonteCarloMultiGPU.dir/MonteCarlo_gold.cpp.obj\nMonteCarlo_gold.cpp\n[  0%] Building CUDA object cpp/5_Domain_Specific/MonteCarloMultiGPU/CMakeFiles/MonteCarloMultiGPU.dir/MonteCarlo_kernel.cu.obj\nMonteCarlo_kernel.cu\r\ntmpxft_0000703c_00000000-7_MonteCarlo_kernel.cudafe1.cpp\r\n[  0%] Building CXX object cpp/5_Domain_Specific/MonteCarloMultiGPU/CMakeFiles/MonteCarloMultiGPU.dir/multithreading.cpp.obj\nmultithreading.cpp\n[100%] Building CXX object cpp/5_Domain_Specific/MonteCarloMultiGPU/CMakeFiles/MonteCarloMultiGPU.dir/MonteCarloMultiGPU.cpp.obj\nMonteCarloMultiGPU.cpp\n[100%] Linking CXX executable MonteCarloMultiGPU.exe\n[100%] Built target MonteCarloMultiGPU\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/NV12toBGRandResize",
+      "target": "NV12toBGRandResize",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-NV12toBGRandResize-NV12toBGRandResize.txt",
+      "tail": "[  0%] Building CUDA object cpp/5_Domain_Specific/NV12toBGRandResize/CMakeFiles/NV12toBGRandResize.dir/bgr_resize.cu.obj\nbgr_resize.cu\r\ntmpxft_00006684_00000000-7_bgr_resize.cudafe1.cpp\r\n[  0%] Building CUDA object cpp/5_Domain_Specific/NV12toBGRandResize/CMakeFiles/NV12toBGRandResize.dir/nv12_resize.cu.obj\nnv12_resize.cu\r\ntmpxft_00005de0_00000000-7_nv12_resize.cudafe1.cpp\r\n[100%] Building CUDA object cpp/5_Domain_Specific/NV12toBGRandResize/CMakeFiles/NV12toBGRandResize.dir/nv12_to_bgr_planar.cu.obj\nnv12_to_bgr_planar.cu\r\ntmpxft_000028c8_00000000-7_nv12_to_bgr_planar.cudafe1.cpp\r\n[100%] Building CXX object cpp/5_Domain_Specific/NV12toBGRandResize/CMakeFiles/NV12toBGRandResize.dir/resize_convert_main.cpp.obj\nresize_convert_main.cpp\n[100%] Building CUDA object cpp/5_Domain_Specific/NV12toBGRandResize/CMakeFiles/NV12toBGRandResize.dir/utils.cu.obj\nutils.cu\r\ntmpxft_00007690_00000000-7_utils.cudafe1.cpp\r\n[100%] Linking CXX executable NV12toBGRandResize.exe\n[100%] Built target NV12toBGRandResize\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/SobelFilter",
+      "target": "SobelFilter",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-SobelFilter-SobelFilter.txt",
+      "tail": "[100%] Building CXX object cpp/5_Domain_Specific/SobelFilter/CMakeFiles/SobelFilter.dir/SobelFilter.cpp.obj\nSobelFilter.cpp\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\5_Domain_Specific\\SobelFilter\\SobelFilter.cpp(108): warning C4005: 'MAX': macro redefinition\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\5_Domain_Specific\\SobelFilter\\..\\..\\..\\Common\\helper_cuda.h(636): note: see previous definition of 'MAX'\nC:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include\\algorithm(4248): warning C4244: '=': conversion from 'float' to 'T', possible loss of data\n        with\n        [\n            T=unsigned char\n        ]\nC:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include\\algorithm(4248): note: the template instantiation context (the oldest one first) is\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\5_Domain_Specific\\SobelFilter\\SobelFilter.cpp(266): note: see reference to function template instantiation 'bool sdkLoadPGM<unsigned char>(const char *,T **,unsigned int *,unsigned int *)' being compiled\n        with\n        [\n            T=unsigned char\n        ]\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\5_Domain_Specific\\SobelFilter\\..\\..\\..\\Common\\helper_image.h(231): note: see reference to function template instantiation '_OutIt *std::transform<unsigned char*,T*,helper_image_internal::ConverterFromUByte<unsigned char>>(const _InIt,const _InIt,_OutIt,_Fn)' being compiled\n        with\n        [\n            _OutIt=unsigned char *,\n            T=unsigned char,\n            _InIt=unsigned char *,\n            _Fn=helper_image_internal::ConverterFromUByte<unsigned char>\n        ]\n[100%] Building CUDA object cpp/5_Domain_Specific/SobelFilter/CMakeFiles/SobelFilter.dir/SobelFilter_kernels.cu.obj\nSobelFilter_kernels.cu\r\ntmpxft_0000a460_00000000-7_SobelFilter_kernels.cudafe1.cpp\r\n[100%] Linking CXX executable SobelFilter.exe\n[100%] Built target SobelFilter\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/SobolQRNG",
+      "target": "SobolQRNG",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-SobolQRNG-SobolQRNG.txt",
+      "tail": "[  0%] Building CXX object cpp/5_Domain_Specific/SobolQRNG/CMakeFiles/SobolQRNG.dir/sobol_gold.cpp.obj\nsobol_gold.cpp\n[  0%] Building CUDA object cpp/5_Domain_Specific/SobolQRNG/CMakeFiles/SobolQRNG.dir/sobol_gpu.cu.obj\nsobol_gpu.cu\r\ntmpxft_0000471c_00000000-7_sobol_gpu.cudafe1.cpp\r\n[100%] Building CXX object cpp/5_Domain_Specific/SobolQRNG/CMakeFiles/SobolQRNG.dir/sobol_primitives.cpp.obj\nsobol_primitives.cpp\n[100%] Building CXX object cpp/5_Domain_Specific/SobolQRNG/CMakeFiles/SobolQRNG.dir/sobol.cpp.obj\nsobol.cpp\n[100%] Linking CXX executable SobolQRNG.exe\n[100%] Built target SobolQRNG\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/bicubicTexture",
+      "target": "bicubicTexture",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-bicubicTexture-bicubicTexture.txt",
+      "tail": "[  0%] Building CXX object cpp/5_Domain_Specific/bicubicTexture/CMakeFiles/bicubicTexture.dir/bicubicTexture.cpp.obj\nbicubicTexture.cpp\nC:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include\\algorithm(4248): warning C4244: '=': conversion from 'float' to 'T', possible loss of data\n        with\n        [\n            T=unsigned char\n        ]\nC:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include\\algorithm(4248): note: the template instantiation context (the oldest one first) is\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\5_Domain_Specific\\bicubicTexture\\bicubicTexture.cpp(699): note: see reference to function template instantiation 'bool sdkLoadPGM<unsigned char>(const char *,T **,unsigned int *,unsigned int *)' being compiled\n        with\n        [\n            T=unsigned char\n        ]\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\5_Domain_Specific\\bicubicTexture\\..\\..\\..\\Common\\helper_image.h(231): note: see reference to function template instantiation '_OutIt *std::transform<unsigned char*,T*,helper_image_internal::ConverterFromUByte<unsigned char>>(const _InIt,const _InIt,_OutIt,_Fn)' being compiled\n        with\n        [\n            _OutIt=unsigned char *,\n            T=unsigned char,\n            _InIt=unsigned char *,\n            _Fn=helper_image_internal::ConverterFromUByte<unsigned char>\n        ]\n[  0%] Building CUDA object cpp/5_Domain_Specific/bicubicTexture/CMakeFiles/bicubicTexture.dir/bicubicTexture_cuda.cu.obj\nbicubicTexture_cuda.cu\r\ntmpxft_0000b730_00000000-7_bicubicTexture_cuda.cudafe1.cpp\r\n[100%] Linking CXX executable bicubicTexture.exe\n[100%] Built target bicubicTexture\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/bilateralFilter",
+      "target": "bilateralFilter",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-bilateralFilter-bilateralFilter.txt",
+      "tail": "[  0%] Building CXX object cpp/5_Domain_Specific/bilateralFilter/CMakeFiles/bilateralFilter.dir/bilateralFilter.cpp.obj\nbilateralFilter.cpp\n[  0%] Building CXX object cpp/5_Domain_Specific/bilateralFilter/CMakeFiles/bilateralFilter.dir/bilateralFilter_cpu.cpp.obj\nbilateralFilter_cpu.cpp\n[  0%] Building CUDA object cpp/5_Domain_Specific/bilateralFilter/CMakeFiles/bilateralFilter.dir/bilateral_kernel.cu.obj\nbilateral_kernel.cu\r\ntmpxft_000028a8_00000000-7_bilateral_kernel.cudafe1.cpp\r\n[100%] Building CXX object cpp/5_Domain_Specific/bilateralFilter/CMakeFiles/bilateralFilter.dir/bmploader.cpp.obj\nbmploader.cpp\n[100%] Linking CXX executable bilateralFilter.exe\n[100%] Built target bilateralFilter\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/binomialOptions",
+      "target": "binomialOptions",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-binomialOptions-binomialOptions.txt",
+      "tail": "[  0%] Building CXX object cpp/5_Domain_Specific/binomialOptions/CMakeFiles/binomialOptions.dir/binomialOptions.cpp.obj\nbinomialOptions.cpp\n[  0%] Building CXX object cpp/5_Domain_Specific/binomialOptions/CMakeFiles/binomialOptions.dir/binomialOptions_gold.cpp.obj\nbinomialOptions_gold.cpp\n[100%] Building CUDA object cpp/5_Domain_Specific/binomialOptions/CMakeFiles/binomialOptions.dir/binomialOptions_kernel.cu.obj\nbinomialOptions_kernel.cu\r\ntmpxft_0000320c_00000000-7_binomialOptions_kernel.cudafe1.cpp\r\n[100%] Linking CXX executable binomialOptions.exe\n[100%] Built target binomialOptions\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/convolutionFFT2D",
+      "target": "convolutionFFT2D",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-convolutionFFT2D-convolutionFFT2D.txt",
+      "tail": "[  0%] Building CUDA object cpp/5_Domain_Specific/convolutionFFT2D/CMakeFiles/convolutionFFT2D.dir/convolutionFFT2D.cu.obj\nconvolutionFFT2D.cu\r\ntmpxft_00007afc_00000000-7_convolutionFFT2D.cudafe1.cpp\r\n[  0%] Building CXX object cpp/5_Domain_Specific/convolutionFFT2D/CMakeFiles/convolutionFFT2D.dir/convolutionFFT2D_gold.cpp.obj\nconvolutionFFT2D_gold.cpp\n[  0%] Building CXX object cpp/5_Domain_Specific/convolutionFFT2D/CMakeFiles/convolutionFFT2D.dir/main.cpp.obj\nmain.cpp\n[100%] Linking CXX executable convolutionFFT2D.exe\n[100%] Built target convolutionFFT2D\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/dwtHaar1D",
+      "target": "dwtHaar1D",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-dwtHaar1D-dwtHaar1D.txt",
+      "tail": "Building CUDA object cpp/5_Domain_Specific/dwtHaar1D/CMakeFiles/dwtHaar1D.dir/dwtHaar1D.cu.obj\ndwtHaar1D.cu\r\ntmpxft_00005864_00000000-7_dwtHaar1D.cudafe1.cpp\r\nLinking CUDA executable dwtHaar1D.exe\nBuilt target dwtHaar1D\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/dxtc",
+      "target": "dxtc",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-dxtc-dxtc.txt",
+      "tail": "[  0%] Building CUDA object cpp/5_Domain_Specific/dxtc/CMakeFiles/dxtc.dir/dxtc.cu.obj\ndxtc.cu\r\ntmpxft_0000d330_00000000-7_dxtc.cudafe1.cpp\r\n[100%] Linking CUDA executable dxtc.exe\n[100%] Built target dxtc\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/fastWalshTransform",
+      "target": "fastWalshTransform",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-fastWalshTransform-fastWalshTransform.txt",
+      "tail": "[  0%] Building CUDA object cpp/5_Domain_Specific/fastWalshTransform/CMakeFiles/fastWalshTransform.dir/fastWalshTransform.cu.obj\nfastWalshTransform.cu\r\ntmpxft_00003c2c_00000000-7_fastWalshTransform.cudafe1.cpp\r\n[100%] Building CXX object cpp/5_Domain_Specific/fastWalshTransform/CMakeFiles/fastWalshTransform.dir/fastWalshTransform_gold.cpp.obj\nfastWalshTransform_gold.cpp\n[100%] Linking CXX executable fastWalshTransform.exe\n[100%] Built target fastWalshTransform\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/fluidsGL",
+      "target": "fluidsGL",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-fluidsGL-fluidsGL.txt",
+      "tail": "[  0%] Building CUDA object cpp/5_Domain_Specific/fluidsGL/CMakeFiles/fluidsGL.dir/fluidsGL_kernels.cu.obj\nfluidsGL_kernels.cu\r\ntmpxft_00005b54_00000000-7_fluidsGL_kernels.cudafe1.cpp\r\n[  0%] Building CXX object cpp/5_Domain_Specific/fluidsGL/CMakeFiles/fluidsGL.dir/fluidsGL.cpp.obj\nfluidsGL.cpp\n[100%] Linking CXX executable fluidsGL.exe\n[100%] Built target fluidsGL\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/marchingCubes",
+      "target": "marchingCubes",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-marchingCubes-marchingCubes.txt",
+      "tail": "[100%] Building CUDA object cpp/5_Domain_Specific/marchingCubes/CMakeFiles/marchingCubes.dir/marchingCubes_kernel.cu.obj\nmarchingCubes_kernel.cu\r\ntmpxft_0000c750_00000000-7_marchingCubes_kernel.cudafe1.cpp\r\n[100%] Building CXX object cpp/5_Domain_Specific/marchingCubes/CMakeFiles/marchingCubes.dir/marchingCubes.cpp.obj\nmarchingCubes.cpp\n[100%] Linking CXX executable marchingCubes.exe\n[100%] Built target marchingCubes\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/nbody",
+      "target": "nbody",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-nbody-nbody.txt",
+      "tail": "[  0%] Building CUDA object cpp/5_Domain_Specific/nbody/CMakeFiles/nbody.dir/bodysystemcuda.cu.obj\nbodysystemcuda.cu\r\ntmpxft_00009e48_00000000-7_bodysystemcuda.cudafe1.cpp\r\n[100%] Building CXX object cpp/5_Domain_Specific/nbody/CMakeFiles/nbody.dir/render_particles.cpp.obj\nrender_particles.cpp\n[100%] Building CXX object cpp/5_Domain_Specific/nbody/CMakeFiles/nbody.dir/nbody.cpp.obj\nnbody.cpp\n[100%] Linking CXX executable nbody.exe\n[100%] Built target nbody\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/postProcessGL",
+      "target": "postProcessGL",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-postProcessGL-postProcessGL.txt",
+      "tail": "Building CXX object cpp/5_Domain_Specific/postProcessGL/CMakeFiles/postProcessGL.dir/main.cpp.obj\nmain.cpp\nNote: Using Texture fmt GL_RGBA16F_ARB\nBuilding CUDA object cpp/5_Domain_Specific/postProcessGL/CMakeFiles/postProcessGL.dir/postProcessGL.cu.obj\npostProcessGL.cu\r\ntmpxft_00008eec_00000000-7_postProcessGL.cudafe1.cpp\r\nLinking CXX executable postProcessGL.exe\nBuilt target postProcessGL\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/quasirandomGenerator",
+      "target": "quasirandomGenerator",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-quasirandomGenerator-quasirandomGenerator.txt",
+      "tail": "[  0%] Building CXX object cpp/5_Domain_Specific/quasirandomGenerator/CMakeFiles/quasirandomGenerator.dir/quasirandomGenerator.cpp.obj\nquasirandomGenerator.cpp\n[100%] Building CXX object cpp/5_Domain_Specific/quasirandomGenerator/CMakeFiles/quasirandomGenerator.dir/quasirandomGenerator_gold.cpp.obj\nquasirandomGenerator_gold.cpp\n[100%] Building CUDA object cpp/5_Domain_Specific/quasirandomGenerator/CMakeFiles/quasirandomGenerator.dir/quasirandomGenerator_kernel.cu.obj\nquasirandomGenerator_kernel.cu\r\ntmpxft_00002104_00000000-7_quasirandomGenerator_kernel.cudafe1.cpp\r\n[100%] Linking CXX executable quasirandomGenerator.exe\n[100%] Built target quasirandomGenerator\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/recursiveGaussian",
+      "target": "recursiveGaussian",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-recursiveGaussian-recursiveGaussian.txt",
+      "tail": "[  0%] Building CUDA object cpp/5_Domain_Specific/recursiveGaussian/CMakeFiles/recursiveGaussian.dir/recursiveGaussian_cuda.cu.obj\nrecursiveGaussian_cuda.cu\r\ntmpxft_00002a20_00000000-7_recursiveGaussian_cuda.cudafe1.cpp\r\n[100%] Building CXX object cpp/5_Domain_Specific/recursiveGaussian/CMakeFiles/recursiveGaussian.dir/recursiveGaussian.cpp.obj\nrecursiveGaussian.cpp\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\5_Domain_Specific\\recursiveGaussian\\recursiveGaussian.cpp(80): warning C4005: 'MAX': macro redefinition\nD:\\cuda-webshader\\.local\\nvidia-audit\\cpp\\5_Domain_Specific\\recursiveGaussian\\..\\..\\..\\Common\\helper_cuda.h(636): note: see previous definition of 'MAX'\n[100%] Linking CXX executable recursiveGaussian.exe\n[100%] Built target recursiveGaussian\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/simpleD3D11",
+      "target": "simpleD3D11",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-simpleD3D11-simpleD3D11.txt",
+      "tail": "[100%] Building CXX object cpp/5_Domain_Specific/simpleD3D11/CMakeFiles/simpleD3D11.dir/simpleD3D11.cpp.obj\nsimpleD3D11.cpp\n[100%] Building CUDA object cpp/5_Domain_Specific/simpleD3D11/CMakeFiles/simpleD3D11.dir/sinewave_cuda.cu.obj\nsinewave_cuda.cu\r\ntmpxft_0000cbfc_00000000-7_sinewave_cuda.cudafe1.cpp\r\n[100%] Building CXX object cpp/5_Domain_Specific/simpleD3D11/CMakeFiles/simpleD3D11.dir/__/__/__/Common/rendercheck_d3d11.cpp.obj\nrendercheck_d3d11.cpp\n[100%] Linking CXX executable simpleD3D11.exe\n[100%] Built target simpleD3D11\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/simpleD3D11Texture",
+      "target": "simpleD3D11Texture",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-simpleD3D11Texture-simpleD3D11Texture.txt",
+      "tail": "[ 50%] Building CXX object cpp/5_Domain_Specific/simpleD3D11Texture/CMakeFiles/simpleD3D11Texture.dir/simpleD3D11Texture.cpp.obj\nsimpleD3D11Texture.cpp\n[ 50%] Building CXX object cpp/5_Domain_Specific/simpleD3D11Texture/CMakeFiles/simpleD3D11Texture.dir/__/__/__/Common/rendercheck_d3d11.cpp.obj\nrendercheck_d3d11.cpp\n[ 50%] Building CUDA object cpp/5_Domain_Specific/simpleD3D11Texture/CMakeFiles/simpleD3D11Texture.dir/texture_2d.cu.obj\ntexture_2d.cu\r\ntmpxft_00002b70_00000000-7_texture_2d.cudafe1.cpp\r\n[ 50%] Building CUDA object cpp/5_Domain_Specific/simpleD3D11Texture/CMakeFiles/simpleD3D11Texture.dir/texture_3d.cu.obj\ntexture_3d.cu\r\ntmpxft_0000ac30_00000000-7_texture_3d.cudafe1.cpp\r\n[100%] Building CUDA object cpp/5_Domain_Specific/simpleD3D11Texture/CMakeFiles/simpleD3D11Texture.dir/texture_cube.cu.obj\ntexture_cube.cu\r\ntmpxft_000045a8_00000000-7_texture_cube.cudafe1.cpp\r\n[100%] Linking CXX executable simpleD3D11Texture.exe\n[100%] Built target simpleD3D11Texture\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/simpleD3D12",
+      "target": "simpleD3D12",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-simpleD3D12-simpleD3D12.txt",
+      "tail": "[  0%] Building CXX object cpp/5_Domain_Specific/simpleD3D12/CMakeFiles/simpleD3D12.dir/DX12CudaSample.cpp.obj\nDX12CudaSample.cpp\n[  0%] Building CXX object cpp/5_Domain_Specific/simpleD3D12/CMakeFiles/simpleD3D12.dir/Main.cpp.obj\nMain.cpp\n[  0%] Building CXX object cpp/5_Domain_Specific/simpleD3D12/CMakeFiles/simpleD3D12.dir/Win32Application.cpp.obj\nWin32Application.cpp\n[100%] Building CXX object cpp/5_Domain_Specific/simpleD3D12/CMakeFiles/simpleD3D12.dir/simpleD3D12.cpp.obj\nsimpleD3D12.cpp\n[100%] Building CXX object cpp/5_Domain_Specific/simpleD3D12/CMakeFiles/simpleD3D12.dir/stdafx.cpp.obj\nstdafx.cpp\n[100%] Building CUDA object cpp/5_Domain_Specific/simpleD3D12/CMakeFiles/simpleD3D12.dir/sinewave_cuda.cu.obj\nsinewave_cuda.cu\r\ntmpxft_000069d0_00000000-7_sinewave_cuda.cudafe1.cpp\r\n[100%] Linking CXX executable simpleD3D12.exe\n[100%] Built target simpleD3D12\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/simpleGL",
+      "target": "simpleGL",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-simpleGL-simpleGL.txt",
+      "tail": "Building CUDA object cpp/5_Domain_Specific/simpleGL/CMakeFiles/simpleGL.dir/simpleGL.cu.obj\nsimpleGL.cu\r\ntmpxft_000031e0_00000000-7_simpleGL.cudafe1.cpp\r\nLinking CUDA executable simpleGL.exe\nBuilt target simpleGL\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/smokeParticles",
+      "target": "smokeParticles",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-smokeParticles-smokeParticles.txt",
+      "tail": "[  0%] Building CXX object cpp/5_Domain_Specific/smokeParticles/CMakeFiles/smokeParticles.dir/GLSLProgram.cpp.obj\nGLSLProgram.cpp\n[ 50%] Building CXX object cpp/5_Domain_Specific/smokeParticles/CMakeFiles/smokeParticles.dir/ParticleSystem.cpp.obj\nParticleSystem.cpp\n[ 50%] Building CUDA object cpp/5_Domain_Specific/smokeParticles/CMakeFiles/smokeParticles.dir/ParticleSystem_cuda.cu.obj\nParticleSystem_cuda.cu\r\ntmpxft_0000d590_00000000-7_ParticleSystem_cuda.cudafe1.cpp\r\n[ 50%] Building CXX object cpp/5_Domain_Specific/smokeParticles/CMakeFiles/smokeParticles.dir/SmokeRenderer.cpp.obj\nSmokeRenderer.cpp\n[ 50%] Building CXX object cpp/5_Domain_Specific/smokeParticles/CMakeFiles/smokeParticles.dir/SmokeShaders.cpp.obj\nSmokeShaders.cpp\n[100%] Building CXX object cpp/5_Domain_Specific/smokeParticles/CMakeFiles/smokeParticles.dir/framebufferObject.cpp.obj\nframebufferObject.cpp\n[100%] Building CXX object cpp/5_Domain_Specific/smokeParticles/CMakeFiles/smokeParticles.dir/particleDemo.cpp.obj\nparticleDemo.cpp\n[100%] Building CXX object cpp/5_Domain_Specific/smokeParticles/CMakeFiles/smokeParticles.dir/renderbuffer.cpp.obj\nrenderbuffer.cpp\n[100%] Linking CXX executable smokeParticles.exe\n[100%] Built target smokeParticles\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/stereoDisparity",
+      "target": "stereoDisparity",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-stereoDisparity-stereoDisparity.txt",
+      "tail": "[  0%] Building CUDA object cpp/5_Domain_Specific/stereoDisparity/CMakeFiles/stereoDisparity.dir/stereoDisparity.cu.obj\nstereoDisparity.cu\r\ntmpxft_00003394_00000000-7_stereoDisparity.cudafe1.cpp\r\n[100%] Linking CUDA executable stereoDisparity.exe\n[100%] Built target stereoDisparity\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/volumeFiltering",
+      "target": "volumeFiltering",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-volumeFiltering-volumeFiltering.txt",
+      "tail": "[  0%] Building CXX object cpp/5_Domain_Specific/volumeFiltering/CMakeFiles/volumeFiltering.dir/volume.cpp.obj\nvolume.cpp\n[100%] Building CUDA object cpp/5_Domain_Specific/volumeFiltering/CMakeFiles/volumeFiltering.dir/volumeFilter_kernel.cu.obj\nvolumeFilter_kernel.cu\r\ntmpxft_000009b0_00000000-7_volumeFilter_kernel.cudafe1.cpp\r\n[100%] Building CXX object cpp/5_Domain_Specific/volumeFiltering/CMakeFiles/volumeFiltering.dir/volumeFiltering.cpp.obj\nvolumeFiltering.cpp\n[100%] Building CUDA object cpp/5_Domain_Specific/volumeFiltering/CMakeFiles/volumeFiltering.dir/volumeRender_kernel.cu.obj\nvolumeRender_kernel.cu\r\ntmpxft_00004f58_00000000-7_volumeRender_kernel.cudafe1.cpp\r\n[100%] Linking CXX executable volumeFiltering.exe\n[100%] Built target volumeFiltering\n\n"
+    },
+    {
+      "sample": "cpp/5_Domain_Specific/volumeRender",
+      "target": "volumeRender",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-5_Domain_Specific-volumeRender-volumeRender.txt",
+      "tail": "[100%] Building CUDA object cpp/5_Domain_Specific/volumeRender/CMakeFiles/volumeRender.dir/volumeRender_kernel.cu.obj\nvolumeRender_kernel.cu\r\ntmpxft_00001130_00000000-7_volumeRender_kernel.cudafe1.cpp\r\n[100%] Building CXX object cpp/5_Domain_Specific/volumeRender/CMakeFiles/volumeRender.dir/volumeRender.cpp.obj\nvolumeRender.cpp\n[100%] Linking CXX executable volumeRender.exe\n[100%] Built target volumeRender\n\n"
+    },
+    {
+      "sample": "cpp/6_Performance/LargeKernelParameter",
+      "target": "LargeKernelParameter",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-6_Performance-LargeKernelParameter-LargeKernelParameter.txt",
+      "tail": "Building CUDA object cpp/6_Performance/LargeKernelParameter/CMakeFiles/LargeKernelParameter.dir/LargeKernelParameter.cu.obj\nLargeKernelParameter.cu\r\ntmpxft_0000d7dc_00000000-7_LargeKernelParameter.cudafe1.cpp\r\nLinking CUDA executable LargeKernelParameter.exe\nBuilt target LargeKernelParameter\n\n"
+    },
+    {
+      "sample": "cpp/6_Performance/UnifiedMemoryPerf",
+      "target": "UnifiedMemoryPerf",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-6_Performance-UnifiedMemoryPerf-UnifiedMemoryPerf.txt",
+      "tail": "[  0%] Building CXX object cpp/6_Performance/UnifiedMemoryPerf/CMakeFiles/UnifiedMemoryPerf.dir/helperFunctions.cpp.obj\nhelperFunctions.cpp\n[100%] Building CUDA object cpp/6_Performance/UnifiedMemoryPerf/CMakeFiles/UnifiedMemoryPerf.dir/matrixMultiplyPerf.cu.obj\nmatrixMultiplyPerf.cu\r\ntmpxft_00008d70_00000000-7_matrixMultiplyPerf.cudafe1.cpp\r\n[100%] Building CUDA object cpp/6_Performance/UnifiedMemoryPerf/CMakeFiles/UnifiedMemoryPerf.dir/commonKernels.cu.obj\ncommonKernels.cu\r\ntmpxft_000079f8_00000000-7_commonKernels.cudafe1.cpp\r\n[100%] Linking CXX executable UnifiedMemoryPerf.exe\n[100%] Built target UnifiedMemoryPerf\n\n"
+    },
+    {
+      "sample": "cpp/6_Performance/alignedTypes",
+      "target": "alignedTypes",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-6_Performance-alignedTypes-alignedTypes.txt",
+      "tail": "Building CUDA object cpp/6_Performance/alignedTypes/CMakeFiles/alignedTypes.dir/alignedTypes.cu.obj\nalignedTypes.cu\r\ntmpxft_00005ee8_00000000-7_alignedTypes.cudafe1.cpp\r\nLinking CUDA executable alignedTypes.exe\nBuilt target alignedTypes\n\n"
+    },
+    {
+      "sample": "cpp/6_Performance/cudaGraphsPerfScaling",
+      "target": "cudaGraphsPerfScaling",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-6_Performance-cudaGraphsPerfScaling-cudaGraphsPerfScaling.txt",
+      "tail": "[100%] Building CUDA object cpp/6_Performance/cudaGraphsPerfScaling/CMakeFiles/cudaGraphsPerfScaling.dir/cudaGraphPerfScaling.cu.obj\ncudaGraphPerfScaling.cu\r\ntmpxft_0000cf5c_00000000-7_cudaGraphPerfScaling.cudafe1.cpp\r\n[100%] Linking CUDA executable cudaGraphsPerfScaling.exe\n[100%] Built target cudaGraphsPerfScaling\n\n"
+    },
+    {
+      "sample": "cpp/6_Performance/transpose",
+      "target": "transpose",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-6_Performance-transpose-transpose.txt",
+      "tail": "[  0%] Building CUDA object cpp/6_Performance/transpose/CMakeFiles/transpose.dir/transpose.cu.obj\ntranspose.cu\r\ntmpxft_0000bea4_00000000-7_transpose.cudafe1.cpp\r\n[100%] Linking CUDA executable transpose.exe\n[100%] Built target transpose\n\n"
+    },
+    {
+      "sample": "cpp/7_libNVVM/cuda-shared-memory",
+      "target": "clobber",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-7_libNVVM-cuda-shared-memory-clobber.txt",
+      "tail": "Built target clobber\n\n"
+    },
+    {
+      "sample": "cpp/7_libNVVM/cuda-shared-memory",
+      "target": "testrun",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-7_libNVVM-cuda-shared-memory-testrun.txt",
+      "tail": "Built target testrun\n\n"
+    },
+    {
+      "sample": "cpp/7_libNVVM/device-side-launch",
+      "target": "dsl",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-7_libNVVM-device-side-launch-dsl.txt",
+      "tail": "[  0%] Building C object cpp/7_libNVVM/device-side-launch/CMakeFiles/dsl.dir/dsl.c.obj\ndsl.c\n[100%] Linking C executable dsl.exe\n[100%] Built target dsl\n\n"
+    },
+    {
+      "sample": "cpp/7_libNVVM/simple",
+      "target": "simple",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-7_libNVVM-simple-simple.txt",
+      "tail": "Building C object cpp/7_libNVVM/simple/CMakeFiles/simple.dir/simple.c.obj\nsimple.c\nLinking C executable simple.exe\nBuilt target simple\n\n"
+    },
+    {
+      "sample": "cpp/7_libNVVM/ptxgen",
+      "target": "ptxgen",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-7_libNVVM-ptxgen-ptxgen.txt",
+      "tail": "[  0%] Building C object cpp/7_libNVVM/ptxgen/CMakeFiles/ptxgen.dir/ptxgen.c.obj\nptxgen.c\n[100%] Linking C executable ptxgen.exe\n[100%] Built target ptxgen\n\n"
+    },
+    {
+      "sample": "cpp/7_libNVVM/uvmlite",
+      "target": "uvmlite",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-7_libNVVM-uvmlite-uvmlite.txt",
+      "tail": "Building C object cpp/7_libNVVM/uvmlite/CMakeFiles/uvmlite.dir/uvmlite.c.obj\nuvmlite.c\nLinking C executable uvmlite.exe\nBuilt target uvmlite\n\n"
+    },
+    {
+      "sample": "cpp/9_CUDA_Tile/helloTile",
+      "target": "helloTile",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-9_CUDA_Tile-helloTile-helloTile.txt",
+      "tail": "Building CUDA object cpp/9_CUDA_Tile/helloTile/CMakeFiles/helloTile.dir/helloTile.cu.obj\nhelloTile.cu\r\ntmpxft_0000338c_00000000-8_helloTile.cudafe1.cpp\r\nLinking CUDA executable helloTile.exe\nBuilt target helloTile\n\n"
+    },
+    {
+      "sample": "cpp/9_CUDA_Tile/tileVectorAdd",
+      "target": "tileVectorAdd",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-9_CUDA_Tile-tileVectorAdd-tileVectorAdd.txt",
+      "tail": "[  0%] Building CUDA object cpp/9_CUDA_Tile/tileVectorAdd/CMakeFiles/tileVectorAdd.dir/tileVectorAdd.cu.obj\ntileVectorAdd.cu\r\ntmpxft_00003cf8_00000000-8_tileVectorAdd.cudafe1.cpp\r\n[100%] Linking CUDA executable tileVectorAdd.exe\n[100%] Built target tileVectorAdd\n\n"
+    },
+    {
+      "sample": "cpp/9_CUDA_Tile/tileTranspose",
+      "target": "tileTranspose",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-9_CUDA_Tile-tileTranspose-tileTranspose.txt",
+      "tail": "Building CUDA object cpp/9_CUDA_Tile/tileTranspose/CMakeFiles/tileTranspose.dir/tileTranspose.cu.obj\ntileTranspose.cu\r\ntmpxft_00003c20_00000000-8_tileTranspose.cudafe1.cpp\r\nLinking CUDA executable tileTranspose.exe\nBuilt target tileTranspose\n\n"
+    },
+    {
+      "sample": "cpp/9_CUDA_Tile/tileMatmulAutotuner",
+      "target": "tileMatmulAutotuner",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-9_CUDA_Tile-tileMatmulAutotuner-tileMatmulAutotuner.txt",
+      "tail": "[100%] Building CXX object cpp/9_CUDA_Tile/tileMatmulAutotuner/CMakeFiles/tileMatmulAutotuner.dir/matmul_autotuner.cpp.obj\nmatmul_autotuner.cpp\n[100%] Linking CXX executable tileMatmulAutotuner.exe\n[100%] Built target tileMatmulAutotuner\n\n"
+    },
+    {
+      "sample": "cpp/9_CUDA_Tile/tileMatmul",
+      "target": "tileMatmul",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-9_CUDA_Tile-tileMatmul-tileMatmul.txt",
+      "tail": "Building CUDA object cpp/9_CUDA_Tile/tileMatmul/CMakeFiles/tileMatmul.dir/tileMatmul.cu.obj\ntileMatmul.cu\r\ntmpxft_0000e0cc_00000000-8_tileMatmul.cudafe1.cpp\r\nLinking CUDA executable tileMatmul.exe\nBuilt target tileMatmul\n\n"
+    },
+    {
+      "sample": "cpp/9_CUDA_Tile/tileBmm",
+      "target": "tileBmm",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-9_CUDA_Tile-tileBmm-tileBmm.txt",
+      "tail": "Building CUDA object cpp/9_CUDA_Tile/tileBmm/CMakeFiles/tileBmm.dir/tileBmm.cu.obj\ntileBmm.cu\r\ntmpxft_00004df4_00000000-8_tileBmm.cudafe1.cpp\r\nLinking CUDA executable tileBmm.exe\nBuilt target tileBmm\n\n"
+    },
+    {
+      "sample": "cpp/9_CUDA_Tile/tileLayerNorm",
+      "target": "tileLayerNorm",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-9_CUDA_Tile-tileLayerNorm-tileLayerNorm.txt",
+      "tail": "[100%] Building CUDA object cpp/9_CUDA_Tile/tileLayerNorm/CMakeFiles/tileLayerNorm.dir/tileLayerNorm.cu.obj\ntileLayerNorm.cu\r\ntmpxft_000051f0_00000000-8_tileLayerNorm.cudafe1.cpp\r\n[100%] Linking CUDA executable tileLayerNorm.exe\n[100%] Built target tileLayerNorm\n\n"
+    },
+    {
+      "sample": "cpp/9_CUDA_Tile/tileRope",
+      "target": "tileRope",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-9_CUDA_Tile-tileRope-tileRope.txt",
+      "tail": "Building CUDA object cpp/9_CUDA_Tile/tileRope/CMakeFiles/tileRope.dir/tileRope.cu.obj\ntileRope.cu\r\ntmpxft_00005a68_00000000-8_tileRope.cudafe1.cpp\r\nLinking CUDA executable tileRope.exe\nBuilt target tileRope\n\n"
+    },
+    {
+      "sample": "cpp/9_CUDA_Tile/tileSpMV",
+      "target": "tileSpMV",
+      "status": "built",
+      "log": "nvidia-build-logs/cpp-9_CUDA_Tile-tileSpMV-tileSpMV.txt",
+      "tail": "[100%] Building CUDA object cpp/9_CUDA_Tile/tileSpMV/CMakeFiles/tileSpMV.dir/tileSpMV.cu.obj\ntileSpMV.cu\r\ntmpxft_0000a0dc_00000000-8_tileSpMV.cudafe1.cpp\r\n[100%] Linking CUDA executable tileSpMV.exe\n[100%] Built target tileSpMV\n\n"
+    }
+  ]
+}

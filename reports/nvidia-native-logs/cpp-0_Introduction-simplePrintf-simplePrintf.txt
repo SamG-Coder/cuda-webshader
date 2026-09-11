@@ -1,0 +1,37 @@
+[2, 0]:		Value is:10
+[2, 1]:		Value is:10
+[2, 2]:		Value is:10
+[2, 3]:		Value is:10
+[2, 4]:		Value is:10
+[2, 5]:		Value is:10
+[2, 6]:		Value is:10
+[2, 7]:		Value is:10
+[3, 0]:		Value is:10
+[3, 1]:		Value is:10
+[3, 2]:		Value is:10
+[3, 3]:		Value is:10
+[3, 4]:		Value is:10
+[3, 5]:		Value is:10
+[3, 6]:		Value is:10
+[3, 7]:		Value is:10
+[0, 0]:		Value is:10
+[0, 1]:		Value is:10
+[0, 2]:		Value is:10
+[0, 3]:		Value is:10
+[0, 4]:		Value is:10
+[0, 5]:		Value is:10
+[0, 6]:		Value is:10
+[0, 7]:		Value is:10
+[1, 0]:		Value is:10
+[1, 1]:		Value is:10
+[1, 2]:		Value is:10
+[1, 3]:		Value is:10
+[1, 4]:		Value is:10
+[1, 5]:		Value is:10
+[1, 6]:		Value is:10
+[1, 7]:		Value is:10
+GPU Device 0: with compute capability 12.0 and Number of SMs 84
+
+printf() is called. Output:
+
+

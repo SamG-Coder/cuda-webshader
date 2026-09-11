@@ -1,0 +1,8 @@
+[  0%] Building CUDA object cpp/5_Domain_Specific/fluidsGL/CMakeFiles/fluidsGL.dir/fluidsGL_kernels.cu.obj
+fluidsGL_kernels.cu
+tmpxft_00005b54_00000000-7_fluidsGL_kernels.cudafe1.cpp
+[  0%] Building CXX object cpp/5_Domain_Specific/fluidsGL/CMakeFiles/fluidsGL.dir/fluidsGL.cpp.obj
+fluidsGL.cpp
+[100%] Linking CXX executable fluidsGL.exe
+[100%] Built target fluidsGL
+

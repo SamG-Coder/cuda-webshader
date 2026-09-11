@@ -1,0 +1,10 @@
+[  0%] Building CUDA object cpp/5_Domain_Specific/convolutionFFT2D/CMakeFiles/convolutionFFT2D.dir/convolutionFFT2D.cu.obj
+convolutionFFT2D.cu
+tmpxft_00007afc_00000000-7_convolutionFFT2D.cudafe1.cpp
+[  0%] Building CXX object cpp/5_Domain_Specific/convolutionFFT2D/CMakeFiles/convolutionFFT2D.dir/convolutionFFT2D_gold.cpp.obj
+convolutionFFT2D_gold.cpp
+[  0%] Building CXX object cpp/5_Domain_Specific/convolutionFFT2D/CMakeFiles/convolutionFFT2D.dir/main.cpp.obj
+main.cpp
+[100%] Linking CXX executable convolutionFFT2D.exe
+[100%] Built target convolutionFFT2D
+

@@ -1,0 +1,90 @@
+GPU: Handle set to 0
+GPU: Handle set to 1
+GPU: Hello from the GPU! The condition was true.
+GPU: doWhileEmptyKernel()
+GPU: doWhileEmptyKernel()
+GPU: counter = 9
+GPU: doWhileEmptyKernel()
+GPU: doWhileEmptyKernel()
+GPU: counter = 8
+GPU: doWhileEmptyKernel()
+GPU: doWhileEmptyKernel()
+GPU: counter = 7
+GPU: doWhileEmptyKernel()
+GPU: doWhileEmptyKernel()
+GPU: counter = 6
+GPU: doWhileEmptyKernel()
+GPU: doWhileEmptyKernel()
+GPU: counter = 5
+GPU: doWhileEmptyKernel()
+GPU: doWhileEmptyKernel()
+GPU: counter = 4
+GPU: doWhileEmptyKernel()
+GPU: doWhileEmptyKernel()
+GPU: counter = 3
+GPU: doWhileEmptyKernel()
+GPU: doWhileEmptyKernel()
+GPU: counter = 2
+GPU: doWhileEmptyKernel()
+GPU: doWhileEmptyKernel()
+GPU: counter = 1
+GPU: doWhileEmptyKernel()
+GPU: doWhileEmptyKernel()
+GPU: counter = 0
+GPU: counter = 0
+GPU: capturedWhileEmptyKernel()
+GPU: counter = 10
+GPU: counter = 9
+GPU: counter = 8
+GPU: counter = 7
+GPU: counter = 6
+GPU: counter = 5
+GPU: counter = 4
+GPU: counter = 3
+GPU: counter = 2
+GPU: counter = 1
+GPU: capturedWhileEmptyKernel()
+GPU: Handle set to 0
+GPU: Hello from the GPU! The condition was false.
+GPU: Handle set to 1
+GPU: Hello from the GPU! The condition was true.
+GPU: Handle set to 0
+GPU: Hello from switchGraphKernelC(), running on the GPU!
+GPU: Handle set to 1
+GPU: Hello from switchGraphKernelD(), running on the GPU!
+GPU: Handle set to 2
+GPU: Hello from switchGraphKernelE(), running on the GPU!
+GPU: Handle set to 3
+GPU: Hello from switchGraphKernelF(), running on the GPU!
+GPU: Handle set to 4
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Driver version is: 13.4
+simpleIfGraph: Building graph...
+Host: Launching graph with device memory set to 0
+Host: Launching graph with device memory set to 1
+simpleIfGraph: Complete
+
+simpleDoWhileGraph: Building graph...
+Host: Launching graph with loop counter set to 10
+simpleDoWhileGraph: Complete
+
+capturedWhileGraph: Building graph...
+Host: Launching graph with loop counter set to 0
+Host: Launching graph with loop counter set to 10
+capturedWhileGraph: Complete
+
+simpleIfElseGraph: Building graph...
+Host: Launching graph with device memory set to 0
+Host: Launching graph with device memory set to 1
+simpleIfElseGraph: Complete
+
+simpleSwitchGraph: Building graph...
+Host: Launching graph with device memory set to 0
+Host: Launching graph with device memory set to 1
+Host: Launching graph with device memory set to 2
+Host: Launching graph with device memory set to 3
+Host: Launching graph with device memory set to 4
+simpleSwitchGraph: Complete
+
+

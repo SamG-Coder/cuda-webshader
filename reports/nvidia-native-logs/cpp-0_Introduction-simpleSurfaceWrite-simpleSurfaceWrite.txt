@@ -1,0 +1,13 @@
+simpleSurfaceWrite starting...
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+CUDA device [NVIDIA GeForce RTX 5080] has 84 Multi-Processors, SM 12.0
+Loaded 'teapot512.pgm', 512 x 512 pixels
+Processing time: 0.012700 (ms)
+20641.26 Mpixels/sec
+Wrote 'output.pgm'
+Comparing files
+	output:    <output.pgm>
+	reference: <./ref_rotated.pgm>
+simpleSurfaceWrite completed, returned OK
+

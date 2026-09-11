@@ -1,0 +1,27 @@
+[  0%] Building CXX object cpp/5_Domain_Specific/bicubicTexture/CMakeFiles/bicubicTexture.dir/bicubicTexture.cpp.obj
+bicubicTexture.cpp
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\algorithm(4248): warning C4244: '=': conversion from 'float' to 'T', possible loss of data
+        with
+        [
+            T=unsigned char
+        ]
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\algorithm(4248): note: the template instantiation context (the oldest one first) is
+D:\cuda-webshader\.local\nvidia-audit\cpp\5_Domain_Specific\bicubicTexture\bicubicTexture.cpp(699): note: see reference to function template instantiation 'bool sdkLoadPGM<unsigned char>(const char *,T **,unsigned int *,unsigned int *)' being compiled
+        with
+        [
+            T=unsigned char
+        ]
+D:\cuda-webshader\.local\nvidia-audit\cpp\5_Domain_Specific\bicubicTexture\..\..\..\Common\helper_image.h(231): note: see reference to function template instantiation '_OutIt *std::transform<unsigned char*,T*,helper_image_internal::ConverterFromUByte<unsigned char>>(const _InIt,const _InIt,_OutIt,_Fn)' being compiled
+        with
+        [
+            _OutIt=unsigned char *,
+            T=unsigned char,
+            _InIt=unsigned char *,
+            _Fn=helper_image_internal::ConverterFromUByte<unsigned char>
+        ]
+[  0%] Building CUDA object cpp/5_Domain_Specific/bicubicTexture/CMakeFiles/bicubicTexture.dir/bicubicTexture_cuda.cu.obj
+bicubicTexture_cuda.cu
+tmpxft_0000b730_00000000-7_bicubicTexture_cuda.cudafe1.cpp
+[100%] Linking CXX executable bicubicTexture.exe
+[100%] Built target bicubicTexture
+

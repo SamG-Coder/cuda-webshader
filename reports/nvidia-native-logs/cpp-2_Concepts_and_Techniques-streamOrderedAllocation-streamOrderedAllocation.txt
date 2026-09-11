@@ -1,0 +1,10 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Starting basicStreamOrderedAllocation()
+> Checking the results from vectorAddGPU() ...
+basicStreamOrderedAllocation PASSED
+Starting streamOrderedAllocationPostSync()
+Total elapsed time = 16.066816 ms over 20 iterations
+> Checking the results from vectorAddGPU() ...
+streamOrderedAllocationPostSync PASSED
+

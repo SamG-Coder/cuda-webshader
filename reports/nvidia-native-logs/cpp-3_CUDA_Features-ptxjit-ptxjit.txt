@@ -1,0 +1,12 @@
+[PTX Just In Time (JIT) Compilation (no-qatest)] - Starting...
+> Using CUDA Device [0]: NVIDIA GeForce RTX 5080
+> findModulePath <./ptxjit_kernel64.ptx>
+> initCUDA loading module: <./ptxjit_kernel64.ptx>
+Loading ptxjit_kernel[] program
+CUDA Link Completed in 0.000000ms. Linker Output:
+info    : 0 bytes gmem
+info    : Function properties for 'myKernel':
+info    : used 8 registers, used 2 barriers, 0 stack, 0 bytes smem, 904 bytes cmem[0], 0 bytes lmem
+
+CUDA kernel launched
+

@@ -1,0 +1,33 @@
+[simpleMultiCopy] - Starting...
+> Using CUDA device [0]: NVIDIA GeForce RTX 5080
+[NVIDIA GeForce RTX 5080] has 84 MP(s) x 128 (Cores/MP) = 10752 (Cores)
+> Device name: NVIDIA GeForce RTX 5080
+> CUDA Capability 12.0 hardware with 84 multi-processors
+> scale_factor = 1.00
+> array_size   = 4194304
+
+
+Relevant properties of this CUDA device
+(X) Can overlap one CPU<>GPU data transfer with GPU kernel execution (device property "cudaDevAttrGpuOverlap")
+( ) Can overlap two CPU<>GPU data transfers with GPU kernel execution
+    (Compute Capability >= 2.0 AND (Tesla product OR Quadro 4000/5000/6000/K5000)
+
+Measured timings (throughput):
+ Memcpy host to device	: 0.635040 ms (26.419149 GB/s)
+ Memcpy device to host	: 0.588832 ms (28.492364 GB/s)
+ Kernel			: 0.063936 ms (2624.063959 GB/s)
+
+Theoretical limits for speedup gained from overlapped data transfers:
+No overlap at all (transfer-kernel-transfer): 1.287808 ms 
+Compute can overlap with one transfer: 1.223872 ms
+Compute can overlap with both data transfers: 0.635040 ms
+
+Average measured timings over 10 repetitions:
+ Avg. time when execution fully serialized	: 1.284358 ms
+ Avg. time when overlapped using 4 streams	: 1.178813 ms
+ Avg. speedup gained (serialized - overlapped)	: 0.105546 ms
+
+Measured throughput:
+ Fully serialized execution		: 26.125443 GB/s
+ Overlapped using 4 streams		: 28.464598 GB/s
+

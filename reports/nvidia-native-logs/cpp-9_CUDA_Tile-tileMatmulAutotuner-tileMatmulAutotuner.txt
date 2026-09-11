@@ -1,0 +1,307 @@
+Note: CPU cross-validation disabled
+Device: NVIDIA GeForce RTX 5080
+Memory Bandwidth: 960 GB/s (theoretical peak)
+GPU Compute Capability: 12.0
+
+Matrix Multiplication Autotuner (FP16 inputs, FP32 accumulate)
+==============================================================
+Backend: NVRTC
+Search space: D:\cuda-webshader\.local\nvidia-audit-build\cpp\9_CUDA_Tile\tileMatmulAutotuner\autotuner_search_space.conf
+Tuning for M=1024, N=4096, K=1024
+
+=== Matrix: C[1024x4096] = A[1024x1024] x B[1024x4096] (FP16->FP32) ===
+    FLOPs: 8.59 GFLOP
+  [1/36]   bm=64,bn=64,bk=32,gx=16,gy=64,ld=2,st=2   :   0.723 ms,    37.7 GB/s, 11878.0 GFLOPS 
+  [2/36]   bm=64,bn=64,bk=32,gx=16,gy=64,ld=2,st=5   :   0.665 ms,    41.0 GB/s, 12919.7 GFLOPS 
+  [3/36]   bm=64,bn=64,bk=32,gx=16,gy=64,ld=2,st=8   :   0.779 ms,    35.0 GB/s, 11025.3 GFLOPS 
+  [4/36]   bm=64,bn=64,bk=32,gx=16,gy=64,ld=5,st=2   :   0.756 ms,    36.1 GB/s, 11366.4 GFLOPS 
+  [5/36]   bm=64,bn=64,bk=32,gx=16,gy=64,ld=5,st=5   :   0.760 ms,    35.9 GB/s, 11301.6 GFLOPS 
+  [6/36]   bm=64,bn=64,bk=32,gx=16,gy=64,ld=5,st=8   :   0.684 ms,    39.9 GB/s, 12556.0 GFLOPS 
+  [7/36]   bm=64,bn=64,bk=32,gx=16,gy=64,ld=8,st=2   :   0.703 ms,    38.8 GB/s, 12220.5 GFLOPS 
+  [8/36]   bm=64,bn=64,bk=32,gx=16,gy=64,ld=8,st=5   :   0.786 ms,    34.7 GB/s, 10925.8 GFLOPS 
+  [9/36]   bm=64,bn=64,bk=32,gx=16,gy=64,ld=8,st=8   :   0.661 ms,    41.3 GB/s, 12998.5 GFLOPS 
+  [10/36]   bm=128,bn=64,bk=32,gx=8,gy=64,ld=2,st=2   :   0.727 ms,    37.5 GB/s, 11808.0 GFLOPS 
+  [11/36]   bm=128,bn=64,bk=32,gx=8,gy=64,ld=2,st=5   :   0.687 ms,    39.7 GB/s, 12506.5 GFLOPS 
+  [12/36]   bm=128,bn=64,bk=32,gx=8,gy=64,ld=2,st=8   :   0.671 ms,    40.7 GB/s, 12809.6 GFLOPS 
+  [13/36]   bm=128,bn=64,bk=32,gx=8,gy=64,ld=5,st=2   :   0.750 ms,    36.4 GB/s, 11456.9 GFLOPS 
+  [14/36]   bm=128,bn=64,bk=32,gx=8,gy=64,ld=5,st=5   :   0.679 ms,    40.1 GB/s, 12645.1 GFLOPS 
+  [15/36]   bm=128,bn=64,bk=32,gx=8,gy=64,ld=5,st=8   :   0.698 ms,    39.0 GB/s, 12300.9 GFLOPS 
+  [16/36]   bm=128,bn=64,bk=32,gx=8,gy=64,ld=8,st=2   :   0.667 ms,    40.9 GB/s, 12878.6 GFLOPS 
+  [17/36]   bm=128,bn=64,bk=32,gx=8,gy=64,ld=8,st=5   :   0.656 ms,    41.6 GB/s, 13098.7 GFLOPS 
+  [18/36]   bm=128,bn=64,bk=32,gx=8,gy=64,ld=8,st=8   :   0.641 ms,    42.5 GB/s, 13401.9 GFLOPS 
+  [19/36]   bm=64,bn=128,bk=32,gx=16,gy=32,ld=2,st=2  :   0.703 ms,    38.8 GB/s, 12221.8 GFLOPS 
+  [20/36]   bm=64,bn=128,bk=32,gx=16,gy=32,ld=2,st=5  :   0.626 ms,    43.5 GB/s, 13714.3 GFLOPS 
+  [21/36]   bm=64,bn=128,bk=32,gx=16,gy=32,ld=2,st=8  :   0.678 ms,    40.2 GB/s, 12662.3 GFLOPS 
+  [22/36]   bm=64,bn=128,bk=32,gx=16,gy=32,ld=5,st=2  :   0.784 ms,    34.8 GB/s, 10957.7 GFLOPS 
+  [23/36]   bm=64,bn=128,bk=32,gx=16,gy=32,ld=5,st=5  :   1.143 ms,    23.8 GB/s, 7513.7 GFLOPS 
+  [24/36]   bm=64,bn=128,bk=32,gx=16,gy=32,ld=5,st=8  :   1.093 ms,    24.9 GB/s, 7860.9 GFLOPS 
+  [25/36]   bm=64,bn=128,bk=32,gx=16,gy=32,ld=8,st=2  :   0.995 ms,    27.4 GB/s, 8637.3 GFLOPS 
+  [26/36]   bm=64,bn=128,bk=32,gx=16,gy=32,ld=8,st=5  :   1.107 ms,    24.6 GB/s, 7761.1 GFLOPS 
+  [27/36]   bm=64,bn=128,bk=32,gx=16,gy=32,ld=8,st=8  :   1.246 ms,    21.9 GB/s, 6896.6 GFLOPS 
+  [28/36]   bm=128,bn=128,bk=32,gx=8,gy=32,ld=2,st=2  :   1.179 ms,    23.1 GB/s, 7285.9 GFLOPS 
+  [29/36]   bm=128,bn=128,bk=32,gx=8,gy=32,ld=2,st=5  :   1.654 ms,    16.5 GB/s, 5193.6 GFLOPS 
+  [30/36]   bm=128,bn=128,bk=32,gx=8,gy=32,ld=2,st=8  :   1.704 ms,    16.0 GB/s, 5040.7 GFLOPS 
+  [31/36]   bm=128,bn=128,bk=32,gx=8,gy=32,ld=5,st=2  :   1.637 ms,    16.7 GB/s, 5247.2 GFLOPS 
+  [32/36]   bm=128,bn=128,bk=32,gx=8,gy=32,ld=5,st=5  :   1.756 ms,    15.5 GB/s, 4891.7 GFLOPS 
+  [33/36]   bm=128,bn=128,bk=32,gx=8,gy=32,ld=5,st=8  :   2.132 ms,    12.8 GB/s, 4028.6 GFLOPS 
+  [34/36]   bm=128,bn=128,bk=32,gx=8,gy=32,ld=8,st=2  :   1.849 ms,    14.7 GB/s, 4645.3 GFLOPS 
+  [35/36]   bm=128,bn=128,bk=32,gx=8,gy=32,ld=8,st=5  :   6.246 ms,     4.4 GB/s, 1375.2 GFLOPS 
+  [36/36]   bm=128,bn=128,bk=32,gx=8,gy=32,ld=8,st=8  :   0.805 ms,    33.9 GB/s, 10666.2 GFLOPS 
+
+  *** BEST CONFIGURATION ***
+  BLOCK_M=64, BLOCK_N=128, BLOCK_K=32
+  LOAD_LATENCY=2, STORE_LATENCY=5, grid_x=16, grid_y=32
+  Performance: 13714.3 GFLOPS, 0.626 ms, 43.5 GB/s
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+
+
+Compiling file with NVRTC
+
+ compilation log ---
+
+ end log ---
+

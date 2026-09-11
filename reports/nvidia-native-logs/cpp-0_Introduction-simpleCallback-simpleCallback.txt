@@ -1,0 +1,19 @@
+=====================================================
+  simpleCallback: CPU -> GPU -> CPU pipeline demo
+=====================================================
+Using GPU 0: compute capability 12.0, 84 SMs
+[thread]    Stage 1: CPU pre-processing on a worker thread...
+[thread]    Filled 100000 elements. First 3 inputs: 42, 43, 44
+
+[thread]    Stage 2: enqueuing H2D copy, kernel, D2H copy on the stream
+[thread]    Registering post-processing callback with cudaLaunchHostFunc
+
+[host func] Stage 3: callback fired automatically - the GPU work is done!
+[host func] First 3 results: 43, 44, 45 (each input +1)
+[host func] Verified all 100000 results: PASS
+[main]      Worker thread joined; GPU work has been enqueued.
+[main]      Waiting for the stream (and callback) to finish...
+
+
+[main]      Pipeline complete. Result: SUCCESS
+

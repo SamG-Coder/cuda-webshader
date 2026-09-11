@@ -1,0 +1,7 @@
+CP: lshmName = simpleIPCshm
+Process 0: Starting on device 0...
+Step 0 done
+Process 0: verifying...
+Process 0 complete!
+PP: lshmName = simpleIPCshm
+

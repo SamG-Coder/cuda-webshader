@@ -1,0 +1,97 @@
+{
+  "passed": true,
+  "staticBuild": true,
+  "softwareAdapterRequested": false,
+  "results": [
+    {
+      "entry": "increment_kernel",
+      "sample": "cpp/0_Introduction/asyncAPI",
+      "passed": true
+    },
+    {
+      "entry": "kernelAddConstant",
+      "sample": "cpp/0_Introduction/cudaOpenMP",
+      "passed": true
+    },
+    {
+      "entry": "incrementKernel",
+      "sample": "cpp/0_Introduction/simpleCallback",
+      "passed": true
+    },
+    {
+      "entry": "incKernel",
+      "sample": "cpp/0_Introduction/simpleMultiCopy",
+      "passed": true
+    },
+    {
+      "entry": "SimpleKernel",
+      "sample": "cpp/0_Introduction/simpleP2P",
+      "passed": true
+    },
+    {
+      "entry": "square_kernel",
+      "sample": "cpp/0_Introduction/simpleStreams",
+      "passed": true
+    },
+    {
+      "entry": "vectorAddGPU",
+      "sample": "cpp/0_Introduction/simpleZeroCopy",
+      "passed": true
+    },
+    {
+      "entry": "vecAdd",
+      "sample": "cpp/0_Introduction/vectorAdd",
+      "passed": true
+    },
+    {
+      "entry": "vectorAddGPU",
+      "sample": "cpp/2_Concepts_and_Techniques/streamOrderedAllocation",
+      "passed": true
+    },
+    {
+      "entry": "copyP2PAndScale",
+      "sample": "cpp/2_Concepts_and_Techniques/streamOrderedAllocationP2P",
+      "passed": true
+    },
+    {
+      "entry": "writePatternKernel",
+      "sample": "cpp/3_CUDA_Features/dmabufInterop",
+      "passed": true
+    },
+    {
+      "entry": "updateHeightmapKernel",
+      "sample": "cpp/4_CUDA_Libraries/oceanFFT",
+      "passed": true
+    },
+    {
+      "entry": "updateHeightmapKernel_y",
+      "sample": "cpp/4_CUDA_Libraries/oceanFFT",
+      "passed": true
+    },
+    {
+      "entry": "calculateSlopeKernel",
+      "sample": "cpp/4_CUDA_Libraries/oceanFFT",
+      "passed": true
+    },
+    {
+      "entry": "AddKernel",
+      "sample": "cpp/5_Domain_Specific/HSOpticalFlow",
+      "passed": true
+    },
+    {
+      "entry": "simple_vbo_kernel",
+      "sample": "cpp/5_Domain_Specific/simpleGL",
+      "passed": true
+    },
+    {
+      "entry": "simple_vbo_kernel",
+      "sample": "cpp/8_Platform_Specific/Tegra/simpleGLES",
+      "passed": true
+    },
+    {
+      "entry": "simple_vbo_kernel",
+      "sample": "cpp/8_Platform_Specific/Tegra/simpleGLES_EGLOutput",
+      "passed": true
+    }
+  ]
+}

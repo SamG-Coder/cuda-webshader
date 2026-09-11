@@ -1,0 +1,14 @@
+[simpleD3D11] - Starting...
+> Found 1 CUDA Capable Device(s)
+
+cuda device id selected = 0
+> Found 1 D3D11 Adapater(s).
+> Found 1 D3D11 Adapater(s) /w Compute capability.
+> NVIDIA GeForce RTX 5080
+> simpleD3D11 running on NVIDIA GeForce RTX 5080 exiting...
+
+> Compare (a)rendered:  <simpleD3D11.ppm>
+>         (b)reference: <./data/ref_simpleD3D11.ppm>
+PPMvsPPM: comparing images size (720,720) epsilon(10), threshold(15%)
+    OK
+

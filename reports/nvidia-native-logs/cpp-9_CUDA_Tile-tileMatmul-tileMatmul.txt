@@ -1,0 +1,4 @@
+Note: CPU cross-validation disabled
+  matmul                                    :   0.041 ms,   203.2 GB/s, 52012.3 GFLOPS 
+  matmul_naive                              :   0.350 ms,    24.0 GB/s, 6136.7 GFLOPS 
+

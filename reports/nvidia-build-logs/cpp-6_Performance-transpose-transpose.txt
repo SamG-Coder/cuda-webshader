@@ -1,0 +1,6 @@
+[  0%] Building CUDA object cpp/6_Performance/transpose/CMakeFiles/transpose.dir/transpose.cu.obj
+transpose.cu
+tmpxft_0000bea4_00000000-7_transpose.cudafe1.cpp
+[100%] Linking CUDA executable transpose.exe
+[100%] Built target transpose
+

@@ -1,0 +1,6 @@
+Building CUDA object cpp/9_CUDA_Tile/tileTranspose/CMakeFiles/tileTranspose.dir/tileTranspose.cu.obj
+tileTranspose.cu
+tmpxft_00003c20_00000000-8_tileTranspose.cudafe1.cpp
+Linking CUDA executable tileTranspose.exe
+Built target tileTranspose
+

@@ -1,0 +1,12 @@
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTreeThrust.exe Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+* Building segmentation tree... done in 14.1586 (ms)
+* Dumping levels for each tree...
+
+
+__LoadPPM() : Failed to open file: level_00.ppm
+PPMvsPPM: unable to load src image file: level_00.ppm
+__LoadPPM() : Failed to open file: level_09.ppm
+PPMvsPPM: unable to load src image file: level_09.ppm

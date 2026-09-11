@@ -1,0 +1,10 @@
+[  0%] Building CUDA object cpp/5_Domain_Specific/HSOpticalFlow/CMakeFiles/HSOpticalFlow.dir/flowCUDA.cu.obj
+flowCUDA.cu
+tmpxft_00004bcc_00000000-7_flowCUDA.cudafe1.cpp
+[  0%] Building CXX object cpp/5_Domain_Specific/HSOpticalFlow/CMakeFiles/HSOpticalFlow.dir/flowGold.cpp.obj
+flowGold.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/HSOpticalFlow/CMakeFiles/HSOpticalFlow.dir/main.cpp.obj
+main.cpp
+[100%] Linking CXX executable HSOpticalFlow.exe
+[100%] Built target HSOpticalFlow
+

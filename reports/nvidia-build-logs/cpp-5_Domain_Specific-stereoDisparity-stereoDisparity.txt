@@ -1,0 +1,6 @@
+[  0%] Building CUDA object cpp/5_Domain_Specific/stereoDisparity/CMakeFiles/stereoDisparity.dir/stereoDisparity.cu.obj
+stereoDisparity.cu
+tmpxft_00003394_00000000-7_stereoDisparity.cudafe1.cpp
+[100%] Linking CUDA executable stereoDisparity.exe
+[100%] Built target stereoDisparity
+

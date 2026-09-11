@@ -1,0 +1,17 @@
+[  0%] Building CUDA object cpp/5_Domain_Specific/NV12toBGRandResize/CMakeFiles/NV12toBGRandResize.dir/bgr_resize.cu.obj
+bgr_resize.cu
+tmpxft_00006684_00000000-7_bgr_resize.cudafe1.cpp
+[  0%] Building CUDA object cpp/5_Domain_Specific/NV12toBGRandResize/CMakeFiles/NV12toBGRandResize.dir/nv12_resize.cu.obj
+nv12_resize.cu
+tmpxft_00005de0_00000000-7_nv12_resize.cudafe1.cpp
+[100%] Building CUDA object cpp/5_Domain_Specific/NV12toBGRandResize/CMakeFiles/NV12toBGRandResize.dir/nv12_to_bgr_planar.cu.obj
+nv12_to_bgr_planar.cu
+tmpxft_000028c8_00000000-7_nv12_to_bgr_planar.cudafe1.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/NV12toBGRandResize/CMakeFiles/NV12toBGRandResize.dir/resize_convert_main.cpp.obj
+resize_convert_main.cpp
+[100%] Building CUDA object cpp/5_Domain_Specific/NV12toBGRandResize/CMakeFiles/NV12toBGRandResize.dir/utils.cu.obj
+utils.cu
+tmpxft_00007690_00000000-7_utils.cudafe1.cpp
+[100%] Linking CXX executable NV12toBGRandResize.exe
+[100%] Built target NV12toBGRandResize
+

@@ -1,0 +1,12 @@
+Initializing...
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+M: 8192 (16 x 512)
+N: 8192 (16 x 512)
+K: 8192 (16 x 512)
+Preparing data for GPU...
+Required shared memory size: 72 Kb
+Computing using high performance kernel = 0 - compute_bf16gemm_async_copy
+Time: 14.096384 ms
+TFLOPS: 78.00
+

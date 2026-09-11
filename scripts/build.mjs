@@ -10,7 +10,7 @@ for(const file of ['cases.js','gpu-suite.js','three-interop.js','gpu.html','gpu-
 for(const dir of ['build/','examples/jsm/controls/'])await mkdir(new URL(`node_modules/three/${dir}`,out),{recursive:true});
 for(const file of ['build/three.core.js','build/three.webgpu.js','build/three.tsl.js','examples/jsm/controls/OrbitControls.js','LICENSE'])await copyFile(new URL(`node_modules/three/${file}`,root),new URL(`node_modules/three/${file}`,out));
 await mkdir(new URL('reports/',out),{recursive:true});
-for(const file of ['performance-comparison.html','performance-comparison.md','comparison-summary.json','simplegl-showcase.png','live-app.png']){
+for(const file of ['performance-comparison.html','performance-comparison.md','comparison-summary.json','simplegl-showcase.png','live-app.png','nvidia-audit.json','nvidia-audit.md','nvidia-gpu.json','nvidia-native.json']){
   try{await access(new URL(`reports/${file}`,root));}catch{continue;}
   await copyFile(new URL(`reports/${file}`,root),new URL(`reports/${file}`,out));
 }

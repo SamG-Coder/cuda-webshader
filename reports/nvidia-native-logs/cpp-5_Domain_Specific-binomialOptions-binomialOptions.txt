@@ -1,0 +1,23 @@
+[D:\cuda-webshader\.local\nvidia-audit-build\cpp\5_Domain_Specific\binomialOptions\binomialOptions.exe] - Starting...
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Generating input data...
+Running GPU binomial tree...
+Options count            : 1024     
+Time steps               : 2048     
+binomialOptionsGPU() time: 1.021000 msec
+Options per second       : 1002938.268621     
+Running CPU binomial tree...
+Comparing the results...
+GPU binomial vs. Black-Scholes
+L1 norm: 2.161200E-04
+CPU binomial vs. Black-Scholes
+L1 norm: 2.160763E-04
+CPU binomial vs. GPU binomial
+L1 norm: 6.712467E-07
+Shutting down...
+
+NOTE: The CUDA Samples are not meant for performance measurements. Results may vary when GPU Boost is enabled.
+
+Test passed
+

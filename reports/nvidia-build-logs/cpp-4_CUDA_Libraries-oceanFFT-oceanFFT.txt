@@ -1,0 +1,8 @@
+[100%] Building CXX object cpp/4_CUDA_Libraries/oceanFFT/CMakeFiles/oceanFFT.dir/oceanFFT.cpp.obj
+oceanFFT.cpp
+[100%] Building CUDA object cpp/4_CUDA_Libraries/oceanFFT/CMakeFiles/oceanFFT.dir/oceanFFT_kernel.cu.obj
+oceanFFT_kernel.cu
+tmpxft_00008168_00000000-7_oceanFFT_kernel.cudafe1.cpp
+[100%] Linking CXX executable oceanFFT.exe
+[100%] Built target oceanFFT
+

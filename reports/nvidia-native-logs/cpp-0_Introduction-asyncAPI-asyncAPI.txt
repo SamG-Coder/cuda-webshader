@@ -1,0 +1,8 @@
+[D:\cuda-webshader\.local\nvidia-audit-build\cpp\0_Introduction\asyncAPI\asyncAPI.exe] - Starting...
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+CUDA device [NVIDIA GeForce RTX 5080]
+time spent executing by the GPU: 4.90
+time spent by CPU in CUDA calls: 2.49
+CPU executed 49663 iterations while waiting for GPU to finish
+

@@ -1,0 +1,13 @@
+[simpleD3D11Texture] - Starting...
+> Found 1 CUDA Capable Device(s)
+> GPU 0: NVIDIA GeForce RTX 5080
+> Found 1 D3D11 Adapater(s).
+> Found 1 D3D11 Adapater(s) /w Compute capability.
+> NVIDIA GeForce RTX 5080
+> simpleD3D11Texture running on NVIDIA GeForce RTX 5080 exiting...
+
+> Compare (a)rendered:  <simpleD3D11Texture.ppm>
+>         (b)reference: <./data/ref_simpleD3D11Texture.ppm>
+PPMvsPPM: comparing images size (720,720) epsilon(10), threshold(15%)
+    OK
+

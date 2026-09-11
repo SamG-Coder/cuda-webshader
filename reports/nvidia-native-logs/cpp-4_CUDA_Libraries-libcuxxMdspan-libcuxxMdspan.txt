@@ -1,0 +1,18 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Device: NVIDIA GeForce RTX 5080 (Compute Capability 12.0)
+
+cuda::to_device_mdspan produced a 2-D device_mdspan of shape (8, 8)
+
+scale_rows kernel: OK (row i scaled by i+1 via cuda::device_mdspan)
+shared_tile_transpose kernel: OK (tile transpose via cuda::shared_memory_mdspan)
+
+cuda::to_dlpack_tensor metadata:
+  device       : kDLCUDA (ordinal 0)
+  ndim         : 2
+  dtype        : code=2 bits=32 lanes=1
+  shape        : [8, 8]
+  strides      : [8, 1]
+
+Done
+

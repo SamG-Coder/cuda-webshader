@@ -1,0 +1,3 @@
+Running on GPU 0 (NVIDIA GeForce RTX 5080)
+Computing Bezier Lines (CUDA Dynamic Parallelism Version) ... Done!
+

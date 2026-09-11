@@ -8,7 +8,7 @@ import {suggestLaunch,suggestConfig,validateConfig,seedBuffer} from './config.js
 import {kernelSource} from './import.js';
 import {createShaderView} from './shader-view.js';
 const $=id=>document.getElementById(id),compiler=new CompilerClient();
-let editor,runtime,shaderView,active=null,busy=false,configKey='',lastArtifact=null,dirty=false,runCount=0,dropDepth=0;
+let editor,runtime,shaderView,active=null,busy=false,configKey='',lastArtifact=null,dirty=false,runCount=0,dropDepth=0,presetConfig=null;
 function log(message,level='info'){const row=document.createElement('div');row.className=`log-row log-${level}`;const stamp=document.createElement('span');stamp.className='log-time';stamp.textContent=new Date().toLocaleTimeString('en-GB');const text=document.createElement('span');text.textContent=message;row.append(stamp,text);$('log').append(row);while($('log').children.length>200)$('log').firstChild.remove();$('log').scrollTop=$('log').scrollHeight;}
 function state(text){$('state').textContent=text;}
 function stop(reason='Stopped. GPU output preserved.'){if(active)active.running=false;$('stop').disabled=true;if(reason){state(reason);log(reason);}}
@@ -29,7 +29,7 @@ async function run(){
   if(editor.getModel().getVersionId()!==revision)throw Error('Source changed while compiling. Run again to execute the latest version.');
   const artifact=compiled.artifact;lastArtifact=artifact;shaderView.generated(artifact);log(`${artifact.name}: typed CUDA → WGSL in ${compiled.compileMs.toFixed(2)} ms. ${artifact.metadata.bindings.length} buffer bindings; ${artifact.metadata.workgroupStorageBytes} shared bytes.`,'success');
   const signature=JSON.stringify([artifact.name,artifact.metadata]);
-  if(configKey!==signature){$('config').value=JSON.stringify(suggestConfig(artifact),null,2);configKey=signature;log('Generated suggested scalar values, synthetic inputs and launch dimensions. Expand Launch settings to change them.');}
+  if(configKey!==signature){$('config').value=JSON.stringify(presetConfig||suggestConfig(artifact),null,2);presetConfig=null;configKey=signature;log('Loaded scalar values, synthetic inputs and launch dimensions. Expand Launch settings to change them.');}
   const config=JSON.parse($('config').value),bytes=validateConfig(config,artifact.metadata);
   runtime ||= await GpuRuntime.create({onError:e=>{stop(null);showError(e);}});const info=runtime.describe();$('device').textContent=`WEBGPU / ${info.vendor.toUpperCase()}`;
   log('Validating WGSL and creating the WebGPU pipeline…');const kernel=await runtime.kernel(artifact);shaderView.validated();log('GPU shader validation passed.','success');
@@ -78,5 +78,12 @@ try{
  $('run').onclick=run;$('stop').onclick=()=>stop();$('infer').onclick=detect;$('open').onclick=()=>$('file').click();$('file').onchange=e=>loadFile(e.target.files[0]).catch(showError);$('export').onclick=()=>download($('filename').textContent,editor.getValue());$('example').onchange=e=>example(e.target.value).catch(showError);$('clear-log').onclick=()=>$('log').replaceChildren();$('reset-config').onclick=()=>{if(lastArtifact){$('config').value=JSON.stringify(suggestConfig(lastArtifact),null,2);log('Suggested inputs restored. Press Compile & run to apply.');}};
  $('animate').onchange=()=>{if(active?.renderer&&!dirty){active.running=$('animate').checked;$('stop').disabled=!active.running;state(active.running?'Animating on GPU':'Paused');}else if($('animate').checked)log('Run a float4 output kernel to enable animated 3D preview.');};
  window.addEventListener('dragenter',e=>{if(e.dataTransfer?.types.includes('Files')){e.preventDefault();dropDepth++;$('drop-overlay').hidden=false;}});window.addEventListener('dragover',e=>{if(e.dataTransfer?.types.includes('Files'))e.preventDefault();});window.addEventListener('dragleave',()=>{if(--dropDepth<=0){dropDepth=0;$('drop-overlay').hidden=true;}});window.addEventListener('drop',e=>{e.preventDefault();dropDepth=0;$('drop-overlay').hidden=true;loadFile(e.dataTransfer?.files[0]).catch(showError);});
- addEventListener('beforeunload',()=>{compiler.dispose();active?.renderer?.setAnimationLoop(null);runtime?.dispose();});log('Monaco editor ready. C++ highlighting, bracket matching, find/replace and compiler error markers enabled.');await example('wave');
+ addEventListener('beforeunload',()=>{compiler.dispose();active?.renderer?.setAnimationLoop(null);runtime?.dispose();});log('Monaco editor ready. C++ highlighting, bracket matching, find/replace and compiler error markers enabled.');
+ const nvidia=new URLSearchParams(location.search).get('nvidia');
+ if(nvidia!==null){
+  const rows=await(await fetch('showcases/nvidia/artifacts.json')).json(),row=/^\d+$/.test(nvidia)?rows[Number(nvidia)]:null;if(!row)throw Error('Unknown NVIDIA sample.');
+  presetConfig=row.preview;
+  editor.setValue(await(await fetch('showcases/nvidia/'+row.source)).text());$('filename').textContent=row.entry+'.cu';$('entry').value=row.entry;$('block').value=row.artifact.metadata.workgroupSize.join(',');
+  log(`NVIDIA ${row.sample}: isolated kernel, BSD-3-Clause. Synthetic preview inputs; use the NVIDIA explorer's Run verified fixture for numerical reference checks. Host program is not executed.`);await run();
+ }else {const selected=new URLSearchParams(location.search).get('example')||'wave';if(!['wave','particles','saxpy','blank'].includes(selected))throw Error('Unknown sandbox example.');$('example').value=selected;await example(selected);}
 }catch(error){showError(error);}

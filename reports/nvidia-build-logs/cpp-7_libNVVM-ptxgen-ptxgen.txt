@@ -1,0 +1,5 @@
+[  0%] Building C object cpp/7_libNVVM/ptxgen/CMakeFiles/ptxgen.dir/ptxgen.c.obj
+ptxgen.c
+[100%] Linking C executable ptxgen.exe
+[100%] Built target ptxgen
+

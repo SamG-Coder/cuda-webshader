@@ -1,0 +1,4 @@
+Starting simpleMultiGPU
+CUDA-capable device count: 1
+Two or more CUDA-capable devices are required. Exiting.
+

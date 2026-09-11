@@ -1,0 +1,14 @@
+Monte Carlo Single Asian Option (with PRNG)
+===========================================
+
+Pricing option on GPU (NVIDIA GeForce RTX 5080)
+
+Precision:      single
+Number of sims: 100000
+
+   Spot    |   Strike   |     r      |   sigma    |   tenor    |  Call/Put  |   Value    |  Expected  |
+-----------|------------|------------|------------|------------|------------|------------|------------|
+        40 |         35 |       0.03 |        0.2 |   0.333333 |       Call |    5.17083 |    5.16253 |
+
+MonteCarloSingleAsianOptionP, Performance = 2052738.91 sims/s, Time = 48.72(ms), NumDevsUsed = 1, Blocksize = 128
+

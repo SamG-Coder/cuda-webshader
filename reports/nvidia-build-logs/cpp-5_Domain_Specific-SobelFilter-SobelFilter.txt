@@ -1,0 +1,29 @@
+[100%] Building CXX object cpp/5_Domain_Specific/SobelFilter/CMakeFiles/SobelFilter.dir/SobelFilter.cpp.obj
+SobelFilter.cpp
+D:\cuda-webshader\.local\nvidia-audit\cpp\5_Domain_Specific\SobelFilter\SobelFilter.cpp(108): warning C4005: 'MAX': macro redefinition
+D:\cuda-webshader\.local\nvidia-audit\cpp\5_Domain_Specific\SobelFilter\..\..\..\Common\helper_cuda.h(636): note: see previous definition of 'MAX'
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\algorithm(4248): warning C4244: '=': conversion from 'float' to 'T', possible loss of data
+        with
+        [
+            T=unsigned char
+        ]
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\algorithm(4248): note: the template instantiation context (the oldest one first) is
+D:\cuda-webshader\.local\nvidia-audit\cpp\5_Domain_Specific\SobelFilter\SobelFilter.cpp(266): note: see reference to function template instantiation 'bool sdkLoadPGM<unsigned char>(const char *,T **,unsigned int *,unsigned int *)' being compiled
+        with
+        [
+            T=unsigned char
+        ]
+D:\cuda-webshader\.local\nvidia-audit\cpp\5_Domain_Specific\SobelFilter\..\..\..\Common\helper_image.h(231): note: see reference to function template instantiation '_OutIt *std::transform<unsigned char*,T*,helper_image_internal::ConverterFromUByte<unsigned char>>(const _InIt,const _InIt,_OutIt,_Fn)' being compiled
+        with
+        [
+            _OutIt=unsigned char *,
+            T=unsigned char,
+            _InIt=unsigned char *,
+            _Fn=helper_image_internal::ConverterFromUByte<unsigned char>
+        ]
+[100%] Building CUDA object cpp/5_Domain_Specific/SobelFilter/CMakeFiles/SobelFilter.dir/SobelFilter_kernels.cu.obj
+SobelFilter_kernels.cu
+tmpxft_0000a460_00000000-7_SobelFilter_kernels.cudafe1.cpp
+[100%] Linking CXX executable SobelFilter.exe
+[100%] Built target SobelFilter
+

@@ -1,0 +1,19 @@
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\2_Concepts_and_Techniques\reduction\reduction.exe Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Using Device 0: NVIDIA GeForce RTX 5080
+
+Reducing array of type int
+
+16777216 elements
+256 threads (max)
+64 blocks
+
+Reduction, Throughput = 635.7054 GB/s, Time = 0.00011 s, Size = 16777216 Elements, NumDevsUsed = 1, Workgroup = 256
+
+GPU result = 2139095040
+CPU result = 2139095040
+
+Test passed
+

@@ -1,0 +1,974 @@
+**********************************************************************
+** Visual Studio 2026 Developer Command Prompt v18.8.0
+** Copyright (c) 2026 Microsoft Corporation
+**********************************************************************
+[vcvarsall.bat] Environment initialized for: 'x64'
+[  0%] Building CUDA object cpp/0_Introduction/UnifiedMemoryStreams/CMakeFiles/UnifiedMemoryStreams.dir/UnifiedMemoryStreams.cu.obj
+UnifiedMemoryStreams.cu
+tmpxft_000065c4_00000000-7_UnifiedMemoryStreams.cudafe1.cpp
+[  1%] Linking CUDA executable UnifiedMemoryStreams.exe
+[  1%] Built target UnifiedMemoryStreams
+[  1%] Building CUDA object cpp/0_Introduction/asyncAPI/CMakeFiles/asyncAPI.dir/asyncAPI.cu.obj
+asyncAPI.cu
+tmpxft_000015b0_00000000-7_asyncAPI.cudafe1.cpp
+[  1%] Linking CUDA executable asyncAPI.exe
+[  1%] Built target asyncAPI
+[  1%] Building CUDA object cpp/0_Introduction/clock/CMakeFiles/clock.dir/clock.cu.obj
+clock.cu
+tmpxft_00006fb0_00000000-7_clock.cudafe1.cpp
+[  1%] Linking CUDA executable clock.exe
+[  1%] Built target clock
+[  1%] Building CUDA object cpp/0_Introduction/cudaOpenMP/CMakeFiles/cudaOpenMP.dir/cudaOpenMP.cu.obj
+cudaOpenMP.cu
+tmpxft_0000daa4_00000000-7_cudaOpenMP.cudafe1.cpp
+[  1%] Linking CUDA executable cudaOpenMP.exe
+[  1%] Built target cudaOpenMP
+[  1%] Building CUDA object cpp/0_Introduction/fp16ScalarProduct/CMakeFiles/fp16ScalarProduct.dir/fp16ScalarProduct.cu.obj
+fp16ScalarProduct.cu
+tmpxft_00005264_00000000-7_fp16ScalarProduct.cudafe1.cpp
+[  1%] Linking CUDA executable fp16ScalarProduct.exe
+[  1%] Built target fp16ScalarProduct
+[  1%] Building CUDA object cpp/0_Introduction/matrixMul/CMakeFiles/matrixMul.dir/matrixMul.cu.obj
+matrixMul.cu
+tmpxft_0000c458_00000000-7_matrixMul.cudafe1.cpp
+[  2%] Linking CUDA executable matrixMul.exe
+[  2%] Built target matrixMul
+[  2%] Building CUDA fatbin: D:/cuda-webshader/.local/nvidia-audit-build/cpp/0_Introduction/matrixMulDrv/matrixMul_kernel64.fatbin
+matrixMul_kernel.cu
+[  2%] Built target generate_fatbin_matmulDrv
+[  2%] Building CXX object cpp/0_Introduction/matrixMulDrv/CMakeFiles/matrixMulDrv.dir/matrixMulDrv.cpp.obj
+matrixMulDrv.cpp
+[  2%] Linking CXX executable matrixMulDrv.exe
+[  2%] Built target matrixMulDrv
+[  2%] Building C object cpp/0_Introduction/matrixMulDynlinkJIT/CMakeFiles/matrixMulDynlinkJIT.dir/cuda_drvapi_dynlink.c.obj
+cuda_drvapi_dynlink.c
+[  2%] Building CXX object cpp/0_Introduction/matrixMulDynlinkJIT/CMakeFiles/matrixMulDynlinkJIT.dir/matrixMulDynlinkJIT.cpp.obj
+matrixMulDynlinkJIT.cpp
+[  3%] Building CXX object cpp/0_Introduction/matrixMulDynlinkJIT/CMakeFiles/matrixMulDynlinkJIT.dir/matrixMul_gold.cpp.obj
+matrixMul_gold.cpp
+[  3%] Building C object cpp/0_Introduction/matrixMulDynlinkJIT/CMakeFiles/matrixMulDynlinkJIT.dir/matrixMul_kernel_32_ptxdump.c.obj
+matrixMul_kernel_32_ptxdump.c
+[  3%] Building C object cpp/0_Introduction/matrixMulDynlinkJIT/CMakeFiles/matrixMulDynlinkJIT.dir/matrixMul_kernel_64_ptxdump.c.obj
+matrixMul_kernel_64_ptxdump.c
+[  3%] Linking CXX executable matrixMulDynlinkJIT.exe
+[  3%] Built target matrixMulDynlinkJIT
+[  3%] Building CUDA object cpp/0_Introduction/simpleAWBarrier/CMakeFiles/simpleAWBarrier.dir/simpleAWBarrier.cu.obj
+D:\cuda-webshader\.local\nvidia-audit\cpp\0_Introduction\simpleAWBarrier\simpleAWBarrier.cu(87): warning #20199-D: unrecognized #pragma in device code
+  #pragma diag_suppress static_var_with_dynamic_init
+          ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\0_Introduction\simpleAWBarrier\simpleAWBarrier.cu(93): warning #20054-D: dynamic initialization is not supported for a function-scope static __shared__ variable within a __device__/__global__ function
+      __declspec(__shared__) cuda::barrier<cuda::thread_scope_block> barrier;
+                                                                     ^
+
+simpleAWBarrier.cu
+tmpxft_00008494_00000000-7_simpleAWBarrier.cudafe1.cpp
+[  4%] Linking CUDA executable simpleAWBarrier.exe
+[  4%] Built target simpleAWBarrier
+[  4%] Building CUDA object cpp/0_Introduction/simpleAssert/CMakeFiles/simpleAssert.dir/simpleAssert.cu.obj
+simpleAssert.cu
+tmpxft_00004d18_00000000-7_simpleAssert.cudafe1.cpp
+[  4%] Linking CUDA executable simpleAssert.exe
+[  4%] Built target simpleAssert
+[  4%] Building CUDA object cpp/0_Introduction/simpleAtomicIntrinsics/CMakeFiles/simpleAtomicIntrinsics.dir/simpleAtomicIntrinsics.cu.obj
+simpleAtomicIntrinsics.cu
+tmpxft_0000b5b0_00000000-7_simpleAtomicIntrinsics.cudafe1.cpp
+[  4%] Linking CUDA executable simpleAtomicIntrinsics.exe
+[  4%] Built target simpleAtomicIntrinsics
+[  5%] Building CUDA object cpp/0_Introduction/simpleAttributes/CMakeFiles/simpleAttributes.dir/simpleAttributes.cu.obj
+simpleAttributes.cu
+tmpxft_000070e8_00000000-7_simpleAttributes.cudafe1.cpp
+[  5%] Linking CUDA executable simpleAttributes.exe
+[  5%] Built target simpleAttributes
+[  5%] Building CUDA object cpp/0_Introduction/simpleCUDA2GL/CMakeFiles/simpleCUDA2GL.dir/simpleCUDA2GL.cu.obj
+simpleCUDA2GL.cu
+tmpxft_0000aef0_00000000-7_simpleCUDA2GL.cudafe1.cpp
+[  5%] Building CXX object cpp/0_Introduction/simpleCUDA2GL/CMakeFiles/simpleCUDA2GL.dir/main.cpp.obj
+main.cpp
+Note: Using Texture fmt GL_RGBA16F_ARB
+[  6%] Linking CXX executable simpleCUDA2GL.exe
+[  6%] Built target simpleCUDA2GL
+[  6%] Building CUDA object cpp/0_Introduction/simpleCallback/CMakeFiles/simpleCallback.dir/simpleCallback.cu.obj
+simpleCallback.cu
+tmpxft_0000de84_00000000-7_simpleCallback.cudafe1.cpp
+[  6%] Linking CUDA executable simpleCallback.exe
+[  6%] Built target simpleCallback
+[  6%] Building CUDA object cpp/0_Introduction/simpleCooperativeGroups/CMakeFiles/simpleCooperativeGroups.dir/simpleCooperativeGroups.cu.obj
+simpleCooperativeGroups.cu
+tmpxft_000004c4_00000000-7_simpleCooperativeGroups.cudafe1.cpp
+[  7%] Linking CUDA executable simpleCooperativeGroups.exe
+[  7%] Built target simpleCooperativeGroups
+[  7%] Building CUDA object cpp/0_Introduction/simpleCubemapTexture/CMakeFiles/simpleCubemapTexture.dir/simpleCubemapTexture.cu.obj
+simpleCubemapTexture.cu
+tmpxft_00002cfc_00000000-7_simpleCubemapTexture.cudafe1.cpp
+[  7%] Linking CUDA executable simpleCubemapTexture.exe
+[  7%] Built target simpleCubemapTexture
+[  7%] Building CUDA fatbin: D:/cuda-webshader/.local/nvidia-audit-build/cpp/0_Introduction/simpleDrvRuntime/vectorAdd_kernel64.fatbin
+vectorAdd_kernel.cu
+[  7%] Built target generate_fatbin_simpleDrv
+[  8%] Building CXX object cpp/0_Introduction/simpleDrvRuntime/CMakeFiles/simpleDrvRuntime.dir/simpleDrvRuntime.cpp.obj
+simpleDrvRuntime.cpp
+[  8%] Linking CXX executable simpleDrvRuntime.exe
+[  8%] Built target simpleDrvRuntime
+[  9%] Building CUDA object cpp/0_Introduction/simpleIPC/CMakeFiles/simpleIPC.dir/simpleIPC.cu.obj
+simpleIPC.cu
+tmpxft_0000285c_00000000-7_simpleIPC.cudafe1.cpp
+[  9%] Building CXX object cpp/0_Introduction/simpleIPC/CMakeFiles/simpleIPC.dir/__/__/__/Common/helper_multiprocess.cpp.obj
+helper_multiprocess.cpp
+[  9%] Linking CXX executable simpleIPC.exe
+[  9%] Built target simpleIPC
+[  9%] Building CUDA object cpp/0_Introduction/simpleLayeredTexture/CMakeFiles/simpleLayeredTexture.dir/simpleLayeredTexture.cu.obj
+simpleLayeredTexture.cu
+tmpxft_00002af8_00000000-7_simpleLayeredTexture.cudafe1.cpp
+[  9%] Linking CUDA executable simpleLayeredTexture.exe
+[  9%] Built target simpleLayeredTexture
+[ 10%] Building CUDA object cpp/0_Introduction/simpleMultiCopy/CMakeFiles/simpleMultiCopy.dir/simpleMultiCopy.cu.obj
+simpleMultiCopy.cu
+tmpxft_0000e35c_00000000-7_simpleMultiCopy.cudafe1.cpp
+[ 10%] Linking CUDA executable simpleMultiCopy.exe
+[ 10%] Built target simpleMultiCopy
+[ 10%] Building CUDA object cpp/0_Introduction/simpleMultiGPU/CMakeFiles/simpleMultiGPU.dir/simpleMultiGPU.cu.obj
+simpleMultiGPU.cu
+tmpxft_000063f8_00000000-7_simpleMultiGPU.cudafe1.cpp
+[ 10%] Linking CUDA executable simpleMultiGPU.exe
+[ 10%] Built target simpleMultiGPU
+[ 11%] Building CUDA object cpp/0_Introduction/simpleP2P/CMakeFiles/simpleP2P.dir/simpleP2P.cu.obj
+simpleP2P.cu
+tmpxft_00006b34_00000000-7_simpleP2P.cudafe1.cpp
+[ 11%] Linking CUDA executable simpleP2P.exe
+[ 11%] Built target simpleP2P
+[ 11%] Building CUDA object cpp/0_Introduction/simplePitchLinearTexture/CMakeFiles/simplePitchLinearTexture.dir/simplePitchLinearTexture.cu.obj
+simplePitchLinearTexture.cu
+tmpxft_00001c3c_00000000-7_simplePitchLinearTexture.cudafe1.cpp
+[ 11%] Linking CUDA executable simplePitchLinearTexture.exe
+[ 11%] Built target simplePitchLinearTexture
+[ 12%] Building CUDA object cpp/0_Introduction/simplePrintf/CMakeFiles/simplePrintf.dir/simplePrintf.cu.obj
+simplePrintf.cu
+tmpxft_00003998_00000000-7_simplePrintf.cudafe1.cpp
+[ 12%] Linking CUDA executable simplePrintf.exe
+[ 12%] Built target simplePrintf
+[ 12%] Building CUDA object cpp/0_Introduction/simpleStreams/CMakeFiles/simpleStreams.dir/simpleStreams.cu.obj
+simpleStreams.cu
+tmpxft_000091ec_00000000-7_simpleStreams.cudafe1.cpp
+[ 12%] Linking CUDA executable simpleStreams.exe
+[ 12%] Built target simpleStreams
+[ 12%] Building CUDA object cpp/0_Introduction/simpleSurfaceWrite/CMakeFiles/simpleSurfaceWrite.dir/simpleSurfaceWrite.cu.obj
+simpleSurfaceWrite.cu
+tmpxft_0000c724_00000000-7_simpleSurfaceWrite.cudafe1.cpp
+[ 13%] Linking CUDA executable simpleSurfaceWrite.exe
+[ 13%] Built target simpleSurfaceWrite
+[ 13%] Building CUDA object cpp/0_Introduction/simpleTexture/CMakeFiles/simpleTexture.dir/simpleTexture.cu.obj
+simpleTexture.cu
+tmpxft_00009b4c_00000000-7_simpleTexture.cudafe1.cpp
+[ 13%] Linking CUDA executable simpleTexture.exe
+[ 13%] Built target simpleTexture
+[ 13%] Building CUDA object cpp/0_Introduction/simpleTexture3D/CMakeFiles/simpleTexture3D.dir/simpleTexture3D_kernel.cu.obj
+simpleTexture3D_kernel.cu
+tmpxft_00006fe4_00000000-7_simpleTexture3D_kernel.cudafe1.cpp
+[ 14%] Building CXX object cpp/0_Introduction/simpleTexture3D/CMakeFiles/simpleTexture3D.dir/simpleTexture3D.cpp.obj
+simpleTexture3D.cpp
+[ 14%] Linking CXX executable simpleTexture3D.exe
+[ 14%] Built target simpleTexture3D
+[ 15%] Building CUDA fatbin: D:/cuda-webshader/.local/nvidia-audit-build/cpp/0_Introduction/simpleTextureDrv/simpleTexture_kernel64.fatbin
+simpleTexture_kernel.cu
+[ 15%] Built target generate_fatbin_textureDrv
+[ 15%] Building CXX object cpp/0_Introduction/simpleTextureDrv/CMakeFiles/simpleTextureDrv.dir/simpleTextureDrv.cpp.obj
+simpleTextureDrv.cpp
+[ 15%] Linking CXX executable simpleTextureDrv.exe
+[ 15%] Built target simpleTextureDrv
+[ 16%] Building CUDA object cpp/0_Introduction/simpleVoteIntrinsics/CMakeFiles/simpleVoteIntrinsics.dir/simpleVoteIntrinsics.cu.obj
+simpleVoteIntrinsics.cu
+tmpxft_000070d0_00000000-7_simpleVoteIntrinsics.cudafe1.cpp
+[ 16%] Linking CUDA executable simpleVoteIntrinsics.exe
+[ 16%] Built target simpleVoteIntrinsics
+[ 16%] Building CUDA object cpp/0_Introduction/simpleZeroCopy/CMakeFiles/simpleZeroCopy.dir/simpleZeroCopy.cu.obj
+simpleZeroCopy.cu
+tmpxft_0000d0e4_00000000-7_simpleZeroCopy.cudafe1.cpp
+[ 16%] Linking CUDA executable simpleZeroCopy.exe
+[ 16%] Built target simpleZeroCopy
+[ 16%] Building CUDA object cpp/0_Introduction/vectorAdd/CMakeFiles/vectorAdd.dir/vectorAdd.cu.obj
+vectorAdd.cu
+tmpxft_00009318_00000000-7_vectorAdd.cudafe1.cpp
+[ 17%] Linking CUDA executable vectorAdd.exe
+[ 17%] Built target vectorAdd
+[ 17%] Building CUDA fatbin: D:/cuda-webshader/.local/nvidia-audit-build/cpp/0_Introduction/vectorAddDrv/vectorAdd_kernel64.fatbin
+vectorAdd_kernel.cu
+[ 17%] Built target generate_fatbin_vectorAdd
+[ 17%] Building CXX object cpp/0_Introduction/vectorAddDrv/CMakeFiles/vectorAddDrv.dir/vectorAddDrv.cpp.obj
+vectorAddDrv.cpp
+[ 17%] Linking CXX executable vectorAddDrv.exe
+[ 17%] Built target vectorAddDrv
+[ 17%] Building CUDA fatbin: D:/cuda-webshader/.local/nvidia-audit-build/cpp/0_Introduction/vectorAddMMAP/vectorAdd_kernel64.fatbin
+vectorAdd_kernel.cu
+[ 17%] Built target generate_fatbin_vectorAddMMAP
+[ 17%] Building CXX object cpp/0_Introduction/vectorAddMMAP/CMakeFiles/vectorAddMMAP.dir/vectorAddMMAP.cpp.obj
+vectorAddMMAP.cpp
+[ 17%] Building CXX object cpp/0_Introduction/vectorAddMMAP/CMakeFiles/vectorAddMMAP.dir/multidevicealloc_memmap.cpp.obj
+multidevicealloc_memmap.cpp
+[ 18%] Linking CXX executable vectorAddMMAP.exe
+[ 18%] Built target vectorAddMMAP
+[ 18%] Building CXX object cpp/0_Introduction/vectorAdd_nvrtc/CMakeFiles/vectorAdd_nvrtc.dir/vectorAdd.cpp.obj
+vectorAdd.cpp
+[ 18%] Linking CXX executable vectorAdd_nvrtc.exe
+[ 18%] Built target vectorAdd_nvrtc
+[ 18%] Building CXX object cpp/1_Utilities/deviceQuery/CMakeFiles/deviceQuery.dir/deviceQuery.cpp.obj
+deviceQuery.cpp
+[ 18%] Linking CXX executable deviceQuery.exe
+[ 18%] Built target deviceQuery
+[ 18%] Building CXX object cpp/1_Utilities/deviceQueryDrv/CMakeFiles/deviceQueryDrv.dir/deviceQueryDrv.cpp.obj
+deviceQueryDrv.cpp
+[ 19%] Linking CXX executable deviceQueryDrv.exe
+[ 19%] Built target deviceQueryDrv
+[ 19%] Building CUDA object cpp/1_Utilities/topologyQuery/CMakeFiles/topologyQuery.dir/topologyQuery.cu.obj
+topologyQuery.cu
+tmpxft_0000b88c_00000000-7_topologyQuery.cudafe1.cpp
+[ 19%] Linking CUDA executable topologyQuery.exe
+[ 19%] Built target topologyQuery
+[ 19%] Building CXX object cpp/2_Concepts_and_Techniques/FunctionPointers/CMakeFiles/FunctionPointers.dir/FunctionPointers.cpp.obj
+FunctionPointers.cpp
+D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\FunctionPointers\FunctionPointers.cpp(105): warning C4005: 'MAX': macro redefinition
+D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\FunctionPointers\..\..\..\Common\helper_cuda.h(636): note: see previous definition of 'MAX'
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\algorithm(4248): warning C4244: '=': conversion from 'float' to 'T', possible loss of data
+        with
+        [
+            T=unsigned char
+        ]
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\algorithm(4248): note: the template instantiation context (the oldest one first) is
+D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\FunctionPointers\FunctionPointers.cpp(272): note: see reference to function template instantiation 'bool sdkLoadPGM<unsigned char>(const char *,T **,unsigned int *,unsigned int *)' being compiled
+        with
+        [
+            T=unsigned char
+        ]
+D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\FunctionPointers\..\..\..\Common\helper_image.h(231): note: see reference to function template instantiation '_OutIt *std::transform<unsigned char*,T*,helper_image_internal::ConverterFromUByte<unsigned char>>(const _InIt,const _InIt,_OutIt,_Fn)' being compiled
+        with
+        [
+            _OutIt=unsigned char *,
+            T=unsigned char,
+            _InIt=unsigned char *,
+            _Fn=helper_image_internal::ConverterFromUByte<unsigned char>
+        ]
+[ 20%] Building CUDA object cpp/2_Concepts_and_Techniques/FunctionPointers/CMakeFiles/FunctionPointers.dir/FunctionPointers_kernels.cu.obj
+FunctionPointers_kernels.cu
+tmpxft_000005a8_00000000-7_FunctionPointers_kernels.cudafe1.cpp
+[ 20%] Linking CXX executable FunctionPointers.exe
+[ 20%] Built target FunctionPointers
+[ 20%] Building CXX object cpp/2_Concepts_and_Techniques/MC_EstimatePiInlineP/CMakeFiles/MC_EstimatePiInlineP.dir/src/main.cpp.obj
+main.cpp
+[ 21%] Building CUDA object cpp/2_Concepts_and_Techniques/MC_EstimatePiInlineP/CMakeFiles/MC_EstimatePiInlineP.dir/src/piestimator.cu.obj
+piestimator.cu
+tmpxft_000032ec_00000000-7_piestimator.cudafe1.cpp
+[ 21%] Building CXX object cpp/2_Concepts_and_Techniques/MC_EstimatePiInlineP/CMakeFiles/MC_EstimatePiInlineP.dir/src/test.cpp.obj
+test.cpp
+[ 21%] Linking CXX executable MC_EstimatePiInlineP.exe
+[ 21%] Built target MC_EstimatePiInlineP
+[ 21%] Building CXX object cpp/2_Concepts_and_Techniques/MC_EstimatePiInlineQ/CMakeFiles/MC_EstimatePiInlineQ.dir/src/main.cpp.obj
+main.cpp
+[ 22%] Building CUDA object cpp/2_Concepts_and_Techniques/MC_EstimatePiInlineQ/CMakeFiles/MC_EstimatePiInlineQ.dir/src/piestimator.cu.obj
+piestimator.cu
+tmpxft_00009834_00000000-7_piestimator.cudafe1.cpp
+[ 22%] Building CXX object cpp/2_Concepts_and_Techniques/MC_EstimatePiInlineQ/CMakeFiles/MC_EstimatePiInlineQ.dir/src/test.cpp.obj
+test.cpp
+[ 22%] Linking CXX executable MC_EstimatePiInlineQ.exe
+[ 22%] Built target MC_EstimatePiInlineQ
+[ 22%] Building CXX object cpp/2_Concepts_and_Techniques/MC_EstimatePiP/CMakeFiles/MC_EstimatePiP.dir/src/main.cpp.obj
+main.cpp
+[ 23%] Building CUDA object cpp/2_Concepts_and_Techniques/MC_EstimatePiP/CMakeFiles/MC_EstimatePiP.dir/src/piestimator.cu.obj
+piestimator.cu
+tmpxft_0000c9c4_00000000-7_piestimator.cudafe1.cpp
+[ 23%] Building CXX object cpp/2_Concepts_and_Techniques/MC_EstimatePiP/CMakeFiles/MC_EstimatePiP.dir/src/test.cpp.obj
+test.cpp
+[ 23%] Linking CXX executable MC_EstimatePiP.exe
+[ 23%] Built target MC_EstimatePiP
+[ 23%] Building CXX object cpp/2_Concepts_and_Techniques/MC_EstimatePiQ/CMakeFiles/MC_EstimatePiQ.dir/src/main.cpp.obj
+main.cpp
+[ 23%] Building CUDA object cpp/2_Concepts_and_Techniques/MC_EstimatePiQ/CMakeFiles/MC_EstimatePiQ.dir/src/piestimator.cu.obj
+piestimator.cu
+tmpxft_00004d2c_00000000-7_piestimator.cudafe1.cpp
+[ 24%] Building CXX object cpp/2_Concepts_and_Techniques/MC_EstimatePiQ/CMakeFiles/MC_EstimatePiQ.dir/src/test.cpp.obj
+test.cpp
+[ 24%] Linking CXX executable MC_EstimatePiQ.exe
+[ 24%] Built target MC_EstimatePiQ
+[ 24%] Building CXX object cpp/2_Concepts_and_Techniques/MC_SingleAsianOptionP/CMakeFiles/MC_SingleAsianOptionP.dir/src/main.cpp.obj
+main.cpp
+[ 24%] Building CUDA object cpp/2_Concepts_and_Techniques/MC_SingleAsianOptionP/CMakeFiles/MC_SingleAsianOptionP.dir/src/pricingengine.cu.obj
+pricingengine.cu
+tmpxft_0000c6f8_00000000-7_pricingengine.cudafe1.cpp
+[ 25%] Building CXX object cpp/2_Concepts_and_Techniques/MC_SingleAsianOptionP/CMakeFiles/MC_SingleAsianOptionP.dir/src/test.cpp.obj
+test.cpp
+[ 25%] Linking CXX executable MC_SingleAsianOptionP.exe
+[ 25%] Built target MC_SingleAsianOptionP
+[ 25%] Building CXX object cpp/2_Concepts_and_Techniques/boxFilter/CMakeFiles/boxFilter.dir/boxFilter.cpp.obj
+boxFilter.cpp
+[ 25%] Building CXX object cpp/2_Concepts_and_Techniques/boxFilter/CMakeFiles/boxFilter.dir/boxFilter_cpu.cpp.obj
+boxFilter_cpu.cpp
+[ 26%] Building CUDA object cpp/2_Concepts_and_Techniques/boxFilter/CMakeFiles/boxFilter.dir/boxFilter_kernel.cu.obj
+boxFilter_kernel.cu
+tmpxft_000058dc_00000000-7_boxFilter_kernel.cudafe1.cpp
+[ 26%] Linking CXX executable boxFilter.exe
+[ 26%] Built target boxFilter
+[ 26%] Building CUDA object cpp/2_Concepts_and_Techniques/convolutionSeparable/CMakeFiles/convolutionSeparable.dir/convolutionSeparable.cu.obj
+convolutionSeparable.cu
+tmpxft_0000245c_00000000-7_convolutionSeparable.cudafe1.cpp
+[ 26%] Building CXX object cpp/2_Concepts_and_Techniques/convolutionSeparable/CMakeFiles/convolutionSeparable.dir/convolutionSeparable_gold.cpp.obj
+convolutionSeparable_gold.cpp
+[ 26%] Building CXX object cpp/2_Concepts_and_Techniques/convolutionSeparable/CMakeFiles/convolutionSeparable.dir/main.cpp.obj
+main.cpp
+[ 26%] Linking CXX executable convolutionSeparable.exe
+[ 26%] Built target convolutionSeparable
+[ 27%] Building CUDA object cpp/2_Concepts_and_Techniques/convolutionTexture/CMakeFiles/convolutionTexture.dir/convolutionTexture.cu.obj
+convolutionTexture.cu
+tmpxft_0000a180_00000000-7_convolutionTexture.cudafe1.cpp
+[ 27%] Building CXX object cpp/2_Concepts_and_Techniques/convolutionTexture/CMakeFiles/convolutionTexture.dir/convolutionTexture_gold.cpp.obj
+convolutionTexture_gold.cpp
+[ 27%] Building CXX object cpp/2_Concepts_and_Techniques/convolutionTexture/CMakeFiles/convolutionTexture.dir/main.cpp.obj
+main.cpp
+[ 27%] Linking CXX executable convolutionTexture.exe
+[ 27%] Built target convolutionTexture
+[ 27%] Building CUDA object cpp/2_Concepts_and_Techniques/dct8x8/CMakeFiles/dct8x8.dir/dct8x8.cu.obj
+dct8x8.cu
+tmpxft_0000d494_00000000-7_dct8x8.cudafe1.cpp
+[ 27%] Building CXX object cpp/2_Concepts_and_Techniques/dct8x8/CMakeFiles/dct8x8.dir/BmpUtil.cpp.obj
+BmpUtil.cpp
+[ 28%] Building CXX object cpp/2_Concepts_and_Techniques/dct8x8/CMakeFiles/dct8x8.dir/DCT8x8_Gold.cpp.obj
+DCT8x8_Gold.cpp
+[ 28%] Linking CXX executable dct8x8.exe
+[ 28%] Built target dct8x8
+[ 28%] Building CUDA object cpp/2_Concepts_and_Techniques/eigenvalues/CMakeFiles/eigenvalues.dir/bisect_large.cu.obj
+bisect_large.cu
+tmpxft_000030cc_00000000-7_bisect_large.cudafe1.cpp
+[ 28%] Building CUDA object cpp/2_Concepts_and_Techniques/eigenvalues/CMakeFiles/eigenvalues.dir/bisect_small.cu.obj
+bisect_small.cu
+tmpxft_00008a5c_00000000-7_bisect_small.cudafe1.cpp
+[ 28%] Building CUDA object cpp/2_Concepts_and_Techniques/eigenvalues/CMakeFiles/eigenvalues.dir/bisect_util.cu.obj
+bisect_util.cu
+tmpxft_000058a4_00000000-7_bisect_util.cudafe1.cpp
+[ 28%] Building CXX object cpp/2_Concepts_and_Techniques/eigenvalues/CMakeFiles/eigenvalues.dir/gerschgorin.cpp.obj
+gerschgorin.cpp
+[ 29%] Building CUDA object cpp/2_Concepts_and_Techniques/eigenvalues/CMakeFiles/eigenvalues.dir/main.cu.obj
+main.cu
+tmpxft_00005908_00000000-7_main.cudafe1.cpp
+[ 29%] Building CXX object cpp/2_Concepts_and_Techniques/eigenvalues/CMakeFiles/eigenvalues.dir/matlab.cpp.obj
+matlab.cpp
+[ 29%] Linking CXX executable eigenvalues.exe
+[ 29%] Built target eigenvalues
+[ 29%] Building CUDA object cpp/2_Concepts_and_Techniques/histogram/CMakeFiles/histogram.dir/histogram256.cu.obj
+histogram256.cu
+tmpxft_00008e8c_00000000-7_histogram256.cudafe1.cpp
+[ 30%] Building CUDA object cpp/2_Concepts_and_Techniques/histogram/CMakeFiles/histogram.dir/histogram64.cu.obj
+histogram64.cu
+tmpxft_00001a94_00000000-7_histogram64.cudafe1.cpp
+[ 30%] Building CXX object cpp/2_Concepts_and_Techniques/histogram/CMakeFiles/histogram.dir/histogram_gold.cpp.obj
+histogram_gold.cpp
+[ 30%] Building CXX object cpp/2_Concepts_and_Techniques/histogram/CMakeFiles/histogram.dir/main.cpp.obj
+main.cpp
+[ 30%] Linking CXX executable histogram.exe
+[ 30%] Built target histogram
+[ 31%] Building CXX object cpp/2_Concepts_and_Techniques/imageDenoising/CMakeFiles/imageDenoising.dir/bmploader.cpp.obj
+bmploader.cpp
+[ 31%] Building CUDA object cpp/2_Concepts_and_Techniques/imageDenoising/CMakeFiles/imageDenoising.dir/imageDenoising.cu.obj
+imageDenoising.cu
+tmpxft_00008bb0_00000000-7_imageDenoising.cudafe1.cpp
+[ 31%] Building CXX object cpp/2_Concepts_and_Techniques/imageDenoising/CMakeFiles/imageDenoising.dir/imageDenoisingGL.cpp.obj
+imageDenoisingGL.cpp
+[ 31%] Linking CXX executable imageDenoising.exe
+[ 31%] Built target imageDenoising
+[ 31%] Building CUDA object cpp/2_Concepts_and_Techniques/inlinePTX/CMakeFiles/inlinePTX.dir/inlinePTX.cu.obj
+inlinePTX.cu
+tmpxft_0000999c_00000000-7_inlinePTX.cudafe1.cpp
+[ 31%] Linking CUDA executable inlinePTX.exe
+[ 31%] Built target inlinePTX
+[ 31%] Building CUDA object cpp/2_Concepts_and_Techniques/interval/CMakeFiles/interval.dir/interval.cu.obj
+Unknown compiler version - please run the configure tests and report the results
+interval.cu
+tmpxft_00001d4c_00000000-7_interval.cudafe1.cpp
+Unknown compiler version - please run the configure tests and report the results
+[ 32%] Linking CUDA executable interval.exe
+[ 32%] Built target interval
+[ 32%] Building CXX object cpp/2_Concepts_and_Techniques/particles/CMakeFiles/particles.dir/particleSystem.cpp.obj
+particleSystem.cpp
+[ 33%] Building CUDA object cpp/2_Concepts_and_Techniques/particles/CMakeFiles/particles.dir/particleSystem_cuda.cu.obj
+particleSystem_cuda.cu
+tmpxft_000004c0_00000000-7_particleSystem_cuda.cudafe1.cpp
+[ 33%] Building CXX object cpp/2_Concepts_and_Techniques/particles/CMakeFiles/particles.dir/particles.cpp.obj
+particles.cpp
+[ 33%] Building CXX object cpp/2_Concepts_and_Techniques/particles/CMakeFiles/particles.dir/render_particles.cpp.obj
+render_particles.cpp
+[ 33%] Building CXX object cpp/2_Concepts_and_Techniques/particles/CMakeFiles/particles.dir/shaders.cpp.obj
+shaders.cpp
+[ 34%] Linking CXX executable particles.exe
+[ 34%] Built target particles
+[ 34%] Building CUDA object cpp/2_Concepts_and_Techniques/radixSortThrust/CMakeFiles/radixSortThrust.dir/radixSortThrust.cu.obj
+radixSortThrust.cu
+tmpxft_000039cc_00000000-7_radixSortThrust.cudafe1.cpp
+[ 35%] Linking CUDA executable radixSortThrust.exe
+[ 35%] Built target radixSortThrust
+[ 35%] Building CXX object cpp/2_Concepts_and_Techniques/reduction/CMakeFiles/reduction.dir/reduction.cpp.obj
+reduction.cpp
+[ 35%] Building CUDA object cpp/2_Concepts_and_Techniques/reduction/CMakeFiles/reduction.dir/reduction_kernel.cu.obj
+reduction_kernel.cu
+tmpxft_00003b58_00000000-7_reduction_kernel.cudafe1.cpp
+[ 36%] Linking CXX executable reduction.exe
+[ 36%] Built target reduction
+[ 36%] Building CUDA object cpp/2_Concepts_and_Techniques/reductionMultiBlockCG/CMakeFiles/reductionMultiBlockCG.dir/reductionMultiBlockCG.cu.obj
+reductionMultiBlockCG.cu
+tmpxft_0000b36c_00000000-7_reductionMultiBlockCG.cudafe1.cpp
+[ 36%] Linking CUDA executable reductionMultiBlockCG.exe
+[ 36%] Built target reductionMultiBlockCG
+[ 36%] Building CXX object cpp/2_Concepts_and_Techniques/scalarProd/CMakeFiles/scalarProd.dir/scalarProd_cpu.cpp.obj
+scalarProd_cpu.cpp
+[ 37%] Building CUDA object cpp/2_Concepts_and_Techniques/scalarProd/CMakeFiles/scalarProd.dir/scalarProd.cu.obj
+scalarProd.cu
+tmpxft_00009dcc_00000000-7_scalarProd.cudafe1.cpp
+[ 37%] Linking CXX executable scalarProd.exe
+[ 37%] Built target scalarProd
+[ 37%] Building CXX object cpp/2_Concepts_and_Techniques/scan/CMakeFiles/scan.dir/main.cpp.obj
+main.cpp
+[ 37%] Building CXX object cpp/2_Concepts_and_Techniques/scan/CMakeFiles/scan.dir/scan_gold.cpp.obj
+scan_gold.cpp
+[ 37%] Building CUDA object cpp/2_Concepts_and_Techniques/scan/CMakeFiles/scan.dir/scan.cu.obj
+scan.cu
+tmpxft_0000a958_00000000-7_scan.cudafe1.cpp
+[ 38%] Linking CXX executable scan.exe
+[ 38%] Built target scan
+[ 38%] Building CUDA object cpp/2_Concepts_and_Techniques/segmentationTreeThrust/CMakeFiles/segmentationTreeThrust.dir/segmentationTree.cu.obj
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/scan_by_key.h(74): warning #1444-D: type "thrust::_V_300304_SM_1200::greater_equal<uint>" was declared deprecated ("Use cuda::std::greater_equal instead")
+    using Dispatch32 = cub::DispatchScanByKey<
+          ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(134): note #3287-D: because of a "deprecated" attribute
+  using greater_equal [[deprecated("Use cuda::std::greater_equal instead")]] = ::cuda::std::greater_equal<T>;
+                        ^
+          detected during:
+            instantiation of "ValuesOutIt thrust::_V_300304_SM_1200::cuda_cub::detail::inclusive_scan_by_key_n(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, KeysInIt, ValuesInIt, ValuesOutIt, SizeT, EqualityOpT, ScanOpT) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, KeysInIt=thrust::_V_300304_SM_1200::device_ptr<uint>, ValuesInIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOpT=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, SizeT=ptrdiff_t]" at line 280
+            instantiation of "ValOutputIt thrust::_V_300304_SM_1200::cuda_cub::inclusive_scan_by_key(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, KeyInputIt, KeyInputIt, ValInputIt, ValOutputIt, BinaryPred, ScanOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, KeyInputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, ValInputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValOutputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPred=cuda::std::__4::greater_equal<uint>, ScanOp=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 189 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 430 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 508 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/scan_by_key.h(83): warning #1444-D: type "thrust::_V_300304_SM_1200::greater_equal<uint>" was declared deprecated ("Use cuda::std::greater_equal instead")
+    using Dispatch64 = cub::DispatchScanByKey<
+          ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(134): note #3287-D: because of a "deprecated" attribute
+  using greater_equal [[deprecated("Use cuda::std::greater_equal instead")]] = ::cuda::std::greater_equal<T>;
+                        ^
+          detected during:
+            instantiation of "ValuesOutIt thrust::_V_300304_SM_1200::cuda_cub::detail::inclusive_scan_by_key_n(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, KeysInIt, ValuesInIt, ValuesOutIt, SizeT, EqualityOpT, ScanOpT) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, KeysInIt=thrust::_V_300304_SM_1200::device_ptr<uint>, ValuesInIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOpT=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, SizeT=ptrdiff_t]" at line 280
+            instantiation of "ValOutputIt thrust::_V_300304_SM_1200::cuda_cub::inclusive_scan_by_key(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, KeyInputIt, KeyInputIt, ValInputIt, ValOutputIt, BinaryPred, ScanOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, KeyInputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, ValInputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValOutputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPred=cuda::std::__4::greater_equal<uint>, ScanOp=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 189 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 430 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 508 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/device/dispatch/dispatch_scan_by_key.cuh(137): warning #1444-D: type "thrust::_V_300304_SM_1200::greater_equal<uint>" was declared deprecated ("Use cuda::std::greater_equal instead")
+    using AgentScanByKeyT = detail::scan_by_key::AgentScanByKey<
+          ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(134): note #3287-D: because of a "deprecated" attribute
+  using greater_equal [[deprecated("Use cuda::std::greater_equal instead")]] = ::cuda::std::greater_equal<T>;
+                        ^
+          detected during:
+            instantiation of "void cub::_V_300304_SM_1200::detail::scan_by_key::DeviceScanByKeyKernel<ChainedPolicyT,KeysInputIteratorT,ValuesInputIteratorT,ValuesOutputIteratorT,ScanByKeyTileStateT,EqualityOp,ScanOpT,InitValueT,OffsetT,AccumT,KeyT>(KeysInputIteratorT, KeyT *, ValuesInputIteratorT, ValuesOutputIteratorT, ScanByKeyTileStateT, int, EqualityOp, ScanOpT, InitValueT, OffsetT) [with ChainedPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, KeysInputIteratorT=uint *, ValuesInputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ScanByKeyTileStateT=cub::_V_300304_SM_1200::ReduceByKeyScanTileState<cuda::std::__4::tuple<float, unsigned int>, int, false>, EqualityOp=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, InitValueT=cub::_V_300304_SM_1200::NullType, OffsetT=uint32_t, AccumT=cuda::std::__4::tuple<float, unsigned int>, KeyT=unsigned int]" at line 468
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchScanByKey<KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOp, ScanOpT, InitValueT, OffsetT, AccumT, PolicyHub>::Invoke<ActivePolicyT>() [with KeysInputIteratorT=uint *, ValuesInputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOp=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, InitValueT=cub::_V_300304_SM_1200::NullType, OffsetT=uint32_t, AccumT=cuda::std::__4::tuple<float, unsigned int>, PolicyHub=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>, ActivePolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000]" at line 846 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::find_and_invoke_policy<DevicePtxVersion,FunctorT>(FunctorT &) [with PolicyPtxVersion=1000, PolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, PrevPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy900, DevicePtxVersion=1200, FunctorT=cub::_V_300304_SM_1200::DispatchScanByKey<uint *, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, cuda::std::__4::greater_equal<uint>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, cub::_V_300304_SM_1200::NullType, uint32_t, cuda::std::__4::tuple<float, unsigned int>, cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>>]" at line 831 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::runtime_arch_to_compiletime<ArchMult,CudaArches...,FunctorT>(int, FunctorT &) [with PolicyPtxVersion=1000, PolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, PrevPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy900, ArchMult=1, CudaArches=<1200>, FunctorT=cub::_V_300304_SM_1200::DispatchScanByKey<uint *, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, cuda::std::__4::greater_equal<uint>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, cub::_V_300304_SM_1200::NullType, uint32_t, cuda::std::__4::tuple<float, unsigned int>, cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>>]" at line 796 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::Invoke(int, FunctorT &) [with PolicyPtxVersion=1000, PolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, PrevPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy900, FunctorT=cub::_V_300304_SM_1200::DispatchScanByKey<uint *, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, cuda::std::__4::greater_equal<uint>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, cub::_V_300304_SM_1200::NullType, uint32_t, cuda::std::__4::tuple<float, unsigned int>, cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>>]" at line 540
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchScanByKey<KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOp, ScanOpT, InitValueT, OffsetT, AccumT, PolicyHub>::Dispatch(void *, size_t &, KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOp, ScanOpT, InitValueT, OffsetT, cudaStream_t) [with KeysInputIteratorT=uint *, ValuesInputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOp=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, InitValueT=cub::_V_300304_SM_1200::NullType, OffsetT=uint32_t, AccumT=cuda::std::__4::tuple<float, unsigned int>, PolicyHub=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>]" at line 99 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/scan_by_key.h
+            instantiation of "ValuesOutIt thrust::_V_300304_SM_1200::cuda_cub::detail::inclusive_scan_by_key_n(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, KeysInIt, ValuesInIt, ValuesOutIt, SizeT, EqualityOpT, ScanOpT) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, KeysInIt=thrust::_V_300304_SM_1200::device_ptr<uint>, ValuesInIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOpT=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, SizeT=ptrdiff_t]" at line 280 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/scan_by_key.h
+            instantiation of "ValOutputIt thrust::_V_300304_SM_1200::cuda_cub::inclusive_scan_by_key(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, KeyInputIt, KeyInputIt, ValInputIt, ValOutputIt, BinaryPred, ScanOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, KeyInputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, ValInputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValOutputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPred=cuda::std::__4::greater_equal<uint>, ScanOp=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 189 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 430 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 508 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/device/dispatch/dispatch_scan_by_key.cuh(149): warning #1444-D: type "thrust::_V_300304_SM_1200::greater_equal<uint>" was declared deprecated ("Use cuda::std::greater_equal instead")
+    __declspec(__shared__) typename AgentScanByKeyT::TempStorage temp_storage;
+                                                                 ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(134): note #3287-D: because of a "deprecated" attribute
+  using greater_equal [[deprecated("Use cuda::std::greater_equal instead")]] = ::cuda::std::greater_equal<T>;
+                        ^
+          detected during:
+            instantiation of "void cub::_V_300304_SM_1200::detail::scan_by_key::DeviceScanByKeyKernel<ChainedPolicyT,KeysInputIteratorT,ValuesInputIteratorT,ValuesOutputIteratorT,ScanByKeyTileStateT,EqualityOp,ScanOpT,InitValueT,OffsetT,AccumT,KeyT>(KeysInputIteratorT, KeyT *, ValuesInputIteratorT, ValuesOutputIteratorT, ScanByKeyTileStateT, int, EqualityOp, ScanOpT, InitValueT, OffsetT) [with ChainedPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, KeysInputIteratorT=uint *, ValuesInputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ScanByKeyTileStateT=cub::_V_300304_SM_1200::ReduceByKeyScanTileState<cuda::std::__4::tuple<float, unsigned int>, int, false>, EqualityOp=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, InitValueT=cub::_V_300304_SM_1200::NullType, OffsetT=uint32_t, AccumT=cuda::std::__4::tuple<float, unsigned int>, KeyT=unsigned int]" at line 468
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchScanByKey<KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOp, ScanOpT, InitValueT, OffsetT, AccumT, PolicyHub>::Invoke<ActivePolicyT>() [with KeysInputIteratorT=uint *, ValuesInputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOp=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, InitValueT=cub::_V_300304_SM_1200::NullType, OffsetT=uint32_t, AccumT=cuda::std::__4::tuple<float, unsigned int>, PolicyHub=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>, ActivePolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000]" at line 846 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::find_and_invoke_policy<DevicePtxVersion,FunctorT>(FunctorT &) [with PolicyPtxVersion=1000, PolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, PrevPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy900, DevicePtxVersion=1200, FunctorT=cub::_V_300304_SM_1200::DispatchScanByKey<uint *, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, cuda::std::__4::greater_equal<uint>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, cub::_V_300304_SM_1200::NullType, uint32_t, cuda::std::__4::tuple<float, unsigned int>, cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>>]" at line 831 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::runtime_arch_to_compiletime<ArchMult,CudaArches...,FunctorT>(int, FunctorT &) [with PolicyPtxVersion=1000, PolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, PrevPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy900, ArchMult=1, CudaArches=<1200>, FunctorT=cub::_V_300304_SM_1200::DispatchScanByKey<uint *, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, cuda::std::__4::greater_equal<uint>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, cub::_V_300304_SM_1200::NullType, uint32_t, cuda::std::__4::tuple<float, unsigned int>, cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>>]" at line 796 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::Invoke(int, FunctorT &) [with PolicyPtxVersion=1000, PolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, PrevPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy900, FunctorT=cub::_V_300304_SM_1200::DispatchScanByKey<uint *, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, cuda::std::__4::greater_equal<uint>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, cub::_V_300304_SM_1200::NullType, uint32_t, cuda::std::__4::tuple<float, unsigned int>, cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>>]" at line 540
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchScanByKey<KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOp, ScanOpT, InitValueT, OffsetT, AccumT, PolicyHub>::Dispatch(void *, size_t &, KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOp, ScanOpT, InitValueT, OffsetT, cudaStream_t) [with KeysInputIteratorT=uint *, ValuesInputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOp=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, InitValueT=cub::_V_300304_SM_1200::NullType, OffsetT=uint32_t, AccumT=cuda::std::__4::tuple<float, unsigned int>, PolicyHub=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>]" at line 99 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/scan_by_key.h
+            instantiation of "ValuesOutIt thrust::_V_300304_SM_1200::cuda_cub::detail::inclusive_scan_by_key_n(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, KeysInIt, ValuesInIt, ValuesOutIt, SizeT, EqualityOpT, ScanOpT) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, KeysInIt=thrust::_V_300304_SM_1200::device_ptr<uint>, ValuesInIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOpT=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, SizeT=ptrdiff_t]" at line 280 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/scan_by_key.h
+            instantiation of "ValOutputIt thrust::_V_300304_SM_1200::cuda_cub::inclusive_scan_by_key(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, KeyInputIt, KeyInputIt, ValInputIt, ValOutputIt, BinaryPred, ScanOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, KeyInputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, ValInputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValOutputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPred=cuda::std::__4::greater_equal<uint>, ScanOp=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 189 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 430 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 508 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/device/dispatch/dispatch_scan_by_key.cuh(137): warning #1444-D: type "thrust::_V_300304_SM_1200::greater_equal<uint>" was declared deprecated ("Use cuda::std::greater_equal instead")
+    using AgentScanByKeyT = detail::scan_by_key::AgentScanByKey<
+          ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(134): note #3287-D: because of a "deprecated" attribute
+  using greater_equal [[deprecated("Use cuda::std::greater_equal instead")]] = ::cuda::std::greater_equal<T>;
+                        ^
+          detected during:
+            instantiation of "void cub::_V_300304_SM_1200::detail::scan_by_key::DeviceScanByKeyKernel<ChainedPolicyT,KeysInputIteratorT,ValuesInputIteratorT,ValuesOutputIteratorT,ScanByKeyTileStateT,EqualityOp,ScanOpT,InitValueT,OffsetT,AccumT,KeyT>(KeysInputIteratorT, KeyT *, ValuesInputIteratorT, ValuesOutputIteratorT, ScanByKeyTileStateT, int, EqualityOp, ScanOpT, InitValueT, OffsetT) [with ChainedPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, KeysInputIteratorT=uint *, ValuesInputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ScanByKeyTileStateT=cub::_V_300304_SM_1200::ReduceByKeyScanTileState<cuda::std::__4::tuple<float, unsigned int>, int, false>, EqualityOp=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, InitValueT=cub::_V_300304_SM_1200::NullType, OffsetT=uint64_t, AccumT=cuda::std::__4::tuple<float, unsigned int>, KeyT=unsigned int]" at line 468
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchScanByKey<KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOp, ScanOpT, InitValueT, OffsetT, AccumT, PolicyHub>::Invoke<ActivePolicyT>() [with KeysInputIteratorT=uint *, ValuesInputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOp=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, InitValueT=cub::_V_300304_SM_1200::NullType, OffsetT=uint64_t, AccumT=cuda::std::__4::tuple<float, unsigned int>, PolicyHub=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>, ActivePolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000]" at line 846 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::find_and_invoke_policy<DevicePtxVersion,FunctorT>(FunctorT &) [with PolicyPtxVersion=1000, PolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, PrevPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy900, DevicePtxVersion=1200, FunctorT=cub::_V_300304_SM_1200::DispatchScanByKey<uint *, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, cuda::std::__4::greater_equal<uint>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, cub::_V_300304_SM_1200::NullType, uint64_t, cuda::std::__4::tuple<float, unsigned int>, cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>>]" at line 831 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::runtime_arch_to_compiletime<ArchMult,CudaArches...,FunctorT>(int, FunctorT &) [with PolicyPtxVersion=1000, PolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, PrevPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy900, ArchMult=1, CudaArches=<1200>, FunctorT=cub::_V_300304_SM_1200::DispatchScanByKey<uint *, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, cuda::std::__4::greater_equal<uint>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, cub::_V_300304_SM_1200::NullType, uint64_t, cuda::std::__4::tuple<float, unsigned int>, cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>>]" at line 796 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::Invoke(int, FunctorT &) [with PolicyPtxVersion=1000, PolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, PrevPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy900, FunctorT=cub::_V_300304_SM_1200::DispatchScanByKey<uint *, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, cuda::std::__4::greater_equal<uint>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, cub::_V_300304_SM_1200::NullType, uint64_t, cuda::std::__4::tuple<float, unsigned int>, cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>>]" at line 540
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchScanByKey<KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOp, ScanOpT, InitValueT, OffsetT, AccumT, PolicyHub>::Dispatch(void *, size_t &, KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOp, ScanOpT, InitValueT, OffsetT, cudaStream_t) [with KeysInputIteratorT=uint *, ValuesInputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOp=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, InitValueT=cub::_V_300304_SM_1200::NullType, OffsetT=uint64_t, AccumT=cuda::std::__4::tuple<float, unsigned int>, PolicyHub=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>]" at line 99 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/scan_by_key.h
+            instantiation of "ValuesOutIt thrust::_V_300304_SM_1200::cuda_cub::detail::inclusive_scan_by_key_n(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, KeysInIt, ValuesInIt, ValuesOutIt, SizeT, EqualityOpT, ScanOpT) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, KeysInIt=thrust::_V_300304_SM_1200::device_ptr<uint>, ValuesInIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOpT=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, SizeT=ptrdiff_t]" at line 280 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/scan_by_key.h
+            instantiation of "ValOutputIt thrust::_V_300304_SM_1200::cuda_cub::inclusive_scan_by_key(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, KeyInputIt, KeyInputIt, ValInputIt, ValOutputIt, BinaryPred, ScanOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, KeyInputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, ValInputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValOutputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPred=cuda::std::__4::greater_equal<uint>, ScanOp=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 189 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 430 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 508 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/device/dispatch/dispatch_scan_by_key.cuh(149): warning #1444-D: type "thrust::_V_300304_SM_1200::greater_equal<uint>" was declared deprecated ("Use cuda::std::greater_equal instead")
+    __declspec(__shared__) typename AgentScanByKeyT::TempStorage temp_storage;
+                                                                 ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(134): note #3287-D: because of a "deprecated" attribute
+  using greater_equal [[deprecated("Use cuda::std::greater_equal instead")]] = ::cuda::std::greater_equal<T>;
+                        ^
+          detected during:
+            instantiation of "void cub::_V_300304_SM_1200::detail::scan_by_key::DeviceScanByKeyKernel<ChainedPolicyT,KeysInputIteratorT,ValuesInputIteratorT,ValuesOutputIteratorT,ScanByKeyTileStateT,EqualityOp,ScanOpT,InitValueT,OffsetT,AccumT,KeyT>(KeysInputIteratorT, KeyT *, ValuesInputIteratorT, ValuesOutputIteratorT, ScanByKeyTileStateT, int, EqualityOp, ScanOpT, InitValueT, OffsetT) [with ChainedPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, KeysInputIteratorT=uint *, ValuesInputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ScanByKeyTileStateT=cub::_V_300304_SM_1200::ReduceByKeyScanTileState<cuda::std::__4::tuple<float, unsigned int>, int, false>, EqualityOp=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, InitValueT=cub::_V_300304_SM_1200::NullType, OffsetT=uint64_t, AccumT=cuda::std::__4::tuple<float, unsigned int>, KeyT=unsigned int]" at line 468
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchScanByKey<KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOp, ScanOpT, InitValueT, OffsetT, AccumT, PolicyHub>::Invoke<ActivePolicyT>() [with KeysInputIteratorT=uint *, ValuesInputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOp=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, InitValueT=cub::_V_300304_SM_1200::NullType, OffsetT=uint64_t, AccumT=cuda::std::__4::tuple<float, unsigned int>, PolicyHub=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>, ActivePolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000]" at line 846 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::find_and_invoke_policy<DevicePtxVersion,FunctorT>(FunctorT &) [with PolicyPtxVersion=1000, PolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, PrevPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy900, DevicePtxVersion=1200, FunctorT=cub::_V_300304_SM_1200::DispatchScanByKey<uint *, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, cuda::std::__4::greater_equal<uint>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, cub::_V_300304_SM_1200::NullType, uint64_t, cuda::std::__4::tuple<float, unsigned int>, cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>>]" at line 831 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::runtime_arch_to_compiletime<ArchMult,CudaArches...,FunctorT>(int, FunctorT &) [with PolicyPtxVersion=1000, PolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, PrevPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy900, ArchMult=1, CudaArches=<1200>, FunctorT=cub::_V_300304_SM_1200::DispatchScanByKey<uint *, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, cuda::std::__4::greater_equal<uint>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, cub::_V_300304_SM_1200::NullType, uint64_t, cuda::std::__4::tuple<float, unsigned int>, cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>>]" at line 796 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::Invoke(int, FunctorT &) [with PolicyPtxVersion=1000, PolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy1000, PrevPolicyT=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>::Policy900, FunctorT=cub::_V_300304_SM_1200::DispatchScanByKey<uint *, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, cuda::std::__4::greater_equal<uint>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, cub::_V_300304_SM_1200::NullType, uint64_t, cuda::std::__4::tuple<float, unsigned int>, cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>>]" at line 540
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchScanByKey<KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOp, ScanOpT, InitValueT, OffsetT, AccumT, PolicyHub>::Dispatch(void *, size_t &, KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOp, ScanOpT, InitValueT, OffsetT, cudaStream_t) [with KeysInputIteratorT=uint *, ValuesInputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutputIteratorT=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOp=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, InitValueT=cub::_V_300304_SM_1200::NullType, OffsetT=uint64_t, AccumT=cuda::std::__4::tuple<float, unsigned int>, PolicyHub=cub::_V_300304_SM_1200::detail::scan_by_key::policy_hub<uint *, cuda::std::__4::tuple<float, unsigned int>, cuda::std::__4::tuple<float, unsigned int>, cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>>]" at line 99 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/scan_by_key.h
+            instantiation of "ValuesOutIt thrust::_V_300304_SM_1200::cuda_cub::detail::inclusive_scan_by_key_n(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, KeysInIt, ValuesInIt, ValuesOutIt, SizeT, EqualityOpT, ScanOpT) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, KeysInIt=thrust::_V_300304_SM_1200::device_ptr<uint>, ValuesInIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValuesOutIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, EqualityOpT=cuda::std::__4::greater_equal<uint>, ScanOpT=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>, SizeT=ptrdiff_t]" at line 280 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/scan_by_key.h
+            instantiation of "ValOutputIt thrust::_V_300304_SM_1200::cuda_cub::inclusive_scan_by_key(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, KeyInputIt, KeyInputIt, ValInputIt, ValOutputIt, BinaryPred, ScanOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, KeyInputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, ValInputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValOutputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPred=cuda::std::__4::greater_equal<uint>, ScanOp=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 189 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 430 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 508 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/detail/sequential/scan_by_key.h(46): warning #1444-D: type "thrust::_V_300304_SM_1200::minimum<cuda::std::__4::tuple<float, unsigned int>>" was declared deprecated ("Use cuda::minimum instead")
+    thrust::detail::wrapped_function<BinaryFunction, ValueType> wrapped_binary_op{binary_op};
+                                                                ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(206): note #3287-D: because of a "deprecated" attribute
+  using minimum [[deprecated("Use cuda::minimum instead")]] = ::cuda::minimum<T>;
+                  ^
+          detected during:
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::system::detail::sequential::inclusive_scan_by_key(thrust::_V_300304_SM_1200::system::detail::sequential::execution_policy<DerivedPolicy> &, InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, BinaryFunction) [with DerivedPolicy=thrust::_V_300304_SM_1200::detail::seq_t, InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, BinaryFunction=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 189 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with DerivedPolicy=thrust::_V_300304_SM_1200::detail::seq_t, InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 280 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/scan_by_key.h
+            instantiation of "ValOutputIt thrust::_V_300304_SM_1200::cuda_cub::inclusive_scan_by_key(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, KeyInputIt, KeyInputIt, ValInputIt, ValOutputIt, BinaryPred, ScanOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, KeyInputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, ValInputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, ValOutputIt=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPred=cuda::std::__4::greater_equal<uint>, ScanOp=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 189 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 430 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/scan.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::inclusive_scan_by_key(InputIterator1, InputIterator1, InputIterator2, OutputIterator, BinaryPredicate, AssociativeOperator) [with InputIterator1=thrust::_V_300304_SM_1200::device_ptr<uint>, InputIterator2=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, OutputIterator=thrust::_V_300304_SM_1200::zip_iterator<cuda::std::__4::tuple<thrust::_V_300304_SM_1200::device_ptr<float>, thrust::_V_300304_SM_1200::device_ptr<uint>>>, BinaryPredicate=cuda::std::__4::greater_equal<uint>, AssociativeOperator=cuda::__4::minimum<cuda::std::__4::tuple<float, unsigned int>>]" at line 508 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/device/dispatch/dispatch_adjacent_difference.cuh(63): warning #1444-D: type "thrust::_V_300304_SM_1200::not_equal_to<uint>" was declared deprecated ("Use cuda::std::not_equal_to instead")
+    using Agent =
+          ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(143): note #3287-D: because of a "deprecated" attribute
+  using not_equal_to [[deprecated("Use cuda::std::not_equal_to instead")]] = ::cuda::std::not_equal_to<T>;
+                       ^
+          detected during:
+            instantiation of "void cub::_V_300304_SM_1200::detail::adjacent_difference::DeviceAdjacentDifferenceDifferenceKernel<ChainedPolicyT,InputIteratorT,OutputIteratorT,DifferenceOpT,OffsetT,InputT,MayAlias,ReadLeft>(InputIteratorT, InputT *, OutputIteratorT, DifferenceOpT, OffsetT) [with ChainedPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int32_t, InputT=unsigned int, MayAlias=false, ReadLeft=true]" at line 217
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchAdjacentDifference<InputIteratorT, OutputIteratorT, DifferenceOpT, OffsetT, AliasOpt, ReadOpt, PolicyHub>::Invoke<ActivePolicyT>() [with InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int32_t, AliasOpt=cub::_V_300304_SM_1200::MayAlias::No, ReadOpt=cub::_V_300304_SM_1200::ReadOption::Left, PolicyHub=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>, ActivePolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500]" at line 846 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::find_and_invoke_policy<DevicePtxVersion,FunctorT>(FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, DevicePtxVersion=1200, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int32_t, cub::_V_300304_SM_1200::MayAlias::No, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>>]" at line 831 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::runtime_arch_to_compiletime<ArchMult,CudaArches...,FunctorT>(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, ArchMult=1, CudaArches=<1200>, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int32_t, cub::_V_300304_SM_1200::MayAlias::No, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>>]" at line 796 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::Invoke(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int32_t, cub::_V_300304_SM_1200::MayAlias::No, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>>]" at line 275
+            [ 2 instantiation contexts not shown ]
+            instantiation of "cudaError_t thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::doit_step(void *, size_t &, InputIt, OutputIt, BinaryOp, size_t, cudaStream_t, thrust::_V_300304_SM_1200::detail::integral_constant<__nv_bool, true>) [with InputIt=uint *, OutputIt=uint *, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 143 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 176 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 61 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator, InputIterator, OutputIterator, BinaryFunction) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 92 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(InputIterator, InputIterator, OutputIterator, BinaryFunction) [with InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 574 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/device/dispatch/dispatch_adjacent_difference.cuh(74): warning #1444-D: type "thrust::_V_300304_SM_1200::not_equal_to<uint>" was declared deprecated ("Use cuda::std::not_equal_to instead")
+    __declspec(__shared__) typename Agent::TempStorage storage;
+                                                       ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(143): note #3287-D: because of a "deprecated" attribute
+  using not_equal_to [[deprecated("Use cuda::std::not_equal_to instead")]] = ::cuda::std::not_equal_to<T>;
+                       ^
+          detected during:
+            instantiation of "void cub::_V_300304_SM_1200::detail::adjacent_difference::DeviceAdjacentDifferenceDifferenceKernel<ChainedPolicyT,InputIteratorT,OutputIteratorT,DifferenceOpT,OffsetT,InputT,MayAlias,ReadLeft>(InputIteratorT, InputT *, OutputIteratorT, DifferenceOpT, OffsetT) [with ChainedPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int32_t, InputT=unsigned int, MayAlias=false, ReadLeft=true]" at line 217
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchAdjacentDifference<InputIteratorT, OutputIteratorT, DifferenceOpT, OffsetT, AliasOpt, ReadOpt, PolicyHub>::Invoke<ActivePolicyT>() [with InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int32_t, AliasOpt=cub::_V_300304_SM_1200::MayAlias::No, ReadOpt=cub::_V_300304_SM_1200::ReadOption::Left, PolicyHub=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>, ActivePolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500]" at line 846 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::find_and_invoke_policy<DevicePtxVersion,FunctorT>(FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, DevicePtxVersion=1200, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int32_t, cub::_V_300304_SM_1200::MayAlias::No, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>>]" at line 831 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::runtime_arch_to_compiletime<ArchMult,CudaArches...,FunctorT>(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, ArchMult=1, CudaArches=<1200>, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int32_t, cub::_V_300304_SM_1200::MayAlias::No, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>>]" at line 796 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::Invoke(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int32_t, cub::_V_300304_SM_1200::MayAlias::No, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>>]" at line 275
+            [ 2 instantiation contexts not shown ]
+            instantiation of "cudaError_t thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::doit_step(void *, size_t &, InputIt, OutputIt, BinaryOp, size_t, cudaStream_t, thrust::_V_300304_SM_1200::detail::integral_constant<__nv_bool, true>) [with InputIt=uint *, OutputIt=uint *, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 143 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 176 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 61 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator, InputIterator, OutputIterator, BinaryFunction) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 92 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(InputIterator, InputIterator, OutputIterator, BinaryFunction) [with InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 574 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/device/dispatch/dispatch_adjacent_difference.cuh(63): warning #1444-D: type "thrust::_V_300304_SM_1200::not_equal_to<uint>" was declared deprecated ("Use cuda::std::not_equal_to instead")
+    using Agent =
+          ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(143): note #3287-D: because of a "deprecated" attribute
+  using not_equal_to [[deprecated("Use cuda::std::not_equal_to instead")]] = ::cuda::std::not_equal_to<T>;
+                       ^
+          detected during:
+            instantiation of "void cub::_V_300304_SM_1200::detail::adjacent_difference::DeviceAdjacentDifferenceDifferenceKernel<ChainedPolicyT,InputIteratorT,OutputIteratorT,DifferenceOpT,OffsetT,InputT,MayAlias,ReadLeft>(InputIteratorT, InputT *, OutputIteratorT, DifferenceOpT, OffsetT) [with ChainedPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int64_t, InputT=unsigned int, MayAlias=false, ReadLeft=true]" at line 217
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchAdjacentDifference<InputIteratorT, OutputIteratorT, DifferenceOpT, OffsetT, AliasOpt, ReadOpt, PolicyHub>::Invoke<ActivePolicyT>() [with InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int64_t, AliasOpt=cub::_V_300304_SM_1200::MayAlias::No, ReadOpt=cub::_V_300304_SM_1200::ReadOption::Left, PolicyHub=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>, ActivePolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500]" at line 846 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::find_and_invoke_policy<DevicePtxVersion,FunctorT>(FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, DevicePtxVersion=1200, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int64_t, cub::_V_300304_SM_1200::MayAlias::No, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>>]" at line 831 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::runtime_arch_to_compiletime<ArchMult,CudaArches...,FunctorT>(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, ArchMult=1, CudaArches=<1200>, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int64_t, cub::_V_300304_SM_1200::MayAlias::No, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>>]" at line 796 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::Invoke(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int64_t, cub::_V_300304_SM_1200::MayAlias::No, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>>]" at line 275
+            [ 2 instantiation contexts not shown ]
+            instantiation of "cudaError_t thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::doit_step(void *, size_t &, InputIt, OutputIt, BinaryOp, size_t, cudaStream_t, thrust::_V_300304_SM_1200::detail::integral_constant<__nv_bool, true>) [with InputIt=uint *, OutputIt=uint *, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 143 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 176 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 61 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator, InputIterator, OutputIterator, BinaryFunction) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 92 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(InputIterator, InputIterator, OutputIterator, BinaryFunction) [with InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 574 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/device/dispatch/dispatch_adjacent_difference.cuh(74): warning #1444-D: type "thrust::_V_300304_SM_1200::not_equal_to<uint>" was declared deprecated ("Use cuda::std::not_equal_to instead")
+    __declspec(__shared__) typename Agent::TempStorage storage;
+                                                       ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(143): note #3287-D: because of a "deprecated" attribute
+  using not_equal_to [[deprecated("Use cuda::std::not_equal_to instead")]] = ::cuda::std::not_equal_to<T>;
+                       ^
+          detected during:
+            instantiation of "void cub::_V_300304_SM_1200::detail::adjacent_difference::DeviceAdjacentDifferenceDifferenceKernel<ChainedPolicyT,InputIteratorT,OutputIteratorT,DifferenceOpT,OffsetT,InputT,MayAlias,ReadLeft>(InputIteratorT, InputT *, OutputIteratorT, DifferenceOpT, OffsetT) [with ChainedPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int64_t, InputT=unsigned int, MayAlias=false, ReadLeft=true]" at line 217
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchAdjacentDifference<InputIteratorT, OutputIteratorT, DifferenceOpT, OffsetT, AliasOpt, ReadOpt, PolicyHub>::Invoke<ActivePolicyT>() [with InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int64_t, AliasOpt=cub::_V_300304_SM_1200::MayAlias::No, ReadOpt=cub::_V_300304_SM_1200::ReadOption::Left, PolicyHub=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>, ActivePolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500]" at line 846 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::find_and_invoke_policy<DevicePtxVersion,FunctorT>(FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, DevicePtxVersion=1200, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int64_t, cub::_V_300304_SM_1200::MayAlias::No, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>>]" at line 831 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::runtime_arch_to_compiletime<ArchMult,CudaArches...,FunctorT>(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, ArchMult=1, CudaArches=<1200>, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int64_t, cub::_V_300304_SM_1200::MayAlias::No, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>>]" at line 796 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::Invoke(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>::Policy500, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int64_t, cub::_V_300304_SM_1200::MayAlias::No, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, false>>]" at line 275
+            [ 2 instantiation contexts not shown ]
+            instantiation of "cudaError_t thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::doit_step(void *, size_t &, InputIt, OutputIt, BinaryOp, size_t, cudaStream_t, thrust::_V_300304_SM_1200::detail::integral_constant<__nv_bool, true>) [with InputIt=uint *, OutputIt=uint *, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 143 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 176 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 61 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator, InputIterator, OutputIterator, BinaryFunction) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 92 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(InputIterator, InputIterator, OutputIterator, BinaryFunction) [with InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 574 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/device/dispatch/dispatch_adjacent_difference.cuh(63): warning #1444-D: type "thrust::_V_300304_SM_1200::not_equal_to<uint>" was declared deprecated ("Use cuda::std::not_equal_to instead")
+    using Agent =
+          ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(143): note #3287-D: because of a "deprecated" attribute
+  using not_equal_to [[deprecated("Use cuda::std::not_equal_to instead")]] = ::cuda::std::not_equal_to<T>;
+                       ^
+          detected during:
+            instantiation of "void cub::_V_300304_SM_1200::detail::adjacent_difference::DeviceAdjacentDifferenceDifferenceKernel<ChainedPolicyT,InputIteratorT,OutputIteratorT,DifferenceOpT,OffsetT,InputT,MayAlias,ReadLeft>(InputIteratorT, InputT *, OutputIteratorT, DifferenceOpT, OffsetT) [with ChainedPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int32_t, InputT=unsigned int, MayAlias=true, ReadLeft=true]" at line 217
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchAdjacentDifference<InputIteratorT, OutputIteratorT, DifferenceOpT, OffsetT, AliasOpt, ReadOpt, PolicyHub>::Invoke<ActivePolicyT>() [with InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int32_t, AliasOpt=cub::_V_300304_SM_1200::MayAlias::Yes, ReadOpt=cub::_V_300304_SM_1200::ReadOption::Left, PolicyHub=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>, ActivePolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500]" at line 846 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::find_and_invoke_policy<DevicePtxVersion,FunctorT>(FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, DevicePtxVersion=1200, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int32_t, cub::_V_300304_SM_1200::MayAlias::Yes, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>>]" at line 831 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::runtime_arch_to_compiletime<ArchMult,CudaArches...,FunctorT>(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, ArchMult=1, CudaArches=<1200>, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int32_t, cub::_V_300304_SM_1200::MayAlias::Yes, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>>]" at line 796 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::Invoke(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int32_t, cub::_V_300304_SM_1200::MayAlias::Yes, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>>]" at line 275
+            [ 2 instantiation contexts not shown ]
+            instantiation of "cudaError_t thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::doit_step(void *, size_t &, InputIt, OutputIt, BinaryOp, size_t, cudaStream_t, thrust::_V_300304_SM_1200::detail::integral_constant<__nv_bool, true>) [with InputIt=uint *, OutputIt=uint *, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 143 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 176 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 61 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator, InputIterator, OutputIterator, BinaryFunction) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 92 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(InputIterator, InputIterator, OutputIterator, BinaryFunction) [with InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 574 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/device/dispatch/dispatch_adjacent_difference.cuh(74): warning #1444-D: type "thrust::_V_300304_SM_1200::not_equal_to<uint>" was declared deprecated ("Use cuda::std::not_equal_to instead")
+    __declspec(__shared__) typename Agent::TempStorage storage;
+                                                       ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(143): note #3287-D: because of a "deprecated" attribute
+  using not_equal_to [[deprecated("Use cuda::std::not_equal_to instead")]] = ::cuda::std::not_equal_to<T>;
+                       ^
+          detected during:
+            instantiation of "void cub::_V_300304_SM_1200::detail::adjacent_difference::DeviceAdjacentDifferenceDifferenceKernel<ChainedPolicyT,InputIteratorT,OutputIteratorT,DifferenceOpT,OffsetT,InputT,MayAlias,ReadLeft>(InputIteratorT, InputT *, OutputIteratorT, DifferenceOpT, OffsetT) [with ChainedPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int32_t, InputT=unsigned int, MayAlias=true, ReadLeft=true]" at line 217
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchAdjacentDifference<InputIteratorT, OutputIteratorT, DifferenceOpT, OffsetT, AliasOpt, ReadOpt, PolicyHub>::Invoke<ActivePolicyT>() [with InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int32_t, AliasOpt=cub::_V_300304_SM_1200::MayAlias::Yes, ReadOpt=cub::_V_300304_SM_1200::ReadOption::Left, PolicyHub=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>, ActivePolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500]" at line 846 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::find_and_invoke_policy<DevicePtxVersion,FunctorT>(FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, DevicePtxVersion=1200, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int32_t, cub::_V_300304_SM_1200::MayAlias::Yes, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>>]" at line 831 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::runtime_arch_to_compiletime<ArchMult,CudaArches...,FunctorT>(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, ArchMult=1, CudaArches=<1200>, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int32_t, cub::_V_300304_SM_1200::MayAlias::Yes, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>>]" at line 796 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::Invoke(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int32_t, cub::_V_300304_SM_1200::MayAlias::Yes, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>>]" at line 275
+            [ 2 instantiation contexts not shown ]
+            instantiation of "cudaError_t thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::doit_step(void *, size_t &, InputIt, OutputIt, BinaryOp, size_t, cudaStream_t, thrust::_V_300304_SM_1200::detail::integral_constant<__nv_bool, true>) [with InputIt=uint *, OutputIt=uint *, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 143 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 176 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 61 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator, InputIterator, OutputIterator, BinaryFunction) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 92 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(InputIterator, InputIterator, OutputIterator, BinaryFunction) [with InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 574 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/device/dispatch/dispatch_adjacent_difference.cuh(63): warning #1444-D: type "thrust::_V_300304_SM_1200::not_equal_to<uint>" was declared deprecated ("Use cuda::std::not_equal_to instead")
+    using Agent =
+          ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(143): note #3287-D: because of a "deprecated" attribute
+  using not_equal_to [[deprecated("Use cuda::std::not_equal_to instead")]] = ::cuda::std::not_equal_to<T>;
+                       ^
+          detected during:
+            instantiation of "void cub::_V_300304_SM_1200::detail::adjacent_difference::DeviceAdjacentDifferenceDifferenceKernel<ChainedPolicyT,InputIteratorT,OutputIteratorT,DifferenceOpT,OffsetT,InputT,MayAlias,ReadLeft>(InputIteratorT, InputT *, OutputIteratorT, DifferenceOpT, OffsetT) [with ChainedPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int64_t, InputT=unsigned int, MayAlias=true, ReadLeft=true]" at line 217
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchAdjacentDifference<InputIteratorT, OutputIteratorT, DifferenceOpT, OffsetT, AliasOpt, ReadOpt, PolicyHub>::Invoke<ActivePolicyT>() [with InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int64_t, AliasOpt=cub::_V_300304_SM_1200::MayAlias::Yes, ReadOpt=cub::_V_300304_SM_1200::ReadOption::Left, PolicyHub=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>, ActivePolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500]" at line 846 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::find_and_invoke_policy<DevicePtxVersion,FunctorT>(FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, DevicePtxVersion=1200, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int64_t, cub::_V_300304_SM_1200::MayAlias::Yes, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>>]" at line 831 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::runtime_arch_to_compiletime<ArchMult,CudaArches...,FunctorT>(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, ArchMult=1, CudaArches=<1200>, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int64_t, cub::_V_300304_SM_1200::MayAlias::Yes, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>>]" at line 796 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::Invoke(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int64_t, cub::_V_300304_SM_1200::MayAlias::Yes, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>>]" at line 275
+            [ 2 instantiation contexts not shown ]
+            instantiation of "cudaError_t thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::doit_step(void *, size_t &, InputIt, OutputIt, BinaryOp, size_t, cudaStream_t, thrust::_V_300304_SM_1200::detail::integral_constant<__nv_bool, true>) [with InputIt=uint *, OutputIt=uint *, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 143 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 176 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 61 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator, InputIterator, OutputIterator, BinaryFunction) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 92 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(InputIterator, InputIterator, OutputIterator, BinaryFunction) [with InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 574 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/device/dispatch/dispatch_adjacent_difference.cuh(74): warning #1444-D: type "thrust::_V_300304_SM_1200::not_equal_to<uint>" was declared deprecated ("Use cuda::std::not_equal_to instead")
+    __declspec(__shared__) typename Agent::TempStorage storage;
+                                                       ^
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/functional.h(143): note #3287-D: because of a "deprecated" attribute
+  using not_equal_to [[deprecated("Use cuda::std::not_equal_to instead")]] = ::cuda::std::not_equal_to<T>;
+                       ^
+          detected during:
+            instantiation of "void cub::_V_300304_SM_1200::detail::adjacent_difference::DeviceAdjacentDifferenceDifferenceKernel<ChainedPolicyT,InputIteratorT,OutputIteratorT,DifferenceOpT,OffsetT,InputT,MayAlias,ReadLeft>(InputIteratorT, InputT *, OutputIteratorT, DifferenceOpT, OffsetT) [with ChainedPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int64_t, InputT=unsigned int, MayAlias=true, ReadLeft=true]" at line 217
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::DispatchAdjacentDifference<InputIteratorT, OutputIteratorT, DifferenceOpT, OffsetT, AliasOpt, ReadOpt, PolicyHub>::Invoke<ActivePolicyT>() [with InputIteratorT=uint *, OutputIteratorT=uint *, DifferenceOpT=cuda::std::__4::not_equal_to<uint>, OffsetT=int64_t, AliasOpt=cub::_V_300304_SM_1200::MayAlias::Yes, ReadOpt=cub::_V_300304_SM_1200::ReadOption::Left, PolicyHub=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>, ActivePolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500]" at line 846 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::find_and_invoke_policy<DevicePtxVersion,FunctorT>(FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, DevicePtxVersion=1200, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int64_t, cub::_V_300304_SM_1200::MayAlias::Yes, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>>]" at line 831 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::runtime_arch_to_compiletime<ArchMult,CudaArches...,FunctorT>(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, ArchMult=1, CudaArches=<1200>, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int64_t, cub::_V_300304_SM_1200::MayAlias::Yes, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>>]" at line 796 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\cub/util_device.cuh
+            instantiation of "cudaError_t cub::_V_300304_SM_1200::ChainedPolicy<PolicyPtxVersion, PolicyT, PrevPolicyT>::Invoke(int, FunctorT &) [with PolicyPtxVersion=500, PolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, PrevPolicyT=cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>::Policy500, FunctorT=cub::_V_300304_SM_1200::DispatchAdjacentDifference<uint *, uint *, cuda::std::__4::not_equal_to<uint>, int64_t, cub::_V_300304_SM_1200::MayAlias::Yes, cub::_V_300304_SM_1200::ReadOption::Left, cub::_V_300304_SM_1200::detail::adjacent_difference::policy_hub<uint *, true>>]" at line 275
+            [ 2 instantiation contexts not shown ]
+            instantiation of "cudaError_t thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::doit_step(void *, size_t &, InputIt, OutputIt, BinaryOp, size_t, cudaStream_t, thrust::_V_300304_SM_1200::detail::integral_constant<__nv_bool, true>) [with InputIt=uint *, OutputIt=uint *, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 143 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::__adjacent_difference::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 176 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/system/cuda/detail/adjacent_difference.h
+            instantiation of "OutputIt thrust::_V_300304_SM_1200::cuda_cub::adjacent_difference(thrust::_V_300304_SM_1200::cuda_cub::execution_policy<Derived> &, InputIt, InputIt, OutputIt, BinaryOp) [with Derived=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIt=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryOp=cuda::std::__4::not_equal_to<uint>]" at line 61 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(const thrust::_V_300304_SM_1200::detail::execution_policy_base<DerivedPolicy> &, InputIterator, InputIterator, OutputIterator, BinaryFunction) [with DerivedPolicy=thrust::_V_300304_SM_1200::cuda_cub::tag, InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 92 of C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin/../include/cccl\thrust/detail/adjacent_difference.inl
+            instantiation of "OutputIterator thrust::_V_300304_SM_1200::adjacent_difference(InputIterator, InputIterator, OutputIterator, BinaryFunction) [with InputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, OutputIterator=thrust::_V_300304_SM_1200::device_ptr<uint>, BinaryFunction=cuda::std::__4::not_equal_to<uint>]" at line 574 of D:\cuda-webshader\.local\nvidia-audit\cpp\2_Concepts_and_Techniques\segmentationTreeThrust\segmentationTree.cu
+
+segmentationTree.cu
+tmpxft_00005bd0_00000000-7_segmentationTree.cudafe1.cpp
+[ 38%] Linking CUDA executable segmentationTreeThrust.exe
+[ 38%] Built target segmentationTreeThrust
+[ 38%] Building CUDA object cpp/2_Concepts_and_Techniques/shfl_scan/CMakeFiles/shfl_scan.dir/shfl_scan.cu.obj
+shfl_scan.cu
+tmpxft_00002934_00000000-7_shfl_scan.cudafe1.cpp
+[ 39%] Linking CUDA executable shfl_scan.exe
+[ 39%] Built target shfl_scan
+[ 40%] Building CXX object cpp/2_Concepts_and_Techniques/sortingNetworks/CMakeFiles/sortingNetworks.dir/main.cpp.obj
+main.cpp
+[ 40%] Building CUDA object cpp/2_Concepts_and_Techniques/sortingNetworks/CMakeFiles/sortingNetworks.dir/bitonicSort.cu.obj
+bitonicSort.cu
+tmpxft_00005674_00000000-7_bitonicSort.cudafe1.cpp
+[ 40%] Building CXX object cpp/2_Concepts_and_Techniques/sortingNetworks/CMakeFiles/sortingNetworks.dir/sortingNetworks_validate.cpp.obj
+sortingNetworks_validate.cpp
+[ 40%] Linking CXX executable sortingNetworks.exe
+[ 40%] Built target sortingNetworks
+[ 40%] Building CUDA object cpp/2_Concepts_and_Techniques/streamOrderedAllocation/CMakeFiles/streamOrderedAllocation.dir/streamOrderedAllocation.cu.obj
+streamOrderedAllocation.cu
+tmpxft_00005080_00000000-7_streamOrderedAllocation.cudafe1.cpp
+[ 40%] Linking CUDA executable streamOrderedAllocation.exe
+[ 40%] Built target streamOrderedAllocation
+[ 40%] Building CUDA object cpp/2_Concepts_and_Techniques/streamOrderedAllocationP2P/CMakeFiles/streamOrderedAllocationP2P.dir/streamOrderedAllocationP2P.cu.obj
+streamOrderedAllocationP2P.cu
+tmpxft_00002c0c_00000000-7_streamOrderedAllocationP2P.cudafe1.cpp
+[ 41%] Linking CUDA executable streamOrderedAllocationP2P.exe
+[ 41%] Built target streamOrderedAllocationP2P
+[ 41%] Building CUDA object cpp/2_Concepts_and_Techniques/threadFenceReduction/CMakeFiles/threadFenceReduction.dir/threadFenceReduction.cu.obj
+threadFenceReduction.cu
+tmpxft_0000cc08_00000000-7_threadFenceReduction.cudafe1.cpp
+[ 42%] Linking CUDA executable threadFenceReduction.exe
+[ 42%] Built target threadFenceReduction
+[ 42%] Building CUDA fatbin: D:/cuda-webshader/.local/nvidia-audit-build/cpp/2_Concepts_and_Techniques/threadMigration/threadMigration_kernel64.fatbin
+threadMigration_kernel.cu
+[ 42%] Built target generate_fatbin_threadMigration
+[ 42%] Building CXX object cpp/2_Concepts_and_Techniques/threadMigration/CMakeFiles/threadMigration.dir/threadMigration.cpp.obj
+threadMigration.cpp
+[ 42%] Linking CXX executable threadMigration.exe
+[ 42%] Built target threadMigration
+[ 43%] Building CUDA object cpp/3_CUDA_Features/bf16TensorCoreGemm/CMakeFiles/bf16TensorCoreGemm.dir/bf16TensorCoreGemm.cu.obj
+bf16TensorCoreGemm.cu
+tmpxft_00003734_00000000-7_bf16TensorCoreGemm.cudafe1.cpp
+[ 43%] Linking CUDA executable bf16TensorCoreGemm.exe
+[ 43%] Built target bf16TensorCoreGemm
+[ 43%] Building CUDA object cpp/3_CUDA_Features/binaryPartitionCG/CMakeFiles/binaryPartitionCG.dir/binaryPartitionCG.cu.obj
+binaryPartitionCG.cu
+tmpxft_00008f38_00000000-7_binaryPartitionCG.cudafe1.cpp
+[ 43%] Linking CUDA executable binaryPartitionCG.exe
+[ 43%] Built target binaryPartitionCG
+[ 43%] Building CXX object cpp/3_CUDA_Features/bindlessTexture/CMakeFiles/bindlessTexture.dir/bindlessTexture.cpp.obj
+bindlessTexture.cpp
+[ 44%] Building CUDA object cpp/3_CUDA_Features/bindlessTexture/CMakeFiles/bindlessTexture.dir/bindlessTexture_kernel.cu.obj
+bindlessTexture_kernel.cu
+tmpxft_00003ff4_00000000-7_bindlessTexture_kernel.cudafe1.cpp
+[ 44%] Linking CXX executable bindlessTexture.exe
+[ 44%] Built target bindlessTexture
+[ 44%] Building CUDA object cpp/3_CUDA_Features/cdpAdvancedQuicksort/CMakeFiles/cdpAdvancedQuicksort.dir/cdpAdvancedQuicksort.cu.obj
+cdpAdvancedQuicksort.cu
+tmpxft_0000dc40_00000000-7_cdpAdvancedQuicksort.cudafe1.cpp
+[ 44%] Building CUDA object cpp/3_CUDA_Features/cdpAdvancedQuicksort/CMakeFiles/cdpAdvancedQuicksort.dir/cdpBitonicSort.cu.obj
+cdpBitonicSort.cu
+tmpxft_00004cf8_00000000-7_cdpBitonicSort.cudafe1.cpp
+[ 44%] Linking CUDA device code CMakeFiles\cdpAdvancedQuicksort.dir\cmake_device_link.obj
+cdpAdvancedQuicksort.cu.obj
+cdpBitonicSort.cu.obj
+cudadevrt.lib
+cudart.lib
+kernel32.lib
+user32.lib
+gdi32.lib
+winspool.lib
+shell32.lib
+ole32.lib
+oleaut32.lib
+uuid.lib
+comdlg32.lib
+advapi32.lib
+[ 45%] Linking CUDA executable cdpAdvancedQuicksort.exe
+[ 45%] Built target cdpAdvancedQuicksort
+[ 45%] Building CUDA object cpp/3_CUDA_Features/cdpBezierTessellation/CMakeFiles/cdpBezierTessellation.dir/BezierLineCDP.cu.obj
+BezierLineCDP.cu
+tmpxft_000083b0_00000000-7_BezierLineCDP.cudafe1.cpp
+[ 45%] Linking CUDA device code CMakeFiles\cdpBezierTessellation.dir\cmake_device_link.obj
+BezierLineCDP.cu.obj
+cudadevrt.lib
+cudart.lib
+kernel32.lib
+user32.lib
+gdi32.lib
+winspool.lib
+shell32.lib
+ole32.lib
+oleaut32.lib
+uuid.lib
+comdlg32.lib
+advapi32.lib
+[ 45%] Linking CUDA executable cdpBezierTessellation.exe
+[ 45%] Built target cdpBezierTessellation
+[ 46%] Building CUDA object cpp/3_CUDA_Features/cdpQuadtree/CMakeFiles/cdpQuadtree.dir/cdpQuadtree.cu.obj
+cdpQuadtree.cu
+tmpxft_00000fbc_00000000-7_cdpQuadtree.cudafe1.cpp
+[ 46%] Linking CUDA device code CMakeFiles\cdpQuadtree.dir\cmake_device_link.obj
+cdpQuadtree.cu.obj
+cudadevrt.lib
+cudart.lib
+kernel32.lib
+user32.lib
+gdi32.lib
+winspool.lib
+shell32.lib
+ole32.lib
+oleaut32.lib
+uuid.lib
+comdlg32.lib
+advapi32.lib
+[ 46%] Linking CUDA executable cdpQuadtree.exe
+[ 46%] Built target cdpQuadtree
+[ 46%] Building CUDA object cpp/3_CUDA_Features/cdpSimplePrint/CMakeFiles/cdpSimplePrint.dir/cdpSimplePrint.cu.obj
+cdpSimplePrint.cu
+tmpxft_0000a0f8_00000000-7_cdpSimplePrint.cudafe1.cpp
+[ 47%] Linking CUDA device code CMakeFiles\cdpSimplePrint.dir\cmake_device_link.obj
+cdpSimplePrint.cu.obj
+cudadevrt.lib
+cudart.lib
+kernel32.lib
+user32.lib
+gdi32.lib
+winspool.lib
+shell32.lib
+ole32.lib
+oleaut32.lib
+uuid.lib
+comdlg32.lib
+advapi32.lib
+[ 47%] Linking CUDA executable cdpSimplePrint.exe
+[ 47%] Built target cdpSimplePrint
+[ 47%] Building CUDA object cpp/3_CUDA_Features/cdpSimpleQuicksort/CMakeFiles/cdpSimpleQuicksort.dir/cdpSimpleQuicksort.cu.obj
+cdpSimpleQuicksort.cu
+tmpxft_00007f78_00000000-7_cdpSimpleQuicksort.cudafe1.cpp
+[ 47%] Linking CUDA device code CMakeFiles\cdpSimpleQuicksort.dir\cmake_device_link.obj
+cdpSimpleQuicksort.cu.obj
+cudadevrt.lib
+cudart.lib
+kernel32.lib
+user32.lib
+gdi32.lib
+winspool.lib
+shell32.lib
+ole32.lib
+oleaut32.lib
+uuid.lib
+comdlg32.lib
+advapi32.lib
+[ 48%] Linking CUDA executable cdpSimpleQuicksort.exe
+[ 48%] Built target cdpSimpleQuicksort
+[ 48%] Building CXX object cpp/3_CUDA_Features/cudaCompressibleMemory/CMakeFiles/cudaCompressibleMemory.dir/compMalloc.cpp.obj
+compMalloc.cpp
+[ 48%] Building CUDA object cpp/3_CUDA_Features/cudaCompressibleMemory/CMakeFiles/cudaCompressibleMemory.dir/saxpy.cu.obj
+saxpy.cu
+tmpxft_0000241c_00000000-7_saxpy.cudafe1.cpp
+[ 48%] Linking CXX executable cudaCompressibleMemory.exe
+[ 48%] Built target cudaCompressibleMemory
+[ 49%] Building CUDA object cpp/3_CUDA_Features/cudaTensorCoreGemm/CMakeFiles/cudaTensorCoreGemm.dir/cudaTensorCoreGemm.cu.obj
+cudaTensorCoreGemm.cu
+tmpxft_0000752c_00000000-7_cudaTensorCoreGemm.cudafe1.cpp
+[ 49%] Linking CUDA executable cudaTensorCoreGemm.exe
+[ 49%] Built target cudaTensorCoreGemm
+[ 49%] Building CUDA object cpp/3_CUDA_Features/dmmaTensorCoreGemm/CMakeFiles/dmmaTensorCoreGemm.dir/dmmaTensorCoreGemm.cu.obj
+dmmaTensorCoreGemm.cu
+tmpxft_00003464_00000000-7_dmmaTensorCoreGemm.cudafe1.cpp
+[ 49%] Linking CUDA executable dmmaTensorCoreGemm.exe
+[ 49%] Built target dmmaTensorCoreGemm
+[ 49%] Building CUDA object cpp/3_CUDA_Features/globalToShmemAsyncCopy/CMakeFiles/globalToShmemAsyncCopy.dir/globalToShmemAsyncCopy.cu.obj
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\globalToShmemAsyncCopy\globalToShmemAsyncCopy.cu(267): warning #20054-D: dynamic initialization is not supported for a function-scope static __shared__ variable within a __device__/__global__ function
+      __declspec(__shared__) cuda::barrier<cuda::thread_scope_block> bar;
+                                                                     ^
+          detected during instantiation of "void MatrixMulAsyncCopyLargeChunkAWBarrier<BLOCK_SIZE>(float *, const float *, const float *, int, int) [with BLOCK_SIZE=16]" at line 818
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\globalToShmemAsyncCopy\globalToShmemAsyncCopy.cu(543): warning #20054-D: dynamic initialization is not supported for a function-scope static __shared__ variable within a __device__/__global__ function
+      __declspec(__shared__) cuda::pipeline_shared_state<cuda::thread_scope_block, maxPipelineStages> shared_state;
+                                                                                                      ^
+          detected during instantiation of "void MatrixMulAsyncCopyMultiStageSharedState<BLOCK_SIZE_X>(float *, const float *, const float *, int, int) [with BLOCK_SIZE_X=16]" at line 821
+
+globalToShmemAsyncCopy.cu
+tmpxft_0000d628_00000000-7_globalToShmemAsyncCopy.cudafe1.cpp
+[ 49%] Linking CUDA executable globalToShmemAsyncCopy.exe
+[ 49%] Built target globalToShmemAsyncCopy
+[ 50%] Building CUDA object cpp/3_CUDA_Features/graphConditionalNodes/CMakeFiles/graphConditionalNodes.dir/graphConditionalNodes.cu.obj
+graphConditionalNodes.cu
+tmpxft_00005a94_00000000-7_graphConditionalNodes.cudafe1.cpp
+[ 50%] Linking CUDA executable graphConditionalNodes.exe
+[ 50%] Built target graphConditionalNodes
+[ 50%] Building CUDA object cpp/3_CUDA_Features/graphMemoryFootprint/CMakeFiles/graphMemoryFootprint.dir/graphMemoryFootprint.cu.obj
+graphMemoryFootprint.cu
+tmpxft_0000a5b4_00000000-7_graphMemoryFootprint.cudafe1.cpp
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\graphMemoryFootprint\graphMemoryFootprint.cu(43): warning C4477: 'printf' : format string '%lu' requires an argument of type 'unsigned long', but variadic argument 1 has type 'size_t'
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\graphMemoryFootprint\graphMemoryFootprint.cu(43): note: consider using '%zu' in the format string
+[ 50%] Linking CUDA executable graphMemoryFootprint.exe
+[ 50%] Built target graphMemoryFootprint
+[ 50%] Building CUDA object cpp/3_CUDA_Features/graphMemoryNodes/CMakeFiles/graphMemoryNodes.dir/graphMemoryNodes.cu.obj
+graphMemoryNodes.cu
+tmpxft_00005f88_00000000-7_graphMemoryNodes.cudafe1.cpp
+[ 51%] Linking CUDA executable graphMemoryNodes.exe
+[ 51%] Built target graphMemoryNodes
+[ 51%] Building CUDA object cpp/3_CUDA_Features/immaTensorCoreGemm/CMakeFiles/immaTensorCoreGemm.dir/immaTensorCoreGemm.cu.obj
+immaTensorCoreGemm.cu
+tmpxft_00006db4_00000000-7_immaTensorCoreGemm.cudafe1.cpp
+[ 52%] Linking CUDA executable immaTensorCoreGemm.exe
+[ 52%] Built target immaTensorCoreGemm
+[ 52%] Building CUDA object cpp/3_CUDA_Features/jacobiCudaGraphs/CMakeFiles/jacobiCudaGraphs.dir/jacobi.cu.obj
+jacobi.cu
+tmpxft_000086a8_00000000-7_jacobi.cudafe1.cpp
+[ 52%] Building CXX object cpp/3_CUDA_Features/jacobiCudaGraphs/CMakeFiles/jacobiCudaGraphs.dir/main.cpp.obj
+main.cpp
+[ 52%] Linking CXX executable jacobiCudaGraphs.exe
+[ 52%] Built target jacobiCudaGraphs
+[ 52%] Building CUDA object cpp/3_CUDA_Features/localityDomains/CMakeFiles/localityDomains.dir/localityDomains.cu.obj
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(61): error: identifier "cudaDevAttrLocalityDomainCount" is undefined
+          cudaDeviceGetAttribute(&localityDomainCount, cudaDevAttrLocalityDomainCount, dev);
+                                                       ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(62): error: identifier "cudaDevAttrLocalityDomainMultiprocessorCount" is undefined
+          cudaDeviceGetAttribute(&localityDomainSmCount, cudaDevAttrLocalityDomainMultiprocessorCount, dev);
+                                                         ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(78): error: identifier "cudaDevSmResourceGroupLocalityDomainId" is undefined
+              params[i].flags            = cudaDevSmResourceGroupLocalityDomainId;
+                                           ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(79): error: class "cudaDevSmResourceGroupParams_st" has no member "localityDomainId"
+              params[i].localityDomainId = static_cast<unsigned int>(i);
+                        ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(88): error: class "cudaDevSmResource" has no member "localityDomainId"
+              std::cout << " - result[" << i << "]: .localityDomainId = " << result[i].sm.localityDomainId
+                                                                                          ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(108): error: identifier "cudaDevSmResourceGroupLocalityDomainId" is undefined
+              bool isStreamLocalized = (streamSmResource.sm.flags & cudaDevSmResourceGroupLocalityDomainId) != 0;
+                                                                    ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(111): error: class "cudaDevSmResource" has no member "localityDomainId"
+                  unsigned int streamLocalityDomain = streamSmResource.sm.localityDomainId;
+                                                                          ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(128): error: identifier "cudaMemLocationTypeDeviceLocalityDomain" is undefined
+              poolProps.location.type                       = cudaMemLocationTypeDeviceLocalityDomain;
+                                                              ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(129): error: class "cudaMemLocation" has no member "localized"
+              poolProps.location.localized.deviceId         = static_cast<unsigned char>(dev);
+                                 ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(130): error: class "cudaMemLocation" has no member "localized"
+              poolProps.location.localized.localityDomainId = static_cast<unsigned char>(i);
+                                 ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(145): error: class "cudaPointerAttributes" has no member "localityDomainOrdinal"
+              if (pointerAttributes.localityDomainOrdinal == -1) {
+                                    ^
+
+D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu(149): error: class "cudaPointerAttributes" has no member "localityDomainOrdinal"
+                  std::cout << " is localized to locality domain " << pointerAttributes.localityDomainOrdinal
+                                                                                        ^
+
+12 errors detected in the compilation of "D:/cuda-webshader/.local/nvidia-audit/cpp/3_CUDA_Features/localityDomains/localityDomains.cu".
+localityDomains.cu
+NMAKE : fatal error U1077: '"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3\bin\nvcc.exe" -forward-unknown-to-host-compiler   -D_WINDOWS -Xcompiler=" /EHsc" -Wno-deprecated-gpu-targets -lineinfo -Wno-deprecated-gpu-targets -lineinfo -Xcompiler="-O2 -Ob2" -DNDEBUG -std=c++17 "--generate-code=arch=compute_75,code=[compute_75,sm_75]" "--generate-code=arch=compute_80,code=[compute_80,sm_80]" "--generate-code=arch=compute_86,code=[compute_86,sm_86]" "--generate-code=arch=compute_87,code=[compute_87,sm_87]" "--generate-code=arch=compute_89,code=[compute_89,sm_89]" "--generate-code=arch=compute_90,code=[compute_90,sm_90]" "--generate-code=arch=compute_100,code=[compute_100,sm_100]" "--generate-code=arch=compute_110,code=[compute_110,sm_110]" "--generate-code=arch=compute_120,code=[compute_120,sm_120]" -Xcompiler=-MD -Xcompiler=/Zc:preprocessor --extended-lambda -MD -MT cpp\3_CUDA_Features\localityDomains\CMakeFiles\localityDomains.dir\localityDomains.cu.obj -MF CMakeFiles\localityDomains.dir\localityDomains.cu.obj.d -x cu -rdc=true -c D:\cuda-webshader\.local\nvidia-audit\cpp\3_CUDA_Features\localityDomains\localityDomains.cu -o CMakeFiles\localityDomains.dir\localityDomains.cu.obj -Xcompiler=-FdCMakeFiles\localityDomains.dir\,-FS' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\bin\HostX64\x64\nmake.exe" -s -f cpp\3_CUDA_Features\localityDomains\CMakeFiles\localityDomains.dir\build.make /nologo -SL                 cpp\3_CUDA_Features\localityDomains\CMakeFiles\localityDomains.dir\build' : return code '0x2'
+Stop.
+NMAKE : warning U4010: 'all' : build failed; /K specified, continuing ...
+NMAKE : warning U4011: 'default_target' : not all dependents available; target not built

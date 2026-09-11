@@ -1,0 +1,9 @@
+CUDA Sobel Edge-Detection Starting...
+
+[CUDA Sobel Edge-Detection] (automated testing w/ readback)
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Reading image: teapot.pgm
+AutoTest: CUDA Sobel Edge-Detection <No Filtering>
+Test passed!
+

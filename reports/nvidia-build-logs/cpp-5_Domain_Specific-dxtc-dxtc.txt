@@ -1,0 +1,6 @@
+[  0%] Building CUDA object cpp/5_Domain_Specific/dxtc/CMakeFiles/dxtc.dir/dxtc.cu.obj
+dxtc.cu
+tmpxft_0000d330_00000000-7_dxtc.cudafe1.cpp
+[100%] Linking CUDA executable dxtc.exe
+[100%] Built target dxtc
+

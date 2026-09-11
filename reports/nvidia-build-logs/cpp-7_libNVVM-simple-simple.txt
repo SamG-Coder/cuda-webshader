@@ -1,0 +1,5 @@
+Building C object cpp/7_libNVVM/simple/CMakeFiles/simple.dir/simple.c.obj
+simple.c
+Linking C executable simple.exe
+Built target simple
+

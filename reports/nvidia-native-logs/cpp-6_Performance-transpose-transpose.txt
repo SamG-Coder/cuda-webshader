@@ -1,0 +1,21 @@
+Transpose Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+> Device 0: "NVIDIA GeForce RTX 5080"
+> SM Capability 12.0 detected:
+> [NVIDIA GeForce RTX 5080] has 84 MP(s) x 128 (Cores/MP) = 10752 (Cores)
+> Compute performance scaling factor = 1.00
+
+Matrix size: 1024x1024 (32x32 tiles), tile size: 32x32, block size: 32x16
+
+transpose simple copy       , Throughput = 1090.5951 GB/s, Time = 0.00716 ms, Size = 1048576 fp32 elements, NumDevsUsed = 1, Workgroup = 512
+transpose shared memory copy, Throughput = 861.8350 GB/s, Time = 0.00906 ms, Size = 1048576 fp32 elements, NumDevsUsed = 1, Workgroup = 512
+transpose naive             , Throughput = 418.3714 GB/s, Time = 0.01867 ms, Size = 1048576 fp32 elements, NumDevsUsed = 1, Workgroup = 512
+transpose coalesced         , Throughput = 819.0990 GB/s, Time = 0.00954 ms, Size = 1048576 fp32 elements, NumDevsUsed = 1, Workgroup = 512
+transpose optimized         , Throughput = 789.7924 GB/s, Time = 0.00989 ms, Size = 1048576 fp32 elements, NumDevsUsed = 1, Workgroup = 512
+transpose coarse-grained    , Throughput = 971.9362 GB/s, Time = 0.00804 ms, Size = 1048576 fp32 elements, NumDevsUsed = 1, Workgroup = 512
+transpose fine-grained      , Throughput = 1052.6479 GB/s, Time = 0.00742 ms, Size = 1048576 fp32 elements, NumDevsUsed = 1, Workgroup = 512
+transpose diagonal          , Throughput = 939.6168 GB/s, Time = 0.00831 ms, Size = 1048576 fp32 elements, NumDevsUsed = 1, Workgroup = 512
+Test passed
+

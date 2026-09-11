@@ -1,0 +1,6 @@
+[100%] Building CUDA object cpp/9_CUDA_Tile/tileLayerNorm/CMakeFiles/tileLayerNorm.dir/tileLayerNorm.cu.obj
+tileLayerNorm.cu
+tmpxft_000051f0_00000000-8_tileLayerNorm.cudafe1.cpp
+[100%] Linking CUDA executable tileLayerNorm.exe
+[100%] Built target tileLayerNorm
+

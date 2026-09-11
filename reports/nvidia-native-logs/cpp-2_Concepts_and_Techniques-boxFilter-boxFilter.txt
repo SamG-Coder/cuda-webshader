@@ -1,0 +1,9 @@
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\2_Concepts_and_Techniques\boxFilter\boxFilter.exe Starting...
+
+Loaded './data/teapot1024.ppm', 1024 x 1024 pixels
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+[runSingleTest]: [CUDA Iterative Box Filter]
+CUDA Iterative Box Filter (radius=14) (passes=1) Image is Matching  <ref_14.ppm>
+
+

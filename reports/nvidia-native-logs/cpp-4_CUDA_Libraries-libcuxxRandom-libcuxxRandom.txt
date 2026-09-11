@@ -1,0 +1,14 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Device: NVIDIA GeForce RTX 5080 (Compute Capability 12.0)
+
+Drawing 4194304 samples per distribution (64 blocks x 256 threads x 256 samples/thread)
+
+uniform(0,1):            n=4194304  mean=0.5001 (exp 0.5000)   var=0.0834 (exp 0.0833)
+normal(0,1):             n=4194304  mean=0.0000 (exp 0.0000)   var=0.9999 (exp 1.0000)
+poisson(lambda=4):       n=4194304  mean=4.0004 (exp 4.0000)   var=4.0025 (exp 4.0000)
+bernoulli(0.25):         n=4194304  p(1)=0.2505 (exp 0.2500)
+
+Engines exercised: cuda::pcg64 (NumPy-compatible) and cuda::std::philox4x32 (C++26)
+Done
+

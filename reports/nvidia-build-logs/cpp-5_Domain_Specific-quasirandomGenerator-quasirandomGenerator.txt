@@ -1,0 +1,10 @@
+[  0%] Building CXX object cpp/5_Domain_Specific/quasirandomGenerator/CMakeFiles/quasirandomGenerator.dir/quasirandomGenerator.cpp.obj
+quasirandomGenerator.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/quasirandomGenerator/CMakeFiles/quasirandomGenerator.dir/quasirandomGenerator_gold.cpp.obj
+quasirandomGenerator_gold.cpp
+[100%] Building CUDA object cpp/5_Domain_Specific/quasirandomGenerator/CMakeFiles/quasirandomGenerator.dir/quasirandomGenerator_kernel.cu.obj
+quasirandomGenerator_kernel.cu
+tmpxft_00002104_00000000-7_quasirandomGenerator_kernel.cudafe1.cpp
+[100%] Linking CXX executable quasirandomGenerator.exe
+[100%] Built target quasirandomGenerator
+

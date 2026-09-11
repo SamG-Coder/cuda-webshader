@@ -1,0 +1,16 @@
+[  0%] Building CXX object cpp/5_Domain_Specific/simpleD3D12/CMakeFiles/simpleD3D12.dir/DX12CudaSample.cpp.obj
+DX12CudaSample.cpp
+[  0%] Building CXX object cpp/5_Domain_Specific/simpleD3D12/CMakeFiles/simpleD3D12.dir/Main.cpp.obj
+Main.cpp
+[  0%] Building CXX object cpp/5_Domain_Specific/simpleD3D12/CMakeFiles/simpleD3D12.dir/Win32Application.cpp.obj
+Win32Application.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/simpleD3D12/CMakeFiles/simpleD3D12.dir/simpleD3D12.cpp.obj
+simpleD3D12.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/simpleD3D12/CMakeFiles/simpleD3D12.dir/stdafx.cpp.obj
+stdafx.cpp
+[100%] Building CUDA object cpp/5_Domain_Specific/simpleD3D12/CMakeFiles/simpleD3D12.dir/sinewave_cuda.cu.obj
+sinewave_cuda.cu
+tmpxft_000069d0_00000000-7_sinewave_cuda.cudafe1.cpp
+[100%] Linking CXX executable simpleD3D12.exe
+[100%] Built target simpleD3D12
+

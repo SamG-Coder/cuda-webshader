@@ -1,0 +1,6 @@
+Building CUDA object cpp/9_CUDA_Tile/tileBmm/CMakeFiles/tileBmm.dir/tileBmm.cu.obj
+tileBmm.cu
+tmpxft_00004df4_00000000-8_tileBmm.cudafe1.cpp
+Linking CUDA executable tileBmm.exe
+Built target tileBmm
+

@@ -1,0 +1,6 @@
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\0_Introduction\simpleAttributes\simpleAttributes.exe Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Processing time: 2139.268311 (ms)
+

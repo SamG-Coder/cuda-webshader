@@ -1,0 +1,6 @@
+[100%] Building CUDA object cpp/6_Performance/cudaGraphsPerfScaling/CMakeFiles/cudaGraphsPerfScaling.dir/cudaGraphPerfScaling.cu.obj
+cudaGraphPerfScaling.cu
+tmpxft_0000cf5c_00000000-7_cudaGraphPerfScaling.cudafe1.cpp
+[100%] Linking CUDA executable cudaGraphsPerfScaling.exe
+[100%] Built target cudaGraphsPerfScaling
+

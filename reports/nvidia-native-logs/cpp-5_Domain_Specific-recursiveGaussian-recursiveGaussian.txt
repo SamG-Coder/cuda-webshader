@@ -1,0 +1,13 @@
+CUDA Recursive Gaussian Starting...
+
+NOTE: The CUDA Samples are not meant for performance measurements. Results may vary when GPU Boost is enabled.
+
+Loaded './data/teapot512.ppm', 512 x 512 pixels
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+(Automated Testing)
+Processing time: 1.370700 (ms)
+191.25 Mpixels/sec
+Summary: 0 errors!
+Test passed
+

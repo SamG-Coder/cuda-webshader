@@ -1,0 +1,8 @@
+[100%] Building CUDA object cpp/5_Domain_Specific/volumeRender/CMakeFiles/volumeRender.dir/volumeRender_kernel.cu.obj
+volumeRender_kernel.cu
+tmpxft_00001130_00000000-7_volumeRender_kernel.cudafe1.cpp
+[100%] Building CXX object cpp/5_Domain_Specific/volumeRender/CMakeFiles/volumeRender.dir/volumeRender.cpp.obj
+volumeRender.cpp
+[100%] Linking CXX executable volumeRender.exe
+[100%] Built target volumeRender
+

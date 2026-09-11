@@ -1,0 +1,9 @@
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\0_Introduction\cudaOpenMP\cudaOpenMP.exe Starting...
+
+number of host CPUs:	16
+number of CUDA devices:	1
+   0: NVIDIA GeForce RTX 5080
+---------------------------
+CPU thread 0 (of 1) uses CUDA device 0
+---------------------------
+

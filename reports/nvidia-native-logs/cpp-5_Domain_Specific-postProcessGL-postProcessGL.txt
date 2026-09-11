@@ -1,0 +1,26 @@
+D:\cuda-webshader\.local\nvidia-audit-build\cpp\5_Domain_Specific\postProcessGL\postProcessGL.exe Starting...
+
+(Test with OpenGL verification)
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+Creating a Texture render target GL_RGBA16F_ARB
+
+	Controls
+	(right click mouse button for Menu)
+	[ ] : Toggle CUDA Post Processing (on/off)
+	[a] : Toggle Animation (on/off)
+	[=] : Increase Blur Radius
+	[-] : Decrease Blur Radius
+	[esc] - Quit
+
+> Saving PPM: <teapot_4.ppm>
+   src_file <teapot_4.ppm>
+   ref_file <././teapot_4.ppm>
+postProcessGL.exe Exiting...
+Images are Matching
+
+> Compare (a)rendered:  <teapot_4.ppm>
+>         (b)reference: <././teapot_4.ppm>
+PPMvsPPM: comparing images size (512,512) epsilon(10), threshold(30%)
+    OK
+

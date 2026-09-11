@@ -1,0 +1,16 @@
+[stereoDisparity] Starting...
+
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+> GPU device has 84 Multi-Processors, SM 12.0 compute capabilities
+
+Loaded <./data/stereo.im0.640x533.ppm> as image 0
+Loaded <./data/stereo.im1.640x533.ppm> as image 1
+Launching CUDA stereoDisparityKernel()
+Input Size  [640x533], Kernel size [17x17], Disparities [-16:0]
+GPU processing time : 0.1320 (ms)
+Pixel throughput    : 2584.242 Mpixels/sec
+GPU Checksum = 4293895789, GPU image: <output_GPU.pgm>
+Computing CPU reference...
+CPU Checksum = 4293895789, CPU image: <output_CPU.pgm>
+

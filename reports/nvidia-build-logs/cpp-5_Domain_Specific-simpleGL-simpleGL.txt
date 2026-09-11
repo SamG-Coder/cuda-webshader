@@ -1,0 +1,6 @@
+Building CUDA object cpp/5_Domain_Specific/simpleGL/CMakeFiles/simpleGL.dir/simpleGL.cu.obj
+simpleGL.cu
+tmpxft_000031e0_00000000-7_simpleGL.cudafe1.cpp
+Linking CUDA executable simpleGL.exe
+Built target simpleGL
+
