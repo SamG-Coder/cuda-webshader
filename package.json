@@ -21,6 +21,7 @@
     "bench:report": "node scripts/report-comparison.mjs"
   },
   "dependencies": {
+    "monaco-editor": "0.52.2",
     "three": "0.186.0"
   },
   "devDependencies": {

@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 256,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "monaco": true,
+  "generatedWgsl": true,
+  "readOnlyShader": true,
+  "comparisonPanes": true,
+  "staleShaderWarning": true,
+  "pasteNumericReference": true,
+  "dropNumericReference": true,
+  "errorMarker": true,
+  "recovery": true,
+  "stop": true,
+  "mobileOverflow": false,
+  "staticBuild": true,
+  "softwareAdapterRequested": false
+}

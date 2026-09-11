@@ -1,0 +1,35 @@
+import {chromium} from 'playwright';
+import {writeFile} from 'node:fs/promises';
+import {createStaticServer} from './serve.mjs';
+import {fileURLToPath} from 'node:url';
+const server=createStaticServer(fileURLToPath(new URL('../dist/',import.meta.url)));await new Promise(r=>server.listen(0,'127.0.0.1',r));
+const browser=await chromium.launch({headless:true,...(process.env.CW_CHROMIUM?{executablePath:process.env.CW_CHROMIUM}:{})});
+const code='__global__ void custom(float* output, unsigned int n) {\n unsigned int i=blockIdx.x*blockDim.x+threadIdx.x;\n if(i<n) output[i]=(float)i*2.0f+3.0f;\n}';
+try{
+ const context=await browser.newContext({viewport:{width:1500,height:1050},permissions:['clipboard-read','clipboard-write']}),page=await context.newPage(),errors=[];page.on('pageerror',e=>{errors.push(e.message);console.log('PAGE ERROR',e.message)});page.on('console',m=>{if(m.type()==='error')console.log('CONSOLE',m.text())});page.setDefaultTimeout(30000);console.log('source startup');
+ await page.goto('http://localhost:5173/sandbox.html');await page.waitForFunction(()=>window.sandbox?.completedRuns>0||window.sandbox?.lastError,{},{timeout:60000});
+ if(await page.evaluate(()=>window.sandbox.lastError))throw Error(await page.evaluate(()=>window.sandbox.lastError));
+  await page.locator('#tab-wgsl').click();
+ if(!await page.evaluate(()=>window.sandbox.shaderView.generatedEditor.getValue().includes('@compute')))throw Error('Generated WGSL missing');
+ if(!await page.evaluate(()=>window.sandbox.shaderView.generatedEditor.getOption(monaco.editor.EditorOption.readOnly)))throw Error('Generated source must be read only');
+ await page.locator('#tab-compare').click();
+ if(!await page.locator('#cuda-column').isVisible()||!await page.locator('#wgsl-column').isVisible())throw Error('Comparison panes missing');
+ await page.screenshot({path:'reports/sandbox-compare.png',fullPage:true});
+ await page.locator('#tab-cuda').click();
+ await page.screenshot({path:'reports/sandbox.png',fullPage:true});
+ if(!await page.locator('.monaco-editor').count())throw Error('Monaco missing');
+ await page.evaluate(code=>navigator.clipboard.writeText(code),code);await page.evaluate(()=>window.sandbox.editor.focus());await page.keyboard.press('Control+a');await page.keyboard.press('Control+v');
+ await page.waitForFunction(()=>window.sandbox.completedRuns>=2||window.sandbox.lastError,{},{timeout:30000});if(await page.evaluate(()=>window.sandbox.lastError))throw Error(await page.evaluate(()=>window.sandbox.lastError));
+ console.log('paste complete');const values=await page.evaluate(()=>window.sandbox.lastOutput);if(!values.every((v,i)=>v===i*2+3))throw Error('Pasted kernel output mismatch');
+ const first=await page.evaluate(()=>window.sandbox.completedRuns);
+ await page.evaluate(code=>{const transfer=new DataTransfer();transfer.items.add(new File(['#include <cuda_runtime.h>\n'+code.replace('2.0f+3.0f','3.0f+1.0f')+'\nint main(){ return 0; }'],'dropped.cu',{type:'text/plain'}));window.dispatchEvent(new DragEvent('drop',{dataTransfer:transfer,bubbles:true,cancelable:true}));},code);
+ await page.waitForFunction(n=>window.sandbox.completedRuns>n,first);if((await page.evaluate(()=>window.sandbox.lastOutput)).some((v,i)=>v!==i*3+1))throw Error('Dropped kernel output mismatch');
+ console.log('drop complete');await page.evaluate(async()=>{window.sandbox.editor.setValue('__global__ void broken(float* output) { output[0] = unknown; }');await window.sandbox.run();});if(!await page.evaluate(()=>window.sandbox.lastError))throw Error('Invalid source unexpectedly passed');
+ if(!await page.evaluate(()=>monaco.editor.getModelMarkers({owner:'cuda'}).length))throw Error('Compiler error marker missing');
+ if(!await page.locator('#shader-status').evaluate(e=>e.classList.contains('stale')))throw Error('Stale shader warning missing');console.log('error case complete');await page.selectOption('#example','wave');await page.waitForFunction(()=>window.sandbox.lastConfig?.output==='pos'&&!window.sandbox.lastError);await page.waitForFunction(()=>!document.querySelector('#run').disabled);
+ console.log('recovery complete');await page.locator('#stop').click();
+ await page.setViewportSize({width:390,height:844});await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth,{},{timeout:3000});
+ console.log('mobile check complete');await page.setViewportSize({width:1500,height:1050});console.log("navigating dist",server.address().port);await page.goto(`http://127.0.0.1:${server.address().port}/sandbox.html`,{waitUntil:"domcontentloaded"});console.log("dist document ready");console.log(await page.evaluate(()=>({state:document.querySelector("#state").textContent,log:document.querySelector("#log").textContent,hasSandbox:!!window.sandbox})));await page.waitForFunction(()=>window.sandbox?.completedRuns>0||window.sandbox?.lastError,{},{timeout:60000});if(await page.evaluate(()=>window.sandbox.lastError))throw Error(await page.evaluate(()=>window.sandbox.lastError));
+ if(errors.length)throw Error(errors.join('\n'));
+ const report={passed:true,adapter:await page.evaluate(()=>window.sandbox.runtime.describe()),monaco:true,generatedWgsl:true,readOnlyShader:true,comparisonPanes:true,staleShaderWarning:true,pasteNumericReference:true,dropNumericReference:true,errorMarker:true,recovery:true,stop:true,mobileOverflow:false,staticBuild:true,softwareAdapterRequested:false};await writeFile('reports/sandbox-check.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
+}catch(e){console.error(e);throw e;}finally{console.log("closing browser");await browser.close();console.log("closing server");server.closeAllConnections();await new Promise(r=>server.close(r));}

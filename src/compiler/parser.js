@@ -27,7 +27,7 @@ export function tokenize(source, defines = {}) {
     if (rest.startsWith('/*')) { const end = rest.indexOf('*/'); if (end < 0) throw new CompileError('Unclosed comment.', token, source); advance(rest.slice(0, end + 2)); continue; }
     if (rest[0] === '#') {
       const directive = rest.split('\n')[0];
-      const m = directive.match(/^#\s*define\s+([A-Za-z_]\w*)\s+([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFuU]?)\s*(?:\/\/.*)?$/);
+      const m = directive.trimEnd().match(/^#\s*define\s+([A-Za-z_]\w*)\s+([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFuU]?)\s*(?:\/\/.*)?$/);
       if (!m) throw new CompileError('Only numeric object-like #define directives are supported; preprocess other directives first.', token, source);
       if (!macros.has(m[1])) macros.set(m[1], m[2]); advance(directive); continue;
     }

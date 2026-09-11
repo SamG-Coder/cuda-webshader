@@ -8,12 +8,17 @@ licenses; the project's MIT license does not relicense them.
 | Component | Version | License | Use |
 |---|---|---|---|
 | Three.js | 0.186.0 | MIT | Browser rendering dependency |
+| Monaco Editor | 0.52.2 | MIT, with bundled third-party notices | Sandbox source editor used by VS Code |
 | Playwright | 1.56.1 | Apache-2.0 | Development/browser test runner |
 | playwright-core | 1.56.1 | Apache-2.0 | Transitive browser test dependency |
 | fsevents | 2.3.2 | MIT | Optional macOS-only Playwright dependency |
 | NVIDIA CUDA Samples simpleGL kernel | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Imported, unchanged showcase kernel |
 
 Versions and package license declarations are recorded in package-lock.json.
+Monaco's upstream LICENSE and ThirdPartyNotices.txt are included alongside its
+redistributed browser assets in static builds. The sandbox serves Monaco locally
+and does not upload pasted source to an editor service. Its C++ syntax highlighting
+does not include the VS Code C++ extension's language server or native debugger.
 Dependencies are installed separately with npm; node_modules is not committed.
 Playwright's NOTICE credits Microsoft Corporation and code derived from
 Puppeteer under Apache-2.0. Preserve the corresponding package LICENSE and

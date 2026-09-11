@@ -4,6 +4,27 @@
 
 **[NVIDIA sine-wave showcase](https://samg-coder.github.io/cuda-webshader/showcases/simplegl/)** · **[Particle simulation and kernel lab](https://samg-coder.github.io/cuda-webshader/lab.html)** · **[CUDA vs. WebGPU results](https://samg-coder.github.io/cuda-webshader/reports/performance-comparison.html)**
 
+## CUDA sandbox
+
+Open `sandbox.html` from the local server, or use the **Sandbox** navigation link.
+The left pane uses Monaco (the editor behind VS Code) with C++ syntax highlighting,
+bracket matching, find/replace, and compiler error markers. Paste source or drop a
+`.cu` file to compile and run; use Ctrl/Cmd+Enter to rerun edits. The right pane
+shows GPU output and timestamped compilation, allocation, dispatch and readback logs.
+
+Float4 output is rendered as 3D points directly from its GPU buffer; scalar output
+gets a value table and heatmap. Expand **Launch settings & buffer inputs** to edit
+the entry point, threads per block, block counts, scalar arguments, record counts,
+synthetic input patterns and output buffer. Suggested values are configurable
+defaults, not inferred application semantics. The `blockIdx`, `blockDim` and
+`threadIdx` CUDA built-ins are mapped to real WebGPU workgroup/invocation indices.
+
+Desktop `.cu` imports extract standalone `__global__` and `__device__` functions
+and numeric macros, preserving diagnostic line numbers. Includes, host allocation,
+CUDA/OpenGL interop and window code are not executed. The supported CUDA language
+subset still applies; this is not arbitrary CUDA/C++ execution. Source stays local
+in the browser. Monaco assets and licenses are served with the app, without a CDN.
+
 Run the demos directly in a browser with WebGPU support. No local installation or CUDA Toolkit is needed for the browser showcases.
 
 A bounded **CUDA C kernel → typed AST → WGSL → WebGPU** pipeline, with a GPU-resident Three.js particle renderer, ten kernel examples, numerical tests and a device-local performance tuner.

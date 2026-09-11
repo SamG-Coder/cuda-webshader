@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "sourceSha256": "2974da9b57e5c673f8ee14087b9ffcbd1703effce245b7dd36f55d2b2c32f236",
+  "sourceBytes": 17830,
+  "entry": "simple_vbo_kernel",
+  "maxError": 1.8609231022814754e-7,
+  "config": {
+    "groups": [
+      32,
+      32,
+      1
+    ],
+    "scalars": {
+      "width": 256,
+      "height": 256,
+      "time": 0
+    },
+    "buffers": {
+      "pos": {
+        "records": 65536,
+        "fill": "zero"
+      }
+    },
+    "output": "pos"
+  },
+  "log": "08:18:38Monaco editor ready. C++ highlighting, bracket matching, find/replace and compiler error markers enabled.08:18:38Detected entry simple_vbo_kernel; suggested block 8 × 8 × 1. Inspect launch settings for custom kernels.08:18:38Run 1: parsing 2,165 characters in compiler worker.08:18:38simple_vbo_kernel: typed CUDA → WGSL in 2.03 ms. 1 buffer bindings; 0 shared bytes.08:18:38Generated suggested scalar values, synthetic inputs and launch dimensions. Expand Launch settings to change them.08:18:38Validating WGSL and creating the WebGPU pipeline…08:18:38GPU shader validation passed.08:18:38Buffer pos: 65,536 × vec4<f32>, zero fill.08:18:38Allocated 1.00 MiB. Dispatch 32 × 32 × 1 blocks × 8 × 8 × 1 threads.08:18:38Dispatch completed in 3.40 ms (CPU submit-to-completion wall time).08:18:38Read pos: 262,144 components, all finite. This is output inspection, not an algorithm correctness test.08:18:38Preview ready.08:18:38Detected entry simple_vbo_kernel; suggested block 8 × 8 × 1. Inspect launch settings for custom kernels.08:18:38Run 2: parsing 17,266 characters in compiler worker.08:18:38Desktop CUDA file: extracted 1 device/kernel functions. Includes and host code are not executed; launch settings provide synthetic inputs.08:18:38simple_vbo_kernel: typed CUDA → WGSL in 0.69 ms. 1 buffer bindings; 0 shared bytes.08:18:38Generated suggested scalar values, synthetic inputs and launch dimensions. Expand Launch settings to change them.08:18:38Validating WGSL and creating the WebGPU pipeline…08:18:38GPU shader validation passed.08:18:38Buffer pos: 65,536 × vec4<f32>, zero fill.08:18:38Allocated 1.00 MiB. Dispatch 32 × 32 × 1 blocks × 8 × 8 × 1 threads.08:18:38Dispatch completed in 23.23 ms (CPU submit-to-completion wall time).08:18:38Read pos: 262,144 components, all finite. This is output inspection, not an algorithm correctness test.08:18:38Preview ready.",
+  "softwareAdapterRequested": false
+}
