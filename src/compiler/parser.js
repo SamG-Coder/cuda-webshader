@@ -11,7 +11,7 @@ const NUM = /^(?:0[xX][\da-fA-F]+[uU]?|(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?[f
 const WORD = /^[A-Za-z_]\w*/;
 const OPERATORS = ['<<=', '>>=', '::', '++', '--', '+=', '-=', '*=', '/=', '%=', '==', '!=', '<=', '>=', '&&', '||', '<<', '>>', '&=', '|=', '^=', '->'];
 const TYPES = new Set(['float', 'int', 'uint', 'unsigned', 'bool', 'void', 'float2', 'float3', 'float4']);
-const QUALIFIERS = new Set(['const', '__shared__', '__restrict__', '__restrict', 'restrict']);
+const QUALIFIERS = new Set(['const', '__shared__', '__restrict__', '__restrict', 'restrict','extern']);
 const MAP = { float: 'f32', int: 'i32', uint: 'u32', bool: 'bool', void: 'void', float2: 'vec2<f32>', float3: 'vec3<f32>', float4: 'vec4<f32>' };
 for(const [prefix,type] of [['uint','u32'],['int','i32']])for(const size of [2,3,4]){TYPES.add(prefix+size);MAP[prefix+size]=`vec${size}<${type}>`;}
 export const builtinType = name => Object.hasOwn(MAP,name)?MAP[name]:null;
@@ -78,8 +78,8 @@ export class Parser {
   }
   startsType() { return TYPES.has(this.peek().value) || this.peek().value===this.templateTypeName || QUALIFIERS.has(this.peek().value); }
   type() {
-    let constant = false, shared = false;
-    while (QUALIFIERS.has(this.peek().value)) { const q = this.take().value; constant ||= q === 'const'; shared ||= q === '__shared__'; }
+    let constant = false, shared = false,external=false;
+    while (QUALIFIERS.has(this.peek().value)) { const q = this.take().value; constant ||= q === 'const'; shared ||= q === '__shared__';external ||= q==='extern'; }
     const tok = this.take(); let type;
     if (tok.value === 'unsigned') { this.match('int'); type = 'u32'; } else type = tok.value===this.templateTypeName?'template:'+tok.value:builtinType(tok.value);
     if (!type) this.fail(`Unsupported type '${tok.value}'. Use float, int, unsigned int, bool or float2/3/4.`, tok);
@@ -89,7 +89,7 @@ export class Parser {
     if(pointer&&reference)this.fail('Pointer references are unsupported.');
     while (['__restrict__', '__restrict', 'restrict'].includes(this.peek().value)) this.take();
     if (this.is('*')) this.fail('Pointer-to-pointer types are not supported.');
-    return {type, constant, shared, pointer,reference};
+    return {type, constant, shared, pointer,reference,external};
   }
   parse() {
     const functions = [];
@@ -109,7 +109,7 @@ export class Parser {
       if(this.is('__launch_bounds__')){if(launchThreads!==null)this.fail('Duplicate launch bounds.');launchBounds();}
       if(launchThreads!==null&&qualifier!=='__global__')this.fail('Launch bounds apply only to kernels.',token);
       const result = this.type();
-      if (result.pointer || result.shared || result.reference) this.fail('Function return pointers/references/shared qualifiers are unsupported.');
+      if (result.pointer || result.shared || result.reference || result.external) this.fail('Function return pointers/references/shared/extern qualifiers are unsupported.');
       if(this.peek().forward)this.fail('Function-forwarding macros are supported at call sites, not in function declarations.');
       const name = this.name(); this.take('('); const params = [];
       if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(); params.push({kind: 'param', token, name, ...type}); } while (this.match(','));
@@ -122,7 +122,7 @@ export class Parser {
   block() { const token = this.take('{'), body = []; while (!this.is('}')) { if (this.peek().kind === 'eof') this.fail('Unclosed block.'); body.push(this.statement()); } this.take('}'); return {kind: 'block', token, body}; }
   declaration(semicolon = true) {
     const token = this.peek(), d = this.type(),declarations=[];
-    do {const name=this.name(),dimensions=[];while(this.match('[')){dimensions.push(this.expression(2));this.take(']');}const init=this.match('=')?this.expression(2):null;declarations.push({kind:'decl',token,name,...d,dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
+    do {const name=this.name(),dimensions=[];while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.expression(2):null;declarations.push({kind:'decl',token,name,...d,dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
     if (semicolon) this.take(';');return declarations.length===1?declarations[0]:{kind:'decls',token,declarations};
   }
   statement() {

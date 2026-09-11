@@ -152,6 +152,11 @@
       "entry": "fwtBatch2Kernel",
       "sample": "cpp/5_Domain_Specific/fastWalshTransform",
       "passed": true
+    },
+    {
+      "entry": "fwtBatch1Kernel",
+      "sample": "cpp/5_Domain_Specific/fastWalshTransform",
+      "passed": true
     }
   ]
 }

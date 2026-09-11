@@ -17,11 +17,11 @@
       "maxStorageBufferBindingSize": 268435456
     }
   },
-  "date": "2026-09-11T23:48:23.335Z",
+  "date": "2026-09-11T23:53:38.784Z",
   "total": 79,
   "passed": 79,
   "failed": 0,
-  "wallMs": 312.06500002741814,
+  "wallMs": 271.74000000953674,
   "results": [
     {
       "name": "SAXPY n=0",
@@ -35,7 +35,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 16.310000002384186
+      "wallMs": 16.325000017881393
     },
     {
       "name": "SAXPY n=1",
@@ -49,7 +49,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.7700000107288361
+      "wallMs": 1.3850000202655792
     },
     {
       "name": "SAXPY n=2",
@@ -63,7 +63,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.7750000059604645
+      "wallMs": 1.6899999976158142
     },
     {
       "name": "SAXPY n=63",
@@ -77,7 +77,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.2249999940395355
+      "wallMs": 3.5650000274181366
     },
     {
       "name": "SAXPY n=127",
@@ -91,7 +91,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 1.7900000214576721
+      "wallMs": 4.0250000059604645
     },
     {
       "name": "SAXPY n=128",
@@ -105,7 +105,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.0999999940395355
+      "wallMs": 0.8900000154972076
     },
     {
       "name": "SAXPY n=129",
@@ -119,7 +119,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.7849999964237213
+      "wallMs": 2.5999999940395355
     },
     {
       "name": "SAXPY n=257",
@@ -133,7 +133,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.5600000023841858
+      "wallMs": 2.619999974966049
     },
     {
       "name": "SAXPY n=1031",
@@ -147,7 +147,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.625
+      "wallMs": 3.310000002384186
     },
     {
       "name": "float4 SAXPY records=0",
@@ -161,7 +161,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 6.125
+      "wallMs": 8.179999977350235
     },
     {
       "name": "float4 SAXPY records=1",
@@ -175,7 +175,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.5449999868869781
+      "wallMs": 2.7249999940395355
     },
     {
       "name": "float4 SAXPY records=31",
@@ -189,7 +189,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.4950000047683716
+      "wallMs": 0.695000022649765
     },
     {
       "name": "float4 SAXPY records=128",
@@ -203,7 +203,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.45500001311302185
+      "wallMs": 0.4599999785423279
     },
     {
       "name": "float4 SAXPY records=129",
@@ -231,7 +231,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.4650000035762787
+      "wallMs": 0.4350000023841858
     },
     {
       "name": "matmul_naive 1×1×1",
@@ -245,7 +245,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 11.015000015497208
+      "wallMs": 11.450000017881393
     },
     {
       "name": "matmul_tiled 1×1×1",
@@ -259,7 +259,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 13.640000015497208
+      "wallMs": 14.770000010728836
     },
     {
       "name": "matmul_register 1×1×1",
@@ -273,7 +273,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 20.930000007152557
+      "wallMs": 23.384999990463257
     },
     {
       "name": "matmul_naive 3×5×7",
@@ -287,7 +287,7 @@
           "maxRel": 2.988747068412719e-7
         }
       },
-      "wallMs": 3.5850000083446503
+      "wallMs": 0.6150000095367432
     },
     {
       "name": "matmul_tiled 3×5×7",
@@ -301,7 +301,7 @@
           "maxRel": 2.988747068412719e-7
         }
       },
-      "wallMs": 3.0150000154972076
+      "wallMs": 3.405000001192093
     },
     {
       "name": "matmul_register 3×5×7",
@@ -315,7 +315,7 @@
           "maxRel": 2.988747068412719e-7
         }
       },
-      "wallMs": 3
+      "wallMs": 3.399999976158142
     },
     {
       "name": "matmul_naive 16×16×16",
@@ -329,7 +329,7 @@
           "maxRel": 0.000007962963505512887
         }
       },
-      "wallMs": 2.675000011920929
+      "wallMs": 0.5649999976158142
     },
     {
       "name": "matmul_tiled 16×16×16",
@@ -343,7 +343,7 @@
           "maxRel": 0.000007962963505512887
         }
       },
-      "wallMs": 3.875
+      "wallMs": 0.7349999845027924
     },
     {
       "name": "matmul_register 16×16×16",
@@ -357,7 +357,7 @@
           "maxRel": 0.000007962963505512887
         }
       },
-      "wallMs": 3.4300000071525574
+      "wallMs": 1.070000022649765
     },
     {
       "name": "matmul_naive 17×19×23",
@@ -371,7 +371,7 @@
           "maxRel": 0.00017283374599630626
         }
       },
-      "wallMs": 2.655000001192093
+      "wallMs": 0.5449999868869781
     },
     {
       "name": "matmul_tiled 17×19×23",
@@ -385,7 +385,7 @@
           "maxRel": 0.00017283374599630626
         }
       },
-      "wallMs": 1.074999988079071
+      "wallMs": 0.6899999976158142
     },
     {
       "name": "matmul_register 17×19×23",
@@ -399,7 +399,7 @@
           "maxRel": 0.00017283374599630626
         }
       },
-      "wallMs": 3.935000002384186
+      "wallMs": 1.030000001192093
     },
     {
       "name": "matmul_naive 31×9×5",
@@ -413,7 +413,7 @@
           "maxRel": 0.000004401365831844938
         }
       },
-      "wallMs": 2.959999978542328
+      "wallMs": 0.45499998331069946
     },
     {
       "name": "matmul_tiled 31×9×5",
@@ -427,7 +427,7 @@
           "maxRel": 0.000004401365831844938
         }
       },
-      "wallMs": 3.030000001192093
+      "wallMs": 0.5449999868869781
     },
     {
       "name": "matmul_register 31×9×5",
@@ -441,7 +441,7 @@
           "maxRel": 0.000004401365831844938
         }
       },
-      "wallMs": 4
+      "wallMs": 0.7600000202655792
     },
     {
       "name": "matmul_naive 0×5×3",
@@ -455,7 +455,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.969999998807907
+      "wallMs": 0.5900000035762787
     },
     {
       "name": "matmul_tiled 0×5×3",
@@ -469,7 +469,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.6800000071525574
+      "wallMs": 0.7199999988079071
     },
     {
       "name": "matmul_register 0×5×3",
@@ -483,7 +483,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.419999986886978
+      "wallMs": 1.094999998807907
     },
     {
       "name": "matmul_naive 5×0×3",
@@ -497,7 +497,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.679999977350235
+      "wallMs": 0.5900000035762787
     },
     {
       "name": "matmul_tiled 5×0×3",
@@ -511,7 +511,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.939999997615814
+      "wallMs": 0.6299999952316284
     },
     {
       "name": "matmul_register 5×0×3",
@@ -525,7 +525,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 1.4650000035762787
+      "wallMs": 3.294999986886978
     },
     {
       "name": "matmul_naive 5×7×0",
@@ -539,7 +539,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.439999997615814
+      "wallMs": 3.024999976158142
     },
     {
       "name": "matmul_tiled 5×7×0",
@@ -553,7 +553,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.240000009536743
+      "wallMs": 1.030000001192093
     },
     {
       "name": "matmul_register 5×7×0",
@@ -567,7 +567,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.290000021457672
+      "wallMs": 3.929999977350235
     },
     {
       "name": "Reduction partials n=0",
@@ -581,7 +581,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 9.514999985694885
+      "wallMs": 10.360000014305115
     },
     {
       "name": "Reduction partials n=1",
@@ -595,7 +595,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.530000001192093
+      "wallMs": 2.8350000083446503
     },
     {
       "name": "Reduction partials n=2",
@@ -609,7 +609,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.935000002384186
+      "wallMs": 2.5450000166893005
     },
     {
       "name": "Reduction partials n=127",
@@ -623,7 +623,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.0399999916553497
+      "wallMs": 0.6599999964237213
     },
     {
       "name": "Reduction partials n=128",
@@ -637,7 +637,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.030000001192093
+      "wallMs": 0.7350000143051147
     },
     {
       "name": "Reduction partials n=129",
@@ -651,7 +651,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.544999986886978
+      "wallMs": 0.5099999904632568
     },
     {
       "name": "Reduction partials n=255",
@@ -665,7 +665,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.304999977350235
+      "wallMs": 0.45500001311302185
     },
     {
       "name": "Reduction partials n=256",
@@ -679,7 +679,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.5100000202655792
+      "wallMs": 0.4050000011920929
     },
     {
       "name": "Reduction partials n=257",
@@ -693,7 +693,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.064999997615814
+      "wallMs": 0.4050000011920929
     },
     {
       "name": "Reduction partials n=1031",
@@ -707,7 +707,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.8600000143051147
+      "wallMs": 0.41999998688697815
     },
     {
       "name": "Convolution + halo n=0",
@@ -721,7 +721,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 10.854999989271164
+      "wallMs": 10.884999990463257
     },
     {
       "name": "Convolution + halo n=1",
@@ -735,7 +735,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.7000000178813934
+      "wallMs": 2.6449999809265137
     },
     {
       "name": "Convolution + halo n=2",
@@ -749,7 +749,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.6099999845027924
+      "wallMs": 0.6749999821186066
     },
     {
       "name": "Convolution + halo n=3",
@@ -763,7 +763,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.6099999845027924
+      "wallMs": 0.6700000166893005
     },
     {
       "name": "Convolution + halo n=127",
@@ -777,7 +777,7 @@
           "maxRel": 0.000001985454559894215
         }
       },
-      "wallMs": 2.580000013113022
+      "wallMs": 0.675000011920929
     },
     {
       "name": "Convolution + halo n=128",
@@ -791,7 +791,7 @@
           "maxRel": 0.000001985454559894215
         }
       },
-      "wallMs": 2.615000009536743
+      "wallMs": 0.6649999916553497
     },
     {
       "name": "Convolution + halo n=129",
@@ -805,7 +805,7 @@
           "maxRel": 0.000001985454559894215
         }
       },
-      "wallMs": 2.625
+      "wallMs": 0.6349999904632568
     },
     {
       "name": "Convolution + halo n=259",
@@ -819,7 +819,7 @@
           "maxRel": 0.000002949040578798364
         }
       },
-      "wallMs": 2.5850000083446503
+      "wallMs": 0.6100000143051147
     },
     {
       "name": "Histogram grid-stride n=0",
@@ -833,7 +833,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 12.145000010728836
+      "wallMs": 10.125
     },
     {
       "name": "Histogram grid-stride n=1",
@@ -847,7 +847,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.8350000083446503
+      "wallMs": 0.7000000178813934
     },
     {
       "name": "Histogram grid-stride n=127",
@@ -861,7 +861,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.8199999928474426
+      "wallMs": 0.8149999976158142
     },
     {
       "name": "Histogram grid-stride n=128",
@@ -875,7 +875,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.580000013113022
+      "wallMs": 0.5550000071525574
     },
     {
       "name": "Histogram grid-stride n=129",
@@ -889,7 +889,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.6649999916553497
+      "wallMs": 2.675000011920929
     },
     {
       "name": "Histogram grid-stride n=1031",
@@ -903,7 +903,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.5550000071525574
+      "wallMs": 2.625
     },
     {
       "name": "Histogram grid-stride n=4099",
@@ -917,7 +917,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.990000009536743
+      "wallMs": 0.5900000035762787
     },
     {
       "name": "Transpose 1×1",
@@ -931,7 +931,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 9.199999988079071
+      "wallMs": 11.935000002384186
     },
     {
       "name": "Transpose 7×19",
@@ -945,7 +945,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.5150000154972076
+      "wallMs": 2.5850000083446503
     },
     {
       "name": "Transpose 33×35",
@@ -959,7 +959,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.5049999952316284
+      "wallMs": 2.564999997615814
     },
     {
       "name": "Transpose 64×9",
@@ -973,7 +973,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.48499998450279236
+      "wallMs": 3.425000011920929
     },
     {
       "name": "Transpose 0×5",
@@ -987,7 +987,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.445000022649765
+      "wallMs": 4
     },
     {
       "name": "Transpose 5×0",
@@ -1001,7 +1001,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.4349999725818634
+      "wallMs": 3.0349999964237213
     },
     {
       "name": "Particle float4 interop n=1, dt=0.016",
@@ -1022,7 +1022,7 @@
           "maxRel": 6.473254873600313e-8
         }
       },
-      "wallMs": 10.180000007152557
+      "wallMs": 12.980000019073486
     },
     {
       "name": "Particle float4 interop n=17, dt=0.016",
@@ -1043,7 +1043,7 @@
           "maxRel": 1.0583948172522589e-7
         }
       },
-      "wallMs": 4.129999995231628
+      "wallMs": 6.004999995231628
     },
     {
       "name": "Particle float4 interop n=129, dt=0.033",
@@ -1064,7 +1064,7 @@
           "maxRel": 0.00001895253120455294
         }
       },
-      "wallMs": 6.590000003576279
+      "wallMs": 3.4300000071525574
     },
     {
       "name": "Particle float4 interop n=17, dt=0",
@@ -1085,27 +1085,27 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.425000011920929
+      "wallMs": 7.5450000166893005
     },
     {
       "name": "Two parameter versions in one batch retain their own snapshots",
       "pass": true,
-      "wallMs": 6.949999988079071
+      "wallMs": 7.020000010728836
     },
     {
       "name": "Reusable hierarchical reduction, including empty and singleton inputs",
       "pass": true,
-      "wallMs": 8.875
+      "wallMs": 10.125
     },
     {
       "name": "SAXPY workgroup specialization 64",
       "pass": true,
-      "wallMs": 5.509999990463257
+      "wallMs": 5.764999985694885
     },
     {
       "name": "SAXPY workgroup specialization 256",
       "pass": true,
-      "wallMs": 8.525000005960464
+      "wallMs": 5.109999984502792
     },
     {
       "name": "Three r186 compute-to-render shared-buffer pixel test",

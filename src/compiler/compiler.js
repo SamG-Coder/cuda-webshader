@@ -72,6 +72,8 @@ class Emitter {
     if (this.workgroupSize.length !== 3 || this.workgroupSize.some(v => !Number.isSafeInteger(v) || v < 1) || this.workgroupSize.reduce((a, b) => a * b, 1) > 1024) this.fail('Workgroup dimensions must be positive integers with at most 1024 total invocations.', kernel);
     if(kernel.launchThreads&&this.workgroupSize.reduce((a,b)=>a*b,1)>kernel.launchThreads)this.fail(`Launch exceeds __launch_bounds__(${kernel.launchThreads}).`,kernel);
     this.currentFunction = kernel;
+    this.dynamicSharedBytes=options.sharedMemoryBytes??0;this.dynamicSharedUsed=false;
+    if(!Number.isSafeInteger(this.dynamicSharedBytes)||this.dynamicSharedBytes<0||this.dynamicSharedBytes>65536)this.fail('sharedMemoryBytes must be an integer in [0,65536].',kernel);
   }
   fail(message, n) { throw new CompileError(message, n?.token, this.ast.source); }
   lookup(name, n) { for (let i = this.scopes.length - 1; i >= 0; --i) { const s = this.scopes[i].get(name); if (s) return s; } this.fail(`Unknown identifier '${name}'.`, n); }
@@ -265,6 +267,7 @@ class Emitter {
     return [...value.pre, value.type === 'void' ? `${value.code};` : `_ = ${value.code};`];
   }
   declare(n) {
+    if(n.external&&(!n.shared||n.pointer||n.reference||n.constant||n.init||n.dimensions.length!==1||n.dimensions[0]!==null))this.fail('extern is supported only as extern __shared__ T name[].',n);
     if(n.reference)this.fail('References are supported only as helper parameters, not local declarations.',n);
     if(n.pointer){
       const baseNode=n.init?.kind==='id'?n.init:n.init?.kind==='binary'&&n.init.op==='+'?n.init.left:null,offsetNode=n.init?.kind==='binary'?n.init.right:null;
@@ -277,7 +280,7 @@ class Emitter {
     }
     if (n.type === 'void') this.fail('Variables cannot have void type.', n);
     let type = n.type;
-    const dims = n.dimensions.map(d => { const value = constantValue(d); if (!Number.isSafeInteger(value) || value < 1 || value > 65536) this.fail('Invalid fixed array dimension (1..65536).', n); return value; });
+    const dims = n.dimensions.map(d => {if(d===null){if(!n.external||!n.shared)this.fail('Unsized arrays require extern __shared__.',n);if(this.dynamicSharedUsed)this.fail('Only one dynamic shared array is supported; CUDA declarations alias the same allocation.',n);const stride=typeStride(n.type);if(n.type==='bool'||vectorLength(n.type)===3)this.fail('Dynamic shared arrays require 32-bit scalars or two/four-component vectors.',n);if(!this.dynamicSharedBytes||this.dynamicSharedBytes%stride)this.fail('Set sharedMemoryBytes to a positive multiple of the dynamic shared element size.',n);this.dynamicSharedUsed=true;return this.dynamicSharedBytes/stride;}const value = constantValue(d); if (!Number.isSafeInteger(value) || value < 1 || value > 65536) this.fail('Invalid fixed array dimension (1..65536).', n); return value; });
     for (let i = dims.length - 1; i >= 0; i--) type = arrayOf(type, dims[i]);
     if (n.shared && n.init) this.fail('__shared__ variables cannot have an initializer.', n);
     if (isArray(type) && n.init) this.fail('Array initializers are unsupported. Initialize elements explicitly.', n);
@@ -343,7 +346,7 @@ class Emitter {
     const bindings = [], scalars = [], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
     const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t}>`;
     for (const p of this.kernel.params) {
-      if (p.shared || p.reference || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
+      if (p.shared || p.reference || p.external || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
       if (p.pointer) {
         if (p.type === 'bool' || vectorLength(p.type)===3) this.fail('bool* and three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
         const atomic = this.usage.atomic.has(p.name), readOnly = p.constant || !this.usage.writes.has(p.name);
@@ -374,7 +377,7 @@ class Emitter {
     for (const helper of this.helpers) {
       this.scopes = [new Map()]; this.currentFunction = helper;
       for (const p of helper.params) {
-        if (p.pointer || p.shared || p.type === 'void') this.fail('Helper arguments must be scalar/vector values, not pointers.', p);
+        if (p.pointer || p.shared || p.external || p.type === 'void') this.fail('Helper arguments must be scalar/vector values, not pointers.', p);
         if(p.reference&&!numeric(p.type))this.fail('Helper references require a 32-bit numeric scalar.',p);
         p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined, constant: p.reference?p.constant:true, atomic: false, kind: p.reference?'reference':'local'}, p);
       }
@@ -383,6 +386,7 @@ class Emitter {
     }
     this.scopes = kernelScope; this.currentFunction = this.kernel;
     const main = this.body(this.kernel.body);
+    if(this.dynamicSharedBytes&&!this.dynamicSharedUsed)this.fail('sharedMemoryBytes was supplied but the kernel has no dynamic shared array.',this.kernel);
     // Runtime parameters preserve CUDA wraparound even when call arguments are literals;
     // WGSL rejects overflowing constant expressions in an inline multiply.
     if(this.integerIntrinsics.has('__mul24'))helperLines.unshift('fn cw_mul24(a: i32, b: i32) -> i32 { return ((a << 8u) >> 8u) * ((b << 8u) >> 8u); }');
@@ -390,7 +394,7 @@ class Emitter {
     for (const s of this.shared) header.push(`var<workgroup> ${s.code}: ${s.atomic ? sharedAtomicType(s.type) : typeName(s.type)};`);
     const storageSize = this.shared.reduce((n, s) => n + Math.ceil(typeStride(s.type) / 16) * 16, 0);
     const wgsl = [...header, '', ...helperLines, '', `@compute @workgroup_size(${this.workgroupSize.join(', ')})`, 'fn main(', '  @builtin(local_invocation_id) cw_thread: vec3<u32>,', '  @builtin(workgroup_id) cw_block: vec3<u32>,', '  @builtin(num_workgroups) cw_grid: vec3<u32>', ') {', ...indent(main), '}', ''].join('\n');
-    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {workgroupSize: this.workgroupSize, bindings, scalars, uniformSize, uniformBinding: uniformSize ? bindings.length : null, workgroupStorageBytes: storageSize, barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
+    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {workgroupSize: this.workgroupSize, bindings, scalars, uniformSize, uniformBinding: uniformSize ? bindings.length : null, workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
   }
 }
 export function compile(source, options = {}) {

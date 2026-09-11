@@ -6680,6 +6680,21 @@
                 "failures": 0
               }
             }
+          },
+          {
+            "sample": "cpp/5_Domain_Specific/fastWalshTransform",
+            "entry": "fwtBatch1Kernel",
+            "pass": true,
+            "values": 768,
+            "maxError": 0,
+            "failures": 0,
+            "outputs": {
+              "d_Output": {
+                "values": 768,
+                "maxError": 0,
+                "failures": 0
+              }
+            }
           }
         ]
       }
@@ -9558,11 +9573,11 @@
       }
     }
   ],
-  "executionUpdated": "2026-09-11T23:48:22.045Z",
+  "executionUpdated": "2026-09-11T23:53:37.511Z",
   "counts": {
     "samples": 208,
     "compilerProbes": 350,
-    "webgpuPassed": 30,
+    "webgpuPassed": 31,
     "nativeProgramsAttempted": 149,
     "nativeStatuses": {
       "exited-zero": 142,

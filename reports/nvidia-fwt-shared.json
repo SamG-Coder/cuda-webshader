@@ -1,0 +1,79 @@
+{
+  "date": "2026-09-11T23:52:25.132Z",
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "sourceCompiled": true,
+  "reference": "Direct Walsh matrix using parity of row & column, independent of staged butterflies",
+  "results": [
+    {
+      "log2N": 2,
+      "N": 4,
+      "batches": 3,
+      "threads": 1,
+      "sharedMemoryBytes": 16,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "log2N": 3,
+      "N": 8,
+      "batches": 3,
+      "threads": 2,
+      "sharedMemoryBytes": 32,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "log2N": 6,
+      "N": 64,
+      "batches": 3,
+      "threads": 16,
+      "sharedMemoryBytes": 256,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "log2N": 7,
+      "N": 128,
+      "batches": 3,
+      "threads": 32,
+      "sharedMemoryBytes": 512,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "log2N": 8,
+      "N": 256,
+      "batches": 3,
+      "threads": 64,
+      "sharedMemoryBytes": 1024,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "log2N": 11,
+      "N": 2048,
+      "batches": 3,
+      "threads": 512,
+      "sharedMemoryBytes": 8192,
+      "guardsPreserved": true,
+      "pass": true
+    }
+  ],
+  "passed": true
+}

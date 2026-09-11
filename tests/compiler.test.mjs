@@ -22,7 +22,7 @@ const bad=[
  ['bool ABI','__global__ void k(bool* x){}',/incompatible/],
  ['double literal',wrap('output[0]=0.5;'),/suffix/],
  ['float atomics',wrap('atomicAdd(&output[0],1.0f);'),/integer atomics/],
- ['dynamic shared',wrap('extern __shared__ float a[];'),/Expected/],
+ ['dynamic shared',wrap('extern __shared__ float a[];'),/sharedMemoryBytes/],
  ['local pointer',wrap('float a[4];float* x=a;'),/Local pointers/],
  ['unexpanded include','#include <cuda.h>\n__global__ void k(){}',/preprocess/],
  ['function macro','#define F(x) x\n__global__ void k(){}',/numeric/],

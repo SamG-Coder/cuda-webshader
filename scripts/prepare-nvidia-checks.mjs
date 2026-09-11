@@ -16,7 +16,7 @@ for(const [index,row] of rows.entries()){
  // Parameter order follows the unchanged CUDA declaration, rather than grouped metadata.
  const signature=text.slice(start,brace),params=signature.slice(signature.indexOf('(')+1,signature.lastIndexOf(')')).split(',').map(p=>p.trim().match(/(\w+)\s*$/)[1]);
  const args=params.map(p=>p in f.buffers?`(${meta.bindings.find(b=>b.name===p).elementType.startsWith('vec')?(f.buffers[p] instanceof Uint32Array?'uint':f.buffers[p] instanceof Int32Array?'int':'float')+meta.bindings.find(b=>b.name===p).stride/4: f.buffers[p] instanceof Uint32Array?'unsigned int':f.buffers[p] instanceof Int32Array?'int':'float'}*)d_${p}`:String(f.scalars[p]));
- lines.push(`sample${index}::${row.entry}<<<dim3(${f.groups}),dim3(${meta.workgroupSize})>>>(${args}); CHECK(cudaGetLastError()); CHECK(cudaDeviceSynchronize()); int failures=0;`);
+ lines.push(`sample${index}::${row.entry}<<<dim3(${f.groups}),dim3(${meta.workgroupSize}),${meta.dynamicSharedMemoryBytes||0}>>>(${args}); CHECK(cudaGetLastError()); CHECK(cudaDeviceSynchronize()); int failures=0;`);
  for(const [name,expected]of Object.entries(f.expectedOutputs||{[f.out]:f.expected}))lines.push(`{CHECK(cudaMemcpy(h_${name},d_${name},sizeof(h_${name}),cudaMemcpyDeviceToHost)); double expected[]={${Array.from(expected,v=>Number(v).toExponential(17)).join(',')}};for(int i=0;i<${expected.length};i++)if(!std::isfinite(h_${name}[i])||fabs(h_${name}[i]-expected[i])>${f.absoluteTolerance??0.000003}+${f.relativeTolerance??0}*fabs(expected[i]))failures++;}`);
  lines.push(`printf("${index} %s\\n",failures?"FAIL":"PASS"); total+=failures;`);
  for(const b of meta.bindings)lines.push(`CHECK(cudaFree(d_${b.name}));`);

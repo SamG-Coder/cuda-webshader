@@ -14,7 +14,7 @@ function state(text){$('state').textContent=text;}
 function stop(reason='Stopped. GPU output preserved.'){if(active)active.running=false;$('stop').disabled=true;if(reason){state(reason);log(reason);}}
 async function cleanup(){if(!active)return;const old=active;active=null;old.renderer?.setAnimationLoop(null);old.observer?.disconnect();await runtime.idle();old.controls?.dispose();old.material?.dispose();old.shared?.dispose();for(const r of old.resources)runtime.destroyBuffer(r);old.renderer?.dispose();$('preview').replaceChildren();}
 function download(name,text){const url=URL.createObjectURL(new Blob([text],{type:'text/plain'})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function detect(){const suggestion=suggestLaunch(editor.getValue());$('entry').value=suggestion.entry;$('block').value=suggestion.block.join(',');configKey='';log(`Detected entry ${suggestion.entry||'(none)'}; suggested block ${suggestion.block.join(' × ')}. Inspect launch settings for custom kernels.`);}
+function detect(){$('shared-bytes').value='0';const suggestion=suggestLaunch(editor.getValue());$('entry').value=suggestion.entry;$('block').value=suggestion.block.join(',');configKey='';log(`Detected entry ${suggestion.entry||'(none)'}; suggested block ${suggestion.block.join(' × ')}. Inspect launch settings for custom kernels.`);}
 function showError(error){const message=error.message||String(error);log(message,'error');state('Failed — see execution log');const match=message.match(/\((\d+):(\d+)\)/);if(editor&&match){const line=Number(match[1]),col=Number(match[2]);monaco.editor.setModelMarkers(editor.getModel(),'cuda',[{startLineNumber:line,startColumn:col,endLineNumber:line,endColumn:col+1,message,severity:monaco.MarkerSeverity.Error}]);editor.revealLineInCenter(line);}window.sandbox.lastError=message;}
 function numericPreview(data,name){const wrapper=document.createElement('div');wrapper.className='numeric';const heading=document.createElement('h3');heading.textContent=`${name} · ${data.length.toLocaleString()} values`;wrapper.append(heading);const canvas=document.createElement('canvas');canvas.width=256;canvas.height=64;const ctx=canvas.getContext('2d'),pixels=ctx.createImageData(256,64);let min=Infinity,max=-Infinity;for(const v of data){if(Number.isFinite(v)){min=Math.min(min,v);max=Math.max(max,v);}}for(let i=0;i<256*64;i++){const value=data[Math.min(data.length-1,Math.floor(i/(256*64)*data.length))],t=Number.isFinite(value)?(value-min)/(max-min||1):0;pixels.data.set([30+Math.round(t*100),60+Math.round(t*180),100+Math.round(t*120),255],i*4);}ctx.putImageData(pixels,0,0);wrapper.append(canvas);const note=document.createElement('p');note.textContent=`Range ${min} … ${max}. Heatmap samples the output; first 128 values below.`;wrapper.append(note);const table=document.createElement('table');for(let i=0;i<Math.min(128,data.length);i++){const row=table.insertRow();row.insertCell().textContent=String(i);row.insertCell().textContent=String(data[i]);}wrapper.append(table);$('preview').replaceChildren(wrapper);}
 async function run(){
@@ -25,7 +25,7 @@ async function run(){
   log(`Run ${runCount}: parsing ${source.length.toLocaleString()} characters in compiler worker.`);
   const input=kernelSource(source);
   if(input.extracted)log(`Desktop CUDA file: extracted ${input.functions} device/kernel functions. Includes and host code are not executed; launch settings provide synthetic inputs.`);
-  const compiled=await compiler.compile(input.source,{entry:$('entry').value.trim()||undefined,workgroupSize:block});
+  const compiled=await compiler.compile(input.source,{entry:$('entry').value.trim()||undefined,workgroupSize:block,sharedMemoryBytes:Number($('shared-bytes').value)});
   if(editor.getModel().getVersionId()!==revision)throw Error('Source changed while compiling. Run again to execute the latest version.');
   const artifact=compiled.artifact;lastArtifact=artifact;shaderView.generated(artifact);log(`${artifact.name}: typed CUDA → WGSL in ${compiled.compileMs.toFixed(2)} ms. ${artifact.metadata.bindings.length} buffer bindings; ${artifact.metadata.workgroupStorageBytes} shared bytes.`,'success');
   const signature=JSON.stringify([artifact.name,artifact.metadata]);
@@ -73,7 +73,7 @@ try{
  editor=monaco.editor.create($('editor'),{value:'',language:'cpp',theme:'cuda-dark',automaticLayout:true,fontSize:13,lineHeight:21,minimap:{enabled:false},scrollBeyondLastLine:false,padding:{top:16},tabSize:4,wordWrap:'off',ariaLabel:'CUDA source code',stickyScroll:{enabled:false}});
  shaderView=createShaderView(editor,{download});
  editor.onDidChangeModelContent(()=>{dirty=true;shaderView.markStale();stop(null);state('Source modified — Ctrl/Cmd + Enter to run');monaco.editor.setModelMarkers(editor.getModel(),'cuda',[]);});
- for(const id of ['entry','block'])$(id).addEventListener('input',()=>{shaderView.markStale();stop(null);});
+ for(const id of ['entry','block','shared-bytes'])$(id).addEventListener('input',()=>{shaderView.markStale();stop(null);});
  editor.onDidPaste(()=>{detect();run();});editor.addAction({id:'cuda-run',label:'Compile and run CUDA',keybindings:[monaco.KeyMod.CtrlCmd|monaco.KeyCode.Enter],run});
  $('run').onclick=run;$('stop').onclick=()=>stop();$('infer').onclick=detect;$('open').onclick=()=>$('file').click();$('file').onchange=e=>loadFile(e.target.files[0]).catch(showError);$('export').onclick=()=>download($('filename').textContent,editor.getValue());$('example').onchange=e=>example(e.target.value).catch(showError);$('clear-log').onclick=()=>$('log').replaceChildren();$('reset-config').onclick=()=>{if(lastArtifact){$('config').value=JSON.stringify(suggestConfig(lastArtifact),null,2);log('Suggested inputs restored. Press Compile & run to apply.');}};
  $('animate').onchange=()=>{if(active?.renderer&&!dirty){active.running=$('animate').checked;$('stop').disabled=!active.running;state(active.running?'Animating on GPU':'Paused');}else if($('animate').checked)log('Run a float4 output kernel to enable animated 3D preview.');};
@@ -82,7 +82,7 @@ try{
  const nvidia=new URLSearchParams(location.search).get('nvidia');
  if(nvidia!==null){
   const rows=await(await fetch('showcases/nvidia/artifacts.json')).json(),row=/^\d+$/.test(nvidia)?rows[Number(nvidia)]:null;if(!row)throw Error('Unknown NVIDIA sample.');
-  presetConfig=row.preview;
+  presetConfig=row.preview;$('shared-bytes').value=String(row.artifact.metadata.dynamicSharedMemoryBytes||0);
   editor.setValue(await(await fetch('showcases/nvidia/'+row.source)).text());$('filename').textContent=row.entry+'.cu';$('entry').value=row.entry;$('block').value=row.artifact.metadata.workgroupSize.join(',');
   log(`NVIDIA ${row.sample}: isolated kernel, BSD-3-Clause. Synthetic preview inputs; use the NVIDIA explorer's Run verified fixture for numerical reference checks. Host program is not executed.`);await run();
  }else {const selected=new URLSearchParams(location.search).get('example')||'wave';if(!['wave','particles','saxpy','blank'].includes(selected))throw Error('Unknown sandbox example.');$('example').value=selected;await example(selected);}

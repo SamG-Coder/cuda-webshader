@@ -40,6 +40,7 @@ export class GpuRuntime {
     const features = ['timestamp-query','core-features-and-limits'].filter(f => adapter?.features.has(f));
     const requiredLimits = adapter ? {
       maxComputeInvocationsPerWorkgroup: Math.min(adapter.limits.maxComputeInvocationsPerWorkgroup, 1024),
+      maxComputeWorkgroupSizeX: Math.min(adapter.limits.maxComputeWorkgroupSizeX,1024),
       maxStorageBufferBindingSize: Math.min(adapter.limits.maxStorageBufferBindingSize, 256 * 1024 * 1024),
       maxBufferSize: Math.min(adapter.limits.maxBufferSize, 256 * 1024 * 1024)
     } : undefined;

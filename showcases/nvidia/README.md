@@ -8,7 +8,7 @@ NVIDIA cuda-samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
 The audit scans direct source files for standalone global void kernels. It is
 not a complete C++ preprocessor or a claim to compile every template instance.
 
-The 30 translated entries were run separately with NVCC on RTX 5080 and with
+The 31 translated entries were run separately with NVCC on RTX 5080 and with
 WebGPU on a real NVIDIA adapter. Fixtures use 256 elements or a 32×32 grid,
 with 64×64 matrices for the two transpose kernels and 17 vectors of 1,537
 elements for the scalar-product kernel;
@@ -34,6 +34,7 @@ node scripts/prepare-nvidia-scan-update.mjs
 node scripts/prepare-nvidia-atomic-cas.mjs
 node scripts/prepare-nvidia-aligned-copy.mjs
 node scripts/prepare-nvidia-fwt-pass.mjs
+node scripts/prepare-nvidia-fwt-shared.mjs
 node scripts/prepare-nvidia-checks.mjs
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor .local/nvidia-checks/check.cu -o .local/nvidia-checks/check.exe
 .local/nvidia-checks/check.exe
@@ -46,6 +47,7 @@ node scripts/test-nvidia-scan-update.mjs
 node scripts/test-nvidia-atomic-cas.mjs
 node scripts/test-nvidia-aligned-copy.mjs
 node scripts/test-nvidia-fwt-pass.mjs
+node scripts/test-nvidia-fwt-shared.mjs
 ```
 
 Run the server first (`npm start`) for browser checks. The browser script uses
@@ -155,8 +157,8 @@ alignment layouts have not been measured by these checks.
 The FWT follow-up retains the complete `fwtBatch2Kernel` body, including its
 local buffer aliases. It runs a single global-memory radix-4 pass with separate
 input/output buffers. The original host program's in-place binding of two
-parameters is not supported by this runtime, and the dynamic-shared-memory
-finishing kernel remains unimplemented. No full transform/convolution is claimed.
+parameters is not supported by this runtime. The finishing kernel has its own
+preset below; the global-pass preset alone is not a full transform/convolution.
 `fwt-pass-native.cu` and `scripts/test-nvidia-fwt-pass.mjs` cover four combinations
 of block counts, batch counts, thread counts and power-of-two strides, comparing
 with independent four-term butterfly equations and checking 16 guard values.
@@ -165,3 +167,18 @@ guards. Alias tests additionally check captured offsets, chained aliases,
 indexing back within the original allocation, const protection, lexical scopes
 and atomics through aliases. Results are `reports/nvidia-fwt-pass-native.txt` and
 `reports/nvidia-fwt-pass.json`; use the same native build flags as above.
+
+The shared-memory follow-up imports the complete `fwtBatch1Kernel` body and its
+namespace alias. `sharedMemoryBytes` specializes its unsized shared array into
+WGSL workgroup storage. Only one such array is allowed because multiple CUDA
+extern declarations alias the same allocation. The sandbox exposes this compile
+option separately from scalar arguments and automatically loads the preset size.
+`fwt-shared-native.cu` and `scripts/test-nvidia-fwt-shared.mjs` check sizes 4, 8,
+64, 128, 256 and 2,048, each with three batches and 16 guard values. Each result
+is compared with the direct Walsh matrix (parity of row & column), independently
+of the kernel's staged butterfly algorithm. Set threads to N/4 and dynamic bytes
+to N*4 for these original launches. The runtime requests the adapter's supported
+X workgroup dimension, capped at 1,024, to support the 512-thread largest case.
+Reports are `reports/nvidia-fwt-shared-native.txt` and
+`reports/nvidia-fwt-shared.json`. These are complete transforms at the tested
+sizes; the large multi-pass dyadic-convolution host pipeline is not reproduced.
