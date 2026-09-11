@@ -1,5 +1,11 @@
 # CUDA → WebShader
 
+## [Launch the live showcase explorer ↗](https://samg-coder.github.io/cuda-webshader/)
+
+**[NVIDIA sine-wave showcase](https://samg-coder.github.io/cuda-webshader/showcases/simplegl/)** · **[Particle simulation and kernel lab](https://samg-coder.github.io/cuda-webshader/lab.html)** · **[CUDA vs. WebGPU results](https://samg-coder.github.io/cuda-webshader/reports/performance-comparison.html)**
+
+Run the demos directly in a browser with WebGPU support. No local installation or CUDA Toolkit is needed for the browser showcases.
+
 A bounded **CUDA C kernel → typed AST → WGSL → WebGPU** pipeline, with a GPU-resident Three.js particle renderer, ten kernel examples, numerical tests and a device-local performance tuner.
 
 This is source translation. **It does not run CUDA binaries, PTX, the CUDA driver, cuBLAS or arbitrary C++ in a browser.** It deliberately implements a useful kernel-language subset rather than pretending a few string replacements constitute a CUDA compiler.
