@@ -1,0 +1,122 @@
+{
+  "date": "2026-09-11T23:19:24.888Z",
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "sourceCompiled": true,
+  "absoluteTolerance": 0.0002,
+  "relativeTolerance": 0.00002,
+  "results": [
+    {
+      "optN": 0,
+      "outputs": {
+        "d_CallResult": {
+          "maxError": 0,
+          "guardsPreserved": true,
+          "pass": true
+        },
+        "d_PutResult": {
+          "maxError": 0,
+          "guardsPreserved": true,
+          "pass": true
+        }
+      },
+      "pass": true
+    },
+    {
+      "optN": 2,
+      "outputs": {
+        "d_CallResult": {
+          "maxError": 0.0000014628257076765294,
+          "guardsPreserved": true,
+          "pass": true
+        },
+        "d_PutResult": {
+          "maxError": 0.0000012500859156716615,
+          "guardsPreserved": true,
+          "pass": true
+        }
+      },
+      "pass": true
+    },
+    {
+      "optN": 10,
+      "outputs": {
+        "d_CallResult": {
+          "maxError": 0.000004768699000123888,
+          "guardsPreserved": true,
+          "pass": true
+        },
+        "d_PutResult": {
+          "maxError": 0.000012053438695147634,
+          "guardsPreserved": true,
+          "pass": true
+        }
+      },
+      "pass": true
+    },
+    {
+      "optN": 258,
+      "outputs": {
+        "d_CallResult": {
+          "maxError": 0.00010874993313336745,
+          "guardsPreserved": true,
+          "pass": true
+        },
+        "d_PutResult": {
+          "maxError": 0.00009919594594975933,
+          "guardsPreserved": true,
+          "pass": true
+        }
+      },
+      "pass": true
+    },
+    {
+      "optN": 259,
+      "outputs": {
+        "d_CallResult": {
+          "maxError": 0.00010874993313336745,
+          "guardsPreserved": true,
+          "pass": true
+        },
+        "d_PutResult": {
+          "maxError": 0.00009919594594975933,
+          "guardsPreserved": true,
+          "pass": true
+        }
+      },
+      "pass": true
+    },
+    {
+      "optN": 1024,
+      "outputs": {
+        "d_CallResult": {
+          "maxError": 0.00010874993313336745,
+          "guardsPreserved": true,
+          "pass": true
+        },
+        "d_PutResult": {
+          "maxError": 0.00010476427269168198,
+          "guardsPreserved": true,
+          "pass": true
+        }
+      },
+      "pass": true
+    }
+  ],
+  "passed": true
+}

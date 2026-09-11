@@ -11,7 +11,7 @@ const NUM = /^(?:0[xX][\da-fA-F]+[uU]?|(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?[f
 const WORD = /^[A-Za-z_]\w*/;
 const OPERATORS = ['<<=', '>>=', '::', '++', '--', '+=', '-=', '*=', '/=', '%=', '==', '!=', '<=', '>=', '&&', '||', '<<', '>>', '&=', '|=', '^=', '->'];
 const TYPES = new Set(['float', 'int', 'uint', 'unsigned', 'bool', 'void', 'float2', 'float3', 'float4']);
-const QUALIFIERS = new Set(['const', '__shared__', '__restrict__', 'restrict']);
+const QUALIFIERS = new Set(['const', '__shared__', '__restrict__', '__restrict', 'restrict']);
 const MAP = { float: 'f32', int: 'i32', uint: 'u32', bool: 'bool', void: 'void', float2: 'vec2<f32>', float3: 'vec3<f32>', float4: 'vec4<f32>' };
 export function tokenize(source, defines = {}) {
   if (typeof source !== 'string' || source.length > 1_000_000) throw new CompileError('Source must be a string of at most 1 MB.');
@@ -82,9 +82,11 @@ export class Parser {
     if (!type) this.fail(`Unsupported type '${tok.value}'. Use float, int, unsigned int, bool or float2/3/4.`, tok);
     if (this.match('const')) constant = true;
     const pointer = this.match('*');
-    while (['__restrict__', 'restrict'].includes(this.peek().value)) this.take();
+    const reference=this.match('&');
+    if(pointer&&reference)this.fail('Pointer references are unsupported.');
+    while (['__restrict__', '__restrict', 'restrict'].includes(this.peek().value)) this.take();
     if (this.is('*')) this.fail('Pointer-to-pointer types are not supported.');
-    return {type, constant, shared, pointer};
+    return {type, constant, shared, pointer,reference};
   }
   parse() {
     const functions = [];
@@ -92,27 +94,30 @@ export class Parser {
       const token = this.peek();
       if(this.match('namespace')){const alias=this.name();this.take('=');const target=this.name();this.take(';');if(target!=='cooperative_groups'||this.groupNamespaces.has(alias))this.fail('Only distinct aliases of cooperative_groups are supported.',token);this.groupNamespaces.add(alias);continue;}
       while (['inline', '__forceinline__'].includes(this.peek().value)) this.take();
+      let launchThreads=null;
+      const launchBounds=()=>{this.take('__launch_bounds__');this.take('(');const t=this.take();if(t.kind!=='number'||!/^[0-9]+[uU]?$/.test(t.value))this.fail('Launch bounds require a positive integer thread count.',t);launchThreads=Number(t.value.replace(/[uU]$/,''));if(launchThreads<1||launchThreads>1024)this.fail('Launch bounds thread count must be in [1,1024].',t);this.take(')');};
+      if(this.is('__launch_bounds__'))launchBounds();
       const qualifier = this.take().value;
       if (!['__global__', '__device__'].includes(qualifier)) this.fail('Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported.', token);
       while (['inline', '__forceinline__'].includes(this.peek().value)) this.take();
+      if(this.is('__launch_bounds__')){if(launchThreads!==null)this.fail('Duplicate launch bounds.');launchBounds();}
+      if(launchThreads!==null&&qualifier!=='__global__')this.fail('Launch bounds apply only to kernels.',token);
       const result = this.type();
-      if (result.pointer || result.shared) this.fail('Function return pointers/shared qualifiers are unsupported.');
+      if (result.pointer || result.shared || result.reference) this.fail('Function return pointers/references/shared qualifiers are unsupported.');
       if(this.peek().forward)this.fail('Function-forwarding macros are supported at call sites, not in function declarations.');
       const name = this.name(); this.take('('); const params = [];
       if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(); params.push({kind: 'param', token, name, ...type}); } while (this.match(','));
       this.take(')'); const body = this.block();
-      functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body});
+      functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads});
     }
     if (!functions.some(f => f.qualifier === '__global__')) this.fail('No __global__ kernel was found.');
     return {kind: 'module', functions, source: this.source};
   }
   block() { const token = this.take('{'), body = []; while (!this.is('}')) { if (this.peek().kind === 'eof') this.fail('Unclosed block.'); body.push(this.statement()); } this.take('}'); return {kind: 'block', token, body}; }
   declaration(semicolon = true) {
-    const token = this.peek(), d = this.type(), name = this.name(), dimensions = [];
-    while (this.match('[')) { dimensions.push(this.expression(2)); this.take(']'); }
-    const init = this.match('=') ? this.expression(2) : null;
-    if (this.is(',')) this.fail('Use one local variable per declaration.');
-    if (semicolon) this.take(';'); return {kind: 'decl', token, name, ...d, dimensions, init};
+    const token = this.peek(), d = this.type(),declarations=[];
+    do {const name=this.name(),dimensions=[];while(this.match('[')){dimensions.push(this.expression(2));this.take(']');}const init=this.match('=')?this.expression(2):null;declarations.push({kind:'decl',token,name,...d,dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
+    if (semicolon) this.take(';');return declarations.length===1?declarations[0]:{kind:'decls',token,declarations};
   }
   statement() {
     const token = this.peek();
@@ -144,7 +149,7 @@ export class Parser {
   unary() {
     const token = this.peek();
     if (['+', '-', '!', '~', '&', '++', '--', '*'].includes(token.value)) { this.take(); return {kind: 'unary', token, op: token.value, value: this.unary(), prefix: true}; }
-    if (this.is('(') && (TYPES.has(this.peek(1).value) || this.peek(1).value === 'const')) { this.take('('); const type = this.type(); if (type.pointer) this.fail('Pointer casts are unsupported.'); this.take(')'); return {kind: 'cast', token, target: type.type, value: this.unary()}; }
+    if (this.is('(') && (TYPES.has(this.peek(1).value) || this.peek(1).value === 'const')) { this.take('('); const type = this.type(); if (type.pointer||type.reference) this.fail('Pointer/reference casts are unsupported.'); this.take(')'); return {kind: 'cast', token, target: type.type, value: this.unary()}; }
     let value;
     if (token.kind === 'number') { this.take(); value = {kind: 'literal', token, value: token.value}; }
     else if (this.match('(')) { value = this.expression(); this.take(')'); }

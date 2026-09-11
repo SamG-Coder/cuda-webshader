@@ -1,6 +1,8 @@
 // Deterministic correctness fixtures for isolated upstream kernels, not host applications.
 import {scalarFixture} from './scalar-fixtures.js';
+import {blackScholesFixture} from './blackscholes-fixtures.js';
 export function fixture(row) {
+ if(row.entry==='BlackScholesGPU')return blackScholesFixture();
  if(row.entry==='scalarProdGPU')return scalarFixture({guards:0});
  const m=row.artifact.metadata,e=row.entry,two=m.workgroupSize[1]>1,transpose=e==='transposeCoalesced'||e==='transposeNoBankConflicts',w=transpose?64:32,n=two?w*w:256;
  const scalars=Object.fromEntries(m.scalars.map(s=>[s.name,({inc_value:5,b:7,n,N:n,vectorLength:n,count:n,inner_reps:3,base:19,width:w,height:w,time:0.375})[s.name]]));

@@ -6,6 +6,20 @@
 
 ## CUDA sandbox
 
+**[Black–Scholes sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=21)**
+now compiles NVIDIA's complete `BlackScholes_kernel.cuh` unchanged, including its
+two device helpers. The compiler supports scalar output references in helpers,
+comma-separated local declarations, `__restrict`, and single-argument
+`__launch_bounds__` (enforced as a maximum thread count). Reference arguments must
+be distinct mutable named local scalars of the exact type; storage elements,
+vector components, reference returns and general C++ references remain unsupported.
+`__fdividef`, `__expf` and `__logf` map to WGSL division, `exp` and `log`;
+they do not promise CUDA fast-math bit equivalence. Both output buffers passed
+native CUDA and real NVIDIA WebGPU checks at six input sizes, including empty,
+partial-block and odd counts. The original kernel processes pairs, so an odd final
+option stays untouched. See [hardware results](reports/nvidia-blackscholes.json)
+and [native results](reports/nvidia-blackscholes-native.txt).
+
 NVIDIA's batched scalar-product kernel also runs unchanged. It uses the new
 `__mul24` / `__umul24` intrinsics and a direct forwarding macro such as
 `#define IMUL(a,b) __mul24(a,b)`. Forwarding macros must pass every argument
@@ -27,7 +41,7 @@ per workgroup. See [transpose validation](reports/nvidia-transpose.json).
 
 The main showcase grid contains individual runnable samples; every card opens
 the sandbox directly. The NVIDIA audit covers 208 upstream sample directories,
-350 compiler entry probes, and 21 kernels checked with both native CUDA and
+350 compiler entry probes, and 22 kernels checked with both native CUDA and
 real NVIDIA WebGPU. See [the audit and remaining blockers](reports/nvidia-audit.md)
 and [reproduction instructions](showcases/nvidia/README.md). These kernel checks
 are separate from full native application execution and from performance tests.
@@ -59,7 +73,7 @@ This is source translation. **It does not run CUDA binaries, PTX, the CUDA drive
 
 ## Validated on an RTX 5080
 
-The project is running locally with installed, locked dependencies. **191 Node tests, 79 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
+The project is running locally with installed, locked dependencies. **203 Node tests, 79 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
 
 Open [the measured comparison](reports/performance-comparison.html) or read [the full methodology and results](reports/performance-comparison.md). All ten kernel sources are compiled by NVCC and translated to WGSL at two workload sizes. Raw GPU timestamps, CUDA event timings, ordinary CUDA launch timings, and verification logs are in `reports/`.
 

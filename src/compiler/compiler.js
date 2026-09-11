@@ -65,6 +65,7 @@ class Emitter {
     this.workgroupSize = [...(options.workgroupSize || [128, 1, 1])];
     while (this.workgroupSize.length < 3) this.workgroupSize.push(1);
     if (this.workgroupSize.length !== 3 || this.workgroupSize.some(v => !Number.isSafeInteger(v) || v < 1) || this.workgroupSize.reduce((a, b) => a * b, 1) > 1024) this.fail('Workgroup dimensions must be positive integers with at most 1024 total invocations.', kernel);
+    if(kernel.launchThreads&&this.workgroupSize.reduce((a,b)=>a*b,1)>kernel.launchThreads)this.fail(`Launch exceeds __launch_bounds__(${kernel.launchThreads}).`,kernel);
     this.currentFunction = kernel;
   }
   fail(message, n) { throw new CompileError(message, n?.token, this.ast.source); }
@@ -194,7 +195,8 @@ class Emitter {
       const count = Number(name.at(-1)); if (args.length !== count) this.fail(`${name} needs ${count} arguments.`, n);
       return this.result(n, `vec${count}<f32>`, `vec${count}<f32>(${args.map(a => this.convert(a.code, a.type, 'f32', n)).join(', ')})`, pre);
     }
-    const unary = {sinf: 'sin', cosf: 'cos', tanf: 'tan', sqrtf: 'sqrt', rsqrtf: 'inverseSqrt', expf: 'exp', exp2f: 'exp2', logf: 'log', log2f: 'log2', fabsf: 'abs', floorf: 'floor', ceilf: 'ceil', truncf: 'trunc'};
+    if(name==='__fdividef'){if(args.length!==2)this.fail('__fdividef requires two arguments.',n);return this.result(n,'f32',`(${args.map(a=>this.convert(a.code,a.type,'f32',n)).join(' / ')})`,pre);}
+    const unary = {sinf: 'sin', cosf: 'cos', tanf: 'tan', sqrtf: 'sqrt', rsqrtf: 'inverseSqrt', expf: 'exp', __expf:'exp', exp2f: 'exp2', logf: 'log', __logf:'log', log2f: 'log2', fabsf: 'abs', floorf: 'floor', ceilf: 'ceil', truncf: 'trunc'};
     const binary = {fminf: 'min', fmaxf: 'max', powf: 'pow', atan2f: 'atan2'};
     if (unary[name] || binary[name] || name === 'fmaf') {
       const count = unary[name] ? 1 : binary[name] ? 2 : 3;
@@ -211,7 +213,12 @@ class Emitter {
     const helper = this.functions.get(name);
     if (!helper || helper.qualifier !== '__device__') this.fail(`Unsupported function '${name}'. CUDA host APIs, warp intrinsics, dynamic launches and libraries are not available.`, n);
     if (args.length !== helper.params.length) this.fail(`Wrong number of arguments for '${name}'.`, n);
-    return this.result(n, helper.result, `f_${name}(${args.map((a, i) => this.convert(a.code, a.type, helper.params[i].type, n)).join(', ')})`, pre);
+    const references=new Set();n.referenceArgs=helper.params.map(p=>!!p.reference);
+    const codes=args.map((a,i)=>{const p=helper.params[i];if(!p.reference)return this.convert(a.code,a.type,p.type,n);
+      const node=n.args[i],s=a.rootSymbol;if(node.kind!=='id'||!s||!['local','reference'].includes(s.kind)||s.constant||isArray(a.type)||!numeric(a.type)||a.type!==p.type)this.fail('Reference arguments require a mutable named local scalar of the exact type.',node);
+      if(references.has(s))this.fail('Aliased reference arguments are unsupported.',node);references.add(s);return s.kind==='reference'?s.pointerCode:`&${s.code}`;
+    });
+    return this.result(n, helper.result, `f_${name}(${codes.join(', ')})`, pre);
   }
   writable(target, n) {
     const s = target.rootSymbol;
@@ -243,6 +250,7 @@ class Emitter {
     return [...value.pre, value.type === 'void' ? `${value.code};` : `_ = ${value.code};`];
   }
   declare(n) {
+    if(n.reference)this.fail('References are supported only as helper parameters, not local declarations.',n);
     if (n.pointer) this.fail('Local pointers are unsupported; use buffer parameters.', n);
     if (n.type === 'void') this.fail('Variables cannot have void type.', n);
     let type = n.type;
@@ -277,11 +285,12 @@ class Emitter {
         n.symbol=this.add(n.name,{name:n.name,kind:'thread-block',constant:true},n);return [];
       case 'block': return ['{', ...indent(this.body(n)), '}'];
       case 'decl': return this.declare(n);
+      case 'decls': return n.declarations.flatMap(d=>this.declare(d));
       case 'expr': return this.effect(n.value);
       case 'if': { const condition = this.expr(n.condition); return [...condition.pre, `if (${this.convert(condition.code, condition.type, 'bool', n)}) {`, ...indent(this.body(n.yes)), ...(n.no ? ['} else {', ...indent(this.body(n.no))] : []), '}']; }
       case 'for': case 'while': {
         this.scopes.push(new Map()); this.loopDepth++;
-        const init = n.kind === 'for' && n.init ? (n.init.kind === 'decl' ? this.declare(n.init) : this.effect(n.init)) : [];
+        const init = n.kind === 'for' && n.init ? (['decl','decls'].includes(n.init.kind) ? this.statement(n.init) : this.effect(n.init)) : [];
         const condition = n.condition ? this.expr(n.condition) : {code: 'true', type: 'bool', pre: []};
         const inner = this.body(n.body), step = n.kind === 'for' && n.step ? this.effect(n.step) : [];
         this.loopDepth--; this.scopes.pop();
@@ -307,7 +316,7 @@ class Emitter {
     const bindings = [], scalars = [], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
     const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t}>`;
     for (const p of this.kernel.params) {
-      if (p.shared || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
+      if (p.shared || p.reference || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
       if (p.pointer) {
         if (p.type === 'bool' || p.type === 'vec3<f32>') this.fail('bool* and float3* have incompatible CUDA/WGSL layouts. Use unsigned int* or float4*.', p);
         const atomic = this.usage.atomic.has(p.name), readOnly = p.constant || !this.usage.writes.has(p.name);
@@ -339,10 +348,11 @@ class Emitter {
       this.scopes = [new Map()]; this.currentFunction = helper;
       for (const p of helper.params) {
         if (p.pointer || p.shared || p.type === 'void') this.fail('Helper arguments must be scalar/vector values, not pointers.', p);
-        p.symbol = this.add(p.name, {name: p.name, type: p.type, code: `v_${p.name}`, constant: true, atomic: false, kind: 'local'}, p);
+        if(p.reference&&!numeric(p.type))this.fail('Helper references require a 32-bit numeric scalar.',p);
+        p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined, constant: p.reference?p.constant:true, atomic: false, kind: p.reference?'reference':'local'}, p);
       }
       const body = this.body(helper.body);
-      helperLines.push(`fn f_${helper.name}(${helper.params.map(p => `v_${p.name}: ${p.type}`).join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`, ...indent(body), '}');
+      helperLines.push(`fn f_${helper.name}(${helper.params.map(p => `v_${p.name}: ${p.reference?`ptr<function, ${p.type}>`:p.type}`).join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`, ...indent(body), '}');
     }
     this.scopes = kernelScope; this.currentFunction = this.kernel;
     const main = this.body(this.kernel.body);

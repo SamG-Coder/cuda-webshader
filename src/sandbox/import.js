@@ -4,7 +4,7 @@ import {forwardingMacro} from '../compiler/macros.js';
 export function kernelSource(source){
  const masked=source.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g,text=>text.replace(/[^\n]/g,' '));
  if(!/^\s*#\s*include\b/m.test(masked)&&!masked.includes('<<<')&&!/\bmain\s*\(/.test(masked))return {source,extracted:false};
- const spans=[],pattern=/\b__(?:global|device)__\s+[^;{}]+?\([^;{}]*\)\s*\{/g;let match;
+ const spans=[],pattern=/\b(?:__launch_bounds__\s*\([^)]*\)\s*)?__(?:global|device)__\s+[^;{}]+?\([^;{}]*\)\s*\{/g;let match;
  while((match=pattern.exec(masked))){let depth=1,end=pattern.lastIndex;for(;end<masked.length&&depth;end++){if(masked[end]==='{')depth++;else if(masked[end]==='}')depth--;}if(depth)throw Error('Unclosed CUDA device function.');spans.push([match.index,end]);pattern.lastIndex=end;}
  if(!spans.length)throw Error('No standalone __global__ / __device__ functions found. Templates, classes and host-only CUDA files need a supported kernel entry.');
  const defines=/^\s*#\s*define\s+\w+\s+[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFuU]?\s*$/gm;

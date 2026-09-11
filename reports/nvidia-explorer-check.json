@@ -107,6 +107,11 @@
       "entry": "scalarProdGPU",
       "sample": "cpp/2_Concepts_and_Techniques/scalarProd",
       "passed": true
+    },
+    {
+      "entry": "BlackScholesGPU",
+      "sample": "cpp/5_Domain_Specific/BlackScholes",
+      "passed": true
     }
   ]
 }

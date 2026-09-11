@@ -28,6 +28,7 @@ export function validateConfig(config,metadata){
  if(!config.scalars||!config.buffers)throw Error('Settings need scalars and buffers objects.');
  let bytes=0;
  for(const b of metadata.bindings){const spec=config.buffers[b.name];if(!spec||!Number.isInteger(spec.records)||spec.records<1||spec.records>1048576)throw Error(`${b.name}: records must be in [1,1048576].`);if(!['zero','one','ramp','random','sphere'].includes(spec.fill))throw Error(`${b.name}: unknown fill pattern.`);if(spec.fill==='sphere'&&b.elementType!=='vec4<f32>')throw Error('sphere fill requires float4 storage.');bytes+=spec.records*b.stride;}
+ for(const b of metadata.bindings)for(const key of ['scale','offset'])if(config.buffers[b.name][key]!==undefined&&!Number.isFinite(config.buffers[b.name][key]))throw Error(`${b.name}: ${key} must be a finite number.`);
  if(bytes>64*1024*1024)throw Error('Sandbox buffers are limited to 64 MiB total.');
  if(!metadata.bindings.some(b=>b.name===config.output))throw Error('Choose an existing output buffer.');
  return bytes;
@@ -38,5 +39,6 @@ export function seedBuffer(binding,spec){
  const random=()=>{state^=state<<13;state^=state>>>17;state^=state<<5;return(state>>>0)/4294967296;};
  for(let i=0;i<data.length;i++)data[i]=spec.fill==='one'?1:spec.fill==='ramp'?i%256:spec.fill==='random'?(Type===Float32Array?random()*2-1:Math.floor(random()*256)):0;
  if(spec.fill==='sphere')for(let i=0;i<spec.records;i++){const angle=random()*Math.PI*2,r=1+random()*6;data.set([Math.cos(angle)*r,(random()-0.5)*2,Math.sin(angle)*r,random()],i*4);}
+ if(spec.scale!==undefined||spec.offset!==undefined)for(let i=0;i<data.length;i++){data[i]=data[i]*(spec.scale??1)+(spec.offset??0);if(!Number.isFinite(data[i]))throw Error('Buffer scale/offset exceeds the storage type range.');}
  return data;
 }

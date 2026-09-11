@@ -1,0 +1,6 @@
+options=0 both outputs + guards: PASS maxError=0
+options=2 both outputs + guards: PASS maxError=2.02494629e-06
+options=10 both outputs + guards: PASS maxError=1.08520662e-05
+options=258 both outputs + guards: PASS maxError=9.34912332e-05
+options=259 both outputs + guards: PASS maxError=9.34912332e-05
+options=1024 both outputs + guards: PASS maxError=9.39973458e-05

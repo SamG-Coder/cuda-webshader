@@ -78,7 +78,7 @@ class Context {
   *call(n){
     const name=n.callName;
     if(name==='__syncthreads'){yield n.token.offset;return;}
-    const args=[];for(const a of n.args)args.push(yield* this.eval(a));
+    const args=[];for(const [i,a] of n.args.entries())args.push(yield* (n.referenceArgs?.[i]?this.ref(a):this.eval(a)));
     if(name==='__mul24')return Math.imul((args[0]<<8)>>8,(args[1]<<8)>>8);
     if(name==='__umul24')return Math.imul(args[0]&0xffffff,args[1]&0xffffff)>>>0;
     if(['atomicAdd','atomicMin','atomicMax','atomicExch'].includes(name)){
@@ -86,7 +86,8 @@ class Context {
     }
     if(['float','int','uint','bool'].includes(name))return convert(args[0],n.type);
     if(name.startsWith('make_float'))return args.map(f);
-    const unary={sinf:Math.sin,cosf:Math.cos,tanf:Math.tan,sqrtf:Math.sqrt,rsqrtf:x=>1/Math.sqrt(x),expf:Math.exp,exp2f:x=>2**x,logf:Math.log,log2f:Math.log2,fabsf:Math.abs,floorf:Math.floor,ceilf:Math.ceil,truncf:Math.trunc};
+    if(name==='__fdividef')return f(args[0]/args[1]);
+    const unary={sinf:Math.sin,cosf:Math.cos,tanf:Math.tan,sqrtf:Math.sqrt,rsqrtf:x=>1/Math.sqrt(x),expf:Math.exp,__expf:Math.exp,exp2f:x=>2**x,logf:Math.log,__logf:Math.log,log2f:Math.log2,fabsf:Math.abs,floorf:Math.floor,ceilf:Math.ceil,truncf:Math.trunc};
     if(unary[name])return f(unary[name](args[0]));
     if(['fminf','fmaxf','min','max','powf','atan2f','fmaf'].includes(name)){
       const value=name==='fmaf'?args[0]*args[1]+args[2]:['fminf','min'].includes(name)?Math.min(...args):['fmaxf','max'].includes(name)?Math.max(...args):name==='powf'?Math.pow(...args):Math.atan2(...args);
@@ -94,7 +95,7 @@ class Context {
     }
     const helper=this.artifact.ast.functions.find(x=>x.name===name);
     if(!helper)throw new Error(`No CPU implementation of ${name}.`);
-    const env=new Map();helper.params.forEach((p,i)=>env.set(p.symbol,{value:convert(args[i],p.type)}));
+    const env=new Map();helper.params.forEach((p,i)=>env.set(p.symbol,p.reference?{get value(){return args[i].get();},set value(v){args[i].set(v);}}:{value:convert(args[i],p.type)}));
     const child=new Context(this.artifact,env,this.ids,this.budget-this.steps),result=yield* child.statement(helper.body);this.steps+=child.steps;
     return convert(result?.value,helper.result);
   }
@@ -103,10 +104,11 @@ class Context {
     switch(n.kind){
       case 'block':for(const s of n.body){const signal=yield* this.statement(s);if(signal)return signal;}return;
       case 'decl':if(!n.shared)this.env.set(n.symbol,{value:n.init?convert(yield* this.eval(n.init),n.resolvedType):zero(n.resolvedType)});return;
+      case 'decls':for(const d of n.declarations)yield* this.statement(d);return;
       case 'expr':yield* this.eval(n.value);return;
       case 'if':if(yield* this.eval(n.condition))return yield* this.statement(n.yes);else if(n.no)return yield* this.statement(n.no);return;
       case 'for':case 'while':{
-        if(n.init){if(n.init.kind==='decl')yield* this.statement(n.init);else yield* this.eval(n.init);}
+        if(n.init){if(['decl','decls'].includes(n.init.kind))yield* this.statement(n.init);else yield* this.eval(n.init);}
         while(!n.condition||(yield* this.eval(n.condition))){const signal=yield* this.statement(n.body);if(signal?.control==='return')return signal;if(signal?.control==='break')break;if(n.step)yield* this.eval(n.step);this.tick();}return;
       }
       case 'return':return {control:'return',value:n.value?yield* this.eval(n.value):undefined};
