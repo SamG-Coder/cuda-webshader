@@ -1,4 +1,5 @@
 /** A deliberately bounded CUDA C frontend. No eval, regex transpilation, or source-specific rewrites. */
+import {forwardingMacro} from './macros.js';
 export class CompileError extends Error {
   constructor(message, token = {}, source = '') {
     const line = token.line || 1, column = token.column || 1;
@@ -18,7 +19,7 @@ export function tokenize(source, defines = {}) {
     if (!/^[A-Za-z_]\w*$/.test(k) || !Number.isFinite(v)) throw new CompileError('Defines must be named finite numbers.');
     return [k, String(v)];
   }));
-  const tokens = []; let i = 0, line = 1, column = 1;
+  const tokens = [],forwarders=new Map(); let i = 0, line = 1, column = 1;
   const advance = str => { for (const c of str) { if (c === '\n') { line++; column = 1; } else column++; } i += str.length; };
   while (i < source.length) {
     const rest = source.slice(i), token = {line, column, offset: i};
@@ -27,8 +28,11 @@ export function tokenize(source, defines = {}) {
     if (rest.startsWith('/*')) { const end = rest.indexOf('*/'); if (end < 0) throw new CompileError('Unclosed comment.', token, source); advance(rest.slice(0, end + 2)); continue; }
     if (rest[0] === '#') {
       const directive = rest.split('\n')[0];
+      const forward=forwardingMacro(directive.trimEnd());
+      if(forward){if(macros.has(forward.name)||forwarders.has(forward.name))throw new CompileError('Macro redefinition is unsupported.',token,source);forwarders.set(forward.name,forward);advance(directive);continue;}
       const m = directive.trimEnd().match(/^#\s*define\s+([A-Za-z_]\w*)\s+([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFuU]?)\s*(?:\/\/.*)?$/);
-      if (!m) throw new CompileError('Only numeric object-like #define directives are supported; preprocess other directives first.', token, source);
+      if (!m) throw new CompileError('Only numeric object-like #define directives and direct function-forwarding macros are supported; preprocess other directives first.', token, source);
+      if(forwarders.has(m[1]))throw new CompileError('Macro redefinition is unsupported.',token,source);
       if (!macros.has(m[1])) macros.set(m[1], m[2]); advance(directive); continue;
     }
     const number = rest.match(NUM);
@@ -40,7 +44,11 @@ export function tokenize(source, defines = {}) {
         let body = expanded;
         if (body.startsWith('-') || body.startsWith('+')) { tokens.push({...token, kind: 'symbol', value: body[0]}); body = body.slice(1); }
         tokens.push({...token, kind: 'number', value: body});
-      } else tokens.push({...token, kind: 'word', value});
+      } else {
+        const chain=[];let target=value;const seen=new Set();
+        while(forwarders.has(target)&&!seen.has(target)&&chain.length<32){seen.add(target);const f=forwarders.get(target);chain.push(f);target=f.target;}
+        tokens.push({...token, kind: 'word', value,...(chain.length?{forward:{chain,target,tooDeep:forwarders.has(target)&&!seen.has(target),recursive:seen.has(target),numericTarget:macros.has(target)}}:{})});
+      }
       advance(value); continue;
     }
     const op = OPERATORS.find(x => rest.startsWith(x));
@@ -89,6 +97,7 @@ export class Parser {
       while (['inline', '__forceinline__'].includes(this.peek().value)) this.take();
       const result = this.type();
       if (result.pointer || result.shared) this.fail('Function return pointers/shared qualifiers are unsupported.');
+      if(this.peek().forward)this.fail('Function-forwarding macros are supported at call sites, not in function declarations.');
       const name = this.name(); this.take('('); const params = [];
       if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(); params.push({kind: 'param', token, name, ...type}); } while (this.match(','));
       this.take(')'); const body = this.block();
@@ -144,7 +153,9 @@ export class Parser {
     while (true) {
       if (this.match('[')) { const index = this.expression(); this.take(']'); value = {kind: 'index', token, base: value, index}; }
       else if (this.match('.')) { value = {kind: 'member', token, base: value, member: this.name()}; }
-      else if (this.match('(')) { const args = []; if (!this.is(')')) do { args.push(this.expression(2)); } while (this.match(',')); this.take(')'); value = {kind: 'call', token, callee: value, args}; }
+      else if (this.match('(')) { const args = []; if (!this.is(')')) do { args.push(this.expression(2)); } while (this.match(',')); this.take(')');
+        if(value.kind==='id'&&value.token.forward){const f=value.token.forward;if(f.tooDeep)this.fail('Forwarding macro chains are limited to 32 calls.',value.token);if(f.recursive||f.numericTarget)this.fail('Recursive or non-function forwarding macro target is unsupported.',value.token);if(f.chain.some(m=>m.arity!==args.length))this.fail(`Wrong argument count for forwarding macro '${value.name}'.`,value.token);value={...value,name:f.target};}
+        value = {kind: 'call', token, callee: value, args}; }
       else if (this.is('++') || this.is('--')) { value = {kind: 'unary', token, op: this.take().value, value, prefix: false}; }
       else break;
     }

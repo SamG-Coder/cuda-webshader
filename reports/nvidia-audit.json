@@ -3078,8 +3078,18 @@
         ]
       },
       "browser": {
-        "status": "translation-rejected",
-        "reason": "Expected ';', found ':'. (53:7)\n    cg::thread_block cta = cg::this_thread_block();\r\n      ^"
+        "status": "kernel-verified",
+        "reason": "Isolated kernels checked against CPU reference on a real NVIDIA WebGPU adapter. Full host program is not executed.",
+        "checks": [
+          {
+            "sample": "cpp/2_Concepts_and_Techniques/scalarProd",
+            "entry": "scalarProdGPU",
+            "pass": true,
+            "values": 17,
+            "maxError": 0,
+            "failures": 0
+          }
+        ]
       }
     },
     {
@@ -9249,11 +9259,11 @@
       }
     }
   ],
-  "executionUpdated": "2026-09-11T22:57:36.095Z",
+  "executionUpdated": "2026-09-11T23:09:37.508Z",
   "counts": {
     "samples": 208,
     "compilerProbes": 350,
-    "webgpuPassed": 20,
+    "webgpuPassed": 21,
     "nativeProgramsAttempted": 149,
     "nativeStatuses": {
       "exited-zero": 142,

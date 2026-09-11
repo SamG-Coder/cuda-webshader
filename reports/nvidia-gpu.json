@@ -16,7 +16,7 @@
     }
   },
   "softwareAdapterRequested": false,
-  "date": "2026-09-11T22:52:53.273Z",
+  "date": "2026-09-11T23:08:00.951Z",
   "results": [
     {
       "sample": "cpp/0_Introduction/asyncAPI",
@@ -2776,6 +2776,33 @@
         1.625,
         2.375,
         -0.5
+      ]
+    },
+    {
+      "sample": "cpp/2_Concepts_and_Techniques/scalarProd",
+      "entry": "scalarProdGPU",
+      "pass": true,
+      "values": 17,
+      "maxError": 0,
+      "failures": 0,
+      "output": [
+        -2.640625,
+        4.484375,
+        -7.109375,
+        5.609375,
+        -2.78125,
+        1.453125,
+        2.40625,
+        -3.28125,
+        5.78125,
+        -5.203125,
+        3.875,
+        -0.984375,
+        -1.734375,
+        5,
+        -9.90625,
+        5.34375,
+        -3.171875
       ]
     }
   ]

@@ -79,6 +79,8 @@ class Context {
     const name=n.callName;
     if(name==='__syncthreads'){yield n.token.offset;return;}
     const args=[];for(const a of n.args)args.push(yield* this.eval(a));
+    if(name==='__mul24')return Math.imul((args[0]<<8)>>8,(args[1]<<8)>>8);
+    if(name==='__umul24')return Math.imul(args[0]&0xffffff,args[1]&0xffffff)>>>0;
     if(['atomicAdd','atomicMin','atomicMax','atomicExch'].includes(name)){
       const old=args[0].get(),value=name==='atomicAdd'?old+args[1]:name==='atomicMin'?Math.min(old,args[1]):name==='atomicMax'?Math.max(old,args[1]):args[1];args[0].set(value);return old;
     }

@@ -25,6 +25,18 @@ and `handle.sync()` lower to the existing barrier path, preserving storage
 visibility analysis and CPU-oracle synchronization sites. Other group types,
 numeric use of handles, helper-local handles and out-of-scope handles are rejected.
 
+Direct function-forwarding macros are recorded during tokenization and resolved
+at call sites. Definitions do not apply retroactively, argument arity is checked
+at every forwarding stage, and chains are bounded to 32 calls. Each argument
+appears once in the resulting AST. This is a restricted macro grammar, not a C++
+preprocessor. Unsupported substitutions and recursive chains fail explicitly.
+
+Signed/unsigned 24-bit multiply intrinsics emit small WGSL helper functions. The
+helpers mask or sign-extend inputs and use 32-bit multiplication. Function
+parameters prevent the shader compiler from rejecting overflowing literal
+arguments as constant-expression overflow. The CPU oracle uses integer multiply;
+independent BigInt and native 64-bit references verify boundary cases.
+
 ## Resource ownership
 
 `GpuRuntime.createBuffer()` owns an allocation; `importBuffer()` borrows one. Owned allocations are destroyed by the runtime. Borrowed allocations are never destroyed by runtime cleanup, although their wrapper can be invalidated. Raw imported buffers must belong to the same device; WebGPU does not expose a generic buffer-to-device identity query, so the Three bridge explicitly compares renderer and runtime devices before importing.

@@ -102,6 +102,11 @@
       "entry": "transposeNoBankConflicts",
       "sample": "cpp/6_Performance/transpose",
       "passed": true
+    },
+    {
+      "entry": "scalarProdGPU",
+      "sample": "cpp/2_Concepts_and_Techniques/scalarProd",
+      "passed": true
     }
   ]
 }

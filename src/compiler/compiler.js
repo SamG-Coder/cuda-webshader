@@ -54,7 +54,7 @@ function analyse(functions, params) {
 }
 class Emitter {
   constructor(ast, kernel, options) {
-    this.ast = ast; this.kernel = kernel; this.options = options; this.scopes = [new Map()]; this.temp = 0; this.loopDepth = 0;
+    this.ast = ast; this.kernel = kernel; this.options = options; this.scopes = [new Map()]; this.temp = 0; this.loopDepth = 0; this.integerIntrinsics=new Set();
     this.functions = new Map(); this.shared = [];
     for (const f of ast.functions) {
       if (this.functions.has(f.name)) this.fail(`Duplicate function '${f.name}'.`, f);
@@ -183,6 +183,12 @@ class Emitter {
     }
     const casts = {float: 'f32', int: 'i32', uint: 'u32', bool: 'bool'};
     const args = n.args.map(a => this.expr(a)), pre = args.flatMap(a => a.pre);
+    if(name==='__mul24'||name==='__umul24'){
+      if(args.length!==2||args.some(a=>!['i32','u32'].includes(a.type)))this.fail(`${name} requires two 32-bit integer arguments.`,n);
+      const signed=name==='__mul24',type=signed?'i32':'u32';
+      this.integerIntrinsics.add(name);
+      return this.result(n,type,`cw_${signed?'mul24':'umul24'}(${args.map(a=>this.convert(a.code,a.type,type,n)).join(', ')})`,pre);
+    }
     if (casts[name]) { if (args.length !== 1) this.fail('Scalar casts require one argument.', n); return this.result(n, casts[name], this.convert(args[0].code, args[0].type, casts[name], n), pre); }
     if (/^make_float[234]$/.test(name)) {
       const count = Number(name.at(-1)); if (args.length !== count) this.fail(`${name} needs ${count} arguments.`, n);
@@ -340,6 +346,10 @@ class Emitter {
     }
     this.scopes = kernelScope; this.currentFunction = this.kernel;
     const main = this.body(this.kernel.body);
+    // Runtime parameters preserve CUDA wraparound even when call arguments are literals;
+    // WGSL rejects overflowing constant expressions in an inline multiply.
+    if(this.integerIntrinsics.has('__mul24'))helperLines.unshift('fn cw_mul24(a: i32, b: i32) -> i32 { return ((a << 8u) >> 8u) * ((b << 8u) >> 8u); }');
+    if(this.integerIntrinsics.has('__umul24'))helperLines.unshift('fn cw_umul24(a: u32, b: u32) -> u32 { return (a & 16777215u) * (b & 16777215u); }');
     for (const s of this.shared) header.push(`var<workgroup> ${s.code}: ${s.atomic ? sharedAtomicType(s.type) : typeName(s.type)};`);
     const storageSize = this.shared.reduce((n, s) => n + Math.ceil(typeStride(s.type) / 16) * 16, 0);
     const wgsl = [...header, '', ...helperLines, '', `@compute @workgroup_size(${this.workgroupSize.join(', ')})`, 'fn main(', '  @builtin(local_invocation_id) cw_thread: vec3<u32>,', '  @builtin(workgroup_id) cw_block: vec3<u32>,', '  @builtin(num_workgroups) cw_grid: vec3<u32>', ') {', ...indent(main), '}', ''].join('\n');
