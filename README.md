@@ -24,7 +24,7 @@ npm start
 
 Open **http://localhost:5173** in a browser with working WebGPU. Do not double-click `index.html`; modules, workers and WebGPU need a proper local/secure origin. No CUDA Toolkit is required for the browser application.
 
-The interface has four areas:
+The main page is a searchable showcase explorer. Open **Kernel lab** (lab.html) for the original four-area workbench:
 
 - **Live system:** 131,072 particles by default; selectable up to 524,288 in the UI. Positions and velocities stay on the GPU. Orbit, zoom, pause and reset.
 - **Kernel lab:** edit/load `.cu`, change the launch shape, compile in a worker, inspect/export WGSL, and validate with the browser's real shader compiler. Compatible particle kernels can replace the live update kernel.
@@ -163,7 +163,7 @@ $env:CW_CHROMIUM = "C:\Program Files\Google\Chrome\Application\chrome.exe"
 npm run test:gpu
 ```
 
-`CW_SOFTWARE_GPU=1` selects SwiftShader for a CI correctness run. A software GPU result is **not** representative of your hardware. A GitHub Actions workflow is included but was not executed here.
+GitHub Actions runs compiler tests and the static build only. Software WebGPU/SwiftShader tests are disabled by project preference. Run GPU tests locally on real hardware.
 
 An optional native CUDA baseline is included in `tests/native-reference.cu`. With an appropriate NVIDIA CUDA Toolkit and GPU, run:
 

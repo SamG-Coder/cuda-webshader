@@ -7,7 +7,7 @@ await new Promise(r=>server.listen(0,'127.0.0.1',r));const page=await browser.ne
 try{
  const results=[];
  for(const [name,url] of [['source','http://127.0.0.1:5173'],['dist',`http://127.0.0.1:${server.address().port}`]]){
-  await page.goto(url);await page.waitForFunction(()=>window.cudaWebShader?.demo&&document.querySelector('#simulation-state').textContent==='RUNNING');
+  await page.goto(`${url}/lab.html`);await page.waitForFunction(()=>window.cudaWebShader?.demo&&document.querySelector('#simulation-state').textContent==='RUNNING');
   await page.waitForFunction(()=>document.querySelector('#hud-fps').textContent.match(/[1-9]/));
   const state=await page.evaluate(()=>({device:document.querySelector('#device-status').textContent,particles:document.querySelector('#hud-count').textContent,cadence:document.querySelector('#hud-fps').textContent,fatalVisible:!document.querySelector('#fatal').hidden,overflow:document.documentElement.scrollWidth>innerWidth}));
   if(state.fatalVisible||state.overflow)throw new Error(JSON.stringify(state));

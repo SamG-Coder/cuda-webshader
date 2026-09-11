@@ -1,0 +1,3 @@
+const buttons=[...document.querySelectorAll('[data-filter]')],cards=[...document.querySelectorAll('article[data-kind]')],search=document.querySelector('#search');let category='all';
+function filter(){const query=search.value.trim().toLowerCase();for(const card of cards)card.hidden=(category!=='all'&&card.dataset.kind!==category)||!card.dataset.search.includes(query);document.querySelector('#empty').hidden=cards.some(card=>!card.hidden);}
+buttons.forEach(button=>button.addEventListener('click',()=>{category=button.dataset.filter;buttons.forEach(b=>b.setAttribute('aria-pressed',String(b===button)));filter();}));search.addEventListener('input',filter);

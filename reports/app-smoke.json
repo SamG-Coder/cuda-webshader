@@ -5,7 +5,7 @@
       "name": "source",
       "device": "WEBGPU / nvidia",
       "particles": "131,072",
-      "cadence": "56 FPS",
+      "cadence": "60 FPS",
       "fatalVisible": false,
       "overflow": false,
       "pause": "PASS"

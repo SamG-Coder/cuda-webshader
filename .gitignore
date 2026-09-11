@@ -20,3 +20,6 @@ reports/gpu-run.log
 .env
 .env.*
 !.env.example
+
+# Downloaded native sample and its third-party build dependencies.
+.local/

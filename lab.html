@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080d15"><title>CUDA → WebShader · Three.js Compute Lab</title>
+<link rel="stylesheet" href="./src/style.css">
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.webgpu.js","three/webgpu":"./node_modules/three/build/three.webgpu.js","three/tsl":"./node_modules/three/build/three.tsl.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script></head>
+<body>
+<header class="topbar"><a class="brand" href="./"><span class="brand-mark">C<span>W</span></span><span>CUDA <b>→</b> WEB SHADER<small>THREE.JS COMPUTE LAB / 0.1</small></span></a><div class="top-status"><span class="status-dot" id="status-dot"></span><span id="device-status">INITIALIZING GPU</span><span class="version">WGSL · r186</span></div></header>
+<nav class="tabs" aria-label="Workspace"><button data-tab="live" class="active">01 <span>Live system</span></button><button data-tab="kernel">02 <span>Kernel lab</span></button><button data-tab="validate">03 <span>Correctness</span></button><button data-tab="bench">04 <span>Performance</span></button><div class="nav-note">CUDA C subset <span>→</span> typed AST <span>→</span> WGSL <span>→</span> WebGPU</div></nav>
+<main class="workspace">
+<section class="workbench">
+<div class="panel active" id="panel-live">
+ <div class="eyebrow">GPU-RESIDENT COMPUTE</div><h1>Same data.<br>Different runtime.</h1><p class="intro">Real CUDA-style kernels, compiled into browser compute shaders. Three.js renders the same GPU buffers.</p>
+ <div class="route"><div><b>01</b><span>CUDA source<small>Parsed, typed, checked</small></span><code>.cu</code></div><div><b>02</b><span>WGSL compute<small>Native WebGPU pipeline</small></span><code>GPU</code></div><div><b>03</b><span>Three.js renderer<small>Shared float4 storage</small></span><code>0 copies*</code></div></div>
+ <p class="micro">*No compute-to-render data copy or CPU readback. Initial state and small scalar parameters are uploaded.</p>
+ <div class="section-line"><span>PARTICLE SIMULATION</span><span id="simulation-state">STARTING</span></div>
+ <label class="control-label" for="particle-count">Particle count <select id="particle-count" disabled><option value="32768">32,768</option><option value="131072" selected>131,072</option><option value="262144">262,144</option><option value="524288">524,288</option></select></label>
+ <div class="button-row"><button id="pause" class="button secondary" disabled>Pause simulation</button><button id="reset" class="button secondary" disabled>Reset field</button></div>
+ <div class="boundary"><b>A compiler, not CUDA emulation.</b><p>This supports a defined CUDA C kernel subset. It does not execute CUDA binaries, cuBLAS, inline PTX, arbitrary pointers or warp-specific instructions.</p></div>
+ <button class="text-button" data-open-tab="kernel">Inspect the source and generated shader <span>↗</span></button>
+</div>
+<div class="panel" id="panel-kernel">
+ <div class="eyebrow">SOURCE-TO-SOURCE COMPILER</div><h2>Kernel workbench</h2><p>Compile a bundled kernel or open your own source. GPU validation does not prove your algorithm is correct.</p>
+ <label class="sr-only" for="kernel-select">Kernel</label><select id="kernel-select" class="full"></select>
+ <div class="small-row"><label>Block <input id="block-shape" value="128,1,1" aria-label="Workgroup dimensions"></label><label class="file-button">Open .cu<input id="open-source" type="file" accept=".cu,.cuh,.txt"></label></div>
+ <div class="editor-tabs"><button id="show-cuda" class="active">CUDA C</button><button id="show-wgsl">GENERATED WGSL</button><span id="compile-info">Not compiled</span></div>
+ <textarea id="source-editor" spellcheck="false" aria-label="CUDA source code"></textarea><textarea id="wgsl-editor" spellcheck="false" readonly hidden aria-label="Generated WGSL shader"></textarea>
+ <div class="button-row"><button id="compile" class="button primary">Compile + validate</button><button id="export-shader" class="button secondary" disabled>Export WGSL</button></div>
+ <button id="apply-live" class="button secondary full" disabled>Apply compatible particle kernel to live scene</button>
+ <pre id="compiler-message" class="compiler-message">The compiler runs in a Web Worker. Unsafe or unsupported features are rejected.</pre>
+ <p class="micro">The block shape must match shared-tile assumptions in your source. Use the JavaScript API to bind and launch custom kernels.</p>
+</div>
+<div class="panel" id="panel-validate">
+ <div class="eyebrow">NUMERICAL CORRECTNESS</div><h2>Test the actual GPU.</h2><p>Independent references, empty inputs, odd sizes, tail guards, shared-memory barriers and integer atomics. Includes a rendered-pixel interop test.</p>
+ <div class="test-summary"><div><strong id="test-passed">—</strong><span>passed</span></div><div><strong id="test-failed">—</strong><span>failed</span></div><div><strong id="test-total">—</strong><span>completed</span></div></div>
+ <div class="button-row"><button id="validate" class="button primary" disabled>Run GPU test suite</button><button id="export-tests" class="button secondary" disabled>Export JSON</button></div>
+ <div class="progress"><div id="test-progress"></div></div><div id="test-results" class="results-list"><div class="empty-state">NOT RUN ON THIS DEVICE<br><small>No simulated or prefilled GPU results.</small></div></div>
+ <p class="micro">These tests cover the bundled kernels, not arbitrary edited source. Rendering pauses during the test run.</p>
+</div>
+<div class="panel" id="panel-bench">
+ <p><a class="text-button" href="showcases/simplegl/">Run the official NVIDIA simpleGL kernel showcase ↗</a></p>
+ <p><a class="text-button" href="reports/performance-comparison.html" target="_blank" rel="noopener">Open measured RTX 5080 CUDA ↔ WebGPU comparison ↗</a></p>
+ <div class="eyebrow">MEASURE. COMPARE. SELECT.</div><h2>Find the fast path.</h2><p>Sweep 64 / 128 / 256-lane scalar and float4 kernels. Compare ordinary, shared-tiled and register-tiled matrix multiplication.</p>
+ <label class="control-label">Vector elements<select id="benchmark-n"><option value="262144">262,144</option><option value="1048576" selected>1,048,576</option><option value="4194304">4,194,304</option></select></label>
+ <label class="control-label">Matrix size<select id="benchmark-m"><option value="128">128 × 128</option><option value="256" selected>256 × 256</option><option value="512">512 × 512</option></select></label>
+ <div class="button-row"><button id="benchmark" class="button primary" disabled>Benchmark + tune</button><button id="export-bench" class="button secondary" disabled>Export JSON</button></div>
+ <div id="timer-note" class="timer-note">Timestamp support has not been checked.</div>
+ <div id="benchmark-results" class="results-list"><div class="empty-state">NO MEASUREMENTS YET<br><small>Compilation and initial upload are excluded.<br>Every variant is checked before it is timed.</small></div></div>
+ <div id="tuning-winners" class="boundary" hidden></div><p class="micro">Reported winners apply to this adapter and workload size. Faster than another WebGPU kernel is not proof of CUDA parity.</p>
+</div>
+</section>
+<section class="visual-panel" aria-label="Three.js GPU particle visualization"><div id="viewport"></div><div class="viewport-title"><div class="eyebrow">LIVE / CUDA-TRANSLATED PARTICLES</div><h2>Orbital field<span>01</span></h2></div><div class="viewport-hint">DRAG TO ORBIT <span>·</span> SCROLL TO ZOOM</div><div id="fatal" class="fatal" hidden></div><div id="busy-overlay" class="busy-overlay" hidden><div class="spinner"></div><b id="busy-label">GPU tests in progress</b><span>The scene is paused so it does not compete with the measured workload.</span></div><div class="hud"><div><span>PARTICLES</span><strong id="hud-count">—</strong></div><div><span>FRAME CADENCE</span><strong id="hud-fps">— <small>FPS</small></strong></div><div><span>GPU STATE</span><strong id="hud-memory">— <small>MiB</small></strong></div><div><span>COMPUTE → RENDER</span><strong class="accent">GPU <small>DIRECT</small></strong></div></div></section>
+</main>
+<footer><span id="activity">Loading sources and checking WebGPU support…</span><span>NO CPU COMPUTE FALLBACK <b>·</b> NO FABRICATED BENCHMARKS</span></footer>
+<script type="module">import('./src/app.js').catch(error=>{const f=document.getElementById('fatal');f.hidden=false;f.textContent='Startup failed: '+error.message+'\nRun npm install, then npm start. Open the localhost URL, not index.html directly.';document.getElementById('activity').textContent='Startup failed — see the error message.';console.error(error);});</script>
+</body></html>

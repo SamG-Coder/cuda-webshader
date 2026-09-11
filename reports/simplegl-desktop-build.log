@@ -1,0 +1,13 @@
+**********************************************************************
+** Visual Studio 2026 Developer Command Prompt v18.8.0
+** Copyright (c) 2026 Microsoft Corporation
+**********************************************************************
+[vcvarsall.bat] Environment initialized for: 'x64'
+simpleGL.cu
+tmpxft_00008fc0_00000000-8_simpleGL.cudafe1.cpp
+freeglut.lib
+glew64.lib
+opengl32.lib
+glu32.lib
+user32.lib
+gdi32.lib
