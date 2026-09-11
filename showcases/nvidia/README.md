@@ -8,7 +8,7 @@ NVIDIA cuda-samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
 The audit scans direct source files for standalone global void kernels. It is
 not a complete C++ preprocessor or a claim to compile every template instance.
 
-The 31 translated entries were run separately with NVCC on RTX 5080 and with
+The 33 translated entries were run separately with NVCC on RTX 5080 and with
 WebGPU on a real NVIDIA adapter. Fixtures use 256 elements or a 32×32 grid,
 with 64×64 matrices for the two transpose kernels and 17 vectors of 1,537
 elements for the scalar-product kernel;
@@ -35,6 +35,7 @@ node scripts/prepare-nvidia-atomic-cas.mjs
 node scripts/prepare-nvidia-aligned-copy.mjs
 node scripts/prepare-nvidia-fwt-pass.mjs
 node scripts/prepare-nvidia-fwt-shared.mjs
+node scripts/prepare-nvidia-histogram-merge.mjs
 node scripts/prepare-nvidia-checks.mjs
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor .local/nvidia-checks/check.cu -o .local/nvidia-checks/check.exe
 .local/nvidia-checks/check.exe
@@ -48,6 +49,7 @@ node scripts/test-nvidia-atomic-cas.mjs
 node scripts/test-nvidia-aligned-copy.mjs
 node scripts/test-nvidia-fwt-pass.mjs
 node scripts/test-nvidia-fwt-shared.mjs
+node scripts/test-nvidia-histogram-merge.mjs
 ```
 
 Run the server first (`npm start`) for browser checks. The browser script uses
@@ -182,3 +184,14 @@ X workgroup dimension, capped at 1,024, to support the 512-thread largest case.
 Reports are `reports/nvidia-fwt-shared-native.txt` and
 `reports/nvidia-fwt-shared.json`. These are complete transforms at the tested
 sizes; the large multi-pass dyadic-convolution host pipeline is not reproduced.
+
+The histogram follow-up imports `mergeHistogram64Kernel` and
+`mergeHistogram256Kernel` with their original bin-count and block-size constants.
+Both compile without new compiler special cases. `histogram-merge-native.cu` and
+`scripts/test-nvidia-histogram-merge.mjs` check 0, 1, 17, 255, 256 and 513 partial
+histograms per variant, one 256-thread block per bin, unsigned overflow and 16
+guard values. The reference sums each column independently; these are merge
+checks, not end-to-end byte histogram generation. The original counting stages
+still use unsupported byte-sized storage and/or shared-memory pointer helpers.
+Reports are `reports/nvidia-histogram-merge-native.txt` and
+`reports/nvidia-histogram-merge.json`; use the same native build flags as above.

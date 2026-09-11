@@ -4,10 +4,12 @@ import {atomicCasFixture} from './atomic-cas-fixtures.js';
 import {alignedCopyFixture} from './aligned-copy-fixtures.js';
 import {fwtPassFixture} from './fwt-pass-fixtures.js';
 import {fwtSharedFixture} from './fwt-shared-fixtures.js';
+import {histogramMergeFixture} from './histogram-merge-fixtures.js';
 // Deterministic correctness fixtures for isolated upstream kernels, not host applications.
 import {scalarFixture} from './scalar-fixtures.js';
 import {blackScholesFixture} from './blackscholes-fixtures.js';
 export function fixture(row) {
+ if(/^mergeHistogram(64|256)Kernel$/.test(row.entry))return histogramMergeFixture(Number(row.entry.match(/\d+/)[0]));
  if(row.entry==='fwtBatch1Kernel')return fwtSharedFixture();
  if(row.entry==='fwtBatch2Kernel')return fwtPassFixture();
  if(row.sample==='cpp/6_Performance/alignedTypes')return alignedCopyFixture(row.artifact.metadata.templateArguments.TData);

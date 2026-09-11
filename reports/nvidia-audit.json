@@ -2710,8 +2710,40 @@
         ]
       },
       "browser": {
-        "status": "translation-rejected",
-        "reason": "Only numeric object-like #define directives are supported; preprocess other directives first. (63:1)\n#pragma unroll\r\n^"
+        "status": "kernel-verified",
+        "reason": "Isolated kernels checked against CPU reference on a real NVIDIA WebGPU adapter. Full host program is not executed.",
+        "checks": [
+          {
+            "sample": "cpp/2_Concepts_and_Techniques/histogram",
+            "entry": "mergeHistogram64Kernel",
+            "pass": true,
+            "values": 64,
+            "maxError": 0,
+            "failures": 0,
+            "outputs": {
+              "d_Histogram": {
+                "values": 64,
+                "maxError": 0,
+                "failures": 0
+              }
+            }
+          },
+          {
+            "sample": "cpp/2_Concepts_and_Techniques/histogram",
+            "entry": "mergeHistogram256Kernel",
+            "pass": true,
+            "values": 256,
+            "maxError": 0,
+            "failures": 0,
+            "outputs": {
+              "d_Histogram": {
+                "values": 256,
+                "maxError": 0,
+                "failures": 0
+              }
+            }
+          }
+        ]
       }
     },
     {
@@ -9573,11 +9605,11 @@
       }
     }
   ],
-  "executionUpdated": "2026-09-11T23:53:37.511Z",
+  "executionUpdated": "2026-09-11T23:57:52.622Z",
   "counts": {
     "samples": 208,
     "compilerProbes": 350,
-    "webgpuPassed": 31,
+    "webgpuPassed": 33,
     "nativeProgramsAttempted": 149,
     "nativeStatuses": {
       "exited-zero": 142,

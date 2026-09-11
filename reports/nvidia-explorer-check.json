@@ -157,6 +157,16 @@
       "entry": "fwtBatch1Kernel",
       "sample": "cpp/5_Domain_Specific/fastWalshTransform",
       "passed": true
+    },
+    {
+      "entry": "mergeHistogram64Kernel",
+      "sample": "cpp/2_Concepts_and_Techniques/histogram",
+      "passed": true
+    },
+    {
+      "entry": "mergeHistogram256Kernel",
+      "sample": "cpp/2_Concepts_and_Techniques/histogram",
+      "passed": true
     }
   ]
 }

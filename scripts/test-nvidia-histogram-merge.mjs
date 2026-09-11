@@ -1,0 +1,9 @@
+import {chromium} from 'playwright';import {writeFile} from 'node:fs/promises';
+const browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM||'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+try{const page=await browser.newPage();await page.goto('http://localhost:5173/');const report=await page.evaluate(async()=>{
+ const {GpuRuntime}=await import('/src/runtime/runtime.js'),{histogramMergeFixture}=await import('/showcases/nvidia/histogram-merge-fixtures.js'),runtime=await GpuRuntime.create(),results=[];
+ try{const adapter=runtime.describe();if(!/nvidia/i.test(JSON.stringify(adapter)))throw Error('Real NVIDIA adapter required');for(const [index,bins]of [[31,64],[32,256]]){const source=await(await fetch(`/showcases/nvidia/kernels/${index}.cu`)).text(),kernel=await runtime.kernel(source,{workgroupSize:[256,1,1]});for(const count of [0,1,17,255,256,513]){const f=histogramMergeFixture(bins,count,16),resources=Object.fromEntries(Object.entries(f.buffers).map(([name,data])=>[name,runtime.createBuffer(data)]));try{runtime.batch().dispatch(kernel.bind(resources,f.scalars),f.groups).submit();const output=await runtime.read(resources.d_Histogram,Uint32Array);results.push({bins,count,guardsPreserved:output.slice(bins).every(v=>v===0xdeadbeef),pass:output.every((v,i)=>v===f.expected[i])});}finally{await runtime.idle();for(const r of Object.values(resources))runtime.destroyBuffer(r);}}}
+ return {date:new Date().toISOString(),adapter,softwareAdapterRequested:false,sourceCompiled:true,results,passed:results.every(r=>r.pass)};
+ }finally{runtime.dispose();}
+ });await writeFile('reports/nvidia-histogram-merge.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));if(!report.passed)process.exitCode=1;
+}finally{await browser.close();}

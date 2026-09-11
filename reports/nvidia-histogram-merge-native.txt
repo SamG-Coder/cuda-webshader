@@ -1,0 +1,12 @@
+bins=64 partialHistograms=0 output + guards: PASS
+bins=64 partialHistograms=1 output + guards: PASS
+bins=64 partialHistograms=17 output + guards: PASS
+bins=64 partialHistograms=255 output + guards: PASS
+bins=64 partialHistograms=256 output + guards: PASS
+bins=64 partialHistograms=513 output + guards: PASS
+bins=256 partialHistograms=0 output + guards: PASS
+bins=256 partialHistograms=1 output + guards: PASS
+bins=256 partialHistograms=17 output + guards: PASS
+bins=256 partialHistograms=255 output + guards: PASS
+bins=256 partialHistograms=256 output + guards: PASS
+bins=256 partialHistograms=513 output + guards: PASS
