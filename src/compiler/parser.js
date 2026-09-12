@@ -37,13 +37,14 @@ export function tokenize(source, defines = {}) {
     if (rest.startsWith('/*')) { const end = rest.indexOf('*/'); if (end < 0) throw new CompileError('Unclosed comment.', token, source); advance(rest.slice(0, end + 2)); continue; }
     if (rest[0] === '#') {
       const directive = rest.split('\n')[0];
-      const conditional=directive.trimEnd().match(/^#\s*(if|else|endif)\b(.*)$/);
+      const conditional=directive.trimEnd().match(/^#\s*(ifdef|ifndef|if|else|endif)\b(.*)$/);
       if(conditional){const [,kind,tail]=conditional,expression=kind==='if'?unwrapCondition(tail.replace(/\/\/.*$/,'').trim()):tail.replace(/\/\/.*$/,'').trim();
-        if(kind==='if'){const match=expression.match(/^(!)?\s*([A-Za-z_]\w*|[0-9]+)$/);if(!match)throw new CompileError('Conditional preprocessing supports an integer literal or numeric macro with optional !.',token,source);const raw=/^[0-9]+$/.test(match[2])?match[2]:macros.get(match[2])??'0',number=Number(raw.replace(/[uU]$/,''));if(!Number.isSafeInteger(number))throw new CompileError('Conditional macro must be an integer.',token,source);const selected=match[1]?!number:!!number;conditionals.push({parent:enabled,selected,otherwise:false});enabled=enabled&&selected;}
+        if(kind==='ifdef'||kind==='ifndef'){if(!/^[A-Za-z_]\w*$/.test(expression))throw new CompileError('Conditional definition test requires one macro name.',token,source);const defined=macros.has(expression)||forwarders.has(expression)||expressions.has(expression),selected=kind==='ifdef'?defined:!defined;conditionals.push({parent:enabled,selected,otherwise:false});enabled=enabled&&selected;}
+        else if(kind==='if'){const match=expression.match(/^(!)?\s*([A-Za-z_]\w*|[0-9]+)$/);if(!match)throw new CompileError('Conditional preprocessing supports an integer literal or numeric macro with optional !.',token,source);const raw=/^[0-9]+$/.test(match[2])?match[2]:macros.get(match[2])??'0',number=Number(raw.replace(/[uU]$/,''));if(!Number.isSafeInteger(number))throw new CompileError('Conditional macro must be an integer.',token,source);const selected=match[1]?!number:!!number;conditionals.push({parent:enabled,selected,otherwise:false});enabled=enabled&&selected;}
         else{const frame=conditionals.at(-1);if(!frame||expression)throw new CompileError('Unmatched or malformed conditional directive.',token,source);if(kind==='else'){if(frame.otherwise)throw new CompileError('Duplicate #else.',token,source);frame.otherwise=true;enabled=frame.parent&&!frame.selected;}else{conditionals.pop();enabled=frame.parent;}}
         advance(directive);continue;
       }
-      if(/^#\s*(elif|ifdef|ifndef)\b/.test(directive))throw new CompileError('Unsupported conditional directive; preprocess it first.',token,source);
+      if(/^#\s*(elif)\b/.test(directive))throw new CompileError('Unsupported conditional directive; preprocess it first.',token,source);
       if(!enabled){advance(directive);continue;}
       if(/^#\s*pragma\s+unroll(?:\s+[1-9]\d*)?\s*(?:\/\/.*)?$/.test(directive.trimEnd())){advance(directive);continue;}
       const expression=expressionMacro(directive.trimEnd());if(expression){if(macros.has(expression.name)||forwarders.has(expression.name)||expressions.has(expression.name))throw new CompileError('Macro redefinition is unsupported.',token,source);expressions.set(expression.name,expression);advance(directive);continue;}

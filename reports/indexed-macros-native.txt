@@ -1,0 +1,1 @@
+PASS indexed shared uchar4 macro and definition branches: ff0d0b07

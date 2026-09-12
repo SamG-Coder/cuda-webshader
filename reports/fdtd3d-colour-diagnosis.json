@@ -1,0 +1,76 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "sourceUnchanged": true,
+  "coefficients": [
+    0.5,
+    0.0625,
+    0.015625,
+    0.00390625,
+    0.0009765625
+  ],
+  "checkpoints": [
+    {
+      "step": 0,
+      "min": -0.9999714493751526,
+      "max": 0.9993805289268494,
+      "p05": -0.8979983925819397,
+      "p95": 0.8905742168426514,
+      "gradientMin": 0.000014275312423706055,
+      "gradientMax": 0.9996902644634247
+    },
+    {
+      "step": 1,
+      "min": -0.7501722574234009,
+      "max": 0.7192054390907288,
+      "p05": -0.4737057089805603,
+      "p95": 0.4681708514690399,
+      "gradientMin": 0.12491387128829956,
+      "gradientMax": 0.8596027195453644
+    },
+    {
+      "step": 10,
+      "min": -0.34228143095970154,
+      "max": 0.3023299276828766,
+      "p05": -0.11389771103858948,
+      "p95": 0.09554608911275864,
+      "gradientMin": 0.32885928452014923,
+      "gradientMax": 0.6511649638414383
+    },
+    {
+      "step": 30,
+      "min": -0.3280882239341736,
+      "max": 0.28833436965942383,
+      "p05": -0.11703174561262131,
+      "p95": 0.09237415343523026,
+      "gradientMin": 0.3359558880329132,
+      "gradientMax": 0.6441671848297119
+    },
+    {
+      "step": 120,
+      "min": -0.3262648284435272,
+      "max": 0.2898874282836914,
+      "p05": -0.11866576224565506,
+      "p95": 0.09201694279909134,
+      "gradientMin": 0.3368675857782364,
+      "gradientMax": 0.6449437141418457
+    }
+  ],
+  "maxError": 1.1920928955078125e-7
+}
