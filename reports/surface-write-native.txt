@@ -1,0 +1,4 @@
+PASS original surface writer: all 262144 texels exactly equal input
+scenario=0 theta=0.5 PASS original surface/texture pipeline, finite output and guards
+scenario=1 theta=0 PASS original surface/texture pipeline, finite output and guards
+scenario=2 theta=-0.7 PASS original surface/texture pipeline, finite output and guards

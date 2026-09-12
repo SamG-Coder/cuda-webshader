@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+<defs><pattern id="cells" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="23" height="23" fill="#376377"/><rect width="10" height="10" x="6" y="6" fill="#a1e9d0"/></pattern></defs>
+<rect width="640" height="360" fill="#0a151e"/>
+<g fill="#112632" stroke="#416777"><rect x="55" y="106" width="126" height="136" rx="6"/><rect x="257" y="70" width="144" height="192" rx="6"/><rect x="463" y="100" width="124" height="142" rx="6"/></g>
+<g fill="#9cedd0"><rect x="75" y="128" width="86" height="10"/><rect x="75" y="154" width="58" height="10"/><rect x="75" y="180" width="74" height="10"/><rect x="75" y="206" width="46" height="10"/></g>
+<rect x="269" y="82" width="120" height="168" fill="url(#cells)"/>
+<g stroke="#9cedd0" stroke-width="3" fill="none"><path d="M194 174H238L226 162M238 174L226 186M413 174H451L439 162M451 174L439 186"/></g>
+<g transform="rotate(-25 525 170)"><rect x="480" y="124" width="90" height="90" fill="#93b8c0"/><path d="M490 194L515 143L553 194Z" fill="#183e50"/><circle cx="546" cy="142" r="9" fill="#effff9"/></g>
+<text x="32" y="332" fill="#a3c8d5" font-family="monospace" font-size="12" letter-spacing="2">BUFFER → SURFACE → TEXTURE · GPU PASSES</text>
+</svg>

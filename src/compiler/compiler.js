@@ -228,6 +228,20 @@ class Emitter {
       default: this.fail(`Unsupported expression '${n.kind}'.`, n);
     }
   }
+  surfaceGridCoordinate(node,axis,scale,seen=new Set()){
+    // Restrict trap-mode stores to coordinates whose full range the runtime can
+    // validate before submission. Never silently turn a CUDA trap into a drop.
+    const literal=(n,value)=>n?.kind==='literal'&&Number(n.value.replace(/[uUlL]+$/,''))===value;
+    if(scale!==1)return node?.kind==='binary'&&node.op==='*'&&((literal(node.right,scale)&&this.surfaceGridCoordinate(node.left,axis,1,seen))||(literal(node.left,scale)&&this.surfaceGridCoordinate(node.right,axis,1,seen)));
+    if(node?.kind==='id'){
+      if(seen.has(node.name))return false;const declarations=[];let changed=false;
+      walk(this.kernel.body,n=>{if(n.kind==='decl'&&n.name===node.name)declarations.push(n);if(n.kind==='call'&&n.callee?.name!=='surf2Dwrite')for(const arg of n.args)walk(arg,a=>{if(a.kind==='id'&&a.name===node.name)changed=true;});if((n.kind==='assign'&&n.left?.kind==='id'&&n.left.name===node.name)||(n.kind==='unary'&&['++','--'].includes(n.op)&&n.value?.name===node.name))changed=true;});
+      if(changed||declarations.length!==1)return false;return this.surfaceGridCoordinate(declarations[0].init,axis,1,new Set([...seen,node.name]));
+    }
+    const member=(n,name)=>n?.kind==='member'&&n.base?.kind==='id'&&n.base.name===name&&n.member===axis;
+    const product=n=>n?.kind==='binary'&&n.op==='*'&&((member(n.left,'blockIdx')&&member(n.right,'blockDim'))||(member(n.right,'blockIdx')&&member(n.left,'blockDim')));
+    return node?.kind==='binary'&&node.op==='+'&&((product(node.left)&&member(node.right,'threadIdx'))||(product(node.right)&&member(node.left,'threadIdx')));
+  }
   argument(n){
     if(n.kind==='unary'&&n.op==='&'&&n.value.kind==='id'){const value=this.expr(n.value),symbol=value.rootSymbol;if(!symbol||!['local','reference'].includes(symbol.kind)||symbol.constant||!numeric(value.type))this.fail('Local pointer arguments require a mutable named numeric scalar.',n);return this.result(n,arrayOf(value.type),value.code,value.pre,{rootSymbol:symbol,localPointer:true,pointerCode:symbol.kind==='reference'?symbol.pointerCode:'&'+value.code});}
     const address=n.kind==='unary'&&n.op==='&'&&n.value.kind==='index'?n.value:null;
@@ -282,6 +296,12 @@ class Emitter {
     if (n.callee.kind !== 'id') this.fail('Only named functions are supported.', n);
     const name = n.callee.name; n.callName = name;
     if(name==='tex1D'){if(n.callee.templateArgument!=='float4'||n.args.length!==2||n.args[0].kind!=='id')this.fail('tex1D supports a bound float4 texture and one float coordinate.',n);const texture=this.lookup(n.args[0].name,n.args[0]),coordinate=this.expr(n.args[1]);if(texture.kind!=='texture'||texture.dimension!=='2d'||coordinate.type!=='f32')this.fail('tex1D requires a matching kernel texture parameter and float coordinate.',n);return this.result(n,'vec4<f32>',`textureSampleLevel(${texture.code}, ${texture.sampler}, vec2<f32>(${coordinate.code}, 0.5f), 0.0f)`,coordinate.pre);}
+    if(name==='surf2Dwrite'){
+      if(n.args.length!==5||n.args[1].kind!=='id'||n.args[4].kind!=='id'||n.args[4].name!=='cudaBoundaryModeTrap')this.fail('surf2Dwrite supports float surfaces with checked global XY coordinates and cudaBoundaryModeTrap.',n);
+      const surface=this.lookup(n.args[1].name,n.args[1]),value=this.expr(n.args[0]),x=this.expr(n.args[2]),y=this.expr(n.args[3]);
+      if(surface.kind!=='surface'||value.type!=='f32'||!['i32','u32'].includes(x.type)||!['i32','u32'].includes(y.type)||!this.surfaceGridCoordinate(n.args[2],'x',4)||!this.surfaceGridCoordinate(n.args[3],'y',1))this.fail('Surface writes require float values, byte offset globalX * 4 and row globalY; other coordinates cannot be bounds-checked before dispatch.',n);
+      return this.result(n,'void',`textureStore(${surface.code}, vec2<i32>(i32(${x.code}) / 4i, i32(${y.code})), vec4<f32>(${value.code}, 0.0f, 0.0f, 0.0f))`,[...value.pre,...x.pre,...y.pre]);
+    }
     if(name==='tex2D'){if(n.callee.templateArgument!=='float'||n.args.length!==3||n.args[0].kind!=='id')this.fail('tex2D supports a bound float texture and two float coordinates.',n);const texture=this.lookup(n.args[0].name,n.args[0]),coords=n.args.slice(1).map(a=>this.expr(a));if(texture.kind!=='texture'||texture.format!=='r32float'||coords.some(c=>c.type!=='f32'))this.fail('tex2D requires a matching kernel texture parameter and float coordinates.',n);return this.result(n,'f32',`textureSampleLevel(${texture.code}, ${texture.sampler}, vec2<f32>(${coords.map(c=>c.code).join(', ')}), 0.0f).r`,coords.flatMap(c=>c.pre));}
     if(name==='tex3D'){if(n.callee.templateArgument!=='float'||n.args.length!==4||n.args[0].kind!=='id')this.fail('tex3D supports a bound texture object and three float coordinates, returning float.',n);const texture=this.lookup(n.args[0].name,n.args[0]);if(texture.kind!=='texture'||texture.dimension!=='3d')this.fail('tex3D requires a kernel texture parameter.',n);const coords=n.args.slice(1).map(a=>this.expr(a));if(coords.some(c=>c.type!=='f32'))this.fail('tex3D coordinates must be floats.',n);return this.result(n,'f32',`textureSampleLevel(${texture.code}, ${texture.sampler}, vec3<f32>(${coords.map(c=>c.code).join(', ')}), 0.0f).r`,coords.flatMap(c=>c.pre));}
     if (name === '__syncthreads') { if (n.args.length) this.fail('__syncthreads takes no arguments.', n); return this.result(n, 'void', 'workgroupBarrier()'); }
@@ -483,12 +503,13 @@ class Emitter {
   emit() {
     this.checkRecursion();
     if (this.kernel.result !== 'void') this.fail('__global__ kernels must return void.', this.kernel);
-    const textures=[],bufferCount=this.kernel.params.filter(p=>p.pointer).length;
+    const textures=[],surfaces=[],bufferCount=this.kernel.params.filter(p=>p.pointer).length;
     const bindings = [], scalars = [], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
     for(const s of this.structs.values())header.push(`struct ${s.type} {`,...s.fields.map(f=>`  cw_field_${f.name}: ${typeName(f.resolvedType)},`),'}');
     const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t}>`;
     for (const p of this.kernel.params) {
       if (p.shared || p.reference || p.external || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
+      if(p.type==='surface2d'){if(p.pointer)this.fail('Surface objects must be passed by value.',p);const binding=bufferCount+this.kernel.params.filter(p=>p.type==='texture3d').length*2+surfaces.length,symbol={name:p.name,type:p.type,code:'cw_surface_'+p.name,kind:'surface',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;surfaces.push({name:p.name,binding,dimension:'2d',format:'r32float',access:'write-only',coordinates:'global-xy'});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_storage_2d<r32float, write>;`);continue;}
       if(p.type==='texture3d'){if(p.pointer)this.fail('Texture objects must be passed by value.',p);const binding=bufferCount+textures.length*2,samplerBinding=binding+1,sampling=this.textureKinds.get(p.name)||'tex3D',dimension=sampling==='tex3D'?'3d':'2d',format=sampling==='tex1D'?'rgba32float':sampling==='tex2D'?'r32float':'r8unorm';const symbol={name:p.name,type:p.type,code:'t_'+p.name,sampler:'s_'+p.name,dimension,format,kind:'texture',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;textures.push({name:p.name,binding,samplerBinding,dimension,format});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_${dimension}<f32>;`,`@group(0) @binding(${samplerBinding}) var ${symbol.sampler}: sampler;`);continue;}
       if (p.pointer) {
         if(this.structs.has(p.type))this.fail('Struct buffer layout is not supported; use local struct values.',p);
@@ -533,7 +554,7 @@ class Emitter {
     if(uniformSize){
       header.push('struct CWParams {',...scalars.map(s=>`  ${s.field||'p_'+s.name}: ${s.type},`));
       for(let i=scalars.length*4;i<uniformSize;i+=4)header.push(`  cw_pad_${i}: u32,`);
-      header.push('}',`@group(0) @binding(${bindings.length+textures.length*2}) var<uniform> cw_params: CWParams;`);
+      header.push('}',`@group(0) @binding(${bindings.length+textures.length*2+surfaces.length}) var<uniform> cw_params: CWParams;`);
     }
     header.push(`const cw_block_size: vec3<u32> = vec3<u32>(${this.workgroupSize.map(x => `${x}u`).join(', ')});`);
     if(this.dynamicSharedBytes&&!this.dynamicSharedUsed)this.fail('sharedMemoryBytes was supplied but the kernel has no dynamic shared array.',this.kernel);
@@ -544,7 +565,7 @@ class Emitter {
     for (const s of this.shared) header.push(`var<workgroup> ${s.code}: ${s.atomic ? sharedAtomicType(s.type) : typeName(s.type)};`);
     const storageSize = this.shared.reduce((n, s) => n + Math.ceil(typeStride(s.type) / 16) * 16, 0);
     const wgsl = [...header, '', ...helperLines, '', `@compute @workgroup_size(${this.workgroupSize.join(', ')})`, 'fn main(', '  @builtin(local_invocation_id) cw_thread: vec3<u32>,', '  @builtin(workgroup_id) cw_block: vec3<u32>,', '  @builtin(num_workgroups) cw_grid: vec3<u32>', ') {', ...indent(main), '}', ''].join('\n');
-    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {workgroupSize: this.workgroupSize, bindings, scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2 : null,...(textures.length?{textures}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
+    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {workgroupSize: this.workgroupSize, bindings, scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2+surfaces.length : null,...(textures.length?{textures}:{}),...(surfaces.length?{surfaces}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
   }
 }
 function resolveTraitTypes(fn, ast, parameter, argument) {

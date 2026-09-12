@@ -18,11 +18,11 @@
       "maxStorageBufferBindingSize": 268435456
     }
   },
-  "date": "2026-09-12T03:10:56.866Z",
-  "total": 103,
-  "passed": 103,
+  "date": "2026-09-12T03:21:49.840Z",
+  "total": 104,
+  "passed": 104,
   "failed": 0,
-  "wallMs": 1211.1650000214577,
+  "wallMs": 1267.8900000154972,
   "results": [
     {
       "name": "SAXPY n=0",
@@ -36,7 +36,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 16.875
+      "wallMs": 17.944999992847443
     },
     {
       "name": "SAXPY n=1",
@@ -50,7 +50,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.8250000178813934
+      "wallMs": 0.8050000071525574
     },
     {
       "name": "SAXPY n=2",
@@ -64,7 +64,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.979999989271164
+      "wallMs": 3.3050000071525574
     },
     {
       "name": "SAXPY n=63",
@@ -78,7 +78,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 1.1549999713897705
+      "wallMs": 1.125
     },
     {
       "name": "SAXPY n=127",
@@ -92,7 +92,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.6749999821186066
+      "wallMs": 0.7150000035762787
     },
     {
       "name": "SAXPY n=128",
@@ -106,7 +106,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.6149999797344208
+      "wallMs": 0.6400000154972076
     },
     {
       "name": "SAXPY n=129",
@@ -120,7 +120,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.6649999916553497
+      "wallMs": 0.5200000107288361
     },
     {
       "name": "SAXPY n=257",
@@ -134,7 +134,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.6599999964237213
+      "wallMs": 0.5800000131130219
     },
     {
       "name": "SAXPY n=1031",
@@ -148,7 +148,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.195000022649765
+      "wallMs": 0.6800000071525574
     },
     {
       "name": "float4 SAXPY records=0",
@@ -162,7 +162,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 9.580000013113022
+      "wallMs": 6.305000007152557
     },
     {
       "name": "float4 SAXPY records=1",
@@ -176,7 +176,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.810000002384186
+      "wallMs": 0.6800000071525574
     },
     {
       "name": "float4 SAXPY records=31",
@@ -190,7 +190,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.810000002384186
+      "wallMs": 0.6500000059604645
     },
     {
       "name": "float4 SAXPY records=128",
@@ -204,7 +204,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.844999998807907
+      "wallMs": 0.5600000023841858
     },
     {
       "name": "float4 SAXPY records=129",
@@ -218,7 +218,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.405000001192093
+      "wallMs": 0.6099999845027924
     },
     {
       "name": "float4 SAXPY records=257",
@@ -232,7 +232,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.7299999892711639
+      "wallMs": 0.5300000011920929
     },
     {
       "name": "matmul_naive 1×1×1",
@@ -246,7 +246,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 9.234999984502792
+      "wallMs": 13.009999990463257
     },
     {
       "name": "matmul_tiled 1×1×1",
@@ -260,7 +260,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 14.580000013113022
+      "wallMs": 13.775000005960464
     },
     {
       "name": "matmul_register 1×1×1",
@@ -274,7 +274,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 24.069999992847443
+      "wallMs": 23.094999998807907
     },
     {
       "name": "matmul_naive 3×5×7",
@@ -288,7 +288,7 @@
           "maxRel": 2.988747068412719e-7
         }
       },
-      "wallMs": 4.004999995231628
+      "wallMs": 0.8100000023841858
     },
     {
       "name": "matmul_tiled 3×5×7",
@@ -302,7 +302,7 @@
           "maxRel": 2.988747068412719e-7
         }
       },
-      "wallMs": 3.9500000178813934
+      "wallMs": 3.125
     },
     {
       "name": "matmul_register 3×5×7",
@@ -316,7 +316,7 @@
           "maxRel": 2.988747068412719e-7
         }
       },
-      "wallMs": 5.030000001192093
+      "wallMs": 4.21000000834465
     },
     {
       "name": "matmul_naive 16×16×16",
@@ -330,7 +330,7 @@
           "maxRel": 0.000007962963505512887
         }
       },
-      "wallMs": 4.0250000059604645
+      "wallMs": 3.145000010728836
     },
     {
       "name": "matmul_tiled 16×16×16",
@@ -344,7 +344,7 @@
           "maxRel": 0.000007962963505512887
         }
       },
-      "wallMs": 3.0250000059604645
+      "wallMs": 3.205000013113022
     },
     {
       "name": "matmul_register 16×16×16",
@@ -358,7 +358,7 @@
           "maxRel": 0.000007962963505512887
         }
       },
-      "wallMs": 1.895000010728836
+      "wallMs": 5.370000004768372
     },
     {
       "name": "matmul_naive 17×19×23",
@@ -372,7 +372,7 @@
           "maxRel": 0.00017283374599630626
         }
       },
-      "wallMs": 2.740000009536743
+      "wallMs": 2.6500000059604645
     },
     {
       "name": "matmul_tiled 17×19×23",
@@ -386,7 +386,7 @@
           "maxRel": 0.00017283374599630626
         }
       },
-      "wallMs": 2.969999998807907
+      "wallMs": 0.8550000190734863
     },
     {
       "name": "matmul_register 17×19×23",
@@ -400,7 +400,7 @@
           "maxRel": 0.00017283374599630626
         }
       },
-      "wallMs": 5.5250000059604645
+      "wallMs": 1.5049999952316284
     },
     {
       "name": "matmul_naive 31×9×5",
@@ -414,7 +414,7 @@
           "maxRel": 0.000004401365831844938
         }
       },
-      "wallMs": 0.8550000190734863
+      "wallMs": 0.5550000071525574
     },
     {
       "name": "matmul_tiled 31×9×5",
@@ -428,7 +428,7 @@
           "maxRel": 0.000004401365831844938
         }
       },
-      "wallMs": 3.780000001192093
+      "wallMs": 0.7599999904632568
     },
     {
       "name": "matmul_register 31×9×5",
@@ -442,7 +442,7 @@
           "maxRel": 0.000004401365831844938
         }
       },
-      "wallMs": 3.8199999928474426
+      "wallMs": 1.5450000166893005
     },
     {
       "name": "matmul_naive 0×5×3",
@@ -456,7 +456,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.9149999916553497
+      "wallMs": 0.550000011920929
     },
     {
       "name": "matmul_tiled 0×5×3",
@@ -470,7 +470,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.205000013113022
+      "wallMs": 0.7399999797344208
     },
     {
       "name": "matmul_register 0×5×3",
@@ -484,7 +484,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.439999997615814
+      "wallMs": 1.395000010728836
     },
     {
       "name": "matmul_naive 5×0×3",
@@ -498,7 +498,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.699999988079071
+      "wallMs": 0.5349999964237213
     },
     {
       "name": "matmul_tiled 5×0×3",
@@ -512,7 +512,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 1.0199999809265137
+      "wallMs": 0.7100000083446503
     },
     {
       "name": "matmul_register 5×0×3",
@@ -526,7 +526,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.6449999809265137
+      "wallMs": 1.4749999940395355
     },
     {
       "name": "matmul_naive 5×7×0",
@@ -540,7 +540,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.7350000143051147
+      "wallMs": 0.5349999964237213
     },
     {
       "name": "matmul_tiled 5×7×0",
@@ -554,7 +554,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.3199999928474426
+      "wallMs": 1.530000001192093
     },
     {
       "name": "matmul_register 5×7×0",
@@ -568,7 +568,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.320000022649765
+      "wallMs": 3.7899999916553497
     },
     {
       "name": "Reduction partials n=0",
@@ -582,7 +582,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 9.844999998807907
+      "wallMs": 10.444999992847443
     },
     {
       "name": "Reduction partials n=1",
@@ -596,7 +596,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.7450000047683716
+      "wallMs": 3.2549999952316284
     },
     {
       "name": "Reduction partials n=2",
@@ -610,7 +610,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.3899999856948853
+      "wallMs": 3
     },
     {
       "name": "Reduction partials n=127",
@@ -624,7 +624,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.7249999940395355
+      "wallMs": 2.9749999940395355
     },
     {
       "name": "Reduction partials n=128",
@@ -638,7 +638,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.5999999940395355
+      "wallMs": 3.0499999821186066
     },
     {
       "name": "Reduction partials n=129",
@@ -652,7 +652,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.669999986886978
+      "wallMs": 2.9850000143051147
     },
     {
       "name": "Reduction partials n=255",
@@ -666,7 +666,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 1.0499999821186066
+      "wallMs": 0.9550000131130219
     },
     {
       "name": "Reduction partials n=256",
@@ -680,7 +680,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.824999988079071
+      "wallMs": 4.060000002384186
     },
     {
       "name": "Reduction partials n=257",
@@ -694,7 +694,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.655000001192093
+      "wallMs": 3.0349999964237213
     },
     {
       "name": "Reduction partials n=1031",
@@ -708,7 +708,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.280000001192093
+      "wallMs": 2.990000009536743
     },
     {
       "name": "Convolution + halo n=0",
@@ -722,7 +722,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 10.924999982118607
+      "wallMs": 12.025000005960464
     },
     {
       "name": "Convolution + halo n=1",
@@ -736,7 +736,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.130000025033951
+      "wallMs": 3.1500000059604645
     },
     {
       "name": "Convolution + halo n=2",
@@ -750,7 +750,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.594999998807907
+      "wallMs": 3.7600000202655792
     },
     {
       "name": "Convolution + halo n=3",
@@ -764,7 +764,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.8099999725818634
+      "wallMs": 3.0349999964237213
     },
     {
       "name": "Convolution + halo n=127",
@@ -778,7 +778,7 @@
           "maxRel": 0.000001985454559894215
         }
       },
-      "wallMs": 3.259999990463257
+      "wallMs": 3.550000011920929
     },
     {
       "name": "Convolution + halo n=128",
@@ -792,7 +792,7 @@
           "maxRel": 0.000001985454559894215
         }
       },
-      "wallMs": 0.8700000047683716
+      "wallMs": 3.4449999928474426
     },
     {
       "name": "Convolution + halo n=129",
@@ -806,7 +806,7 @@
           "maxRel": 0.000001985454559894215
         }
       },
-      "wallMs": 2.770000010728836
+      "wallMs": 2.955000013113022
     },
     {
       "name": "Convolution + halo n=259",
@@ -820,7 +820,7 @@
           "maxRel": 0.000002949040578798364
         }
       },
-      "wallMs": 2.7899999916553497
+      "wallMs": 3.060000002384186
     },
     {
       "name": "Histogram grid-stride n=0",
@@ -834,7 +834,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 11.870000004768372
+      "wallMs": 11.53999999165535
     },
     {
       "name": "Histogram grid-stride n=1",
@@ -848,7 +848,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.8899999856948853
+      "wallMs": 2.929999977350235
     },
     {
       "name": "Histogram grid-stride n=127",
@@ -862,7 +862,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.604999989271164
+      "wallMs": 3.0149999856948853
     },
     {
       "name": "Histogram grid-stride n=128",
@@ -876,7 +876,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.824999988079071
+      "wallMs": 5.064999997615814
     },
     {
       "name": "Histogram grid-stride n=129",
@@ -890,7 +890,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.9099999964237213
+      "wallMs": 4.425000011920929
     },
     {
       "name": "Histogram grid-stride n=1031",
@@ -904,7 +904,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.8449999988079071
+      "wallMs": 2.7399999797344208
     },
     {
       "name": "Histogram grid-stride n=4099",
@@ -918,7 +918,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.5049999952316284
+      "wallMs": 3.1149999797344208
     },
     {
       "name": "Transpose 1×1",
@@ -932,7 +932,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 11.919999986886978
+      "wallMs": 11.51000002026558
     },
     {
       "name": "Transpose 7×19",
@@ -946,7 +946,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.7150000035762787
+      "wallMs": 2.719999998807907
     },
     {
       "name": "Transpose 33×35",
@@ -960,7 +960,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.7399999797344208
+      "wallMs": 2.814999997615814
     },
     {
       "name": "Transpose 64×9",
@@ -974,7 +974,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.969999998807907
+      "wallMs": 2.945000022649765
     },
     {
       "name": "Transpose 0×5",
@@ -988,7 +988,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.9249999821186066
+      "wallMs": 0.8999999761581421
     },
     {
       "name": "Transpose 5×0",
@@ -1002,7 +1002,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 0.7150000035762787
+      "wallMs": 0.875
     },
     {
       "name": "Particle float4 interop n=1, dt=0.016",
@@ -1023,7 +1023,7 @@
           "maxRel": 6.473254873600313e-8
         }
       },
-      "wallMs": 10.969999998807907
+      "wallMs": 10.769999980926514
     },
     {
       "name": "Particle float4 interop n=17, dt=0.016",
@@ -1044,7 +1044,7 @@
           "maxRel": 1.0583948172522589e-7
         }
       },
-      "wallMs": 6.6500000059604645
+      "wallMs": 1.1699999868869781
     },
     {
       "name": "Particle float4 interop n=129, dt=0.033",
@@ -1065,7 +1065,7 @@
           "maxRel": 0.00001895253120455294
         }
       },
-      "wallMs": 6.264999985694885
+      "wallMs": 1.1350000202655792
     },
     {
       "name": "Particle float4 interop n=17, dt=0",
@@ -1086,114 +1086,144 @@
           "maxRel": 0
         }
       },
-      "wallMs": 6.259999990463257
+      "wallMs": 1.074999988079071
     },
     {
       "name": "Two parameter versions in one batch retain their own snapshots",
       "pass": true,
-      "wallMs": 6.96000000834465
+      "wallMs": 4.16499999165535
     },
     {
       "name": "Reusable hierarchical reduction, including empty and singleton inputs",
       "pass": true,
-      "wallMs": 4.689999997615814
+      "wallMs": 9.019999980926514
     },
     {
       "name": "Device helper templates: deduction, specialization, nested types, references and vectors",
       "pass": true,
-      "wallMs": 33.83499997854233
+      "wallMs": 24.5
     },
     {
       "name": "NVIDIA N-body vector traits resolve in kernel buffers and device helpers",
       "pass": true,
-      "wallMs": 14.525000005960464
+      "wallMs": 15.894999980926514
     },
     {
       "name": "NVIDIA N-body interaction reads constant uniforms with per-dispatch snapshots",
       "pass": true,
-      "wallMs": 19.314999997615814
+      "wallMs": 18.724999994039536
     },
     {
       "name": "Static and dynamic shared helpers coordinate lanes through nested calls",
       "pass": true,
-      "wallMs": 38.485000014305115
+      "wallMs": 38.480000019073486
     },
     {
       "name": "Storage pointer helpers preserve nested offsets, vectors, atomics, aliases and shared storage",
       "pass": true,
-      "wallMs": 41.37999999523163
+      "wallMs": 39.83500000834465
     },
     {
       "name": "Vector aggregate initializers preserve partial zero filling and dependent helper types",
       "pass": true,
-      "wallMs": 17.389999985694885
+      "wallMs": 14.069999992847443
     },
     {
       "name": "Original NVIDIA shared-memory conversion wrapper exchanges float4 tiles",
       "pass": true,
-      "wallMs": 17.395000010728836
+      "wallMs": 20.155000001192093
     },
     {
       "name": "Original NVIDIA N-body advances three steps with an enforced whole-block contract",
       "pass": true,
-      "wallMs": 220.18000000715256
+      "wallMs": 241.95500001311302
     },
     {
       "name": "Original NVIDIA N-body early return remains rejected before a helper barrier",
       "pass": true,
       "expectedRejection": true,
       "reason": "Early return depends on the lane index before a shared-memory barrier.",
-      "wallMs": 5.554999977350235
+      "wallMs": 5.5
     },
     {
       "name": "Constant integer arrays retain defaults, high bits and per-dispatch snapshots",
       "pass": true,
-      "wallMs": 7.780000001192093
+      "wallMs": 9.0799999833107
     },
     {
       "name": "Original NVIDIA FDTD3d stencil uses constant coefficients across three volume steps",
       "pass": true,
-      "wallMs": 63.820000022649765
+      "wallMs": 66.56499999761581
     },
     {
       "name": "Pointer shifts preserve float4 stride, negative halo origins, aliases and by-value helper pointers",
       "pass": true,
-      "wallMs": 8.599999994039536
+      "wallMs": 7.965000003576279
     },
     {
       "name": "GPU range copy uses byte offsets and preserves surrounding values",
       "pass": true,
-      "wallMs": 0.36500000953674316
+      "wallMs": 0.5699999928474426
     },
     {
       "name": "Original NVIDIA recursive Gaussian four-pass RGBA image filter",
       "pass": true,
-      "wallMs": 60.87000000476837
+      "wallMs": 66.125
     },
     {
       "name": "Original NVIDIA simpleTexture3D samples real normalized 3D textures",
       "pass": true,
-      "wallMs": 28.805000007152557
+      "wallMs": 30.610000014305115
     },
     {
       "name": "Ray helper math uses runtime float vectors for normalization and dot products",
       "pass": true,
-      "wallMs": 13.004999995231628
+      "wallMs": 12.060000002384186
     },
     {
       "name": "Local structs and constant camera matrices retain value semantics on GPU",
       "pass": true,
-      "wallMs": 18.26000002026558
+      "wallMs": 16.694999992847443
     },
     {
       "name": "Paired 3D volume and 1D float4 transfer textures sample on NVIDIA hardware",
       "pass": true,
-      "wallMs": 21.805000007152557
+      "wallMs": 17.855000019073486
     },
     {
       "name": "Original NVIDIA volume matrix overloads and const references",
       "pass": true,
-      "wallMs": 12.139999985694885
+      "wallMs": 11.564999997615814
+    },
+    {
+      "name": "Original NVIDIA surface write and texture pipeline matches native CUDA",
+      "pass": true,
+      "comparisons": [
+        {
+          "scenario": 0,
+          "theta": 0.5,
+          "maxError": 0.0016390681266784668,
+          "pixels": 262144,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "scenario": 1,
+          "theta": 0,
+          "maxError": 0,
+          "pixels": 262144,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "scenario": 2,
+          "theta": -0.7,
+          "maxError": 0.0016390830278396606,
+          "pixels": 262144,
+          "noIntermediateCPUTransfer": true
+        }
+      ],
+      "allSurfaceTexelsMatchInput": true,
+      "oversizedDispatchRejected": true,
+      "wallMs": 96.30499997735023
     },
     {
       "name": "Original NVIDIA 2D texture rotation matches native CUDA images",
@@ -1232,7 +1262,7 @@
           "pixels": 262144
         }
       ],
-      "wallMs": 84.62000000476837
+      "wallMs": 74.87999999523163
     },
     {
       "name": "Complete original NVIDIA volume renderer matches native CUDA images",
@@ -1260,32 +1290,32 @@
           "differentPixels": 2
         }
       ],
-      "wallMs": 38.610000014305115
+      "wallMs": 39.29000002145767
     },
     {
       "name": "Original NVIDIA Haar full transform with GPU coefficient range copies",
       "pass": true,
-      "wallMs": 45.20999997854233
+      "wallMs": 47.85999998450279
     },
     {
       "name": "Original NVIDIA separable convolution runs both passes with mutable pointer offsets",
       "pass": true,
-      "wallMs": 52.12000000476837
+      "wallMs": 52.214999973773956
     },
     {
       "name": "GPU rejects divergent entry into a helper barrier",
       "pass": true,
-      "wallMs": 0.5499999821186066
+      "wallMs": 0.6599999964237213
     },
     {
       "name": "SAXPY workgroup specialization 64",
       "pass": true,
-      "wallMs": 9.375
+      "wallMs": 9.094999998807907
     },
     {
       "name": "SAXPY workgroup specialization 256",
       "pass": true,
-      "wallMs": 7.379999995231628
+      "wallMs": 7.16499999165535
     },
     {
       "name": "Three r186 compute-to-render shared-buffer pixel test",

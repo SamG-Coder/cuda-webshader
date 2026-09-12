@@ -13,6 +13,9 @@ See [launch requirements and validation](showcases/nbody/README.md).
 [NVIDIA FDTD3d is also available as a 3D scalar-volume showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fdtd),
 with the original shared-memory stencil, editable constant coefficients and
 GPU-only field feedback. See [volume setup and validation](showcases/fdtd3d/README.md).
+[NVIDIA surface write](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=surface)
+runs the original surface-write and texture-rotation kernels as two GPU passes.
+See [surface support and validation](showcases/surface-write/README.md).
 [NVIDIA texture rotation](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=texture2d)
 runs the original teapot-image rotation kernel with a float 2D GPU texture.
 See [sampling settings and native comparisons](showcases/texture2d/README.md).
@@ -381,7 +384,7 @@ Supports `__global__ void` kernels; by-value scalar/vector `__device__` helpers;
 
 Floating constants need an `f` suffix, e.g. `0.5f`. Mixed scalar expressions are explicitly typed. Guarded ternary expressions become real branches, not an eager `select()` that could evaluate an unselected buffer access or atomic operation.
 
-**Not supported:** arbitrary host CUDA code, `<<<...>>>` in source, `cudaMalloc`/streams/events APIs, binary/PTX input, headers/includes, templates, classes, structs, C++ STL, general pointers, unrestricted pointer arithmetic, shared/local-pointer helper parameters, recursion, general function-like macros beyond direct forwarding, dynamic shared memory, CUDA texture/surface APIs, cooperative grid barriers, warp shuffles/votes, inline PTX, tensor cores/WMMA, half/double/64-bit arithmetic, or floating-point atomics. Float3 and bool pointer-buffer ABIs are rejected rather than guessed. General CUDA vector arithmetic is not supplied; use explicit components as the examples do.
+**Not supported:** arbitrary host CUDA execution, kernel launch syntax inside compiled device code, cudaMalloc/streams/events host APIs, binary/PTX input, C++ STL, unrestricted C++ classes or templates, nested or storage-buffer structs, general pointers and unrestricted pointer arithmetic, runtime recursion, cooperative grid barriers, warp shuffles/votes, inline PTX, tensor cores/WMMA, half/double/64-bit arithmetic, or floating-point atomics. Float3 and bool pointer-buffer ABIs are rejected rather than guessed. The feature-specific sections above describe supported templates, local structs, dynamic shared memory, helper pointers and vector operations. Texture support is currently tex3D<float>, tex2D<float>, and tex1D<float4> with bound kernel handles. Surface support is float surf2Dwrite with checked global XY coordinates; arbitrary coordinates, surface reads and texture/surface helper parameters remain unsupported.
 
 Unsupported syntax/types fail explicitly where recognized. The browser's WGSL compiler remains the final validation gate for emitted code, including uniformity and implementation limits. Finite f32 numerical agreement is tested with tolerances; do not assume NVCC bit-for-bit equivalence, identical FMA contraction, denormal handling, NaN behavior or transcendental precision. This is an experimental compiler/runtime, not a production-hardened general CUDA replacement.
 
