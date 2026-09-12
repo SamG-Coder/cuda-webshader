@@ -13,7 +13,7 @@ export const typeStride = t => isArray(t) ? typeStride(t.element) * t.length : v
 const numeric = t => ['f32', 'i32', 'u32','cw_uchar'].includes(t);
 const indent = lines => lines.map(l => `  ${l}`);
 const rootName = n => n?.kind === 'id' ? n.name : ['index', 'member'].includes(n?.kind) ? rootName(n.base) : null;
-const shiftedPointers=fn=>{const names=new Set();walk(fn.body,n=>{if(n.kind==='assign'&&['+=','-='].includes(n.op)&&n.left.kind==='id')names.add(n.left.name);});return names;};
+const shiftedPointers=fn=>{const names=new Set();walk(fn.body,n=>{if(n.kind==='assign'&&['=','+=','-='].includes(n.op)&&n.left.kind==='id')names.add(n.left.name);});return names;};
 export function walk(node, visit) {
   if (!node || typeof node !== 'object') return;
   if (node.kind) visit(node);
@@ -242,7 +242,7 @@ class Emitter {
           return this.result(n,'bool',code,pre);
         }
         if(a.type==='cw_uchar4'||b.type==='cw_uchar4')this.fail('uchar4 arithmetic requires explicit byte components.',n);
-        if(vectorLength(a.type)||vectorLength(b.type)){const type=vectorLength(a.type)?a.type:b.type;const element=vectorElement(type),ops=element==='f32'?['+','-','*','/']:['+','-','*'];if(!ops.includes(n.op)||![type,element].includes(a.type)||![type,element].includes(b.type))this.fail('Vector arithmetic requires matching vector/scalar element types; integer vectors support +, -, * only.',n);const code=v=>v.type===type?v.code:`${type}(${v.code})`;n.operandType=type;return this.result(n,type,`(${code(a)} ${n.op} ${code(b)})`,[...a.pre,...b.pre]);}
+        if(vectorLength(a.type)||vectorLength(b.type)){const type=vectorLength(a.type)?a.type:b.type;const element=vectorElement(type),ops=element==='f32'?['+','-','*','/']:['+','-','*'];const compatible=v=>v.type===type||v.type===element||element==='f32'&&numeric(v.type);if(!ops.includes(n.op)||!compatible(a)||!compatible(b))this.fail('Vector arithmetic requires matching vector/scalar element types; integer vectors support +, -, * only.',n);const code=v=>v.type===type?v.code:`${type}(${this.convert(v.code,v.type,element,n)})`;n.operandType=type;return this.result(n,type,`(${code(a)} ${n.op} ${code(b)})`,[...a.pre,...b.pre]);}
         let common = ['<<', '>>'].includes(n.op) ? a.type : this.common(a.type, b.type, n);
         if (vectorLength(common)) this.fail('CUDA vector arithmetic requires explicit components; operator overloads are outside this subset.', n);
         if (['&', '|', '^', '<<', '>>', '%'].includes(n.op) && !['i32', 'u32'].includes(common)) this.fail('Bitwise, shift and remainder operators require integers.', n);
@@ -467,6 +467,15 @@ class Emitter {
     if (n.kind === 'assign') {
       walk(n.left,node=>{if(node.kind==='unary'&&['++','--'].includes(node.op))this.fail('Increment/decrement inside assignment destinations are unsupported.',node);});
       if(n.op==='='&&n.right.kind==='assign'){let current=n;while(current.kind==='assign'){if(current.op!=='='||current.left.kind!=='id'||!['local','reference'].includes(this.lookup(current.left.name,current.left).kind))this.fail('Chained assignment requires named local variables or references and =.',current);current=current.right;}const inner=this.effect(n.right),target=this.expr(n.left,true);this.writable(target,n.left);const value=this.expr(n.right.left);n.type=target.type;return [...inner,`${target.code} = ${this.convert(value.code,value.type,target.type,n)};`];}
+      if(n.left.kind==='id'&&n.op==='='){
+        const symbol=this.lookup(n.left.name,n.left);
+        if(['buffer','buffer-alias'].includes(symbol.kind)){
+          const value=this.argument(n.right);if(!symbol.offsetCode||!value.pointerCode||value.rootSymbol?.code!==symbol.code||typeName(value.type)!==typeName(symbol.type))this.fail('Pointer reassignment must stay within the same typed allocation.',n);
+          if(value.rootSymbol.constant&&!symbol.constant)this.fail('Cannot discard const through pointer reassignment.',n);
+          n.left.symbol=symbol;n.pointerRebind=true;n.type=symbol.type;
+          return [...value.pre,`${symbol.offsetCode} = ${value.pointerCode};`];
+        }
+      }
       if(n.left.kind==='id'&&['+=','-='].includes(n.op)){
         const symbol=this.lookup(n.left.name,n.left);
         if(['buffer','buffer-alias'].includes(symbol.kind)){

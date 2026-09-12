@@ -1,0 +1,62 @@
+{
+  "passed": true,
+  "staticBuild": true,
+  "softwareAdapterRequested": false,
+  "passes": [
+    "1. d_boxfilter_rgba_x",
+    "2. d_boxfilter_rgba_y"
+  ],
+  "results": [
+    {
+      "radius": 14,
+      "pixels": 1048576,
+      "maxChannelError": 1,
+      "controlReadbackBytes": 0,
+      "renderedPixelsMatchGPU": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "timestamp-query",
+          "float32-filterable"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      }
+    },
+    {
+      "radius": 22,
+      "pixels": 1048576,
+      "maxChannelError": 1,
+      "controlReadbackBytes": 0,
+      "renderedPixelsMatchGPU": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "timestamp-query",
+          "float32-filterable"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      }
+    }
+  ],
+  "sourceUnchanged": true,
+  "invalidDimensionsRejected": true,
+  "mobileOverflow": false
+}

@@ -1,0 +1,8 @@
+PASS case=0 64x37 radius=0: original RGBA row/column kernels; both guards intact.
+PASS case=1 64x37 radius=3: original RGBA row/column kernels; both guards intact.
+PASS case=2 1024x1024 radius=14: original RGBA row/column kernels; both guards intact.
+PASS case=3 1024x1024 radius=22: original RGBA row/column kernels; both guards intact.
+PASS scalar stage=0: 64x32 radius 3; guards intact.
+PASS scalar stage=1: 64x32 radius 3; guards intact.
+PASS scalar stage=2: 64x32 radius 3; guards intact.
+PASS scalar stage=3: 64x32 radius 3; guards intact.

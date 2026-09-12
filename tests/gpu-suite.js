@@ -1,3 +1,4 @@
+import {checkBoxFilter} from './box-filter-gpu.js';
 import {checkMarchingVolume} from './marching-volume-gpu.js';
 import {checkSharedPointers} from './shared-pointer-gpu.js';
 import {checkMarchingPipeline} from './marching-pipeline-gpu.js';
@@ -188,6 +189,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Complete implicit marching-cubes GPU pipeline matches native CUDA',()=>checkMarchingPipeline(runtime));
   await run('Hierarchical exclusive scan matches native CUDA',()=>checkExclusiveScan(runtime));
   await run('Original shared marching-cubes triangle generation matches native CUDA',()=>checkMarchingTriangles(runtime));
+  await run('Original RGBA box filter matches native row and column images',()=>checkBoxFilter(runtime));
   await run('Original sampled-volume marching cubes matches native CUDA at three isovalues',()=>checkMarchingVolume(runtime));
   await run('Shared pointer helpers match native CUDA with aliases and offsets',()=>checkSharedPointers(runtime));
   await run('Shared vector references match native CUDA after synchronization',()=>checkSharedVectorReferences(runtime));

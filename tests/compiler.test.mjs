@@ -29,7 +29,7 @@ const bad=[
  ['CUDA allocation',wrap('cudaMalloc(output,n);'),/Unsupported function/],
  ['warp shuffle',wrap('output[0]=__shfl_sync(0xffffffffu,1.0f,0);'),/Unsupported function/],
  ['const write','__global__ void k(const float* x){x[0]=1.0f;}',/const/],
- ['pointer arithmetic',wrap('output=output+1;'),/scalar|operand/],
+ ['pointer multiplication',wrap('output=output*2;'),/scalar|operand|allocation/],
  ['post-increment in an assignment destination',wrap('int i=0;output[i++]=1.0f;'),/assignment destinations/],
  ['unknown identifier',wrap('output[0]=missing;'),/Unknown identifier/],
  ['recursion','__device__ float f(float x){return f(x);} __global__ void k(float* x){x[0]=f(x[0]);}',/Recursive/],

@@ -1,0 +1,83 @@
+{
+  "pipeline": {
+    "buffers": {
+      "horizontal": {
+        "type": "u32",
+        "records": 1048576,
+        "fill": "zero"
+      },
+      "output": {
+        "type": "u32",
+        "records": 1048576,
+        "fill": "zero"
+      }
+    },
+    "textures": {
+      "rgbaTex": {
+        "kind": "image-rgba",
+        "source": "showcases/box-filter/teapot1024.ppm",
+        "dimensions": [
+          1024,
+          1024
+        ],
+        "filter": "linear",
+        "addressMode": "clamp-to-edge",
+        "normalizedCoords": false
+      }
+    },
+    "steps": [
+      {
+        "entry": "d_boxfilter_rgba_x",
+        "block": [
+          64,
+          1,
+          1
+        ],
+        "groups": [
+          16,
+          1,
+          1
+        ],
+        "bindings": {
+          "od": "horizontal"
+        },
+        "scalars": {
+          "w": 1024,
+          "h": 1024,
+          "r": 14
+        }
+      },
+      {
+        "entry": "d_boxfilter_rgba_y",
+        "block": [
+          64,
+          1,
+          1
+        ],
+        "groups": [
+          16,
+          1,
+          1
+        ],
+        "bindings": {
+          "id": "horizontal",
+          "od": "output"
+        },
+        "scalars": {
+          "w": 1024,
+          "h": 1024,
+          "r": 14
+        }
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "output",
+      "width": 1024,
+      "height": 1024,
+      "format": "rgba8",
+      "alpha": "opaque",
+      "flipY": true
+    }
+  }
+}

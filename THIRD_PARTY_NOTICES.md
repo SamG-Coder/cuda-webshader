@@ -104,3 +104,13 @@ showcase retain the original `Common/helper_math.h` NVIDIA code and notice.
 notice; its other functions are MIT test code. `showcases/marching-cubes/Bucky.raw`
 is the unmodified NVIDIA marchingCubes sample data, licensed under the same
 BSD-3-Clause notice. The native volume captures derive from those assets.
+
+### NVIDIA boxFilter
+
+`showcases/box-filter/kernel.cu` and `tests/box-filter-kernel.cuh` retain the
+original device functions and BSD-3-Clause notice from CUDA Samples commit
+`5443602d89ed99aede2e4b7bf329daddeadb320e`,
+`cpp/2_Concepts_and_Techniques/boxFilter/boxFilter_kernel.cu`.
+`showcases/box-filter/teapot1024.ppm` is the sample's unchanged image under the
+same NVIDIA license. Native captures derive from those assets. The compiler,
+JSON launch setup and test harnesses are original MIT project code.

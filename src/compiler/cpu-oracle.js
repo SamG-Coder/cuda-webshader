@@ -17,7 +17,7 @@ function convert(value,type){
 function zero(type,structs=[]){const spec=structs.find(s=>s.type===type);if(spec)return Object.fromEntries(spec.fields.map(f=>[f.name,zero(f.resolvedType,structs)]));if(isArray(type))return Array.from({length:type.length},()=>zero(type.element,structs));const n=vectorLength(type);return n?Array(n).fill(0):type==='bool'?false:0;}
 class BufferView {
   constructor(data,type,offset=0){this.data=data;this.type=type;this.offset=offset;this.records=Array.isArray(data);this.width=this.records?1:vectorLength(type)||1;this.length=data.length/this.width;if(!Number.isInteger(this.length))throw new Error('Buffer record count is not integral.');}
-  check(i){if(!Number.isInteger(i)||i+this.offset<0||i+this.offset>=this.length)throw new RangeError(`CPU oracle detected out-of-bounds access at ${i}, length ${this.length}.`);}
+  check(i){if(!Number.isInteger(i)||i+this.offset<0||i+this.offset>=this.length)throw new RangeError(`CPU oracle detected out-of-bounds access at ${i}, offset ${this.offset}, length ${this.length}.`);}
   get(i){this.check(i);i+=this.offset;return this.records?structuredClone(this.data[i]):this.width===1?this.data[i]:Array.from(this.data.subarray(i*this.width,(i+1)*this.width));}
   set(i,v){this.check(i);i+=this.offset;if(this.width===1)this.data[i]=convert(v,this.type);else this.data.set(convert(v,this.type),i*this.width);}
 }
@@ -82,6 +82,7 @@ class Context {
       case 'conditional':return convert(yield* this.eval((yield* this.eval(n.condition))?n.yes:n.no),n.type);
       case 'assign':{
         if(n.pointerArrayAssignment){const target=yield* this.ref(n.left),offset=yield* this.eval(n.right.value.index);target.set(convert(offset,'i32'));return offset;}
+        if(n.pointerRebind){let base=n.right.pointerArrayElement?yield* this.eval(n.right):this.env.get(n.right.pointerBaseSymbol)?.value;const offset=n.right.pointerOffset?yield* this.eval(n.right.pointerOffset):0;if(Array.isArray(base))base=new BufferView(base,n.right.pointerBaseSymbol.type.element);if(!(base instanceof BufferView))throw Error('Expected pointer allocation.');const result=new BufferView(base.data,base.type,convert(base.offset+convert(offset,'i32'),'i32'));this.env.get(n.left.symbol).value=result;return result;}
         if(n.pointerShift){const cell=this.env.get(n.left.symbol),base=cell.value,delta=yield* this.eval(n.right);if(!(base instanceof BufferView))throw Error('Expected a storage pointer.');const offset=binary(n.op==='+='?'+':'-',base.offset,convert(delta,'i32'),'i32');cell.value=new BufferView(base.data,base.type,offset);return cell.value;}
         let target,value;if(n.packedAtomicAssignment){value=yield* this.eval(n.right);target=yield* this.ref(n.left);}else{target=yield* this.ref(n.left);value=yield* this.eval(n.right);}
         target.set(n.op==='='?value:binary(n.op.slice(0,-1),target.get(),value,n.operandType||n.type));return target.get();
@@ -168,7 +169,8 @@ export function executeCPU(artifact,buffers,scalars,workgroups,{instructionBudge
     const groupEnv=new Map(baseEnv);shared.forEach(n=>groupEnv.set(n.symbol,{value:zero(n.resolvedType)}));
     const lanes=[];
     for(let tz=0;tz<block[2];tz++)for(let ty=0;ty<block[1];ty++)for(let tx=0;tx<block[0];tx++){
-      const context=new Context(artifact,new Map(groupEnv),{threadIdx:[tx,ty,tz],blockIdx:[x,y,z],blockDim:block,gridDim:grid},instructionBudget);lanes.push(context.statement(artifact.kernel.body));
+      const laneEnv=new Map(groupEnv);for(const p of artifact.kernel.params)laneEnv.set(p.symbol,{...groupEnv.get(p.symbol)});
+      const context=new Context(artifact,laneEnv,{threadIdx:[tx,ty,tz],blockIdx:[x,y,z],blockDim:block,gridDim:grid},instructionBudget);lanes.push(context.statement(artifact.kernel.body));
     }
     while(true){
       const states=lanes.map(lane=>lane.next());if(states.every(s=>s.done))break;
