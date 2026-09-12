@@ -24,16 +24,22 @@ export function parseValueClass(p) {
     }
     if(p.is('(')) {
       const selfReference=spec.reference&&spec.constant&&spec.type===record.type;
+      const indexedReference=spec.reference&&!spec.constant&&operator==='[]';
       if(selfReference&&!['+','-'].includes(operator))p.fail('Const self-reference returns currently require a unary class operator.',start);
-      if(!device||spec.pointer||spec.reference&&!selfReference||spec.shared||spec.external)p.fail('Value-class methods require value returns or a const self reference.',start);
+      if(!device||spec.pointer||spec.reference&&!selfReference&&!indexedReference||spec.shared||spec.external)p.fail('Value-class methods require value returns or a const self reference.',start);
       p.take('(');const params=[];
       if(!p.is(')'))do{const t=p.peek(),type=p.type(),param=p.name();if(type.pointer||type.reference||type.shared||type.external)p.fail('Value-class method parameters currently require values.',t);params.push({kind:'param',token:t,name:param,...type});}while(p.match(','));
       p.take(')');const constant=!!p.match('const');
       if(constructor&&constant)p.fail('Constructors cannot be const.',start);
       if(functions.length>=128)p.fail('At most 128 methods per value class are supported.',start);
-      if(!constructor&&!constant)p.fail('Mutable class methods are not yet supported.',start);
+      if(!constructor&&!constant&&!indexedReference)p.fail('Mutable class methods are not yet supported.',start);
       if(operator&&params.length!==(operator==='[]'?1:0))p.fail('Supported class operators are unary +/-, or single-index access.',start);
       const body=p.block(),helper=constructor?'cw_ctor_'+name:'cw_method_'+name+'_'+(operator?{'+':'positive','-':'negative','[]':'index'}[operator]:member);
+      if(indexedReference){
+        const ret=body.body[0],value=ret?.value;
+        if(constant||body.body.length!==1||ret?.kind!=='return'||value?.kind!=='index'||value.base?.kind!=='id'||value.index?.kind!=='id'||value.index.name!==params[0].name||!['i32','u32'].includes(params[0].type))p.fail('Reference indexing requires exactly return field[index] with one integer index.',start);
+        record.methods.push({name:member,indexedReference:true,field:value.base.name,result:spec.type,token:start});p.match(';');continue;
+      }
       if(selfReference){const ret=body.body[0];if(body.body.length!==1||ret?.kind!=='return'||ret.value?.kind!=='unary'||ret.value.op!=='*'||ret.value.value?.kind!=='id'||ret.value.value.name!=='this')p.fail('Const reference methods currently require exactly return *this.',start);}
       if(constructor)record.constructors.push(helper);else record.methods.push({name:member,helper,selfReference});
       functions.push({kind:'function',token:start,name:helper,qualifier:'__device__',result:spec.type,params,body,classOwner:name,classConstructor:constructor,classMethod:constructor?null:member,classSelfReference:selfReference});
@@ -47,6 +53,7 @@ export function parseValueClass(p) {
   }
   p.take('}');p.take(';');
   if(!record.fields.length)p.fail('Value classes require at least one field.',token);
+  for(const method of record.methods.filter(m=>m.indexedReference)){const field=record.fields.find(f=>f.name===method.field);if(!field||field.dimensions.length!==1||field.type!==method.result)p.fail('Reference indexing must return an element of a matching array field.',method.token);}
   const fields=new Set(record.fields.map(f=>f.name));
   for(const fn of functions) {
     const self='cw_object_'+name,locals=new Set(fn.params.map(v=>v.name));

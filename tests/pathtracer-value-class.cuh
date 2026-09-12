@@ -1,5 +1,5 @@
 // Focused fixture: unchanged supported methods from Roger Allen vec3.h.
-// Writable indexing, mutable methods and binary operators remain unsupported.
+// General mutable methods and binary operators remain unsupported.
 class vec3  {
 
 
@@ -17,5 +17,6 @@ public:
     __host__ __device__ inline const vec3& operator+() const { return *this; }
     __host__ __device__ inline vec3 operator-() const { return vec3(-e[0], -e[1], -e[2]); }
     __host__ __device__ inline float operator[](int i) const { return e[i]; }
+    __host__ __device__ inline float& operator[](int i) { return e[i]; };
     float e[3];
 };

@@ -268,8 +268,10 @@ class Emitter {
         if(n.pointerTarget&&this.lookup(n.base.name,n).type.element!==n.pointerTarget)this.fail('Byte pointer dereference must retain its pointee type.',n);if(raw&&n.pointerConstant)this.fail('Cannot modify a const byte pointer.',n);
         const base = this.expr(n.base, raw);
         if(this.structs.get(base.type)?.methods?.some(m=>m.name==='operator[]')){
+          const reference=this.structs.get(base.type).methods.find(m=>m.name==='operator[]'&&m.indexedReference);
+          if(reference&&(raw||!base.rootSymbol?.constant)){n.base={kind:'member',base:n.base,member:reference.field,token:n.token};return this.expr(n,raw);}
           if(raw)this.fail('Read-only class indexing cannot be used as a writable reference.',n);
-          const base=n.base,index=n.index;delete n.base;delete n.index;Object.assign(n,{kind:'call',callee:{kind:'member',base,member:'operator[]',token:n.token},args:[index]});return this.call(n);
+          const receiver=n.base,index=n.index;delete n.base;delete n.index;Object.assign(n,{kind:'call',callee:{kind:'member',base:receiver,member:'operator[]',token:n.token},args:[index]});return this.call(n);
         }
         const index = this.expr(n.index);
         if(base.rootSymbol?.kind==='pointer-array'){
@@ -470,7 +472,7 @@ class Emitter {
       if(record){if(!record.constructors.length)this.fail('No value-class constructor is declared.',n);n.callee={kind:'id',token:n.token,name:'cw_ctor_'+record.name};}
     }
     if(n.callee.kind==='member'&&n.callee.member!=='sync'){
-      const receiver=n.callee.base,value=this.expr(receiver),record=this.structs.get(value.type),method=record?.methods?.find(m=>m.name===n.callee.member);
+      const receiver=n.callee.base,value=this.expr(receiver),record=this.structs.get(value.type),method=record?.methods?.find(m=>m.name===n.callee.member&&!m.indexedReference);
       if(!method)this.fail('Unknown or unsupported value-class method.',n);
       n.args=[receiver,...n.args];n.callee={kind:'id',token:n.token,name:method.helper};
     }

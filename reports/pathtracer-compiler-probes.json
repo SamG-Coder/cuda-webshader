@@ -7,7 +7,7 @@
   {
     "file": "vec3.h",
     "compiled": false,
-    "error": "Value-class methods require value returns or a const self reference. (18:5)\n    __host__ __device__ inline float& operator[](int i) { return e[i]; };\r\n    ^"
+    "error": "This class operator overload is not yet supported. (20:5)\n    __host__ __device__ inline vec3& operator+=(const vec3 &v2);\r\n    ^"
   },
   {
     "file": "hitable.h",

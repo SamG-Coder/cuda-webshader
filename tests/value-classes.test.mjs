@@ -31,3 +31,11 @@ test('Const self, unary negation and indexing preserve class operator values',()
  executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[2,3,4,3]);
  for(const statement of ['v[0]=1.0f;','(+v).e[0]=1.0f;'])assert.throws(()=>compile(operators+'__global__ void k(){vec3 v(1.0f,2.0f,3.0f);'+statement+'}'),/Read-only/);
 });
+
+const writableOperators=operators.replace(' float e[3];',' __device__ float& operator[](int i){return e[i];} float e[3];');
+test('Writable class index aliases original array storage with dynamic indices',()=>{
+ const c=compile(writableOperators+'__global__ void k(float*out){vec3 v(2.0f,3.0f,4.0f);int i=0;v[i]=9.0f;v[1]+=5.0f;out[0]=v.x();out[1]=v.y();out[2]=v[2];out[3]=float(i);}',{workgroupSize:[1,1,1]}),out=new Float32Array(4);
+ executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[9,8,4,0]);
+ assert.throws(()=>compile(writableOperators+'__global__ void k(){const vec3 v(1.0f,2.0f,3.0f);v[0]=1.0f;}'),/const/);
+ assert.throws(()=>compile(writableOperators.replace('return e[i];} float e[3];','return e[0];} float e[3];')+'__global__ void k(){}'),/Reference indexing/);
+});
