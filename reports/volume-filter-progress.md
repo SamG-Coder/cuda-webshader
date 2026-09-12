@@ -12,7 +12,7 @@ An MIT probe executes the same CUDA function on native NVIDIA CUDA and hardware 
 
 ## Remaining original-sample requirements
 - Import and invoke static conversion templates: completed for explicit concrete type arguments; see validation below.
-- Support the cudaExtent launch argument with explicit checked host transport and appropriate size_t semantics.
+- Support the cudaExtent launch argument: completed for read-only by-value parameters with checked u32-range dimensions and unsigned 64-bit integer comparisons.
 - Compile VolumeTypeInfo<unsigned char>::convert, including its original literal/cast arithmetic: completed and native/GPU verified.
 - Support sizeof(VolumeType) with correct CUDA type semantics.
 - Support byte-valued 3D surface writes and sampling the resulting volume without CPU round trips.
@@ -32,4 +32,13 @@ The original unsigned-char conversion uses a double literal in `__saturatef(samp
 
 767 original NVIDIA conversions match native CUDA and hardware WebGPU, including adjacent float32 values at byte boundaries. A separate MIT arithmetic probe verifies 255 boundaries using multiplier 65535.0; all would differ if the product were rounded to float32 before conversion. All four original VolumeTypeInfo template definitions match the pinned header byte for byte.
 
-The original filter now reaches its cudaExtent launch parameter as the next observed compiler failure. 441 unit tests and 128 NVIDIA hardware checks pass; compile-all and static build pass. No showcase is added until the original filter pipeline is verified.
+At this stage the original filter reached its cudaExtent launch parameter. 441 unit tests and 128 NVIDIA hardware checks pass; compile-all and static build pass. No showcase is added until the original filter pipeline is verified.
+
+## Extent parameters and vector filter weights
+Read-only by-value cudaExtent parameters are now transported as three named u32 uniforms: `size.width`, `size.height`, `size.depth` for a parameter called size. Each component must be an integer from 0 through 4294967295; larger values are rejected, not truncated. All six integer comparison operators preserve native 64-bit unsigned size_t promotion, including sign extension when a negative int is compared with an extent field. This is a bounded extent-parameter profile, not general size_t arithmetic or arbitrary struct ABI support. Extent mutation, local extent values, extent pointers and arithmetic on size fields remain unsupported.
+
+A native/GPU probe verifies 168 comparison results across dimensions 0, 8 and UINT32_MAX, including INT32_MIN and -1 coordinates, unsigned casts and cross-field comparisons. Invalid component updates reject transactionally before touching uniform memory.
+
+Constant scalar/vector values and fixed vector arrays now use flattened uniform components. Vector arrays support 1..256 records with zero initialization and host overrides; existing struct component limits remain unchanged. The original filter’s `float4 c_filterData[125]` gets through compilation. A native/GPU probe checks all 125 float4 records (500 uploaded components) through helper reads.
+
+446 unit tests and 130 NVIDIA hardware checks pass, plus compile-all and static build. The current original sample failure is `sizeof(VolumeType)` in the surf3Dwrite byte offset. Byte-valued 3D surface output and GPU-only sampling/rendering of that output also remain to be implemented and verified before a showcase can be added.

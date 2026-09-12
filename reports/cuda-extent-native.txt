@@ -1,0 +1,1 @@
+PASS 168 extent comparison results, negative signed coordinates and full u32 component range

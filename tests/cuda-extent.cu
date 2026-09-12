@@ -1,0 +1,2 @@
+// SPDX-License-Identifier: MIT
+__global__ void extentProbe(const int* input,uint* output,cudaExtent size,uint n){uint i=blockIdx.x*blockDim.x+threadIdx.x;if(i<n){int x=input[i];output[i*8]=x<size.width;output[i*8+1]=x<=size.width;output[i*8+2]=x>size.width;output[i*8+3]=x>=size.width;output[i*8+4]=x==size.width;output[i*8+5]=x!=size.width;output[i*8+6]=size.height<size.depth;output[i*8+7]=size.width>=(unsigned int)x;}}

@@ -91,10 +91,10 @@ class Emitter {
     for (let i = this.scopes.length - 1; i >= 0; --i) { const s = this.scopes[i].get(name); if (s) return s; }
     const global=this.ast.constantGlobals.find(g=>g.name===name);
     if(global){
-      if(this.structs.has(global.type)){
-        if(!this.globalSymbols.has(name)){if(global.init||global.dimensions.length)this.fail('Constant structs currently require zero initialization and a single struct value.',global);const leaves=[];
-          const build=(type,path)=>{if(this.structs.has(type)){const fields=this.structs.get(type).fields.map(f=>[f.name,build(f.resolvedType,path+'.'+f.name)]);return {code:`${type}(${fields.map(([,v])=>v.code).join(', ')})`,shape:{kind:'struct',fields:fields.map(([name,v])=>[name,v.shape])}};}if(isArray(type)||vectorLength(type)){const count=isArray(type)?type.length:vectorLength(type),element=isArray(type)?type.element:vectorElement(type),items=Array.from({length:count},(_,i)=>build(element,path+(isArray(type)?'['+i+']':'.'+'xyzw'[i])));return {code:`${typeName(type)}(${items.map(v=>v.code).join(', ')})`,shape:{kind:'array',items:items.map(v=>v.shape)}};}if(!numeric(type)||leaves.length>=256)this.fail('Constant structs support at most 256 float/int/uint components.',global);const field='cw_struct_constant_'+this.ast.constantGlobals.indexOf(global)+'_'+leaves.length;leaves.push({name:path,type,origin:'constant',field,defaultValue:0});return {code:'cw_params.'+field,shape:{kind:'scalar',name:path,type}};};
-          const value=build(global.type,'constant.'+name),symbol={name:'constant.'+name,type:global.type,code:value.code,constant:true,atomic:false,kind:'constant-global',aggregate:value.shape};this.constantScalars.push(...leaves);this.globalSymbols.set(name,symbol);global.symbol=symbol;
+      if(this.structs.has(global.type)||vectorLength(global.type)){
+        if(!this.globalSymbols.has(name)){if(global.init||this.structs.has(global.type)&&global.dimensions.length)this.fail('Constant aggregates require zero initialization; struct arrays are unsupported.',global);let aggregateType=global.type;if(global.dimensions.length){const length=constantValue(global.dimensions[0]);if(!Number.isInteger(length)||length<1||length>256)this.fail('Constant vector arrays require 1..256 elements.',global);aggregateType=arrayOf(global.type,length);}const leaves=[];
+          const build=(type,path)=>{if(this.structs.has(type)){const fields=this.structs.get(type).fields.map(f=>[f.name,build(f.resolvedType,path+'.'+f.name)]);return {code:`${type}(${fields.map(([,v])=>v.code).join(', ')})`,shape:{kind:'struct',fields:fields.map(([name,v])=>[name,v.shape])}};}if(isArray(type)||vectorLength(type)){const count=isArray(type)?type.length:vectorLength(type),element=isArray(type)?type.element:vectorElement(type),items=Array.from({length:count},(_,i)=>build(element,path+(isArray(type)?'['+i+']':'.'+'xyzw'[i])));return {code:`${typeName(type)}(${items.map(v=>v.code).join(', ')})`,shape:{kind:'array',items:items.map(v=>v.shape)}};}if(!numeric(type)||leaves.length>=(vectorLength(global.type)?1024:256))this.fail('Constant aggregates exceed the supported component limit.',global);const field='cw_struct_constant_'+this.ast.constantGlobals.indexOf(global)+'_'+leaves.length;leaves.push({name:path,type,origin:'constant',field,defaultValue:0});return {code:'cw_params.'+field,shape:{kind:'scalar',name:path,type}};};
+          const value=build(aggregateType,'constant.'+name),symbol={name:'constant.'+name,type:aggregateType,code:value.code,constant:true,atomic:false,kind:'constant-global',aggregate:value.shape};this.constantScalars.push(...leaves);this.globalSymbols.set(name,symbol);global.symbol=symbol;
         }return this.globalSymbols.get(name);
       }
       if(!numeric(global.type))this.fail('Referenced constant globals require float, int or unsigned int scalar values.',n);
@@ -189,6 +189,7 @@ class Emitter {
           return this.result(n, 'u32', `${code}.${n.member}`);
         }
         const base = this.expr(n.base, raw), size = vectorLength(base.type);
+        if(base.type==='cw_extent'){if(!['width','height','depth'].includes(n.member))this.fail('cudaExtent has width, height and depth fields.',n);return this.result(n,'cw_size64',`${base.code}.${n.member}`,base.pre,{rootSymbol:base.rootSymbol});}
         if(base.type==='cw_uchar4'){if(n.member.length!==1||!'xyzw'.includes(n.member))this.fail('uchar4 has x, y, z and w byte components.',n);const shift='xyzw'.indexOf(n.member)*8,read=base.atomic&&raw?`atomicLoad(&${base.code})`:base.code;return this.result(n,'cw_uchar',`((${read} >> ${shift}u) & 255u)`,base.pre,{rootSymbol:base.rootSymbol,packedBase:base.code,packedShift:shift,packedAtomic:!!base.atomic});}
         if(this.structs.has(base.type)){const field=this.structs.get(base.type).fields.find(f=>f.name===n.member);if(!field)this.fail('Unknown struct field '+n.member,n);return this.result(n,field.resolvedType,`${base.code}.cw_field_${n.member}`,base.pre,{rootSymbol:base.rootSymbol});}
         if (!size || n.member.length !== 1 || 'xyzw'.indexOf(n.member) < 0 || 'xyzw'.indexOf(n.member) >= size) this.fail('Only valid single vector components (.x/.y/.z/.w) are supported.', n);
@@ -218,6 +219,13 @@ class Emitter {
           const tmp = `cw_tmp_${this.temp++}`;
           const pre = [...a.pre, `var ${tmp}: bool = ${ac};`, `if (${n.op === '&&' ? tmp : `!${tmp}`}) {`, ...indent([...b.pre, `${tmp} = ${bc};`]), '}'];
           return this.result(n, 'bool', tmp, pre);
+        }
+        if(a.type==='cw_size64'||b.type==='cw_size64'){
+          if(!['==','!=','<','>','<=','>='].includes(n.op)||![a.type,b.type].every(t=>['cw_size64','i32','u32','bool'].includes(t)))this.fail('cudaExtent size fields support integer comparisons only.',n);
+          const left='cw_size_left_'+this.temp++,right='cw_size_right_'+this.temp++,promote=(v,code)=>v.type==='cw_size64'?code:v.type==='bool'?`vec2<u32>(select(0u, 1u, ${code}), 0u)`:v.type==='i32'?`vec2<u32>(u32(${code}), select(0u, 4294967295u, ${code} < 0i))`:`vec2<u32>(u32(${code}), 0u)`;
+          const pre=[...a.pre,`let ${left} = ${a.code};`,...b.pre,`let ${right} = ${b.code};`],ac=promote(a,left),bc=promote(b,right);this.extentUsed=true;n.operandType='cw_size64';
+          const code=n.op==='=='?`all(${ac} == ${bc})`:n.op==='!='?`any(${ac} != ${bc})`:n.op==='<'?`cw_size_less(${ac}, ${bc})`:n.op==='>'?`cw_size_less(${bc}, ${ac})`:n.op==='<='?`!cw_size_less(${bc}, ${ac})`:`!cw_size_less(${ac}, ${bc})`;
+          return this.result(n,'bool',code,pre);
         }
         if(a.type==='cw_uchar4'||b.type==='cw_uchar4')this.fail('uchar4 arithmetic requires explicit byte components.',n);
         if(vectorLength(a.type)||vectorLength(b.type)){const type=vectorLength(a.type)?a.type:b.type;if(vectorElement(type)!=='f32'||!['+','-','*','/'].includes(n.op)||![type,'f32'].includes(a.type)||![type,'f32'].includes(b.type))this.fail('Vector arithmetic supports matching float vectors and float scalars with +, -, *, /.',n);const code=v=>v.type===type?v.code:`${type}(${v.code})`;n.operandType=type;return this.result(n,type,`(${code(a)} ${n.op} ${code(b)})`,[...a.pre,...b.pre]);}
@@ -449,6 +457,7 @@ class Emitter {
     return [...value.pre, value.type === 'void' ? `${value.code};` : `_ = ${value.code};`];
   }
   declare(n) {
+    if(n.type==='cw_extent')this.fail('cudaExtent supports read-only by-value kernel parameters only.',n);
     if(['texture3d','surface2d'].includes(n.type))this.fail('Texture and surface handles require kernel or supported helper parameters, not local aliases.',n);
     if(n.init?.kind==='shared-conversion'){
       if(!n.pointer||n.reference||n.shared||n.external||n.dimensions.length||n.type!==n.init.target)this.fail('Shared conversion requires a matching local pointer declaration.',n);
@@ -542,6 +551,12 @@ class Emitter {
     const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t}>`;
     for (const p of this.kernel.params) {
       if (p.shared || p.reference || p.external || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
+      if(p.type==='cw_extent'){
+        if(p.pointer)this.fail('cudaExtent supports read-only by-value kernel parameters only.',p);
+        this.extentUsed=true;const fields=['width','height','depth'];for(const field of fields)scalars.push({name:p.name+'.'+field,type:'u32',sourceType:'cudaExtent-component',field:'cw_extent_'+p.name+'_'+field,offset:scalars.length*4});
+        const symbol={name:p.name,type:p.type,code:`cw_extent(${fields.map(field=>`vec2<u32>(cw_params.cw_extent_${p.name}_${field}, 0u)`).join(', ')})`,constant:true,atomic:false,kind:'uniform'};
+        this.add(p.name,symbol,p,true);p.symbol=symbol;continue;
+      }
       if(p.type==='surface2d'){if(p.pointer)this.fail('Surface objects must be passed by value.',p);const dimensions=new Set();walk(this.kernel.body,n=>{if(n.kind==='call'&&['surf2Dwrite','surf3Dwrite'].includes(n.callee?.name)&&n.args[1]?.kind==='id'&&n.args[1].name===p.name)dimensions.add(n.callee.name==='surf3Dwrite'?'3d':'2d');});if(dimensions.size>1)this.fail('A surface cannot mix 2D and 3D writes.',p);const dimension=[...dimensions][0]||'2d',binding=bufferCount+this.kernel.params.filter(p=>p.type==='texture3d').length*2+surfaces.length,symbol={name:p.name,type:p.type,code:'cw_surface_'+p.name,kind:'surface',dimension,constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;surfaces.push({name:p.name,binding,dimension,format:'r32float',access:'write-only',coordinates:dimension==='3d'?'global-xyz':'global-xy'});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_storage_${dimension}<r32float, write>;`);continue;}
       if(p.type==='texture3d'){if(p.pointer)this.fail('Texture objects must be passed by value.',p);const binding=bufferCount+textures.length*2,samplerBinding=binding+1,sampling=p.textureSampling||'tex3D',{dimension,format}=textureShape(sampling);const symbol={name:p.name,type:p.type,code:'t_'+p.name,sampler:'s_'+p.name,coordinateScale:`vec2<f32>(cw_params.cw_tex_${p.name}_sx, cw_params.cw_tex_${p.name}_sy)`,pixelPoint:`cw_params.cw_tex_${p.name}_point`,dimension,format,kind:'texture',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;textures.push({name:p.name,binding,samplerBinding,dimension,format,...(sampling==='tex2Dfloat4'?{coordinates:'2d'}:{})});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_${dimension}<f32>;`,`@group(0) @binding(${samplerBinding}) var ${symbol.sampler}: sampler;`);continue;}
       if (p.pointer) {
@@ -570,7 +585,7 @@ class Emitter {
     const emitHelpers=()=>{while(emittedHelpers<this.helpers.length){const helper=this.helpers[emittedHelpers++];
       this.scopes = [new Map()]; this.currentFunction = helper;
       for (const p of helper.params) {
-        if (p.shared || p.external || p.type === 'void'||p.type==='surface2d') this.fail('Invalid helper parameter.', p);
+        if (p.shared || p.external || p.type === 'void'||p.type==='surface2d'||p.type==='cw_extent') this.fail('Invalid helper parameter.', p);
         if(p.type==='texture3d'){if(p.pointer||p.reference)this.fail('Texture helper parameters must be passed by value.',p);const {dimension,format}=textureShape(p.textureSampling);p.symbol=this.add(p.name,{name:p.name,type:p.type,code:'cw_texture_'+p.name,sampler:'cw_sampler_'+p.name,coordinateScale:'cw_scale_'+p.name,pixelPoint:'cw_point_'+p.name,dimension,format,kind:'texture',constant:true},p);continue;}
         if(p.pointer){const base=this.bufferSymbols.get(p.boundBuffer);if(!base)this.fail('Helper buffer pointer was not specialized.',p);p.symbol=this.add(p.name,{...base,name:p.name,kind:'buffer-alias',constant:p.constant||p.boundConstant,offsetCode:'cw_buffer_offset_'+helper.params.indexOf(p)},p);continue;}
         if(p.type==='thread-block'){if(p.reference)this.fail('thread_block helper parameters must be passed by value.',p);p.symbol=this.add(p.name,{name:p.name,type:p.type,kind:'thread-block',constant:true},p);continue;}
@@ -600,6 +615,7 @@ class Emitter {
     if(this.integerIntrinsics.has('__umul24'))helperLines.unshift('fn cw_umul24(a: u32, b: u32) -> u32 { return (a & 16777215u) * (b & 16777215u); }');
     // A float32 significand times a 16-bit integer fits exactly in 40 bits.
     // Integer limbs preserve the original double product before truncating to a byte.
+    if(this.extentUsed){header.unshift('struct cw_extent { width: vec2<u32>, height: vec2<u32>, depth: vec2<u32>, }');helperLines.unshift('fn cw_size_less(a: vec2<u32>, b: vec2<u32>) -> bool { return a.y < b.y || (a.y == b.y && a.x < b.x); }');}
     if(this.exactByteScaleUsed)helperLines.unshift(`fn cw_exact_byte_scale(value: f32, scale: u32) -> u32 {
   let bits = bitcast<u32>(value);
   let exponent = (bits >> 23u) & 255u;

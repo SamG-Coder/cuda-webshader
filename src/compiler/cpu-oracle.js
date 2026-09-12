@@ -6,6 +6,8 @@
 import {isArray, vectorLength, vectorElement, walk} from './compiler.js';
 const f = Math.fround;
 function convert(value,type){
+  if(type==='cw_size64')return BigInt.asUintN(64,BigInt(value));
+  if(type==='cw_extent')return structuredClone(value);
   if(typeof type==='string'&&type.startsWith('cw_struct_'))return structuredClone(value);
   if(type==='cw_uchar')return Number(value)&255;
   if(type==='cw_uchar4')return Number(value)>>>0;
@@ -61,6 +63,7 @@ class Context {
       case 'id':if(n.name==='true')return true;if(n.name==='false')return false;return this.env.get(n.symbol)?.value;
       case 'index':return (yield* this.ref(n)).get();
       case 'member':{
+        if(n.base.type==='cw_extent')return (yield* this.eval(n.base))[n.member];
         if(n.base.kind==='id'&&this.ids[n.base.name])return this.ids[n.base.name]['xyz'.indexOf(n.member)];
         const base=yield* this.eval(n.base);if(n.base.type==='cw_uchar4')return(base>>>('xyzw'.indexOf(n.member)*8))&255;return base[typeof n.base.type==='string'&&n.base.type.startsWith('cw_struct_')?n.member:'xyzw'.indexOf(n.member)];
       }
@@ -150,6 +153,7 @@ export function executeCPU(artifact,buffers,scalars,workgroups,{instructionBudge
   const block=artifact.metadata.workgroupSize,baseEnv=new Map();
   for(const global of artifact.ast.constantGlobals)if(global.symbol){if(global.symbol.aggregate){const build=node=>{if(node.kind==='struct')return Object.fromEntries(node.fields.map(([name,value])=>[name,build(value)]));if(node.kind==='array')return node.items.map(build);const value=scalars[node.name]??0;if(!Number.isFinite(value))throw Error('Invalid constant struct component '+node.name);return convert(value,node.type);};baseEnv.set(global.symbol,{value:build(global.symbol.aggregate)});continue;}if(global.symbol.elements){const values=global.symbol.elements.map(name=>{const meta=artifact.metadata.scalars.find(s=>s.name===name),value=Object.hasOwn(scalars,name)?scalars[name]:meta.defaultValue;if(!Number.isFinite(value))throw new Error('Invalid constant array value '+name);return convert(value,global.type);});baseEnv.set(global.symbol,{value:values});continue;}const meta=artifact.metadata.scalars.find(s=>s.name===global.symbol.name),value=Object.hasOwn(scalars,meta.name)?scalars[meta.name]:meta.defaultValue;if(!Number.isFinite(value))throw new Error('Invalid constant global '+meta.name);baseEnv.set(global.symbol,{value:convert(value,global.type)});}
   for(const p of artifact.kernel.params){
+    if(p.type==='cw_extent'){const value={};for(const field of ['width','height','depth']){const v=scalars[p.name+'.'+field];if(!Number.isInteger(v)||v<0||v>0xffffffff)throw Error('Invalid cudaExtent component '+field);value[field]=BigInt(v);}baseEnv.set(p.symbol,{value});continue;}
     if(p.pointer){if(!ArrayBuffer.isView(buffers[p.name]))throw new Error(`Missing CPU buffer ${p.name}.`);baseEnv.set(p.symbol,{value:new BufferView(buffers[p.name],p.type)});}
     else{if(p.type==='bool'&&![true,false,0,1].includes(scalars[p.name]))throw new Error(`Invalid Boolean scalar ${p.name}.`);if(p.type==='cw_uchar4'&&(!Number.isInteger(scalars[p.name])||scalars[p.name]<0||scalars[p.name]>0xffffffff))throw new Error(`Invalid packed scalar ${p.name}.`);if(!Number.isFinite(scalars[p.name])&&!(p.type==='bool'&&typeof scalars[p.name]==='boolean'))throw new Error(`Missing/invalid scalar ${p.name}.`);baseEnv.set(p.symbol,{value:convert(scalars[p.name],p.type)});}
   }
