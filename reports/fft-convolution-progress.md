@@ -9,3 +9,11 @@ Complete primary-call macros with fixed/free arguments now preserve the original
 Native validation checks 32,775 lookups each of float, float2 and float4 (229,425 scalar components) against CUDA. All are exact, including negative/out-of-range indices, vector alias helpers and multi-row/padded-tail storage. See linear-float-check.json and linear-float-native.txt.
 
 The original padKernel_kernel, padDataClampToBorder_kernel and modulateAndNormalize_kernel bodies plus mulAndScale are retained in tests/fft-convolution-kernels.cuh and compile. Their complete convolution pipeline is not yet running. Remaining work includes 2048-point FFT axes, original-size memory budgets, native FFT convolution comparisons and a sandbox result preview. No new runnable showcase is claimed yet.
+
+## 2048-point transform milestone
+
+The runtime complex and real FFT APIs now support axes through 2048 elements. One workgroup still handles each row or column, with at most 1024 threads and 16 KiB of shared float2 storage. Each active lane computes a complete butterfly pair; larger axes distribute loads and stores across lanes without assuming one thread per element.
+
+Native cuFFT captures cover 2048 × 8, 8 × 2048 and 2048 × 2048. At the square size, relative spectrum L2 error is 5.3833e-7 and maximum normalized native-inverse error is 1.37091e-6. A GPU forward/inverse round trip has maximum input-domain error 2.38419e-6 for input values in [-1,1]. The large-transform roundtrip check allows 4e-6; smaller transforms retain their existing 2e-6 limit. Native forward relative error (2e-6), native inverse error (2e-6), row padding and guard checks remain in force. See large-fft-check.json.
+
+This is a runtime milestone. The sandbox's FFT-size and memory limits still need updating for the original 2000-square convolution preset, followed by the full native convolution comparison and showcase preview.

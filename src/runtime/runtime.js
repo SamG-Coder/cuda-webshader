@@ -181,17 +181,17 @@ export class GpuRuntime {
   async inverseFFT2D(input,output,{width,height}={}) {return this.complexFFT2D(input,output,{width,height,inverse:true});}
   async complexFFT2D(input,output,{width,height,inverse=false}={}) {
     this.assertAlive();for(const r of [input,output]){this.checkResource(r);if(!r.gpuBuffer)throw Error('Inverse FFT requires storage buffers.');}
-    const valid=n=>Number.isInteger(n)&&n>=1&&n<=1024&&(n&(n-1))===0;
-    if(!valid(width)||!valid(height)||width*height*8>input.byteLength||width*height*8>output.byteLength)throw new RangeError('Inverse FFT needs power-of-two dimensions up to 1024 and complete float2 buffers.');
+    const valid=n=>Number.isInteger(n)&&n>=1&&n<=2048&&(n&(n-1))===0;
+    if(!valid(width)||!valid(height)||width*height*8>input.byteLength||width*height*8>output.byteLength)throw new RangeError('Inverse FFT needs power-of-two dimensions up to 2048 and complete float2 buffers.');
     if(typeof inverse!=='boolean')throw Error('FFT inverse must be boolean.');const source=inverse?FFT_SOURCE:FORWARD_FFT_SOURCE,entry=inverse?'inverseFftAxis':'forwardFftAxis';
-    const rows=await this.kernel(source,{entry,workgroupSize:[width,1,1]}),columns=await this.kernel(source,{entry,workgroupSize:[height,1,1]}),scratch=this.createBuffer(width*height*8),batch=this.batch({label:(inverse?'inverse':'forward')+' complex 2D FFT'});
+    const rows=await this.kernel(source,{entry,workgroupSize:[Math.min(width,1024),1,1]}),columns=await this.kernel(source,{entry,workgroupSize:[Math.min(height,1024),1,1]}),scratch=this.createBuffer(width*height*8),batch=this.batch({label:(inverse?'inverse':'forward')+' complex 2D FFT'});
     try{batch.dispatch(rows.bind({input,output:scratch},{width,height,axis:0}),[height,1,1]);batch.dispatch(columns.bind({input:scratch,output},{width,height,axis:1}),[width,1,1]);batch.submit();await this.idle();}
     finally{if(!batch.ended)batch.discard();this.destroyBuffer(scratch);}
   }
   async realFFT2D(input,output,{width,height,inverse=false,realStride=width}={}) {
     this.assertAlive();for(const r of [input,output]){this.checkResource(r);if(!r.gpuBuffer)throw Error('Real FFT requires storage buffers.');}
-    const valid=n=>Number.isInteger(n)&&n>=1&&n<=1024&&(n&(n-1))===0;
-    if(!valid(width)||!valid(height)||typeof inverse!=='boolean'||!Number.isInteger(realStride)||realStride<width||realStride>65536)throw Error('Real FFT needs power-of-two dimensions up to 1024 and a valid real row stride.');
+    const valid=n=>Number.isInteger(n)&&n>=1&&n<=2048&&(n&(n-1))===0;
+    if(!valid(width)||!valid(height)||typeof inverse!=='boolean'||!Number.isInteger(realStride)||realStride<width||realStride>65536)throw Error('Real FFT needs power-of-two dimensions up to 2048 and a valid real row stride.');
     const packed=Math.floor(width/2)+1,realBytes=realStride*height*4,complexBytes=packed*height*8;
     if(input.byteLength<(inverse?complexBytes:realBytes)||output.byteLength<(inverse?realBytes:complexBytes))throw Error('Real FFT buffers are too small for their row layouts.');
     const prepare=await this.kernel(REAL_FFT_SOURCE,{entry:inverse?'unpackSpectrum':'realToComplex',workgroupSize:[128,1,1]}),finish=await this.kernel(REAL_FFT_SOURCE,{entry:inverse?'complexToReal':'packSpectrum',workgroupSize:[128,1,1]}),a=this.createBuffer(width*height*8),b=this.createBuffer(width*height*8);

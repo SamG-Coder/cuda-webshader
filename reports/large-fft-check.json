@@ -1,0 +1,43 @@
+{
+  "name": "2048-point real FFT axes match native cuFFT",
+  "pass": true,
+  "results": [
+    {
+      "width": 2048,
+      "height": 8,
+      "realStride": 2050,
+      "maxForwardError": 0.00011444091796875,
+      "relativeL2": 3.56716583028121e-07,
+      "inverseNormalizedError": 6.556510925292969e-07,
+      "normalizedRoundtripError": 1.0728836059570312e-06,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    },
+    {
+      "width": 8,
+      "height": 2048,
+      "realStride": 10,
+      "maxForwardError": 8.96453857421875e-05,
+      "relativeL2": 3.492200687075704e-07,
+      "inverseNormalizedError": 7.152557373046875e-07,
+      "normalizedRoundtripError": 1.1920928955078125e-06,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    },
+    {
+      "width": 2048,
+      "height": 2048,
+      "realStride": 2050,
+      "maxForwardError": 0.0029296875,
+      "relativeL2": 5.383302232008093e-07,
+      "inverseNormalizedError": 1.3709068298339844e-06,
+      "normalizedRoundtripError": 2.384185791015625e-06,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    }
+  ],
+  "maximumAxis": 2048,
+  "maximumThreads": 1024,
+  "roundtripLimit": 4e-06,
+  "wallMs": 428.05000001192093
+}
