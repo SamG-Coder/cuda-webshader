@@ -62,6 +62,7 @@ class Context {
     this.tick();
     switch(n.kind){
       case 'initializer':{const values=[];for(const item of n.items)values.push(yield* this.eval(item));while(values.length<Number(n.type[3]))values.push(0);return values;}
+      case 'byte-index':{const offset=yield* this.eval(n.offset);if(typeof offset==='bigint'){const index=offset/BigInt(n.resolvedStride);return Number(index>2147483647n?2147483647n:index);}return Math.trunc(offset/n.resolvedStride);}
       case 'sizeof':return BigInt(n.numericValue);
       case 'literal':return convert(n.numericValue,n.type);
       case 'id':if(n.name==='true')return true;if(n.name==='false')return false;return this.env.get(n.symbol)?.value;

@@ -179,6 +179,14 @@ class Emitter {
         const codes=values.map(v=>this.convert(v.code,v.type,element,n));while(codes.length<width)codes.push(`${element}(0)`);
         return this.result(n,n.target,`${n.target}(${codes.join(', ')})`,values.flatMap(v=>v.pre));
       }
+      case 'byte-index': {
+        const base=this.lookup(n.baseName,n),stride=cudaValueSize(n.target);if(!['buffer','buffer-alias','shared'].includes(base.kind)||base.type.element!==n.target||!stride)this.fail('Byte pointer casts must retain the storage pointee type.',n);
+        const multiple=node=>{if(node?.kind==='literal')return Number(node.value.replace(/[uU]$/,''))%stride===0;if(node?.kind==='sizeof')return cudaValueSize(node.target)%stride===0;if(node?.kind==='binary'&&node.op==='*')return multiple(node.left)||multiple(node.right);return false;};
+        if(stride>1&&!multiple(n.offset)){const factor=n.offset?.kind==='binary'&&n.offset.op==='*'?[n.offset.left,n.offset.right].find(a=>a.kind==='id'&&this.lookup(a.name,a).kind==='uniform'&&['i32','u32','cw_short','cw_ushort','cw_size64'].includes(this.lookup(a.name,a).type)):null;if(!factor)this.fail('Byte-address casts to wider types need provable alignment or an integer launch pitch factor.',n);this.pointerConstraints.push({name:factor.name,minimum:0,multipleOf:stride});}
+        if(base.constant&&!n.constant)this.fail('Cannot discard const through a byte pointer cast.',n);const offset=this.expr(n.offset);if(!['i32','u32','cw_size64'].includes(offset.type))this.fail('Byte offsets require integer values.',n);n.resolvedStride=stride;
+        if(offset.type==='cw_size64'){const shift=Math.log2(stride);if(!Number.isInteger(shift))this.fail('Wide byte addressing requires power-of-two pointee size.',n);const name='cw_byte_offset_'+this.temp++,low=shift?`((${name}.x >> ${shift}u) | (${name}.y << ${32-shift}u))`:`${name}.x`,maximumHigh=shift?2**(shift-1)-1:0;const tooLarge=shift?`${name}.y > ${maximumHigh}u`:`(${name}.y != 0u || ${name}.x > 2147483647u)`;return this.result(n,'i32',`select(i32(${low}),2147483647i,${tooLarge})`,[...offset.pre,`let ${name} = ${offset.code};`]);}
+        return this.result(n,offset.type,`(${offset.code} / ${stride}${offset.type==='u32'?'u':'i'})`,offset.pre);
+      }
       case 'sizeof': {const size=cudaValueSize(n.target);if(size===null)this.fail('sizeof requires a supported built-in value type.',n);this.extentUsed=true;n.numericValue=size;return this.result(n,'cw_size64',`vec2<u32>(${size}u, 0u)`);}
       case 'literal': {
         const isHex = /^0[xX]/.test(n.value), isFloat = !isHex && /[fF]$/.test(n.value), isUnsigned = /[uU]$/.test(n.value);
@@ -199,6 +207,7 @@ class Emitter {
         const atomic=s.atomic&&!isArray(s.type);return this.result(n, s.type, atomic&&!raw?`atomicLoad(&${s.code})`:s.code, [], {rootSymbol: s, atomicRoot: s.atomic,atomic});
       }
       case 'index': {
+        if(n.pointerTarget&&this.lookup(n.base.name,n).type.element!==n.pointerTarget)this.fail('Byte pointer dereference must retain its pointee type.',n);if(raw&&n.pointerConstant)this.fail('Cannot modify a const byte pointer.',n);
         const base = this.expr(n.base, true), index = this.expr(n.index);
         if(base.rootSymbol?.kind==='pointer-array'){
           const slots=base.rootSymbol,root=slots.pointerRoot;if(!root)this.fail('Pointer array must be assigned a shared-array address before use.',n);
@@ -609,16 +618,6 @@ class Emitter {
       if(n.shared||n.dimensions.length||baseNode?.kind!=='id')this.fail('Local pointers require a buffer alias with an optional integer offset.',n);
       const base=this.lookup(baseNode.name,baseNode);if(!['buffer','buffer-alias','shared'].includes(base.kind)||base.type.element!==n.type||(base.kind==='shared'&&base.atomic))this.fail('Local pointers can alias only same-type storage buffers or non-atomic shared arrays.',n);
       if(base.constant&&!n.constant)this.fail('Cannot discard const through a buffer alias.',n);
-      if(n.byteOffsetCast&&n.type!=='cw_uchar'){
-        const stride=cudaValueSize(n.type);if(!stride)this.fail('Byte-address casts need a known pointee alignment.',n);
-        const multiple=node=>{if(node.kind==='literal')return Number(node.value.replace(/[uU]$/,''))%stride===0;if(node.kind==='binary'&&node.op==='*')return multiple(node.left)||multiple(node.right);return false;};
-        if(!multiple(offsetNode)){
-          const factor=offsetNode?.kind==='binary'&&offsetNode.op==='*'?[offsetNode.left,offsetNode.right].find(a=>a.kind==='id'&&this.lookup(a.name,a).kind==='uniform'&&['i32','u32','cw_short','cw_ushort'].includes(this.lookup(a.name,a).type)):null;
-          if(!factor)this.fail('Byte-address casts to wider types need provable alignment or an integer launch pitch factor.',n);
-          this.pointerConstraints.push({name:factor.name,minimum:0,multipleOf:stride});
-        }
-        offsetNode={kind:'binary',op:'/',left:offsetNode,right:{kind:'literal',value:String(stride),token:n.token},token:n.token};
-      }
       const offset=offsetNode?this.expr(offsetNode):{type:'i32',code:'0i',pre:[]};if(!['i32','u32'].includes(offset.type))this.fail('Buffer alias offsets must be 32-bit integers.',n);
       const offsetCode=`cw_offset_${this.temp++}`,symbol={...base,...(base.kind==='shared'?{sharedPointer:base.code}:{}),name:n.name,constant:n.constant||base.constant,kind:'buffer-alias',offsetCode};this.add(n.name,symbol,n);n.symbol=symbol;n.aliasBase=base;n.aliasOffset=offsetNode;
       return [...offset.pre,`var ${offsetCode} = ${base.offsetCode?base.offsetCode+' + ':''}${this.convert(offset.code,offset.type,'i32',n)};`];
@@ -928,16 +927,18 @@ function instantiateHelperTemplates(ast, kernel) {
 }
 export function compile(source, options = {},bufferUsage=null) {
   const ast = parse(source, options), kernels = ast.functions.filter(f => f.qualifier === '__global__');
-  // Recognize same-allocation byte-address round trips before buffer usage analysis.
-  // The emitter checks pointee type and constness before accepting the alias.
+  // Lower same-allocation byte-address round trips while retaining typed offsets.
+  const bytePointer=node=>{
+    if(node?.kind==='binary'&&['+','-'].includes(node.op)){const p=bytePointer(node.left);if(p)return {...p,index:{...node,left:p.index}};return null;}
+    if(node?.kind!=='pointer-cast')return null;
+    const offset=node.value,inner=offset?.left;
+    if(offset?.kind!=='binary'||offset.op!=='+'||inner?.kind!=='pointer-cast'||inner.target!=='byte-address'||inner.value?.kind!=='id')return null;
+    return {base:inner.value,target:node.target,constant:node.constant,index:{kind:'byte-index',token:node.token,baseName:inner.value.name,target:node.target,constant:node.constant,offset:offset.right}};
+  };
   walk(ast,n=>{
-    if(n.kind!=='decl'||!n.pointer||n.init?.kind!=='pointer-cast')return;
-    const outer=n.init,offset=outer.value,inner=offset?.left;
-    if(outer.target!==n.type||offset?.kind!=='binary'||offset.op!=='+'||inner?.kind!=='pointer-cast'||inner.target!=='byte-address'||inner.value?.kind!=='id')return;
-    if(outer.constant&&!n.constant)throw new CompileError('Cannot discard const through a pointer cast.',n.token,source);
-    n.byteOffsetCast=true;n.init={...offset,left:inner.value};
+    if(n.kind==='decl'&&n.pointer){const p=bytePointer(n.init);if(!p)return;if(p.target!==n.type)throw new CompileError('Byte pointer alias must retain its pointee type.',n.token,source);if(p.constant&&!n.constant)throw new CompileError('Cannot discard const through a pointer cast.',n.token,source);n.init={kind:'binary',op:'+',left:p.base,right:p.index,token:n.token};}
+    if(n.kind==='unary'&&n.op==='*'){const p=bytePointer(n.value),base=n.value;delete n.value;delete n.op;Object.assign(n,p?{kind:'index',base:p.base,index:p.index,pointerTarget:p.target,pointerConstant:p.constant,dereference:true}:{kind:'index',base,index:{kind:'literal',value:'0',token:n.token},dereference:true});}
   });
-  walk(ast,n=>{if(n.kind==='unary'&&n.op==='*'){const base=n.value;delete n.value;delete n.op;Object.assign(n,{kind:'index',base,index:{kind:'literal',value:'0',token:n.token},dereference:true});}});
   const specialization=options.entry?.match(/^([A-Za-z_]\w*)<\s*(\d+|[A-Za-z_]\w*)\s*>$/),entry=specialization?specialization[1]:options.entry;if(specialization&&ast.typeAliases?.[specialization[2]])specialization[2]=['float','int','uint','bool','uchar','uchar4',...['float','int','uint'].flatMap(p=>[2,3,4].map(n=>p+n))].find(n=>builtinType(n)===ast.typeAliases[specialization[2]]);
   const kernel = entry ? kernels.find(k => k.name === entry) : kernels.length === 1 ? kernels[0] : null;
   if (!kernel) throw new CompileError(options.entry ? `Kernel '${options.entry}' was not found.` : 'Multiple kernels found; specify options.entry.');

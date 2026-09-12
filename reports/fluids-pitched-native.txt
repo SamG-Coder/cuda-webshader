@@ -1,0 +1,1 @@
+Captured original forces, velocity update and five particle-advection steps; 19x13 domain, 192-byte pitch.

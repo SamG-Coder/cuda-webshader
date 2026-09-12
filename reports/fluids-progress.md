@@ -60,13 +60,29 @@ negative signed operands and sizeof(size_t) = 8. See size-values-check.json and
 size-values-native.txt. Validation: 543 unit tests, 166 real NVIDIA GPU checks,
 compilation and static build pass.
 
-The three remaining original kernels now reach their pointer expressions:
-addForces_k and updateVelocity_k fail on local aliases combining a byte-address
-cast with a trailing element offset. advectParticles_k fails on an inline
-dereference of that cast. These require typed pitched byte-pointer lowering. The host pipeline requires forward real-to-complex and inverse
+All three pitched kernels now compile unchanged. Same-allocation byte casts
+retain their pointee type and combine a byte row offset with a trailing element
+offset. Both local pointer aliases and inline dereferences are supported.
+Alignment is checked at compile time where possible, otherwise through a
+runtime pitch-multiple constraint (8 bytes for float2). Const removal and
+pointee reinterpretation are rejected. Wide byte offsets are divided before
+conversion to buffer indices; unrepresentable positive indices stay out of
+range rather than wrapping into a small valid index.
+
+Native CUDA comparisons of addForces_k, updateVelocity_k and five successive
+advectParticles_k launches match exactly for 1,758 components, including row
+padding and guards. The fixture has a 19 by 13 domain, 192-byte row pitch and a
+large particle timestep to exercise periodic coordinate wrapping. This tests
+the stages with controlled inputs, not the full FFT solver.
+
+See reports/fluids-pitched-check.json and reports/fluids-pitched-native.txt.
+Validation: 545 unit tests, 167 real NVIDIA GPU checks, compilation and static
+build passed. No original CUDA function body was changed.
+
+The remaining host pipeline requires forward real-to-complex and inverse
 complex-to-real FFT layouts, float2 buffer-to-texture updates, repeated velocity
 feedback and particle rendering/interaction. Current FFT support only provides
 a complex inverse transform.
 
-No fluids showcase card has been added. Multi-step error accumulation and a
-native/WebGPU performance comparison have not yet been established.
+No fluids showcase card has been added. Multi-step solver error accumulation
+and a native/WebGPU performance comparison have not yet been established.

@@ -1,0 +1,28 @@
+{
+  "name": "Original fluids pitched kernels match native CUDA",
+  "pass": true,
+  "comparisons": [
+    {
+      "name": "fluids-forces-native",
+      "components": 632,
+      "maxError": 0
+    },
+    {
+      "name": "fluids-update-native",
+      "components": 632,
+      "maxError": 0
+    },
+    {
+      "name": "fluids-particles-native",
+      "components": 494,
+      "maxError": 0
+    }
+  ],
+  "originalBodiesUnchanged": true,
+  "pitchBytes": 192,
+  "paddingPreserved": true,
+  "misalignmentRejected": true,
+  "particleSteps": 5,
+  "wallMs": 89.5949999988079,
+  "softwareAdapterRequested": false
+}
