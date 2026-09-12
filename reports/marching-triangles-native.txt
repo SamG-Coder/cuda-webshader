@@ -1,0 +1,2 @@
+Native RTX 5080; nvcc -O3 --fmad=false -std=c++17 -arch=native -I.local/nvidia-audit/Common tests/marching-triangles-native.cu
+Original implicit field: active=1024 vertices=6240; shared generateTriangles captured; CPU scans are fixture setup only.

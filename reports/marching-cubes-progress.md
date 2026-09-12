@@ -65,3 +65,15 @@ The native and browser checks use the same extracted original device source, ret
 The next original-source failures are: generateTriangles's shared-array vector references, and generateTriangles2's local `float3 *v[3]` pointer array referencing selected shared vertices. Prefix-scan/compaction integration and mesh output verification also remain outstanding.
 
 Validation for classification: 470 unit tests, 136 hardware GPU checks, compile-all and static build pass.
+
+## Shared reference outputs and original implicit-field triangle generation
+
+The compiler specializes reference helpers by argument memory space and preserves it through nested forwarding: local references use function pointers, shared references use workgroup pointers. Both kinds can coexist in the same call chain and in one helper invocation, including const shared reads. Shared-array indices are captured during argument evaluation. Atomic shared values and root aliases remain rejected. Helpers that themselves declare shared memory currently reject address-space specialization rather than duplicating their shared state.
+
+A native/WebGPU test combines original NVIDIA interpolation with shared writes, local/shared mixed calls, a block barrier and reads of neighbouring lanes. All 3,072 position/gradient components agree exactly. CPU-oracle coverage checks three blocks and mixed local/shared calls as well.
+
+The original generateTriangles now compiles and executes with USE_SHARED=1. A separate native fixture selects the upstream implicit-field branch (SAMPLE_VOLUME=0) through compile-time definitions, without changing the CUDA function bodies. A 16³ field at isoValue=.5 has 1,024 active voxels and 6,240 output vertices. Native-generated scan/compaction inputs are loaded unchanged for the browser triangle-stage test; this is isolated stage verification, not a complete GPU marching-cubes pipeline. The native harness uses host prefix scans to prepare that fixture, followed by the original CUDA compactVoxels and generateTriangles entries.
+
+All 49,920 triangle output components are finite. Position comparison has 300 non-bit-identical components, with maximum absolute error 2.9802322387695312e-8; gradient comparison has 414, with maximum error 9.313225746154785e-10. The test allows absolute error up to 1e-6. Native compilation disables multiply-add fusion. This result is numerical agreement, not a claim of bit-exact mesh output.
+
+473 unit tests and 138 hardware GPU checks pass, plus compile-all and static build. Remaining work includes GPU scan/compaction integration, the original sampled-volume generateTriangles2 pointer-array path, and generic mesh presentation. No showcase card advertises the unfinished complete pipeline.

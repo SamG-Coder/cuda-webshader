@@ -48,7 +48,9 @@ fn main(
         var v_k: u32 = u32(0i);
         loop {
           if (!(v_k < u32(16i))) { break; }
-          v_sum = fma(s_tileA[v_ty][v_k], s_tileB[v_k][v_tx], v_sum);
+          let cw_argument_index_2 = v_k;
+          let cw_argument_index_3 = v_tx;
+          v_sum = fma(s_tileA[v_ty][cw_argument_index_2], s_tileB[v_k][cw_argument_index_3], v_sum);
           continuing {
             v_k += u32(1);
           }

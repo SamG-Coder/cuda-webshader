@@ -75,7 +75,7 @@ class Emitter {
       this.functions.set(f.name, f);
     }
     this.helpers = ast.functions.filter(f => f.qualifier === '__device__'&&!f.params.some(p=>p.pointer));
-    this.pointerHelpers=new Map();this.bufferSymbols=new Map();
+    this.pointerHelpers=new Map();this.referenceHelpers=new Map();this.bufferSymbols=new Map();
     this.usage = analyse([kernel], kernel.params);this.usage.atomic=this.usage.atomicBindings;
     for(const kind of ['reads','writes','atomic'])for(const name of bufferUsage?.[kind]||[])this.usage[kind].add(name);
     this.usage.storageBarrier=[...this.usage.writes].some(n=>this.usage.reads.has(n));
@@ -181,7 +181,7 @@ class Emitter {
         if(n.dereference&&!['buffer','buffer-alias'].includes(base.rootSymbol?.kind))this.fail('Dereference requires a storage-buffer pointer.',n);
         if (!isArray(base.type) || !['i32', 'u32'].includes(index.type)) this.fail('Indexing requires an array and a 32-bit integer index.', n);
         const offset=base.rootSymbol?.offsetCode;let indexCode=offset?`(${offset} + ${this.convert(index.code,index.type,'i32',n)})`:index.code;
-        const capturePre=[];if(captureIndex&&base.rootSymbol?.kind==='local'){const temp='cw_argument_index_'+this.temp++;capturePre.push(`let ${temp} = ${indexCode};`);indexCode=temp;}
+        const capturePre=[];if(captureIndex&&['local','shared'].includes(base.rootSymbol?.kind)){const temp='cw_argument_index_'+this.temp++;capturePre.push(`let ${temp} = ${indexCode};`);indexCode=temp;}
         let code = `${base.code}[${indexCode}]`;const type = base.type.element;
         if(type==='cw_uchar'&&base.rootSymbol?.rootBufferName){const temp='cw_byte_index_'+this.temp++;return this.result(n,type,`((${base.code}[${temp} >> 2u] >> ((${temp} & 3u) * 8u)) & 255u)`,[...base.pre,...index.pre,`let ${temp} = u32(${indexCode});`],{rootSymbol:base.rootSymbol});}
         const atomic = base.atomicRoot && !isArray(type);
@@ -315,6 +315,18 @@ class Emitter {
     }
     return this.pointerHelpers.get(key);
   }
+  bindReferenceHelper(helper,args,n){
+    const spaces=helper.params.map((p,i)=>p.reference?(args[i].rootSymbol?.kind==='shared'||args[i].rootSymbol?.referenceSpace==='workgroup'?'workgroup':'function'):null);
+    if(spaces.every((space,i)=>space===null||space===(helper.params[i].referenceSpace||'function')))return helper;
+    const origin=helper.referenceOrigin||helper.name,key=JSON.stringify([origin,spaces]);
+    if(!this.referenceHelpers.has(key)){
+      if(this.referenceHelpers.size>=128)this.fail('At most 128 helper reference specializations are supported.',n);
+      const base=this.functions.get(origin)||helper;walk(base.body,node=>{if(node.kind==='decl'&&node.shared)this.fail('Reference address-space specialization of helpers with shared declarations is unsupported.',node);});
+      const clone=structuredClone(base);let name='cw_reference_helper_'+this.referenceHelpers.size;while(this.functions.has(name))name+='_';clone.name=name;clone.referenceOrigin=origin;
+      spaces.forEach((space,i)=>{if(space)clone.params[i].referenceSpace=space;});this.referenceHelpers.set(key,clone);this.functions.set(name,clone);this.helpers.push(clone);this.ast.functions.push(clone);
+    }
+    return this.referenceHelpers.get(key);
+  }
   call(n) {
     const groupSync=n.callee.kind==='id'&&n.callee.name==='cooperative_groups::sync';
     const memberSync=n.callee.kind==='member'&&n.callee.member==='sync';
@@ -413,6 +425,7 @@ class Emitter {
     for(const param of helper.params)if(param.defaultValue!==undefined&&!['f32','i32','u32','bool','cw_uchar'].includes(param.type))this.fail('Default arguments require scalar value parameters.',param);
     while(args.length<helper.params.length){const value=structuredClone(helper.params[args.length].defaultValue);n.args.push(value);const argument=this.argument(value);args.push(argument);pre.push(...argument.pre);}
     if(helper.params.some(p=>p.pointer))helper=this.bindPointerHelper(helper,args,n);
+    if(helper.params.some(p=>p.reference))helper=this.bindReferenceHelper(helper,args,n);
     const caller=this.currentFunction.name,edges=this.helperCalls.get(caller)||new Set();edges.add(helper.name);this.helperCalls.set(caller,edges);
     const reaches=(from,target,seen=new Set())=>{if(from===target)return true;if(seen.has(from))return false;seen.add(from);return [...(this.helperCalls.get(from)||[])].some(next=>reaches(next,target,seen));};
     if(reaches(helper.name,caller))this.fail('Recursive helper calls are unsupported.',n);
@@ -420,8 +433,9 @@ class Emitter {
     const references=new Set();n.constRefTemporaries=[];n.localPointerArgs=helper.params.map(p=>!!p.localPointer);n.referenceArgs=helper.params.map(p=>!!p.reference);n.groupArgs=helper.params.map(p=>p.type==='thread-block');n.pointerArgs=helper.params.map(p=>!!p.pointer);
     const codes=args.map((a,i)=>{const p=helper.params[i];if(p.type==='texture3d'){const shape=textureShape(p.textureSampling),symbol=a.rootSymbol;if(symbol?.kind!=='texture'||symbol.dimension!==shape.dimension||symbol.format!==shape.format)this.fail('Texture helper argument requires the same inferred sampling format.',n.args[i]);return symbol.code+', '+symbol.sampler+(symbol.linearFetch?', '+symbol.lengthCode:'')+(['tex2D','tex2Dfloat4','tex3D'].includes(p.textureSampling)?', '+symbol.coordinateScale+', '+symbol.pixelPoint:'');}if(p.localPointer){if(references.has(a.rootSymbol))this.fail('Aliased local pointer/reference arguments are unsupported.',n.args[i]);references.add(a.rootSymbol);return a.pointerCode;}if(p.pointer)return a.pointerCode;if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
       const node=n.args[i],s=a.rootSymbol;
-      if(p.constant){if(node.kind==='member'&&node.base.type==='cw_uchar4'&&p.type==='cw_uchar'){const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: cw_uchar = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||p.type==='cw_uchar4'||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.add(s);if(s?.kind==='reference')return s.pointerCode;if(s?.kind==='local'&&!s.constant&&['id','member'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
-      if(!['id','index'].includes(node.kind)||!s||!['local','reference'].includes(s.kind)||s.constant||isArray(a.type)||!(numeric(a.type)||vectorLength(a.type))||a.type!==p.type)this.fail('Reference arguments require a mutable local scalar/vector or local array element of the exact type.',node);
+      if(s?.kind==='shared'&&s.atomic)this.fail('Atomic shared values cannot bind ordinary references.',node);
+      if(p.constant){if(node.kind==='member'&&node.base.type==='cw_uchar4'&&p.type==='cw_uchar'){const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: cw_uchar = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||p.type==='cw_uchar4'||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.add(s);if(s?.kind==='reference')return s.pointerCode;if(s?.kind==='shared'){if(!['id','index'].includes(node.kind))this.fail('Shared references require whole scalars/vectors or array elements.',node);return '&'+a.code;}if(s?.kind==='local'&&!s.constant&&['id','member'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
+      if(!['id','index'].includes(node.kind)||!s||!['local','reference','shared'].includes(s.kind)||s.constant||isArray(a.type)||!(numeric(a.type)||vectorLength(a.type))||a.type!==p.type)this.fail('Reference arguments require a mutable scalar/vector or array element in local or shared memory, of the exact type.',node);
       if(references.has(s))this.fail('Aliased reference arguments are unsupported.',node);references.add(s);return s.kind==='reference'?s.pointerCode:`&${a.code}`;
     });
     return this.result(n, helper.result, `f_${helper.name}(${[...codes.filter(c=>c!==null),'cw_thread','cw_block','cw_grid'].join(', ')})`, pre);
@@ -610,10 +624,10 @@ class Emitter {
         if(p.pointer){const base=this.bufferSymbols.get(p.boundBuffer);if(!base)this.fail('Helper buffer pointer was not specialized.',p);p.symbol=this.add(p.name,{...base,name:p.name,kind:'buffer-alias',constant:p.constant||p.boundConstant,offsetCode:'cw_buffer_offset_'+helper.params.indexOf(p)},p);continue;}
         if(p.type==='thread-block'){if(p.reference)this.fail('thread_block helper parameters must be passed by value.',p);p.symbol=this.add(p.name,{name:p.name,type:p.type,kind:'thread-block',constant:true},p);continue;}
         if(p.reference&&!numeric(p.type)&&!vectorLength(p.type)&&!(p.constant&&(p.type==='cw_uchar4'||vectorLength(p.type)||this.structs.has(p.type))))this.fail('Helper references require numeric scalars or vectors.',p);
-        p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined, constant:p.constant, atomic: false, kind: p.reference?'reference':'local'}, p);
+        p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined,...(p.reference?{referenceSpace:p.referenceSpace||'function'}:{}), constant:p.constant, atomic: false, kind: p.reference?'reference':'local'}, p);
       }
       const body = this.body(helper.body);
-      helperLines.push(`fn f_${helper.name}(${[...helper.params.filter(p=>p.type!=='thread-block').map(p => p.type==='texture3d'?`cw_texture_${p.name}: texture_${textureShape(p.textureSampling).dimension}<${p.textureSampling==='fetch_uint'?'u32':'f32'}>, cw_sampler_${p.name}: sampler${p.textureSampling.startsWith('fetch_')?`, cw_length_${p.name}: u32`:''}${['tex2D','tex2Dfloat4','tex3D'].includes(p.textureSampling)?`, cw_scale_${p.name}: vec${p.textureSampling==='tex3D'?3:2}<f32>, cw_point_${p.name}: f32`:''}`:p.pointer?`cw_buffer_arg_${helper.params.indexOf(p)}: i32`:`${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.reference?`ptr<function, ${p.type}>`:p.type}`),'cw_thread: vec3<u32>','cw_block: vec3<u32>','cw_grid: vec3<u32>'].join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>p.pointer).map(p=>`var cw_buffer_offset_${helper.params.indexOf(p)}: i32 = cw_buffer_arg_${helper.params.indexOf(p)};`)),...indent(helper.params.filter(p=>p.type!=='thread-block'&&p.type!=='texture3d'&&!p.pointer&&!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
+      helperLines.push(`fn f_${helper.name}(${[...helper.params.filter(p=>p.type!=='thread-block').map(p => p.type==='texture3d'?`cw_texture_${p.name}: texture_${textureShape(p.textureSampling).dimension}<${p.textureSampling==='fetch_uint'?'u32':'f32'}>, cw_sampler_${p.name}: sampler${p.textureSampling.startsWith('fetch_')?`, cw_length_${p.name}: u32`:''}${['tex2D','tex2Dfloat4','tex3D'].includes(p.textureSampling)?`, cw_scale_${p.name}: vec${p.textureSampling==='tex3D'?3:2}<f32>, cw_point_${p.name}: f32`:''}`:p.pointer?`cw_buffer_arg_${helper.params.indexOf(p)}: i32`:`${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.reference?`ptr<${p.referenceSpace||'function'}, ${p.type}>`:p.type}`),'cw_thread: vec3<u32>','cw_block: vec3<u32>','cw_grid: vec3<u32>'].join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>p.pointer).map(p=>`var cw_buffer_offset_${helper.params.indexOf(p)}: i32 = cw_buffer_arg_${helper.params.indexOf(p)};`)),...indent(helper.params.filter(p=>p.type!=='thread-block'&&p.type!=='texture3d'&&!p.pointer&&!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
     }};
     emitHelpers();
     this.scopes = kernelScope; this.currentFunction = this.kernel;

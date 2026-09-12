@@ -48,9 +48,13 @@ fn main(
   workgroupBarrier();
   if ((v_i < cw_params.p_n)) {
     var v_sum: f32 = (s_tile[v_lane] * 0.0625f);
-    v_sum = fma(s_tile[(v_lane + u32(1i))], 0.25f, v_sum);
-    v_sum = fma(s_tile[(v_lane + u32(2i))], 0.375f, v_sum);
-    v_sum = fma(s_tile[(v_lane + u32(3i))], 0.25f, v_sum);
-    b_output[v_i] = fma(s_tile[(v_lane + u32(4i))], 0.0625f, v_sum);
+    let cw_argument_index_3 = (v_lane + u32(1i));
+    v_sum = fma(s_tile[cw_argument_index_3], 0.25f, v_sum);
+    let cw_argument_index_4 = (v_lane + u32(2i));
+    v_sum = fma(s_tile[cw_argument_index_4], 0.375f, v_sum);
+    let cw_argument_index_5 = (v_lane + u32(3i));
+    v_sum = fma(s_tile[cw_argument_index_5], 0.25f, v_sum);
+    let cw_argument_index_6 = (v_lane + u32(4i));
+    b_output[v_i] = fma(s_tile[cw_argument_index_6], 0.0625f, v_sum);
   }
 }

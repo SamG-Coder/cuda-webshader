@@ -1,0 +1,2 @@
+Native RTX 5080; nvcc -O3 --fmad=false -std=c++17 -arch=native -I.local/nvidia-audit/Common tests/shared-vector-reference-native.cu
+Captured 384 positions and gradients after shared interpolation, synchronization and neighbour reads; local and shared helper calls coexist.
