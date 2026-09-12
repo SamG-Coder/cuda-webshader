@@ -69,3 +69,5 @@ project code under MIT.
 - [MIT license text](https://opensource.org/license/mit)
 - [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 - [NVIDIA CUDA Toolkit EULA](https://docs.nvidia.com/cuda/eula/index.html)
+
+The `showcases/postprocess-gl/` CUDA source and `teapot.ppm` image are from NVIDIA CUDA Samples `postProcessGL`, revision `5443602d89ed99aede2e4b7bf329daddeadb320e`, under the NVIDIA BSD-3-Clause notice retained in `kernel.cu` and `licenses/`. The image is copied from `data/teapot_orig.ppm`. Original project integration and validation code remain MIT.

@@ -1,0 +1,5 @@
+case=0 8x8 radius=0 original kernel native capture PASS; guards unchanged
+case=1 32x16 radius=1 original kernel native capture PASS; guards unchanged
+case=2 32x16 radius=4 original kernel native capture PASS; guards unchanged
+case=3 32x16 radius=8 original kernel native capture PASS; guards unchanged
+case=4 512x512 radius=4 original kernel native capture PASS; guards unchanged

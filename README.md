@@ -468,3 +468,5 @@ The original project source, CUDA kernel examples, generated WGSL, tests, benchm
 Dependencies retain their own licenses: Three.js is MIT, while Playwright and playwright-core are Apache-2.0 development dependencies. The CUDA Toolkit and browser binaries are external prerequisites and are not included in this source repository. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for license scope and attribution, and [docs/research.md](docs/research.md) for design references.
 
 The static build includes the project license, third-party notices and Three.js license. Native executables and large benchmark input binaries are excluded from Git; `npm run bench:native:build` regenerates them locally. Measured reports, raw timing samples and the generated native launcher source are included.
+
+[Try NVIDIA post-process glow in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=postprocess): original RGBA texture and shared-tile CUDA kernel, original teapot input, editable highlights and CUDA/WGSL comparison. [Validation and launch settings](showcases/postprocess-gl/README.md).

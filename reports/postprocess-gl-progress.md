@@ -1,15 +1,15 @@
-# postProcessGL compiler progress
+# postProcessGL: complete default float4 image path
 
-Candidate: NVIDIA CUDA Samples `cpp/5_Domain_Specific/postProcessGL/postProcessGL.cu`, pinned revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
+The original NVIDIA `cudaProcess` and its device helpers now run in the sandbox, with a standalone showcase card linked only to `sandbox.html?example=postprocess`.
 
-The original kernel has not been added to the showcase yet. Generic desktop extraction preserves its function bodies and the `SMEM(X, Y)` macro.
+Source: CUDA Samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`, `cpp/5_Domain_Specific/postProcessGL/postProcessGL.cu`. Generic extraction preserves the function bodies, conditionals and shared-memory indexing macro. The original `data/teapot_orig.ppm` is copied without byte changes.
 
-Completed prerequisites:
-- Indexed primary expression macros support reads and lvalue writes through AST substitution. Parameter parentheses and balanced delimiters are required; surrounding textual operators remain rejected.
-- `#ifdef` and `#ifndef` recognize numeric definitions (including zero), expression macros, forwarding macros, and externally supplied numeric defines. Existing nested branch state is preserved. This is still bounded preprocessing, not a complete C preprocessor.
-- Native CUDA and real NVIDIA WebGPU agree on a shared `uchar4` tile probe using the original SMEM definition: packed result `ff0d0b07`. This is a compiler prerequisite probe, not validation of the complete postProcessGL image algorithm.
-- 402 unit tests and 115 NVIDIA GPU checks pass. Compile-all and static build pass.
+Implemented generic requirements:
+- Indexed expression macros and definition conditionals (previous commit).
+- Inferred float4 2D texture results through helpers, distinct from scalar float images and float4 transfer tables.
+- Numeric-to-float texture coordinates, nearest clamped pixel sampling and linear sampling, with per-texture coordinate uniforms.
+- RGBA32 float texture uploads and bounded P6 PPM decoding in the sandbox.
 
-Next measured blocker: original `getPixel` calls `tex2D<float4>(inTex, x, y)` with integer coordinates. The current compiler only accepts scalar float 2D texture results and float coordinates. Extend texture format inference, helper parameter propagation, runtime RGBA image upload, and coordinate conversion before executing the original kernel. Then validate its halo loading and dynamic shared tile against native CUDA and an independent image reference, implement sandbox host configuration, and add one sandbox-linked card only after complete image checks pass.
+Validation: five native CUDA captures versus real NVIDIA WebGPU and an independent reference, using radii 0, 1, 4 and 8. Every RGB channel matches exactly in all cases; output alpha and guard regions pass. The full image is 512 × 512. A separate hardware case checks bilinear RGBA sampling alongside a 1D transfer texture. 406 unit tests, 117 real NVIDIA GPU checks, compile-all, static build and the explorer checks pass. The static sandbox verifies all native image pixels, an edited highlight multiplier, shader comparison and mobile layout.
 
-Preserve the original CUDA bodies. The default upstream path uses a float4 texture; the optional `USE_TEXTURE_RGBA8UI` branch has a separate unsigned texture requirement. Do not claim desktop OpenGL execution from a compute-only comparison.
+Scope: the default upstream float4 texture path is complete. The optional `USE_TEXTURE_RGBA8UI` unsigned texture path remains unsupported. These checks run the unchanged compute kernel against the saved upstream input image, not the desktop OpenGL application. They establish correctness, not native-versus-WebGPU performance. See the showcase README for exact launch constraints and reports for measured results.

@@ -1,0 +1,13 @@
+# NVIDIA postProcessGL
+
+[Open the glow sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=postprocess).
+
+The original `cudaProcess`, `getPixel`, `rgbToInt` and clamp helpers come from NVIDIA CUDA Samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`, `cpp/5_Domain_Specific/postProcessGL/postProcessGL.cu`. Function bodies and the shared-memory indexing macro are unchanged. Desktop host code is excluded by the generic importer. `teapot.ppm` is a byte-identical copy of the sample’s `data/teapot_orig.ppm`. NVIDIA code and image remain BSD-3-Clause; the harness and compiler are MIT.
+
+This runs the original disc-shaped blur and highlight amplification on the original 512 × 512 colour image. The sandbox decodes the input PPM into a float4 texture, dispatches the generated shader, and displays the packed RGB output with opaque presentation alpha. The computation runs on the GPU. It does not launch the desktop OpenGL application or render a new 3D teapot each frame. The original host uses an OpenGL texture; this harness supplies the saved image through CUDA/WebGPU float4 textures.
+
+The preset uses square 8 × 8 blocks, radius 4, threshold 0.8 and highlight multiplier 4. Edit `threshold` and `highlight` in Launch settings. For another integer radius from 0 through 8, set `tilew = 8 + 2*r` and shared memory bytes to `tilew * tilew * 4`. Keep square blocks and exact image coverage: the original kernel has no output bounds guard, and its corner loading assumes square blocks. Larger blocks/radii require a correspondingly sized tile within device limits.
+
+The compiler supports the default `tex2D<float4>` path. The optional upstream `USE_TEXTURE_RGBA8UI` / `tex2D<uchar4>` mode remains unsupported. Float RGBA and scalar float 2D textures support numeric coordinates, nearest/linear filtering and normalized or clamped pixel coordinates. The existing float4 transfer texture API remains separate.
+
+Validation covers five native CUDA image captures, WebGPU and an independent disc-filter reference: radii 0, 1, 4 and 8, three highlight settings, image edges, corners and all output guards. All RGB channels matched exactly on the tested NVIDIA device (the comparison allows at most one byte for floating-point rounding). The static sandbox also matches every native pixel, verifies an edited highlight multiplier, CUDA/WGSL comparison and mobile layout. See `reports/postprocess-gl-native.txt`, the postProcessGL result in `reports/nvidia-regression-gpu.json`, and `reports/postprocess-gl-sandbox-check.json`. These are correctness checks, not native-versus-WebGPU performance benchmarks.
