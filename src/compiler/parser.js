@@ -161,9 +161,15 @@ export class Parser {
     return {kind: 'module', functions, constantGlobals,typeTraits:[...this.typeTraits.values()], source: this.source};
   }
   block() { const token = this.take('{'), body = []; while (!this.is('}')) { if (this.peek().kind === 'eof') this.fail('Unclosed block.'); body.push(this.statement()); } this.take('}'); return {kind: 'block', token, body}; }
+  initializer(){
+    if(!this.is('{'))return this.expression(2);
+    const token=this.take('{'),items=[];
+    while(!this.is('}')){items.push(this.expression(2));if(!this.match(','))break;}
+    this.take('}');return {kind:'initializer',token,items};
+  }
   declaration(semicolon = true) {
     const token = this.peek(), d = this.type(),declarations=[];
-    do {const name=this.name(),dimensions=[];while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.expression(2):null;declarations.push({kind:'decl',token,name,...d,dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
+    do {const name=this.name(),dimensions=[];while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.initializer():null;declarations.push({kind:'decl',token,name,...d,dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
     if (semicolon) this.take(';');return declarations.length===1?declarations[0]:{kind:'decls',token,declarations};
   }
   statement() {

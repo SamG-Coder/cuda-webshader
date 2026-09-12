@@ -106,6 +106,14 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
       }finally{await runtime.idle();for(const buffer of Object.values(buffers))runtime.destroyBuffer(buffer);}
     }
   });
+  await run('Vector aggregate initializers preserve partial zero filling and dependent helper types',async()=>{
+    const source=await(await fetch('/tests/vector-initializers.cu')).text(),kernel=await runtime.kernel(source,{workgroupSize:[128,1,1]});
+    for(const n of [1,129,1025]){const out=runtime.createBuffer(new Float32Array(n*12+16).fill(-12345));try{
+      runtime.batch().dispatch(kernel.bind({out},{n}),[Math.ceil(n/128)]).submit();const actual=await runtime.read(out);
+      for(let i=0;i<n;i++){const expected=[0,0,0,0,i+5,0,0,0,1,2,3,4];for(let j=0;j<12;j++)if(actual[i*12+j]!==expected[j])throw Error('Vector initializer mismatch at '+i);}
+      if(!actual.slice(n*12).every(v=>v===-12345))throw Error('Vector initializer guard changed');
+    }finally{await runtime.idle();runtime.destroyBuffer(out);}}
+  });
   await run('GPU rejects divergent entry into a helper barrier',async()=>{
     try{await runtime.kernel('__device__ void barrier(){__syncthreads();} __global__ void k(){if(threadIdx.x==0u)barrier();}',{workgroupSize:[4,1,1]});}catch(error){if(/uniform/i.test(error.message))return;throw error;}
     throw Error('Divergent helper barrier was accepted');

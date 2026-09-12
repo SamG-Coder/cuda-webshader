@@ -118,6 +118,14 @@ class Emitter {
   expr(n, raw = false) {
     if (!n) this.fail('Missing expression.', this.kernel);
     switch (n.kind) {
+      case 'initializer': {
+        const width=vectorLength(n.target),element=vectorElement(n.target);
+        if(!width||n.items.length>width)this.fail('Vector initializers require at most one scalar per component.',n);
+        const values=n.items.map(item=>this.expr(item));
+        if(values.some(v=>v.type!==element))this.fail('Vector initializer components must match the element type; use explicit casts for conversions.',n);
+        const codes=values.map(v=>v.code);while(codes.length<width)codes.push(`${element}(0)`);
+        return this.result(n,n.target,`${n.target}(${codes.join(', ')})`,values.flatMap(v=>v.pre));
+      }
       case 'literal': {
         const isHex = /^0[xX]/.test(n.value), isFloat = !isHex && /[fF]$/.test(n.value), isUnsigned = /[uU]$/.test(n.value);
         if (!isFloat && /[.eE]/.test(n.value) && !/^0[xX]/.test(n.value)) this.fail('Double-precision literals are unsupported. Use an f suffix, for example 0.5f.', n);
@@ -356,6 +364,7 @@ class Emitter {
     if (isArray(type) && n.init) this.fail('Array initializers are unsupported. Initialize elements explicitly.', n);
     const atomic = n.shared && analyse([this.currentFunction],[]).atomic.has(n.name);
     if (atomic && !['i32', 'u32'].includes(n.type)) this.fail('Shared atomics require int or unsigned int.', n);
+    if(n.init?.kind==='initializer')n.init.target=type;
     const init = n.init ? this.expr(n.init) : null;
     if (n.constant && !init && !n.shared) this.fail('A const local variable needs an initializer.', n);
     const code = `${n.shared ? (this.currentFunction===this.kernel?'s':'s_'+(this.currentFunction.pointerOrigin||this.currentFunction.name)) : 'v'}_${n.name}`;

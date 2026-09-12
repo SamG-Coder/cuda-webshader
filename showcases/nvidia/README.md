@@ -312,8 +312,8 @@ across three blocks. Shared objects are separate for different helper functions
 and template specializations. WebGPU rejects a divergent call into a helper
 barrier. Native results are in `reports/shared-helpers-native.txt`; build
 `tests/shared-helpers-native.cu` with the NVCC flags above.
-N-body still needs its shared-memory conversion wrapper and vector aggregate
-initializers, plus integration and full numerical/visual validation.
+N-body still needs its shared-memory conversion wrapper, plus integration and
+full numerical/visual validation.
 
 Storage-buffer helper pointers are checked by `tests/helper-pointers.cu` in native
 CUDA and hardware WebGPU at 32 and 128 threads across three blocks. Coverage
@@ -326,3 +326,12 @@ bindings retain correct read/write and atomic declarations. Pointer returns,
 reassignment, casts and shared/local-array pointer arguments remain unsupported.
 Native results: `reports/helper-pointers-native.txt`; build
 `tests/helper-pointers-native.cu` with the NVCC flags above.
+
+Local vector brace initializers now support full, partial, empty and trailing-comma
+lists. Missing components become zero, including in dependent template types.
+Components must match the vector element type; implicit conversions are rejected
+with a diagnostic requiring explicit casts. Arrays, scalar brace initialization
+and nested aggregate lists remain unsupported. `tests/vector-initializers.cu`
+passes native CUDA and hardware WebGPU checks for 1, 129 and 1,025 records,
+including output guards. Native results: `reports/vector-initializers-native.txt`;
+build `tests/vector-initializers-native.cu` with the NVCC flags above.

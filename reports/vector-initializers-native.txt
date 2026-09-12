@@ -1,0 +1,3 @@
+n=1 PASS vector initializers, dependent helper types and guards
+n=129 PASS vector initializers, dependent helper types and guards
+n=1025 PASS vector initializers, dependent helper types and guards

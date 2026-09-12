@@ -50,6 +50,7 @@ class Context {
     if(n.kind==='sequence'){let result;for(const expression of n.expressions)result=yield* this.eval(expression);return result;}
     this.tick();
     switch(n.kind){
+      case 'initializer':{const values=[];for(const item of n.items)values.push(yield* this.eval(item));while(values.length<Number(n.type[3]))values.push(0);return values;}
       case 'literal':return convert(n.numericValue,n.type);
       case 'id':if(n.name==='true')return true;if(n.name==='false')return false;return this.env.get(n.symbol)?.value;
       case 'index':return (yield* this.ref(n)).get();
