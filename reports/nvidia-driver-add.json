@@ -1,0 +1,103 @@
+{
+  "date": "2026-09-12T00:17:11.363Z",
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "sourceCompiled": true,
+  "absoluteTolerance": 0,
+  "scope": "Original C-linkage vector-add kernel; driver/runtime host interoperability is not reproduced",
+  "results": [
+    {
+      "groups": [
+        1,
+        1,
+        1
+      ],
+      "threads": 128,
+      "n": 0,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "groups": [
+        1,
+        1,
+        1
+      ],
+      "threads": 128,
+      "n": 1,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "groups": [
+        1,
+        1,
+        1
+      ],
+      "threads": 128,
+      "n": 127,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "groups": [
+        1,
+        1,
+        1
+      ],
+      "threads": 128,
+      "n": 128,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "groups": [
+        2,
+        1,
+        1
+      ],
+      "threads": 128,
+      "n": 129,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "groups": [
+        3,
+        1,
+        1
+      ],
+      "threads": 128,
+      "n": 257,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "groups": [
+        9,
+        1,
+        1
+      ],
+      "threads": 128,
+      "n": 1025,
+      "guardsPreserved": true,
+      "pass": true
+    }
+  ],
+  "passed": true
+}

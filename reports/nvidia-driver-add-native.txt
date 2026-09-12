@@ -1,0 +1,7 @@
+n=0 PASS exact output and 16 guards
+n=1 PASS exact output and 16 guards
+n=127 PASS exact output and 16 guards
+n=128 PASS exact output and 16 guards
+n=129 PASS exact output and 16 guards
+n=257 PASS exact output and 16 guards
+n=1025 PASS exact output and 16 guards

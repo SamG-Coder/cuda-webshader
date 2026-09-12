@@ -1,0 +1,9 @@
+import {chromium} from 'playwright';import {writeFile} from 'node:fs/promises';
+const browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM||'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+try{const page=await browser.newPage();await page.goto('http://localhost:5173/');const report=await page.evaluate(async()=>{
+ const {GpuRuntime}=await import('/src/runtime/runtime.js'),{driverAddFixture}=await import('/showcases/nvidia/driver-add-fixtures.js'),runtime=await GpuRuntime.create(),results=[];
+ try{const adapter=runtime.describe();if(!/nvidia/i.test(JSON.stringify(adapter)))throw Error('Real NVIDIA adapter required');const source=await(await fetch('/showcases/nvidia/kernels/36.cu')).text();for(const n of [0,1,127,128,129,257,1025]){const threads=128,f=driverAddFixture(n,threads),resources=Object.fromEntries(Object.entries(f.buffers).map(([name,data])=>[name,runtime.createBuffer(data)]));try{const kernel=await runtime.kernel(source,{workgroupSize:[threads,1,1]});runtime.batch().dispatch(kernel.bind(resources,f.scalars),f.groups).submit();const output=await runtime.read(resources.C),guardsPreserved=output.slice(n).every(v=>v===-12345);results.push({groups:f.groups,threads,n,guardsPreserved,pass:guardsPreserved&&output.every((v,i)=>Number.isFinite(v)&&Math.abs(v-f.expected[i])<=0)});}finally{await runtime.idle();for(const r of Object.values(resources))runtime.destroyBuffer(r);}}
+ return {date:new Date().toISOString(),adapter,softwareAdapterRequested:false,sourceCompiled:true,absoluteTolerance:0,scope:'Original C-linkage vector-add kernel; driver/runtime host interoperability is not reproduced',results,passed:results.every(r=>r.pass)};
+ }finally{runtime.dispose();}
+ });await writeFile('reports/nvidia-driver-add.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));if(!report.passed)process.exitCode=1;
+}finally{await browser.close();}

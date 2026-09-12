@@ -182,6 +182,11 @@
       "entry": "transposeNaive",
       "sample": "cpp/6_Performance/transpose",
       "passed": true
+    },
+    {
+      "entry": "VecAdd_kernel",
+      "sample": "cpp/0_Introduction/simpleDrvRuntime",
+      "passed": true
     }
   ]
 }

@@ -38,6 +38,7 @@ export function tokenize(source, defines = {}) {
       if(forwarders.has(m[1]))throw new CompileError('Macro redefinition is unsupported.',token,source);
       if (!macros.has(m[1])) macros.set(m[1], m[2]); advance(directive); continue;
     }
+    if(rest[0]==='"') {const literal=rest.match(/^"[^"\n\r\\]*"/);if(!literal)throw new CompileError('Unsupported or unterminated string literal.',token,source);tokens.push({...token,kind:'string',value:literal[0]});advance(literal[0]);continue;}
     const number = rest.match(NUM);
     if (number) { tokens.push({...token, kind: 'number', value: number[0].replace(/(?:[uU][lL]|[lL][uU])$/,'u')}); advance(number[0]); continue; }
     const word = rest.match(WORD);
@@ -96,6 +97,7 @@ export class Parser {
     while (this.peek().kind !== 'eof') {
       const token = this.peek();
       let templateParameter=null,templateKind=null;this.templateTypeName=null;
+      if(this.match('extern')){const linkage=this.take();if(linkage.kind!=='string'||linkage.value!=='"C"')this.fail('Only extern "C" linkage on a single device function definition is supported.',linkage);if(!['__global__','__device__'].includes(this.peek().value))this.fail('extern "C" must precede a single __global__ or __device__ function definition; linkage blocks and templates are unsupported.');}
       if(this.match('template')){this.take('<');const kind=this.take();if(!['int','class','typename'].includes(kind.value))this.fail('Only one integer or built-in type template parameter is supported.',kind);templateKind=kind.value==='int'?'int':'type';templateParameter=this.name();if(TYPES.has(templateParameter))this.fail('Template parameter must have a distinct name.',token);this.take('>');if(templateKind==='type')this.templateTypeName=templateParameter;}
       if(this.match('namespace')){const alias=this.name();this.take('=');const target=this.name();this.take(';');if(target!=='cooperative_groups'||this.groupNamespaces.has(alias))this.fail('Only distinct aliases of cooperative_groups are supported.',token);this.groupNamespaces.add(alias);continue;}
       while (['static','inline', '__forceinline__'].includes(this.peek().value)) this.take();

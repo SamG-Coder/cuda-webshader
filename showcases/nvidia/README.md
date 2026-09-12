@@ -8,7 +8,7 @@ NVIDIA cuda-samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
 The audit scans direct source files for standalone global void kernels. It is
 not a complete C++ preprocessor or a claim to compile every template instance.
 
-The 36 translated entries were run separately with NVCC on RTX 5080 and with
+The 37 translated entries were run separately with NVCC on RTX 5080 and with
 WebGPU on a real NVIDIA adapter. Fixtures use 256 elements or a 32×32 grid,
 with 64×64 matrices for the two transpose kernels and 17 vectors of 1,537
 elements for the scalar-product kernel;
@@ -39,6 +39,7 @@ node scripts/prepare-nvidia-histogram-merge.mjs
 node scripts/prepare-nvidia-inverse-cnd.mjs
 node scripts/prepare-nvidia-mpi-sqrt.mjs
 node scripts/prepare-nvidia-transpose-naive.mjs
+node scripts/prepare-nvidia-driver-add.mjs
 node scripts/prepare-nvidia-checks.mjs
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor .local/nvidia-checks/check.cu -o .local/nvidia-checks/check.exe
 .local/nvidia-checks/check.exe
@@ -55,6 +56,7 @@ node scripts/test-nvidia-fwt-shared.mjs
 node scripts/test-nvidia-histogram-merge.mjs
 node scripts/test-nvidia-inverse-cnd.mjs
 node scripts/test-nvidia-mpi-sqrt.mjs
+node scripts/test-nvidia-driver-add.mjs
 ```
 
 Run the server first (`npm start`) for browser checks. The browser script uses
@@ -227,3 +229,16 @@ defines. The existing transpose native and WebGPU harnesses now check all three
 variants on 32×32, 64×96, 96×64 and 128×128 matrices, with exact output and 16
 untouched guard values. No new compiler feature was needed. Input dimensions
 must be multiples of 32. These are correctness checks, not timing benchmarks.
+
+The simpleDrvRuntime follow-up compiles the complete original vector-add kernel
+file, preserving its single-function C linkage declaration. Native and WebGPU
+harnesses check 0, 1, 127, 128, 129, 257 and 1,025 inputs, with exact results and
+16 untouched output guards. The compute kernel is supported; native driver/runtime
+API interoperability is not reproduced. Reports are `reports/nvidia-driver-add.json`
+and `reports/nvidia-driver-add-native.txt`; build `driver-add-native.cu` with the
+flags above. Linkage blocks and C-linked templates remain unsupported.
+
+The combined native harness keeps each fixture in a separate non-inlined function
+to avoid accumulating all fixture arrays in Windows' default-size stack.
+Audit generation requires a PASS line for every isolated native kernel.
+

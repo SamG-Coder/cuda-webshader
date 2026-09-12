@@ -1,3 +1,4 @@
+import {driverAddFixture} from './driver-add-fixtures.js';
 import {matrixFixture} from './matrixmul-fixtures.js';
 import {scanUpdateFixture} from './scan-update-fixtures.js';
 import {atomicCasFixture} from './atomic-cas-fixtures.js';
@@ -11,6 +12,7 @@ import {mpiSqrtFixture} from './mpi-sqrt-fixtures.js';
 import {scalarFixture} from './scalar-fixtures.js';
 import {blackScholesFixture} from './blackscholes-fixtures.js';
 export function fixture(row) {
+ if(row.entry==='VecAdd_kernel')return driverAddFixture();
  if(row.entry==='simpleMPIKernel')return mpiSqrtFixture();
  if(row.entry==='inverseCNDKernel')return inverseCndFixture();
  if(/^mergeHistogram(64|256)Kernel$/.test(row.entry))return histogramMergeFixture(Number(row.entry.match(/\d+/)[0]));

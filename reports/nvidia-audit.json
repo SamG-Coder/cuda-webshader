@@ -916,8 +916,25 @@
         ]
       },
       "browser": {
-        "status": "translation-rejected",
-        "reason": "Unsupported character \"\\\"\". (37:8)\nextern \"C\" __global__ void VecAdd_kernel(const float *A, const float *B, float *C, int N)\r\n       ^"
+        "status": "kernel-verified",
+        "reason": "Isolated kernels checked against CPU reference on a real NVIDIA WebGPU adapter. Full host program is not executed.",
+        "checks": [
+          {
+            "sample": "cpp/0_Introduction/simpleDrvRuntime",
+            "entry": "VecAdd_kernel",
+            "pass": true,
+            "values": 273,
+            "maxError": 0,
+            "failures": 0,
+            "outputs": {
+              "C": {
+                "values": 273,
+                "maxError": 0,
+                "failures": 0
+              }
+            }
+          }
+        ]
       }
     },
     {
@@ -9654,11 +9671,11 @@
       }
     }
   ],
-  "executionUpdated": "2026-09-12T00:14:01.959Z",
+  "executionUpdated": "2026-09-12T00:19:44.552Z",
   "counts": {
     "samples": 208,
     "compilerProbes": 350,
-    "webgpuPassed": 36,
+    "webgpuPassed": 37,
     "nativeProgramsAttempted": 149,
     "nativeStatuses": {
       "exited-zero": 142,
