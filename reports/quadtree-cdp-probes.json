@@ -1,0 +1,11 @@
+{
+  "upstreamRevision": "5443602d89ed99aede2e4b7bf329daddeadb320e",
+  "sourceSha256": "e5e8cc5c47abc769d0a765288e318f75544d8a75701af31aa98f40ae1fe6440d",
+  "originalDeviceBodies": true,
+  "results": [
+    {
+      "compiled": false,
+      "error": "Value classes currently require public fields and methods. (46:5)\n    float *m_x;\r\n    ^"
+    }
+  ]
+}

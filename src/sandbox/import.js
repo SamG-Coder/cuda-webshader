@@ -23,6 +23,15 @@ export function kernelSource(source){
  const traits=/\btemplate\s*<[^>]*>\s*struct\s+\w+(?:\s*<[^>]*>)?\s*\{([^{}]*)\}\s*;/g;
  while((match=traits.exec(masked)))if(/^(?:\s*typedef\s+(?:unsigned\s+)?\w+\s+\w+\s*;)+\s*$/.test(match[1]))spans.push([match.index,match.index+match[0].length]);
  const declarations=[];
+ // Retain referenced records as whole declarations, including constructors and
+ // methods. Never extract a member as an unrelated module-level function.
+ const records=[],recordPattern=/\b(?:class|struct)\s+(\w+)(?:\s*:\s*(?:public|protected|private)\s+\w+)?\s*\{/g;
+ while((match=recordPattern.exec(masked))){let depth=1,end=recordPattern.lastIndex;for(;end<masked.length&&depth;end++){if(masked[end]==='{')depth++;else if(masked[end]==='}')depth--;}
+   if(depth)throw Error('Unclosed CUDA record declaration.');while(/\s/.test(masked[end]||'')&&end<masked.length)end++;
+   if(masked[end]===';')records.push({names:[match[1]],range:[match.index,end+1]});recordPattern.lastIndex=end;
+ }
+ for(let i=spans.length-1;i>=0;i--)if(records.some(({range:[a,b]})=>spans[i][0]>=a&&spans[i][1]<=b&&!(spans[i][0]===a&&spans[i][1]===b&&/template\s*<\s*(?:typename|class)\b/.test(masked.slice(a,b))&&/operator\s*\(\s*\)/.test(masked.slice(a,b)))))spans.splice(i,1);
+ declarations.push(...records);
  const plainStructs=/\b(?:typedef\s+)?struct\s*(?:\w+\s*)?\{[^{}]*\}\s*(?:\w+\s*)?;/g;
  while((match=plainStructs.exec(masked))){const names=/^(?:typedef\s+)?struct\s*(\w+)?\s*\{[\s\S]*\}\s*(\w+)?\s*;$/.exec(match[0]);declarations.push({names:[names?.[1],names?.[2]].filter(Boolean),range:[match.index,match.index+match[0].length]});}
  const valueAliases=/\btypedef\s+(?:unsigned\s+)?\w+\s+\w+\s*;/g;

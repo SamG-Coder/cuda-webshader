@@ -1,0 +1,5 @@
+GPU Device 0: "Blackwell" with compute capability 12.0
+
+GPU device NVIDIA GeForce RTX 5080 has compute capabilities (SM 12.0)
+Launching CDP kernel to build the quadtree
+Results: OK

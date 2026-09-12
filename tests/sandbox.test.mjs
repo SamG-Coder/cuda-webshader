@@ -19,3 +19,9 @@ test('Windows desktop CUDA files accept numeric macros with trailing comments',(
  const source='#include <cuda_runtime.h>\r\n#define REFRESH_DELAY 10 // ms\r\n__global__ void f(float* out) { out[0]=(float)REFRESH_DELAY; }\r\nint main() { return 0; }\r\n';
  assert.equal(compile(kernelSource(source).source,{entry:'f'}).name,'f');
 });
+
+test('Desktop import keeps referenced classes and transitive records without orphan methods',()=>{
+ const source='#include <cuda_runtime.h>\nclass Inner { public: float x; __host__ __device__ Inner():x(2.f){} };\nclass Outer { public: Inner inner; __host__ __device__ float get() const {return inner.x;} };\nclass HostOnly { FILE* file; __device__ float ignored(){return 0.f;} };\n__global__ void k(float* out){Outer value;out[0]=value.get();}\nint main(){return 0;}';
+ const imported=kernelSource(source).source;assert.ok(imported.includes('class Inner'));assert.ok(imported.includes('class Outer'));assert.ok(!imported.includes('HostOnly'));assert.ok(!imported.includes('ignored'));
+ assert.equal(imported.split('\n').length,source.split('\n').length);assert.equal(compile(imported,{entry:'k'}).name,'k');
+});
