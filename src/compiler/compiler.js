@@ -11,6 +11,7 @@ export const typeStride = t => isArray(t) ? typeStride(t.element) * t.length : v
 const numeric = t => ['f32', 'i32', 'u32'].includes(t);
 const indent = lines => lines.map(l => `  ${l}`);
 const rootName = n => n?.kind === 'id' ? n.name : ['index', 'member'].includes(n?.kind) ? rootName(n.base) : null;
+const shiftedPointers=fn=>{const names=new Set();walk(fn.body,n=>{if(n.kind==='assign'&&['+=','-='].includes(n.op)&&n.left.kind==='id')names.add(n.left.name);});return names;};
 export function walk(node, visit) {
   if (!node || typeof node !== 'object') return;
   if (node.kind) visit(node);
@@ -337,6 +338,14 @@ class Emitter {
   effect(n) {
     if(n.kind==='sequence')return n.expressions.flatMap(e=>this.effect(e));
     if (n.kind === 'assign') {
+      if(n.left.kind==='id'&&['+=','-='].includes(n.op)){
+        const symbol=this.lookup(n.left.name,n.left);
+        if(['buffer','buffer-alias'].includes(symbol.kind)){
+          const value=this.expr(n.right);if(!['i32','u32'].includes(value.type)||!symbol.offsetCode)this.fail('Pointer updates require a 32-bit integer offset.',n);
+          n.left.symbol=symbol;n.pointerShift=true;n.type=symbol.type;
+          return [...value.pre,`${symbol.offsetCode} ${n.op} ${this.convert(value.code,value.type,'i32',n)};`];
+        }
+      }
       const target = this.expr(n.left, true); this.writable(target, n.left); const value = this.expr(n.right);
       let code = this.convert(value.code, value.type, target.type, n);
       if (n.op !== '=') {
@@ -375,7 +384,7 @@ class Emitter {
       if(base.constant&&!n.constant)this.fail('Cannot discard const through a buffer alias.',n);
       const offset=offsetNode?this.expr(offsetNode):{type:'i32',code:'0i',pre:[]};if(!['i32','u32'].includes(offset.type))this.fail('Buffer alias offsets must be 32-bit integers.',n);
       const offsetCode=`cw_offset_${this.temp++}`,symbol={...base,name:n.name,constant:n.constant||base.constant,kind:'buffer-alias',offsetCode};this.add(n.name,symbol,n);n.symbol=symbol;n.aliasBase=base;n.aliasOffset=offsetNode;
-      return [...offset.pre,`let ${offsetCode} = ${base.offsetCode?base.offsetCode+' + ':''}${this.convert(offset.code,offset.type,'i32',n)};`];
+      return [...offset.pre,`var ${offsetCode} = ${base.offsetCode?base.offsetCode+' + ':''}${this.convert(offset.code,offset.type,'i32',n)};`];
     }
     if (n.type === 'void') this.fail('Variables cannot have void type.', n);
     let type = n.type;const sharedOwner=(this.currentFunction.pointerOrigin||this.currentFunction.name)+':'+n.token.offset+':'+n.name;
@@ -454,7 +463,7 @@ class Emitter {
         if (atomic && !['i32', 'u32'].includes(p.type)) this.fail('Only 32-bit integer atomics are supported.', p);
         const binding = bindings.length;
         bindings.push({name: p.name, elementType: p.type, stride: typeStride(p.type), binding, readOnly, atomic});
-        const symbol = {name: p.name, rootBufferName:p.name, type: arrayOf(p.type), code: `b_${p.name}`, constant: p.constant, atomic, kind: 'buffer'};
+        const symbol = {name: p.name, rootBufferName:p.name, type: arrayOf(p.type), code: `b_${p.name}`, constant: p.constant, atomic, kind: 'buffer',...(shiftedPointers(this.kernel).has(p.name)?{offsetCode:'cw_pointer_'+p.name}:{})};
         this.add(p.name, symbol, p, true); p.symbol = symbol;this.bufferSymbols.set(p.name,symbol);
         header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type}>` : p.type}>;`);
       } else {
@@ -472,17 +481,17 @@ class Emitter {
       this.scopes = [new Map()]; this.currentFunction = helper;
       for (const p of helper.params) {
         if (p.shared || p.external || p.type === 'void') this.fail('Invalid helper parameter.', p);
-        if(p.pointer){const base=this.bufferSymbols.get(p.boundBuffer);if(!base)this.fail('Helper buffer pointer was not specialized.',p);p.symbol=this.add(p.name,{...base,name:p.name,kind:'buffer-alias',constant:p.constant||p.boundConstant,offsetCode:'v_'+p.name+'_offset'},p);continue;}
+        if(p.pointer){const base=this.bufferSymbols.get(p.boundBuffer);if(!base)this.fail('Helper buffer pointer was not specialized.',p);p.symbol=this.add(p.name,{...base,name:p.name,kind:'buffer-alias',constant:p.constant||p.boundConstant,offsetCode:'cw_buffer_offset_'+helper.params.indexOf(p)},p);continue;}
         if(p.type==='thread-block'){if(p.reference)this.fail('thread_block helper parameters must be passed by value.',p);p.symbol=this.add(p.name,{name:p.name,type:p.type,kind:'thread-block',constant:true},p);continue;}
         if(p.reference&&!numeric(p.type))this.fail('Helper references require a 32-bit numeric scalar.',p);
         p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined, constant:p.constant, atomic: false, kind: p.reference?'reference':'local'}, p);
       }
       const body = this.body(helper.body);
-      helperLines.push(`fn f_${helper.name}(${[...helper.params.filter(p=>p.type!=='thread-block').map(p => p.pointer?`v_${p.name}_offset: i32`:`${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.reference?`ptr<function, ${p.type}>`:p.type}`),'cw_thread: vec3<u32>','cw_block: vec3<u32>','cw_grid: vec3<u32>'].join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>p.type!=='thread-block'&&!p.pointer&&!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
+      helperLines.push(`fn f_${helper.name}(${[...helper.params.filter(p=>p.type!=='thread-block').map(p => p.pointer?`cw_buffer_arg_${helper.params.indexOf(p)}: i32`:`${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.reference?`ptr<function, ${p.type}>`:p.type}`),'cw_thread: vec3<u32>','cw_block: vec3<u32>','cw_grid: vec3<u32>'].join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>p.pointer).map(p=>`var cw_buffer_offset_${helper.params.indexOf(p)}: i32 = cw_buffer_arg_${helper.params.indexOf(p)};`)),...indent(helper.params.filter(p=>p.type!=='thread-block'&&!p.pointer&&!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
     }};
     emitHelpers();
     this.scopes = kernelScope; this.currentFunction = this.kernel;
-    const main = this.body(this.kernel.body);
+    const main = [...this.kernel.params.filter(p=>p.pointer&&p.symbol.offsetCode).map(p=>`var ${p.symbol.offsetCode}: i32 = 0i;`),...this.body(this.kernel.body)];
     emitHelpers();this.scopes=kernelScope;this.currentFunction=this.kernel;
     for(const scalar of this.constantScalars)scalars.push({...scalar,offset:scalars.length*4});
     const uniformSize=scalars.length?Math.ceil(scalars.length*4/16)*16:0;

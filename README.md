@@ -13,6 +13,9 @@ See [launch requirements and validation](showcases/nbody/README.md).
 [NVIDIA FDTD3d is also available as a 3D scalar-volume showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fdtd),
 with the original shared-memory stencil, editable constant coefficients and
 GPU-only field feedback. See [volume setup and validation](showcases/fdtd3d/README.md).
+[NVIDIA separable convolution](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=separable)
+runs the original row and column filters as a GPU pass sequence, with both
+generated shaders available for comparison. See [pass setup and validation](showcases/convolution-separable/README.md).
 Device helpers now
 support one built-in type or explicit integer template argument, including nested
 calls and arguments forwarded from a kernel template. Type-trait structs containing typedef members, including explicit type specializations
@@ -108,7 +111,8 @@ multiple batches. The compiler now accepts local aliases of storage buffers,
 including `float *p = input + offset` and alias chains. Offsets are captured at
 declaration; reads, writes and atomics retain the original buffer's binding and
 const rules. Helpers now accept storage-buffer pointers and offsets. Pointer
-reassignment, pointer casts and shared/local-array pointers remain unsupported. All accesses must stay within the
+`+=`/`-=` updates move storage-pointer offsets; general reassignment, pointer casts
+and shared/local-array pointers remain unsupported. All dereferences must stay within the
 original allocation. This is one radix-4 transform pass; the shared-memory finishing kernel has its
 own preset, and full dyadic convolution is not implemented in this preview.
 See [native/WebGPU pass checks](reports/nvidia-fwt-pass.json).
@@ -230,7 +234,7 @@ This is source translation. **It does not run CUDA binaries, PTX, the CUDA drive
 
 ## Validated on an RTX 5080
 
-The project is running locally with installed, locked dependencies. **321 Node tests, 91 real WebGPU checks (including Three.js rendered-pixel interop and expected validation rejections), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
+The project is running locally with installed, locked dependencies. **327 Node tests, 93 real WebGPU checks (including Three.js rendered-pixel interop and expected validation rejections), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
 
 Open [the measured comparison](reports/performance-comparison.html) or read [the full methodology and results](reports/performance-comparison.md). All ten kernel sources are compiled by NVCC and translated to WGSL at two workload sizes. Raw GPU timestamps, CUDA event timings, ordinary CUDA launch timings, and verification logs are in `reports/`.
 

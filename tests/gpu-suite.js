@@ -2,6 +2,7 @@ import {prepareReduction} from '../src/runtime/operations.js';import {kernelOpti
 import {makeCases,compareArrays} from './cases.js';
 import {nbodyInitial,nbodyStep} from './nbody-reference.js';
 import {fdtdInitial,fdtdStep,fdtdCoefficients} from './fdtd3d-reference.js';
+import {separableInitial,separableReference,separableCoefficients} from './convolution-separable-reference.js';
 export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   const results=[],start=performance.now();
   const run=async(name,action)=>{const t=performance.now();let result;try{result={name,pass:true,...await action()};}catch(error){result={name,pass:false,error:String(error.stack||error)};}result.wallMs=performance.now()-t;results.push(result);onCase(result,results.length);};
@@ -159,6 +160,17 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
         for(let step=0;step<3;step++){expected=fdtdStep(expected,dimx,dimy,dimz);runtime.batch().dispatch(inv,[Math.ceil(dimx/32),Math.ceil(dimy/4),1]).copy(output,input).submit();const actual=await runtime.read(output);for(let i=0;i<actual.length;i++)if(!Number.isFinite(actual[i])||Math.abs(actual[i]-expected[i])>3e-5)throw Error(`FDTD mismatch ${dimx}x${dimy}x${dimz} step=${step} index=${i}`);}
       }finally{await runtime.idle();runtime.destroyBuffer(input);runtime.destroyBuffer(output);}
     }
+  });
+  await run('Pointer shifts preserve float4 stride, negative halo origins, aliases and by-value helper pointers',async()=>{
+    const source='__device__ float4 read(const float4* p,int p_offset){p+=p_offset;return p[0];}__global__ void k(const float4* input,float4* out){const float4* saved=input;input-=2;const float4* alias=input;out[0]=read(alias,2);out[1]=saved[1];alias+=3;out[2]=alias[0];}';
+    const input=runtime.createBuffer(Float32Array.from({length:16},(_,i)=>i)),out=runtime.createBuffer(new Float32Array(12));try{const kernel=await runtime.kernel(source,{workgroupSize:[1]});runtime.batch().dispatch(kernel.bind({input,out},{}),[1]).submit();const actual=await runtime.read(out);if(String(actual)!=='0,1,2,3,4,5,6,7,4,5,6,7')throw Error('Pointer stride, alias or helper mutation mismatch');}finally{await runtime.idle();runtime.destroyBuffer(input);runtime.destroyBuffer(out);}
+  });
+  await run('Original NVIDIA separable convolution runs both passes with mutable pointer offsets',async()=>{
+    const source=await(await fetch('/tests/convolution-separable.cuh')).text(),rows=await runtime.kernel(source,{entry:'convolutionRowsKernel',workgroupSize:[16,4,1]}),columns=await runtime.kernel(source,{entry:'convolutionColumnsKernel',workgroupSize:[16,8,1]});
+    for(const [imageW,imageH,pitch]of [[128,64,128],[256,128,272]]){let expected=separableInitial(imageW,imageH,pitch),a=runtime.createBuffer(expected),b=runtime.createBuffer(new Float32Array(expected.length).fill(-12345));try{
+      const scalars={imageW,imageH,pitch,...Object.fromEntries(separableCoefficients.map((v,i)=>[`constant.c_Kernel[${i}]`,v]))};
+      for(const [kernel,axis,groups]of [[rows,'rows',[imageW/128,imageH/4]],[columns,'columns',[imageW/16,imageH/64]]]){expected=separableReference(expected,imageW,imageH,pitch,axis);runtime.batch().dispatch(kernel.bind({d_Dst:b,d_Src:a},scalars),groups).submit();const actual=await runtime.read(b);for(let i=0;i<actual.length;i++)if(!Number.isFinite(actual[i])||Math.abs(actual[i]-expected[i])>3e-5)throw Error('Separable convolution mismatch '+axis+' '+i);[a,b]=[b,a];}
+    }finally{await runtime.idle();runtime.destroyBuffer(a);runtime.destroyBuffer(b);}}
   });
   await run('GPU rejects divergent entry into a helper barrier',async()=>{
     try{await runtime.kernel('__device__ void barrier(){__syncthreads();} __global__ void k(){if(threadIdx.x==0u)barrier();}',{workgroupSize:[4,1,1]});}catch(error){if(/uniform/i.test(error.message))return;throw error;}

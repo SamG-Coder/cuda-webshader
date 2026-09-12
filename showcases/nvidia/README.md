@@ -325,7 +325,9 @@ reuse across calls with different buffers. The compiler specializes helpers by
 buffer binding and passes offsets, preserving a single shared allocation per
 original helper. Access analysis propagates through nested helpers so storage
 bindings retain correct read/write and atomic declarations. Pointer returns,
-reassignment, casts and shared/local-array pointer arguments remain unsupported.
+general reassignment, casts and shared/local-array pointer arguments remain unsupported.
+Storage-pointer +=/-= offset updates now support the original separable convolution
+row and column kernels, available in a separate two-pass sandbox showcase.
 Native results: `reports/helper-pointers-native.txt`; build
 `tests/helper-pointers-native.cu` with the NVCC flags above.
 

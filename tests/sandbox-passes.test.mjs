@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {compile} from '../src/compiler/compiler.js';import {preparePass,suggestConfig,validateConfig} from '../src/sandbox/config.js';
+const root=compile('__global__ void first(float* a,float* b,int n){b[threadIdx.x]=a[threadIdx.x];}'),next=compile('__global__ void second(float* input,float* output,float scale){output[threadIdx.x]=input[threadIdx.x]*scale;}'),config=suggestConfig(root),pass={entry:'second',block:[128,1,1],groups:[1,1,1],bindings:{input:'b',output:'a'},scalars:{scale:0.5}};
+test('Additional passes map existing buffers and select only their scalar parameters',()=>{const p=preparePass(pass,next.metadata,config,root.metadata);assert.deepEqual(p.bindings,{input:'b',output:'a'});assert.deepEqual(p.scalars,{scale:0.5});assert.doesNotThrow(()=>validateConfig({...config,passes:[pass]},root.metadata));});
+test('Pass configuration rejects missing buffers, unknown overrides and invalid launches',()=>{
+ for(const p of [{...pass,bindings:{input:'missing',output:'a'}},{...pass,bindings:{...pass.bindings,typo:'a'}},{...pass,scalars:{scale:1,typo:2}},{...pass,groups:[0,1,1]}])assert.throws(()=>preparePass(p,next.metadata,config,root.metadata));
+ for(const passes of [{},Array(9).fill(pass),[{entry:'second',block:[128]}]])assert.throws(()=>validateConfig({...config,passes},root.metadata),/passes/);
+});

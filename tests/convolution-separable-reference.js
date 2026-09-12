@@ -1,0 +1,3 @@
+export const separableCoefficients=Array.from({length:17},(_,i)=>(i+1)/256);
+export function separableInitial(width,height,pitch){return Float32Array.from({length:pitch*height+16},(_,i)=>i<pitch*height&&i%pitch<width?(i%29-14)*0.125:-12345);}
+export function separableReference(input,width,height,pitch,axis){const output=new Float32Array(input.length).fill(-12345);for(let y=0;y<height;y++)for(let x=0;x<width;x++){let sum=0;for(let j=-8;j<=8;j++){const sx=x+(axis==='rows'?j:0),sy=y+(axis==='columns'?j:0);if(sx>=0&&sx<width&&sy>=0&&sy<height)sum+=input[sy*pitch+sx]*separableCoefficients[8-j];}output[y*pitch+x]=sum;}return output;}

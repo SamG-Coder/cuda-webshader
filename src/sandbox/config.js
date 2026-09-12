@@ -24,6 +24,7 @@ export function suggestConfig(artifact){
  return {groups,scalars:values,buffers,output:(bindings.find(b=>!b.readOnly&&b.elementType==='vec4<f32>')||bindings.find(b=>!b.readOnly)||bindings[0])?.name};
 }
 export function validateConfig(config,metadata){
+ if(config.passes!==undefined&&(!Array.isArray(config.passes)||config.passes.length>8||config.passes.some(p=>!p||typeof p.entry!=='string'||!Array.isArray(p.block)||p.block.length!==3)))throw Error('Additional passes require entry, three block dimensions and groups; at most eight passes are supported.');
  if(!Array.isArray(config.groups)||config.groups.length!==3||config.groups.some(n=>!Number.isInteger(n)||n<1||n>65535)||config.groups.reduce((a,b)=>a*b,1)*metadata.workgroupSize.reduce((a,b)=>a*b,1)>4194304)throw Error('Launch must contain three positive block counts, each ≤65,535, and at most 4,194,304 invocations.');
  if(!config.scalars||!config.buffers)throw Error('Settings need scalars and buffers objects.');
  let bytes=0;
@@ -34,6 +35,14 @@ export function validateConfig(config,metadata){
  if(config.volume!==undefined){const v=config.volume,b=metadata.bindings.find(b=>b.name===config.output);if(b.elementType!=='f32'||!Array.isArray(v?.dimensions)||v.dimensions.length!==3||v.dimensions.some(n=>!Number.isInteger(n)||n<1)||!Number.isInteger(v.halo)||v.halo<0||v.dimensions.map(n=>n+2*v.halo).reduce((a,b)=>a*b,1)!==config.buffers[config.output].records)throw Error('Volume preview requires float storage, three positive interior dimensions, and a nonnegative halo matching the record count.');}
  if(config.feedback!==undefined){if(!config.feedback||typeof config.feedback!=='object'||Array.isArray(config.feedback))throw Error('Feedback must map destination buffer names to source names.');for(const [target,source]of Object.entries(config.feedback)){const a=metadata.bindings.find(b=>b.name===source),b=metadata.bindings.find(b=>b.name===target);if(!a||!b||source===target||a.elementType!==b.elementType||config.buffers[source].records!==config.buffers[target].records)throw Error('Feedback requires distinct buffers with matching types and record counts.');if(Object.hasOwn(config.feedback,source))throw Error('Feedback chains and cycles are unsupported.');}}
  return bytes;
+}
+export function preparePass(pass,metadata,config,rootMetadata){
+ for(const name of Object.keys(pass.bindings||{}))if(!metadata.bindings.some(b=>b.name===name))throw Error(`Pass ${pass.entry}: unknown buffer parameter ${name}.`);
+ for(const name of Object.keys(pass.scalars||{}))if(!metadata.scalars.some(s=>s.name===name))throw Error(`Pass ${pass.entry}: unknown scalar parameter ${name}.`);
+ const bindings={},buffers={};for(const b of metadata.bindings){const name=pass.bindings?.[b.name]??b.name,root=rootMetadata.bindings.find(r=>r.name===name);if(!root||root.elementType!==b.elementType)throw Error(`Pass ${pass.entry}: ${b.name} needs a matching existing buffer.`);bindings[b.name]=name;buffers[b.name]=config.buffers[name];}
+ const supplied={...config.scalars,...pass.scalars},scalars=Object.fromEntries(metadata.scalars.filter(s=>Object.hasOwn(supplied,s.name)).map(s=>[s.name,supplied[s.name]]));
+ validateConfig({groups:pass.groups,scalars,buffers,output:metadata.bindings[0]?.name},metadata);
+ return {bindings,scalars,groups:pass.groups};
 }
 export function seedBuffer(binding,spec){
  const Type=binding.elementType.includes('u32')?Uint32Array:binding.elementType.includes('i32')?Int32Array:Float32Array;

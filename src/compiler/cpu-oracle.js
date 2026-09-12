@@ -70,6 +70,7 @@ class Context {
       }
       case 'conditional':return convert(yield* this.eval((yield* this.eval(n.condition))?n.yes:n.no),n.type);
       case 'assign':{
+        if(n.pointerShift){const cell=this.env.get(n.left.symbol),base=cell.value,delta=yield* this.eval(n.right);if(!(base instanceof BufferView))throw Error('Expected a storage pointer.');const offset=binary(n.op==='+='?'+':'-',base.offset,convert(delta,'i32'),'i32');cell.value=new BufferView(base.data,base.type,offset);return cell.value;}
         const target=yield* this.ref(n.left),value=yield* this.eval(n.right);
         target.set(n.op==='='?value:binary(n.op.slice(0,-1),target.get(),value,n.operandType||n.type));return target.get();
       }
@@ -81,7 +82,7 @@ class Context {
     const name=n.callName;
     if(name==='__syncthreads'){yield n.token.offset;return;}
     const args=[];for(const [i,a] of n.args.entries()){
-      if(n.pointerArgs?.[i]){const base=this.env.get(a.pointerBaseSymbol)?.value,offset=a.pointerOffset?yield* this.eval(a.pointerOffset):0;if(!(base instanceof BufferView)||!Number.isInteger(offset)||base.offset+offset<0||base.offset+offset>base.length)throw new RangeError('CPU helper pointer outside buffer.');args.push(new BufferView(base.data,base.type,base.offset+offset));}
+      if(n.pointerArgs?.[i]){const base=this.env.get(a.pointerBaseSymbol)?.value,offset=a.pointerOffset?yield* this.eval(a.pointerOffset):0;if(!(base instanceof BufferView)||!Number.isInteger(offset) )throw new RangeError('CPU helper pointer needs an integer offset.');args.push(new BufferView(base.data,base.type,convert(base.offset+convert(offset,'i32'),'i32')));}
       else args.push(n.groupArgs?.[i]?null:yield* (n.referenceArgs?.[i]?this.ref(a):this.eval(a)));
     }
     if(name==='__mul24')return Math.imul((args[0]<<8)>>8,(args[1]<<8)>>8);
@@ -110,7 +111,7 @@ class Context {
     this.tick();
     switch(n.kind){
       case 'block':for(const s of n.body){const signal=yield* this.statement(s);if(signal)return signal;}return;
-      case 'decl':if(n.aliasBase){const base=this.env.get(n.aliasBase).value,offset=base.offset+(n.aliasOffset?yield* this.eval(n.aliasOffset):0);if(!Number.isInteger(offset)||offset<0||offset>base.length)throw new RangeError('CPU alias offset outside buffer.');this.env.set(n.symbol,{value:new BufferView(base.data,base.type,offset)});}else if(!n.shared)this.env.set(n.symbol,{value:n.init?convert(yield* this.eval(n.init),n.resolvedType):zero(n.resolvedType)});return;
+      case 'decl':if(n.aliasBase){const base=this.env.get(n.aliasBase).value,offset=convert(base.offset+convert(n.aliasOffset?yield* this.eval(n.aliasOffset):0,'i32'),'i32');if(!Number.isInteger(offset))throw new RangeError('CPU alias needs an integer offset.');this.env.set(n.symbol,{value:new BufferView(base.data,base.type,offset)});}else if(!n.shared)this.env.set(n.symbol,{value:n.init?convert(yield* this.eval(n.init),n.resolvedType):zero(n.resolvedType)});return;
       case 'decls':for(const d of n.declarations)yield* this.statement(d);return;
       case 'expr':yield* this.eval(n.value);return;
       case 'if':if(yield* this.eval(n.condition))return yield* this.statement(n.yes);else if(n.no)return yield* this.statement(n.no);return;

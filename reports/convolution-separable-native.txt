@@ -1,0 +1,2 @@
+128x64 pitch=128 PASS original row/column pipeline, independent reference and padding guards
+256x128 pitch=272 PASS original row/column pipeline, independent reference and padding guards
