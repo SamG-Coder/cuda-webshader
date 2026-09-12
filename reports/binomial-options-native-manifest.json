@@ -1,0 +1,36 @@
+{
+  "revision": "5443602d89ed99aede2e4b7bf329daddeadb320e",
+  "precision": "float32",
+  "options": 1024,
+  "steps": 2048,
+  "seed": 123,
+  "host": "Windows MSVC rand",
+  "nativeCompilerFlags": [
+    "-O3",
+    "--fmad=false",
+    "-std=c++17",
+    "-arch=native"
+  ],
+  "files": {
+    "input": {
+      "file": "binomial-options-input.bin",
+      "bytes": 20480,
+      "sha256": "dba0162613b98387265a7af8d677dd2a3f4ef0bad7b9b4f6f28e203bfdec0a10"
+    },
+    "prepared": {
+      "file": "binomial-options-prepared.bin",
+      "bytes": 20480,
+      "sha256": "5e84a8c5c3b3fdfcb37cb06ee650e4ea0e18db8024084da089a626e04524c001"
+    },
+    "native": {
+      "file": "binomial-options-native.bin",
+      "bytes": 4096,
+      "sha256": "dfaf45ecf08c5c6319297f58d8c7b1ef48eb05c4e93dd4bc417c91ceec0a5de2"
+    },
+    "cpu": {
+      "file": "binomial-options-cpu.bin",
+      "bytes": 4096,
+      "sha256": "b7bbae657cd4a097d058501d171ce6ad5b8b8c5f03398b7f628b57112aa754a4"
+    }
+  }
+}
