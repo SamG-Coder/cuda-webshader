@@ -130,3 +130,16 @@ test('XORWOW compatibility is explicit and rejects unsupported initialization mo
  assert.throws(()=>compile(s,{libraries:['unknown']}),/Supported libraries/);
  const camera=['value-class','camera-class','camera-kernels'].map(n=>readFileSync(new URL('./pathtracer-'+n+'.cuh',import.meta.url),'utf8')).join('\n');assert.ok(compile(camera,{...options,entry:'check_camera'}).wgsl.includes('tan('));
 });
+
+
+test('Object call macros evaluate their body at each use and retain state effects',()=>{
+ const s='#define NEXT next(&state)\n__device__ float next(int*p){*p+=1;return float(*p);}__global__ void k(float*out){int state=0;out[0]=NEXT;out[1]=NEXT;out[2]=float(state);}';
+ const a=compile(s,{workgroupSize:[1,1,1]}),out=new Float32Array(3);executeCPU(a,{out},{},[1]);assert.deepEqual([...out],[1,2,2]);
+ assert.throws(()=>compile(s.replace('next(&state)','next(&state);next(&state)')),/bounded|Template|Object/);
+});
+
+test('Original material methods compile with call macros, float pow and double constructor literals',()=>{
+ const source=['class','kernels'].map(n=>readFileSync(new URL('./pathtracer-material-'+n+'.cuh',import.meta.url),'utf8')).join('\n');
+ const a=compile(source,{entry:'check_material',libraries:['curand-xorwow'],workgroupSize:[1,1,1],objectHeap:'persistent'});assert.equal(a.metadata.objectHeap.types.length,3);assert.ok(a.wgsl.includes('pow('));
+ const c=compile('class V{public:float x;__device__ V(){x=0.0f;}__device__ V(float a){x=a;}};__global__ void k(float*out){V a(0.7);out[0]=a.x;out[1]=pow(0.5f,3.0f);}',{workgroupSize:[1,1,1]}),out=new Float32Array(2);executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[Math.fround(0.7),0.125]);
+});

@@ -1,0 +1,1 @@
+512 original material scatter cases; 5120 float outputs and 512 subsequent RNG draws

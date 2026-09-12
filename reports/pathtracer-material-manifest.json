@@ -1,0 +1,25 @@
+{
+  "revision": "ab140b12d4923b75270831baabab5e4d4209f305",
+  "nativeLibrary": "CUDA 13.3 cuRAND",
+  "nativeResults": {
+    "lambertian": {
+      "accepted": 171,
+      "rejected": 0
+    },
+    "metal": {
+      "accepted": 86,
+      "rejected": 85
+    },
+    "dielectric": {
+      "accepted": 170,
+      "rejected": 0
+    }
+  },
+  "sha256": {
+    "tests/pathtracer-material-class.cuh": "d659222fcca44586a214d81ef0126aaaf73e26c669b59b79480d04d5482e0ee4",
+    "tests/pathtracer-material-kernels.cuh": "90a4c053d8c7f5b1a658115f5a9384021385db4f29f5baa40449b1d29c12e83b",
+    "tests/pathtracer-material-native.cu": "4c69f392d9af27e8268cac995573060c987c0e87f933040cb7296d6998094c6a",
+    "reports/pathtracer-material-native.bin": "9542264b25d30c60752245aae23a23a143b8dc7f6ee346d5eee8b495a7dfade0",
+    "reports/pathtracer-material-native-bits.bin": "152c9ad47f31e35b9ef7dbd62c5f3594d34efb2facbf399c2741c5d428283fe0"
+  }
+}

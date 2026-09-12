@@ -58,13 +58,13 @@ export function tokenize(source, defines = {}) {
       if(forward){if(macros.has(forward.name)||forwarders.has(forward.name)||expressions.has(forward.name)||objectExpressions.has(forward.name))throw new CompileError('Macro redefinition is unsupported.',token,source);forwarders.set(forward.name,forward);advance(directive);continue;}
       const m = directive.trimEnd().match(/^#\s*define\s+([A-Za-z_]\w*)\s+([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFuU]?)\s*(?:\/\/.*)?$/);
       if(!m){const object=directive.trimEnd().match(/^#\s*define\s+([A-Za-z_]\w*)\s+(.+?)\s*(?:\/\/.*)?$/);if(object){try{const value=integerExpression(object[2].replace(/[A-Za-z_]\w*/g,name=>macros.has(name)?'('+macros.get(name)+')':name));if(forwarders.has(object[1])||expressions.has(object[1])||objectExpressions.has(object[1]))throw Error('Macro redefinition is unsupported.');if(!macros.has(object[1])){macros.set(object[1],String(value));numericMacroSnapshot=null;}advance(directive);continue;}catch(error){
-          const body=object[2].trim();if(body.length>1024||!body.startsWith('(')||!body.endsWith(')'))throw new CompileError(error.message,token,source);
+          const body=object[2].trim(),primary=expressionMacro('#define cw_object_macro() '+body);if(body.length>1024||!primary)throw new CompileError(error.message,token,source);
           if(objectExpressions.has(object[1])||forwarders.has(object[1])||expressions.has(object[1]))throw new CompileError('Macro redefinition is unsupported.',token,source);
           if(macros.has(object[1])){advance(directive);continue;}
           const expanded=body.replace(/0[xX][\da-fA-F]+[uU]?|(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFuU]?|[A-Za-z_]\w*/g,name=>/^[A-Za-z_]\w*$/.test(name)?(objectExpressions.has(name)?objectExpressions.get(name).map(t=>t.value).join(' '):macros.has(name)?macros.get(name):name):name);
           if(expanded.length>8192||objectExpressions.size>=128)throw new CompileError('Object macro expansion limit exceeded.',token,source);
           let parts;try{parts=tokenize(expanded).filter(t=>t.kind!=='eof');}catch{throw new CompileError(error.message,token,source);}
-          if(parts.length>256||parts.some(t=>t.kind==='word'&&!['float','int','uint','unsigned','short'].includes(t.value)||t.kind==='symbol'&&!'()+-*/%<>&|^~'.includes(t.value)))throw new CompileError('Object expressions require bounded constant arithmetic and numeric casts.',token,source);
+          if(parts.length>256||parts.some(t=>t.kind==='symbol'&&!'()[],.+-*/%<>&|^~!?:'.includes(t.value)))throw new CompileError('Object expressions require bounded primary expressions.',token,source);
           objectExpressions.set(object[1],parts);advance(directive);continue;
         }}}
       if (!m) throw new CompileError('Only numeric object-like #define directives and direct function-forwarding macros are supported; preprocess other directives first.', token, source);

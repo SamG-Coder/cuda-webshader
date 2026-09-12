@@ -1,0 +1,20 @@
+{
+  "name": "Original CUDA materials scatter through virtual dispatch",
+  "pass": true,
+  "cases": 1024,
+  "modes": [
+    "invocation",
+    "persistent"
+  ],
+  "materials": [
+    "lambertian",
+    "metal",
+    "dielectric"
+  ],
+  "virtualDispatch": true,
+  "randomStateExact": true,
+  "floatValues": 10240,
+  "maxAbsoluteError": 1.1920928955078125e-07,
+  "fullPathtracerSupported": false,
+  "wallMs": 2146.0550000071526
+}

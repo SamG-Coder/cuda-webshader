@@ -234,3 +234,28 @@ Seeds include zero and UINT32_MAX. Every original camera method body is intact.
 These results establish camera and RNG behaviour in a local-value harness;
 persistent camera access, material scattering and the full scene still require
 integration before a new sandbox showcase is valid.
+
+
+## Original material-scattering stage
+
+The original material.h device definitions now execute, including RANDVEC3,
+random_in_unit_sphere, reflect/refract, Schlick reflectance, and the lambertian,
+metal and dielectric scatter methods. Bounded object-like primary-expression
+macros now preserve repeated function calls and state effects. Unambiguous
+constructors accept double-to-float scalar conversion, and CUDA float pow maps
+to WGSL pow. Source method bodies and the original RANDVEC3 macro are unchanged.
+
+The native harness uses real device allocation, material* virtual dispatch and
+cuRAND. The WebGPU harness runs the same 512 cases in invocation-local and
+persistent arena modes: 1,024 cases and 10,240 compared float values. All 1,024
+subsequent RNG draws match the native values exactly. Scatter acceptance,
+attenuation and ray origins match exactly; maximum absolute direction error is
+0.00000011920928955078125 (tolerance 0.00003). Inputs include inward/outward rays,
+multiple incident angles and metal fuzz values above one to exercise clamping.
+The native cases include both accepted and rejected metal scatters.
+
+This verifies the full original material methods and random sampling, not yet
+the complete rendered scene. Combining all original device functions currently
+stops at the explicit sphere* downcast in free_world. Persistent camera access,
+class-value output buffers, shared parameter naming and RNG buffer initialization
+also still need full-module integration. No new showcase card is claimed here.

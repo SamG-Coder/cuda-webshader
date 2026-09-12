@@ -141,8 +141,8 @@ class Context {
     if(name==='abs')return Math.abs(args[0])|0;
     const unary={sinf:Math.sin,cosf:Math.cos,tanf:Math.tan,tan:Math.tan,sqrtf:Math.sqrt,rsqrtf:x=>1/Math.sqrt(x),exp:Math.exp,expf:Math.exp,__expf:Math.exp,exp2f:x=>2**x,logf:Math.log,__logf:Math.log,log2f:Math.log2,fabs:Math.abs,fabsf:Math.abs,floorf:Math.floor,ceilf:Math.ceil,truncf:Math.trunc};
     if(unary[name])return f(unary[name](args[0]));
-    if(['fminf','fmaxf','min','max','powf','atan2f','fmaf'].includes(name)){
-      const value=name==='fmaf'?args[0]*args[1]+args[2]:['fminf','min'].includes(name)?Math.min(...args):['fmaxf','max'].includes(name)?Math.max(...args):name==='powf'?Math.pow(...args):Math.atan2(...args);
+    if(['fminf','fmaxf','min','max','powf','pow','atan2f','fmaf'].includes(name)){
+      const value=name==='fmaf'?args[0]*args[1]+args[2]:['fminf','min'].includes(name)?Math.min(...args):['fmaxf','max'].includes(name)?Math.max(...args):['powf','pow'].includes(name)?Math.pow(...args):Math.atan2(...args);
       return convert(value,n.type);
     }
     const helper=this.artifact.ast.functions.find(x=>x.name===name);

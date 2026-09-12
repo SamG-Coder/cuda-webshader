@@ -2,6 +2,7 @@ import {checkLayered} from './layered-gpu.js';
 import {checkDeferredPointers} from './deferred-pointers-gpu.js';
 import {checkNv12Convert} from './nv12-convert-gpu.js';
 import {checkNv12Resize} from './nv12-resize-gpu.js';
+import {checkPathtracerMaterials} from './pathtracer-material-gpu.js';
 import {checkPathtracerCamera} from './pathtracer-camera-gpu.js';
 import {checkPersistentList} from './pathtracer-list-gpu.js';
 import {checkPersistentObjects} from './pathtracer-persistent-gpu.js';
@@ -253,6 +254,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Deferred pointer assignments preserve batch and channel offsets',()=>checkDeferredPointers(runtime));
   await run('Original full-resolution NV12 conversion matches native CUDA',()=>checkNv12Convert(runtime));
   await run('Original single-frame NV12 resize matches native byte output',()=>checkNv12Resize(runtime));
+  await run('Original CUDA materials scatter through virtual dispatch',()=>checkPathtracerMaterials(runtime));
   await run('Original CUDA camera and cuRAND XORWOW match native',()=>checkPathtracerCamera(runtime));
   await run('Original CUDA hitable_list captures live object buffers',()=>checkPersistentList(runtime));
   await run('Persistent CUDA sphere objects survive separate create/trace/free submissions',()=>checkPersistentObjects(runtime));
