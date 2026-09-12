@@ -1,3 +1,4 @@
 # Binary Netpbm payloads must never undergo line-ending conversion.
 *.ppm binary
 *.pgm binary
+*.bmp binary

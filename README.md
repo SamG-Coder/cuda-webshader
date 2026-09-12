@@ -470,3 +470,5 @@ Dependencies retain their own licenses: Three.js is MIT, while Playwright and pl
 The static build includes the project license, third-party notices and Three.js license. Native executables and large benchmark input binaries are excluded from Git; `npm run bench:native:build` regenerates them locally. Measured reports, raw timing samples and the generated native launcher source are included.
 
 [Try NVIDIA post-process glow in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=postprocess): original RGBA texture and shared-tile CUDA kernel, original teapot input, editable highlights and CUDA/WGSL comparison. [Validation and launch settings](showcases/postprocess-gl/README.md).
+
+[Try NVIDIA bilateral filtering in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=bilateral): the original edge-preserving filter and photograph, with editable colour-distance smoothing. [Validation and launch settings](showcases/bilateral-filter/README.md).

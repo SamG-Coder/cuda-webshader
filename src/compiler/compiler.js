@@ -349,7 +349,8 @@ class Emitter {
     if(name==='__fdividef'){if(args.length!==2)this.fail('__fdividef requires two arguments.',n);return this.result(n,'f32',`(${args.map(a=>this.convert(a.code,a.type,'f32',n)).join(' / ')})`,pre);}
     if(name==='sqrt'){if(args.length!==1||args[0].type!=='f32')this.fail('sqrt supports the single float overload only; double/integer overloads are unavailable.',n);return this.result(n,'f32',`sqrt(${args[0].code})`,pre);}
     if(name==='__saturatef'){if(n.args.length!==1)this.fail('__saturatef requires one float argument.',n);const a=args[0];if(a.type!=='f32')this.fail('__saturatef requires a float argument.',n);return this.result(n,'f32',`clamp(${a.code}, 0.0f, 1.0f)`,a.pre);}
-    const unary = {sinf: 'sin', cosf: 'cos', tanf: 'tan', sqrtf: 'sqrt', rsqrtf: 'inverseSqrt', expf: 'exp', __expf:'exp', exp2f: 'exp2', logf: 'log', __logf:'log', log2f: 'log2', fabsf: 'abs', floorf: 'floor', ceilf: 'ceil', truncf: 'trunc'};
+    if(name==='fabs'&&(args.length!==1||args[0].type!=='f32'))this.fail('fabs supports the CUDA float overload; double precision is unavailable.',n);
+    const unary = {sinf: 'sin', cosf: 'cos', tanf: 'tan', sqrtf: 'sqrt', rsqrtf: 'inverseSqrt', expf: 'exp', __expf:'exp', exp2f: 'exp2', logf: 'log', __logf:'log', log2f: 'log2', fabs:'abs', fabsf: 'abs', floorf: 'floor', ceilf: 'ceil', truncf: 'trunc'};
     const binary = {fminf: 'min', fmaxf: 'max', powf: 'pow', atan2f: 'atan2'};
     if (unary[name] || binary[name] || name === 'fmaf') {
       const count = unary[name] ? 1 : binary[name] ? 2 : 3;

@@ -1,0 +1,7 @@
+case=0 17x9 radius=0 range=0.1 native original kernel PASS; guards unchanged
+case=1 31x19 radius=2 range=0.25 native original kernel PASS; guards unchanged
+Loading showcases/bilateral-filter/nature.bmp...
+BMP width: 640
+BMP height: 480
+BMP file loaded successfully!
+case=2 640x480 radius=5 range=0.1 native original kernel PASS; guards unchanged

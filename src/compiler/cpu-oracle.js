@@ -109,7 +109,7 @@ class Context {
     if(name==='__fdividef')return f(args[0]/args[1]);
     if(name==='__saturatef')return f(Number.isNaN(args[0])?0:Math.max(0,Math.min(1,args[0])));
     if(name==='sqrt')return f(Math.sqrt(args[0]));
-    const unary={sinf:Math.sin,cosf:Math.cos,tanf:Math.tan,sqrtf:Math.sqrt,rsqrtf:x=>1/Math.sqrt(x),expf:Math.exp,__expf:Math.exp,exp2f:x=>2**x,logf:Math.log,__logf:Math.log,log2f:Math.log2,fabsf:Math.abs,floorf:Math.floor,ceilf:Math.ceil,truncf:Math.trunc};
+    const unary={sinf:Math.sin,cosf:Math.cos,tanf:Math.tan,sqrtf:Math.sqrt,rsqrtf:x=>1/Math.sqrt(x),expf:Math.exp,__expf:Math.exp,exp2f:x=>2**x,logf:Math.log,__logf:Math.log,log2f:Math.log2,fabs:Math.abs,fabsf:Math.abs,floorf:Math.floor,ceilf:Math.ceil,truncf:Math.trunc};
     if(unary[name])return f(unary[name](args[0]));
     if(['fminf','fmaxf','min','max','powf','atan2f','fmaf'].includes(name)){
       const value=name==='fmaf'?args[0]*args[1]+args[2]:['fminf','min'].includes(name)?Math.min(...args):['fmaxf','max'].includes(name)?Math.max(...args):name==='powf'?Math.pow(...args):Math.atan2(...args);
