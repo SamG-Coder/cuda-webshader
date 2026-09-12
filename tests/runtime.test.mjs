@@ -14,6 +14,14 @@ function setup(){
  const runtime=new GpuRuntime(device);const artifact=compile('__global__ void stamp(float* values,unsigned int slot,float value){values[slot]=value;}');const kernel=new Kernel(runtime,artifact,{},{});const values=runtime.createBuffer(new Float32Array(4));
  return {runtime,kernel,values,events,device};
 }
+test('Float4 3D texture uploads use 16-byte texels and reject mismatched data',()=>{
+ const {runtime,device,events}=setup();device.features.add('float32-filterable');
+ const texture=runtime.createTexture3D(new Float32Array(3*4*5*4),{width:3,height:4,depth:5,format:'rgba32float'});
+ assert.equal(texture.format,'rgba32float');assert.equal(texture.dimension,'3d');const upload=events.find(e=>e.kind==='textureUpload');assert.equal(upload.bytes,3*4*5*16);assert.equal(upload.layout.bytesPerRow,48);assert.deepEqual(upload.size,[3,4,5]);
+ assert.throws(()=>runtime.createTexture3D(new Float32Array(3*4*5),{width:3,height:4,depth:5,format:'rgba32float'}),/matching/);
+ const invalid=new Float32Array(3*4*5*4);invalid[1]=NaN;assert.throws(()=>runtime.createTexture3D(invalid,{width:3,height:4,depth:5,format:'rgba32float'}),/matching/);
+ assert.throws(()=>runtime.createTexture3D(null,{width:3,height:4,depth:5,format:'rgba32float',storage:true}),/storage format/);runtime.dispose();
+});
 test('Layered float4 allocation and surface launches validate dimensions, storage and layer defaults',()=>{
  const {runtime,device,events}=setup();device.features.add('float32-filterable');device.limits.maxTextureArrayLayers=4;
  const texture=runtime.createLayeredTexture2D(new Float32Array(4*4*2*4),{width:4,height:4,layers:2,storage:true});

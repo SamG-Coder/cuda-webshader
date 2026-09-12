@@ -198,3 +198,5 @@ in `tests/particle-integration-kernel.cuh` and `showcases/particle-collision/ker
 The original BSD-3-Clause notice remains intact. Compiler zip-launch lowering,
 project initial-condition data and the labelled cell-clearing CUDA adapter are
 project code under MIT.
+
+`tests/smoke-noise-kernel.cuh` and `tests/smoke-noise-host.cuh` retain NVIDIA's BSD-3-Clause notice and the unchanged noise sampling and generation functions from `smokeParticles` at revision `5443602d89ed99aede2e4b7bf329daddeadb320e`. The surrounding probe and validation harness are MIT project code.

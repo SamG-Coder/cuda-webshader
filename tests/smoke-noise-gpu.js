@@ -1,0 +1,9 @@
+export async function checkSmokeNoise(runtime){
+ const source=await(await fetch('/tests/smoke-noise-kernel.cuh')).text()+await(await fetch('/tests/smoke-noise-probe.cuh')).text(),kernel=await runtime.kernel(source,{entry:'sampleSmokeNoise',workgroupSize:[128,1,1]});
+ const data=new Float32Array(await(await fetch('/reports/smoke-noise-input.bin')).arrayBuffer()),coordinates=new Float32Array(await(await fetch('/reports/smoke-noise-coordinates.bin')).arrayBuffer()),count=coordinates.length/4;
+ const input=runtime.createBuffer(coordinates),output=runtime.createBuffer(new Float32Array(count*4+16).fill(-77)),comparisons=[];
+ try{for(let mode=0;mode<4;mode++){
+  const texture=runtime.createTexture3D(data,{width:64,height:64,depth:64,format:'rgba32float',filter:mode===1||mode===3?'nearest':'linear',addressMode:mode<2?'repeat':'clamp-to-edge',normalizedCoords:mode!==3});
+  try{runtime.batch().dispatch(kernel.bind({coordinates:input,output,texture},{count}),[Math.ceil(count/128),1,1]).submit();const actual=await runtime.read(output),expected=new Float32Array(await(await fetch('/reports/smoke-noise-'+mode+'-native.bin')).arrayBuffer());if(expected.length!==count*4)throw Error('Invalid native noise capture');let maxError=0;for(let i=0;i<count*4;i++){if(!Number.isFinite(actual[i]))throw Error('Nonfinite noise sample');maxError=Math.max(maxError,Math.abs(actual[i]-expected[i]));}for(let i=count*4;i<actual.length;i++)if(actual[i]!==-77)throw Error('Noise output guard changed');if(maxError>1e-6)throw Error('Smoke noise native mismatch mode='+mode+' error='+maxError);comparisons.push({mode,coordinates:count,components:count*4,maxError});}finally{runtime.destroyTexture(texture);}
+ }return {comparisons,originalHelperUnchanged:true,originalNoiseGeneration:true};}finally{runtime.destroyBuffer(input);runtime.destroyBuffer(output);}
+}

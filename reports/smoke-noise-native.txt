@@ -1,0 +1,4 @@
+Captured noise3D: mode=0, coordinates=769, float4 volume=64³.
+Captured noise3D: mode=1, coordinates=769, float4 volume=64³.
+Captured noise3D: mode=2, coordinates=769, float4 volume=64³.
+Captured noise3D: mode=3, coordinates=769, float4 volume=64³.

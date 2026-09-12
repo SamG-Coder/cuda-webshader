@@ -1,0 +1,36 @@
+{
+  "softwareAdapterRequested": false,
+  "result": {
+    "name": "Original smoke float4 noise sampling matches native CUDA",
+    "pass": true,
+    "comparisons": [
+      {
+        "mode": 0,
+        "coordinates": 769,
+        "components": 3076,
+        "maxError": 0
+      },
+      {
+        "mode": 1,
+        "coordinates": 769,
+        "components": 3076,
+        "maxError": 0
+      },
+      {
+        "mode": 2,
+        "coordinates": 769,
+        "components": 3076,
+        "maxError": 0
+      },
+      {
+        "mode": 3,
+        "coordinates": 769,
+        "components": 3076,
+        "maxError": 0
+      }
+    ],
+    "originalHelperUnchanged": true,
+    "originalNoiseGeneration": true,
+    "wallMs": 86.45500001311302
+  }
+}

@@ -108,12 +108,12 @@ export class GpuRuntime {
     const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:'nearest',magFilter:'nearest'}),dimension:'2d',format,width,height,depth:1,linearLength:data.length};this.textures.add(resource);this.stats.dataBytesUploaded+=upload.byteLength;return resource;
   }
   createTexture3D(data,{width,height,depth,filter='linear',addressMode='repeat',label='CUDA 3D texture',format='r8unorm',storage=false,normalizedCoords=true}={}){
-    this.assertAlive();if(!['r8unorm','r32float','rgba8unorm'].includes(format)||storage&&!['r32float','rgba8unorm'].includes(format))throw Error('Unsupported 3D texture format or storage format.');
+    this.assertAlive();if(!['r8unorm','r32float','rgba8unorm','rgba32float'].includes(format)||storage&&!['r32float','rgba8unorm'].includes(format))throw Error('Unsupported 3D texture format or storage format.');
     if(typeof normalizedCoords!=='boolean'||!normalizedCoords&&addressMode!=='clamp-to-edge')throw Error('Unnormalized 3D texture coordinates require clamp-to-edge addressing.');
-    const bytes=format==='r8unorm'?1:4,Type=format==='r32float'?Float32Array:Uint8Array;
-    if(![width,height,depth].every(n=>Number.isInteger(n)&&n>0&&n<=this.device.limits.maxTextureDimension3D)||!(data===null&&storage)&&(!(data instanceof Type)||data.length!==width*height*depth||data.some(v=>!Number.isFinite(v))))throw new RangeError('3D texture requires matching byte or finite float data and valid dimensions.');
+    const components=format==='rgba32float'?4:1,bytes=format==='rgba32float'?16:format==='r8unorm'?1:4,Type=['r32float','rgba32float'].includes(format)?Float32Array:Uint8Array;
+    if(![width,height,depth].every(n=>Number.isInteger(n)&&n>0&&n<=this.device.limits.maxTextureDimension3D)||!(data===null&&storage)&&(!(data instanceof Type)||data.length!==width*height*depth*components||data.some(v=>!Number.isFinite(v))))throw new RangeError('3D texture requires matching byte or finite float data and valid dimensions.');
     if(!['linear','nearest'].includes(filter)||!['repeat','clamp-to-edge','mirror-repeat'].includes(addressMode))throw Error('Unsupported texture sampler settings.');
-    if(format==='r32float'&&filter==='linear'&&!this.device.features.has('float32-filterable'))throw Error('Float32 linear filtering requires float32-filterable.');
+    if(['r32float','rgba32float'].includes(format)&&filter==='linear'&&!this.device.features.has('float32-filterable'))throw Error('Float32 linear filtering requires float32-filterable.');
     let upload=data;if(data&&format==='rgba8unorm'){upload=new Uint8Array(data.length*4);for(let i=0;i<data.length;i++){upload[i*4]=data[i];upload[i*4+3]=255;}}
     const gpuTexture=this.device.createTexture({label,size:[width,height,depth],dimension:'3d',format,usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST|GPUTextureUsage.COPY_SRC|(storage?GPUTextureUsage.STORAGE_BINDING:0)});
     if(upload)this.device.queue.writeTexture({texture:gpuTexture},upload,{bytesPerRow:width*bytes,rowsPerImage:height},[width,height,depth]);
