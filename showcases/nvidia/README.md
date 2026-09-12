@@ -265,8 +265,9 @@ references with the existing restrictions. Conflicting deductions are rejected;
 integer arguments and non-deduced trait contexts still need explicit arguments
 unless another parameter determines the type. Explicit device-function
 specializations are selected for the deduced or supplied argument. Scalar constant
-globals are supported as uniforms; constant arrays and shared-memory helper access
-remain unsupported. The dependent vector
+globals are supported as uniforms. Helpers support built-in indices, barriers,
+shared declarations and by-value block handles; constant arrays and buffer-pointer
+helper parameters remain unsupported. The dependent vector
 traits now resolve through typedef-only template structs and explicit type
 specializations; unsupported value types still fail if selected.
 This does not add N-body to the verified catalog. The feature regression fixture
@@ -302,3 +303,14 @@ guards. Native results are in `reports/constant-globals-native.txt`; build
 `tests/constant-globals-native.cu` with the NVCC flags above. The hardware WebGPU
 suite also checks multiple constant values in the same dispatch batch. This
 verifies the interaction helper, not the complete N-body integration pipeline.
+
+Shared-helper support is checked with `tests/shared-helpers.cu` and
+`tests/shared-helpers-dynamic.cu`. Static float/unsigned template tiles, shared
+atomics, nested calls, by-value block handles, built-in indices, and one dynamic
+shared array pass native CUDA and hardware WebGPU checks at 32 and 128 threads
+across three blocks. Shared objects are separate for different helper functions
+and template specializations. WebGPU rejects a divergent call into a helper
+barrier. Native results are in `reports/shared-helpers-native.txt`; build
+`tests/shared-helpers-native.cu` with the NVCC flags above.
+N-body still needs buffer-pointer helper arguments and its shared-memory
+conversion wrapper, plus integration and full numerical/visual validation.

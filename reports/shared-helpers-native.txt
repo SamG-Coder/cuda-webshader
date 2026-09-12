@@ -1,0 +1,4 @@
+dynamic=0 threads=32 groups=3 PASS helper tile exchange and guards
+dynamic=0 threads=128 groups=3 PASS helper tile exchange and guards
+dynamic=1 threads=32 groups=3 PASS helper tile exchange and guards
+dynamic=1 threads=128 groups=3 PASS helper tile exchange and guards

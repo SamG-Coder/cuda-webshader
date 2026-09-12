@@ -17,8 +17,11 @@ Scalar `__constant__` globals now become read-only uniforms, with values supplie
 through keys such as `constant.softeningSquared` in the sandbox’s scalar settings.
 Omitted values use the declaration’s numeric initializer or zero. NVIDIA’s original
 `bodyBodyInteraction` helper passes force checks at three softening values.
-Constant arrays and shared-memory pointers/barriers inside helpers remain
-unsupported. N-body has not yet been added as a complete working showcase.
+Device helpers now support thread/block indices, block barriers, static shared
+arrays, one explicitly sized dynamic shared array, and by-value `thread_block`
+handles. Constant arrays, buffer-pointer helper parameters, and N-body’s
+shared-memory conversion wrapper remain unsupported. N-body has not yet been
+added as a complete working showcase.
 The helper support and NVIDIA’s original vector-trait declarations pass native
 CUDA and NVIDIA WebGPU tests for 1, 129 and 1,025 records. Coverage includes
 unsigned wraparound, reference mutation, vector position updates and output guards.
@@ -214,7 +217,7 @@ This is source translation. **It does not run CUDA binaries, PTX, the CUDA drive
 
 ## Validated on an RTX 5080
 
-The project is running locally with installed, locked dependencies. **289 Node tests, 82 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
+The project is running locally with installed, locked dependencies. **295 Node tests, 84 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
 
 Open [the measured comparison](reports/performance-comparison.html) or read [the full methodology and results](reports/performance-comparison.md). All ten kernel sources are compiled by NVCC and translated to WGSL at two workload sizes. Raw GPU timestamps, CUDA event timings, ordinary CUDA launch timings, and verification logs are in `reports/`.
 

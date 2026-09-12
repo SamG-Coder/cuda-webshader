@@ -83,7 +83,8 @@ export class Parser {
     let constant = false, shared = false,external=false;
     while (QUALIFIERS.has(this.peek().value)) { const q = this.take().value; constant ||= q === 'const'; shared ||= q === '__shared__';external ||= q==='extern'; }
     const tok = this.take(); let type;
-    if(tok.value==='typename'||this.typeTraits.has(tok.value)){
+    if(this.groupNamespaces.has(tok.value)){this.take('::');this.take('thread_block');type='thread-block';}
+    else if(tok.value==='typename'||this.typeTraits.has(tok.value)){
       const name=tok.value==='typename'?this.name():tok.value;
       if(!this.typeTraits.has(name))this.fail(`Unknown type trait '${name}'.`,tok);
       this.take('<');const argument=this.name();this.take('>');this.take('::');const member=this.name();

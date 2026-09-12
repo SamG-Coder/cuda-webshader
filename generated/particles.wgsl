@@ -10,7 +10,7 @@ struct CWParams {
 @group(0) @binding(2) var<uniform> cw_params: CWParams;
 const cw_block_size: vec3<u32> = vec3<u32>(128u, 1u, 1u);
 
-fn f_softened_inverse_radius(cw_arg_radiusSquared: f32) -> f32 {
+fn f_softened_inverse_radius(cw_arg_radiusSquared: f32, cw_thread: vec3<u32>, cw_block: vec3<u32>, cw_grid: vec3<u32>) -> f32 {
   var v_radiusSquared: f32 = cw_arg_radiusSquared;
   return inverseSqrt((v_radiusSquared + 0.35f));
 }
@@ -26,7 +26,7 @@ fn main(
     var v_p: vec4<f32> = b_position[v_i];
     var v_v: vec4<f32> = b_velocity[v_i];
     var v_radiusSquared: f32 = ((v_p.x * v_p.x) + (v_p.z * v_p.z));
-    var v_inv: f32 = f_softened_inverse_radius(v_radiusSquared);
+    var v_inv: f32 = f_softened_inverse_radius(v_radiusSquared, cw_thread, cw_block, cw_grid);
     var v_radial: f32 = (cw_params.p_attraction * (1.4f - (0.11f * sqrt((v_radiusSquared + 0.001f)))));
     var v_ax: f32 = ((((-v_p.z) * 0.52f) - (v_p.x * v_radial)) * v_inv);
     var v_az: f32 = (((v_p.x * 0.52f) - (v_p.z * v_radial)) * v_inv);

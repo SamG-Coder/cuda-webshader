@@ -79,7 +79,7 @@ class Context {
   *call(n){
     const name=n.callName;
     if(name==='__syncthreads'){yield n.token.offset;return;}
-    const args=[];for(const [i,a] of n.args.entries())args.push(yield* (n.referenceArgs?.[i]?this.ref(a):this.eval(a)));
+    const args=[];for(const [i,a] of n.args.entries())args.push(n.groupArgs?.[i]?null:yield* (n.referenceArgs?.[i]?this.ref(a):this.eval(a)));
     if(name==='__mul24')return Math.imul((args[0]<<8)>>8,(args[1]<<8)>>8);
     if(name==='__umul24')return Math.imul(args[0]&0xffffff,args[1]&0xffffff)>>>0;
     if(name==='atomicCAS'){const old=args[0].get();if(old===convert(args[1],n.type))args[0].set(convert(args[2],n.type));return old;}
@@ -98,7 +98,7 @@ class Context {
     }
     const helper=this.artifact.ast.functions.find(x=>x.name===name);
     if(!helper)throw new Error(`No CPU implementation of ${name}.`);
-    const env=new Map([...this.env].filter(([symbol])=>symbol.kind==='constant-global'));helper.params.forEach((p,i)=>env.set(p.symbol,p.reference?{get value(){return args[i].get();},set value(v){args[i].set(v);}}:{value:convert(args[i],p.type)}));
+    const env=new Map([...this.env].filter(([symbol])=>['constant-global','shared'].includes(symbol.kind)));helper.params.forEach((p,i)=>env.set(p.symbol,p.reference?{get value(){return args[i].get();},set value(v){args[i].set(v);}}:{value:convert(args[i],p.type)}));
     const child=new Context(this.artifact,env,this.ids,this.budget-this.steps),result=yield* child.statement(helper.body);this.steps+=child.steps;
     return convert(result?.value,helper.result);
   }
@@ -133,7 +133,7 @@ export function executeCPU(artifact,buffers,scalars,workgroups,{instructionBudge
     if(p.pointer){if(!ArrayBuffer.isView(buffers[p.name]))throw new Error(`Missing CPU buffer ${p.name}.`);baseEnv.set(p.symbol,{value:new BufferView(buffers[p.name],p.type)});}
     else{if(!Number.isFinite(scalars[p.name]))throw new Error(`Missing/invalid scalar ${p.name}.`);baseEnv.set(p.symbol,{value:convert(scalars[p.name],p.type)});}
   }
-  const shared=[];walk(artifact.kernel.body,n=>{if(n.kind==='decl'&&n.shared)shared.push(n);});
+  const shared=[];for(const fn of artifact.ast.functions)walk(fn.body,n=>{if(n.kind==='decl'&&n.shared&&n.symbol&&!shared.some(d=>d.symbol===n.symbol))shared.push(n);});
   let groups=0,barriers=0;
   for(let z=0;z<grid[2];z++)for(let y=0;y<grid[1];y++)for(let x=0;x<grid[0];x++){
     const groupEnv=new Map(baseEnv);shared.forEach(n=>groupEnv.set(n.symbol,{value:zero(n.resolvedType)}));

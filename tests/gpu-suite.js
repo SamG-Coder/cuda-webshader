@@ -80,6 +80,21 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
       }finally{await runtime.idle();runtime.destroyBuffer(out);}
     }
   });
+  await run('Static and dynamic shared helpers coordinate lanes through nested calls',async()=>{
+    for(const dynamic of [false,true]){
+      const source=await(await fetch('/tests/'+(dynamic?'shared-helpers-dynamic.cu':'shared-helpers.cu'))).text();
+      for(const threads of [32,128]){const groups=3,n=threads*groups,out=runtime.createBuffer(new Float32Array(n+16).fill(-12345));
+        try{const kernel=await runtime.kernel(source,{workgroupSize:[threads,1,1],...(dynamic?{sharedMemoryBytes:threads*4}:{})});runtime.batch().dispatch(kernel.bind({out},{}),[groups]).submit();const actual=await runtime.read(out);
+          for(let i=0;i<n;i++){const reversed=Math.floor(i/threads)*threads+threads-1-i%threads,expected=dynamic?reversed:reversed*1.125+threads+groups;if(actual[i]!==expected)throw Error('Shared helper mismatch at '+i);}
+          if(!actual.slice(n).every(v=>v===-12345))throw Error('Shared helper guard changed');
+        }finally{await runtime.idle();runtime.destroyBuffer(out);}
+      }
+    }
+  });
+  await run('GPU rejects divergent entry into a helper barrier',async()=>{
+    try{await runtime.kernel('__device__ void barrier(){__syncthreads();} __global__ void k(){if(threadIdx.x==0u)barrier();}',{workgroupSize:[4,1,1]});}catch(error){if(/uniform/i.test(error.message))return;throw error;}
+    throw Error('Divergent helper barrier was accepted');
+  });
   // Explicitly exercise workgroup variants used by the tuner, beyond the catalogue defaults.
   for(const block of [64,256])await run(`SAXPY workgroup specialization ${block}`,async()=>{
     const n=1031,xData=Float32Array.from({length:n},(_,i)=>i*0.125),x=runtime.createBuffer(xData),y=runtime.createBuffer(n*4);

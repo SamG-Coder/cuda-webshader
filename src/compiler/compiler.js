@@ -141,7 +141,6 @@ class Emitter {
       }
       case 'member': {
         if (n.base.kind === 'id' && ['threadIdx', 'blockIdx', 'blockDim', 'gridDim'].includes(n.base.name)) {
-          if (this.currentFunction !== this.kernel) this.fail('Pass CUDA built-in indices as scalar arguments to __device__ helpers.', n);
           if (!['x', 'y', 'z'].includes(n.member)) this.fail('CUDA dimensions have x, y and z components only.', n);
           const code = {threadIdx: 'cw_thread', blockIdx: 'cw_block', blockDim: 'cw_block_size', gridDim: 'cw_grid'}[n.base.name];
           return this.result(n, 'u32', `${code}.${n.member}`);
@@ -196,12 +195,11 @@ class Emitter {
     if(groupSync||memberSync){
       const group=groupSync?n.args[0]:n.callee.base;
       if(n.args.length!==(groupSync?1:0)||group?.kind!=='id'||this.lookup(group.name,group).kind!=='thread-block')this.fail('Block sync requires a local thread_block handle from this_thread_block().',n);
-      if(this.currentFunction!==this.kernel)this.fail('Barriers in helper functions are not supported.',n);
       n.callName='__syncthreads';return this.result(n,'void','workgroupBarrier()');
     }
     if (n.callee.kind !== 'id') this.fail('Only named functions are supported.', n);
     const name = n.callee.name; n.callName = name;
-    if (name === '__syncthreads') { if (n.args.length) this.fail('__syncthreads takes no arguments.', n); if (this.currentFunction !== this.kernel) this.fail('Barriers in helper functions are not supported.', n); return this.result(n, 'void', 'workgroupBarrier()'); }
+    if (name === '__syncthreads') { if (n.args.length) this.fail('__syncthreads takes no arguments.', n); return this.result(n, 'void', 'workgroupBarrier()'); }
     if(name==='atomicCAS'){
       if(n.args.length!==3||n.args[0].kind!=='unary'||n.args[0].op!=='&'||!['index','id'].includes(n.args[0].value.kind))this.fail('atomicCAS requires &buffer[index] or &sharedScalar, compare and replacement.',n);
       const target=this.expr(n.args[0].value,true),compare=this.expr(n.args[1]),replacement=this.expr(n.args[2]);
@@ -218,7 +216,7 @@ class Emitter {
       return this.result(n, target.type, `${atomics[name]}(&${target.code}, ${this.convert(value.code, value.type, target.type, n)})`, [...target.pre, ...value.pre]);
     }
     const casts = {float: 'f32', int: 'i32', uint: 'u32', bool: 'bool'};
-    const args = n.args.map(a => this.expr(a)), pre = args.flatMap(a => a.pre);
+    const args = n.args.map(a => {if(a.kind==='id'&&!['true','false'].includes(a.name)){const s=this.lookup(a.name,a);if(s.kind==='thread-block'){a.symbol=s;return {type:'thread-block',code:'',pre:[],rootSymbol:s};}}return this.expr(a);}), pre = args.flatMap(a => a.pre);
     if(name==='__mul24'||name==='__umul24'){
       if(args.length!==2||args.some(a=>!['i32','u32'].includes(a.type)))this.fail(`${name} requires two 32-bit integer arguments.`,n);
       const signed=name==='__mul24',type=signed?'i32':'u32';
@@ -258,12 +256,12 @@ class Emitter {
     const reaches=(from,target,seen=new Set())=>{if(from===target)return true;if(seen.has(from))return false;seen.add(from);return [...(this.helperCalls.get(from)||[])].some(next=>reaches(next,target,seen));};
     if(reaches(helper.name,caller))this.fail('Recursive helper calls are unsupported.',n);
     n.callee.name=helper.name;n.callName=helper.name;
-    const references=new Set();n.referenceArgs=helper.params.map(p=>!!p.reference);
-    const codes=args.map((a,i)=>{const p=helper.params[i];if(!p.reference)return this.convert(a.code,a.type,p.type,n);
+    const references=new Set();n.referenceArgs=helper.params.map(p=>!!p.reference);n.groupArgs=helper.params.map(p=>p.type==='thread-block');
+    const codes=args.map((a,i)=>{const p=helper.params[i];if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
       const node=n.args[i],s=a.rootSymbol;if(node.kind!=='id'||!s||!['local','reference'].includes(s.kind)||s.constant||isArray(a.type)||!numeric(a.type)||a.type!==p.type)this.fail('Reference arguments require a mutable named local scalar of the exact type.',node);
       if(references.has(s))this.fail('Aliased reference arguments are unsupported.',node);references.add(s);return s.kind==='reference'?s.pointerCode:`&${s.code}`;
     });
-    return this.result(n, helper.result, `f_${helper.name}(${codes.join(', ')})`, pre);
+    return this.result(n, helper.result, `f_${helper.name}(${[...codes.filter(c=>c!==null),'cw_thread','cw_block','cw_grid'].join(', ')})`, pre);
   }
   writable(target, n) {
     const s = target.rootSymbol;
@@ -313,16 +311,15 @@ class Emitter {
     for (let i = dims.length - 1; i >= 0; i--) type = arrayOf(type, dims[i]);
     if (n.shared && n.init) this.fail('__shared__ variables cannot have an initializer.', n);
     if (isArray(type) && n.init) this.fail('Array initializers are unsupported. Initialize elements explicitly.', n);
-    const atomic = n.shared && this.usage.atomic.has(n.name);
+    const atomic = n.shared && analyse([this.currentFunction],[]).atomic.has(n.name);
     if (atomic && !['i32', 'u32'].includes(n.type)) this.fail('Shared atomics require int or unsigned int.', n);
     const init = n.init ? this.expr(n.init) : null;
     if (n.constant && !init && !n.shared) this.fail('A const local variable needs an initializer.', n);
-    const code = `${n.shared ? 's' : 'v'}_${n.name}`;
+    const code = `${n.shared ? (this.currentFunction===this.kernel?'s':'s_'+this.currentFunction.name) : 'v'}_${n.name}`;
     const symbol = {name: n.name, type, code, constant: n.constant, atomic, kind: n.shared ? 'shared' : 'local'};
-    if (n.shared && this.currentFunction !== this.kernel) this.fail('Shared memory in helpers is unsupported.', n);
     this.add(n.name, symbol, n); n.symbol = symbol; n.resolvedDimensions = dims; n.resolvedType = type;
     if (n.shared) {
-      if (this.shared.some(x => x.name === n.name)) this.fail('Shared array names must be unique.', n);
+      if (this.shared.some(x => x.code === code)) this.fail('Shared array names must be unique.', n);
       this.shared.push(symbol); return [];
     }
     return [...(init?.pre || []), `${n.constant ? 'let' : 'var'} ${code}: ${typeName(type)}${init ? ` = ${this.convert(init.code, init.type, type, n)}` : ''};`];
@@ -336,7 +333,6 @@ class Emitter {
     switch (n.kind) {
       case 'empty': return [];
       case 'thread-block':
-        if(this.currentFunction!==this.kernel)this.fail('thread_block handles are supported only inside a kernel.',n);
         n.symbol=this.add(n.name,{name:n.name,kind:'thread-block',constant:true},n);return [];
       case 'block': return ['{', ...indent(this.body(n)), '}'];
       case 'decl': return this.declare(n);
@@ -401,11 +397,12 @@ class Emitter {
       this.scopes = [new Map()]; this.currentFunction = helper;
       for (const p of helper.params) {
         if (p.pointer || p.shared || p.external || p.type === 'void') this.fail('Helper arguments must be scalar/vector values, not pointers.', p);
+        if(p.type==='thread-block'){if(p.reference)this.fail('thread_block helper parameters must be passed by value.',p);p.symbol=this.add(p.name,{name:p.name,type:p.type,kind:'thread-block',constant:true},p);continue;}
         if(p.reference&&!numeric(p.type))this.fail('Helper references require a 32-bit numeric scalar.',p);
         p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined, constant:p.constant, atomic: false, kind: p.reference?'reference':'local'}, p);
       }
       const body = this.body(helper.body);
-      helperLines.push(`fn f_${helper.name}(${helper.params.map(p => `${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.reference?`ptr<function, ${p.type}>`:p.type}`).join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
+      helperLines.push(`fn f_${helper.name}(${[...helper.params.filter(p=>p.type!=='thread-block').map(p => `${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.reference?`ptr<function, ${p.type}>`:p.type}`),'cw_thread: vec3<u32>','cw_block: vec3<u32>','cw_grid: vec3<u32>'].join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>p.type!=='thread-block'&&!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
     }};
     emitHelpers();
     this.scopes = kernelScope; this.currentFunction = this.kernel;
