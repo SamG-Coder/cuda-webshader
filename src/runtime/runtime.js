@@ -39,7 +39,7 @@ export function validateWorkgroup(metadata, limits) {
   if (metadata.workgroupStorageBytes > limits.maxComputeWorkgroupStorageSize) throw new Error(`Kernel requires ${metadata.workgroupStorageBytes} workgroup bytes; device supports ${limits.maxComputeWorkgroupStorageSize}.`);
   if (metadata.uniformSize > limits.maxUniformBufferBindingSize) throw new Error('Uniform parameters exceed the device binding limit.');
   if((metadata.textures?.length||0)>limits.maxSampledTexturesPerShaderStage||(metadata.textures?.length||0)>limits.maxSamplersPerShaderStage)throw Error('Too many sampled textures for this device.');
-  if (metadata.bindings.length + (metadata.objectHeap?.persistent?metadata.objectHeap.types.length:0) > limits.maxStorageBuffersPerShaderStage) throw new Error('Too many storage buffers for this device.');
+  if (metadata.bindings.length + (metadata.objectHeap?.persistent?metadata.objectHeap.types.length+(metadata.objectHeap.imports?.length||0):0) > limits.maxStorageBuffersPerShaderStage) throw new Error('Too many storage buffers for this device.');
 }
 export class GpuRuntime {
   static async create(options = {}) {
@@ -244,7 +244,7 @@ export class GpuRuntime {
         for(const surface of artifact.metadata.surfaces||[])entries.push({binding:surface.binding,visibility:GPUShaderStage.COMPUTE,storageTexture:{access:'write-only',format:surface.format,viewDimension:surface.dimension}});
         if(artifact.metadata.uniformSize)entries.push({binding:artifact.metadata.uniformBinding,visibility:GPUShaderStage.COMPUTE,buffer:{type:'uniform',hasDynamicOffset:true,minBindingSize:artifact.metadata.uniformSize}});
         const layout=this.device.createBindGroupLayout({label:artifact.name,entries});
-        const objectLayout=artifact.metadata.objectHeap?.persistent?this.device.createBindGroupLayout({entries:artifact.metadata.objectHeap.types.map(t=>({binding:t.binding,visibility:GPUShaderStage.COMPUTE,buffer:{type:'storage',minBindingSize:t.byteLength}}))}):null;
+        const objectLayout=artifact.metadata.objectHeap?.persistent?this.device.createBindGroupLayout({entries:[...artifact.metadata.objectHeap.types.map(t=>({binding:t.binding,visibility:GPUShaderStage.COMPUTE,buffer:{type:'storage',minBindingSize:t.byteLength}})),...(artifact.metadata.objectHeap.imports||[]).map(i=>({binding:i.binding,visibility:GPUShaderStage.COMPUTE,buffer:{type:'storage',minBindingSize:4}}))]}):null;
         const pipeline=await this.device.createComputePipelineAsync({label:artifact.name,layout:this.device.createPipelineLayout({bindGroupLayouts:objectLayout?[layout,objectLayout]:[layout]}),compute:{module,entryPoint:artifact.entryPoint || 'main'}});
         this.stats.pipelineCompiles++; result=new Kernel(this,artifact,pipeline,layout,info.messages,objectLayout);
       }catch(error){thrown=error;}
@@ -267,7 +267,7 @@ export class Invocation {
   constructor(kernel,buffers,scalars,{objectArena}={}) {
     this.kernel=kernel;this.runtime=kernel.runtime;this.runtime.assertAlive();this.version=0;this.values={};
     this.uniformData=new ArrayBuffer(kernel.artifact.metadata.uniformSize);this.buffers={...buffers};
-    const meta=kernel.artifact.metadata,entries=[],seen=new Map(),known=new Set([...meta.bindings,...(meta.textures||[]),...(meta.surfaces||[])].map(b=>b.name));
+    const meta=kernel.artifact.metadata,entries=[],seen=new Map(),known=new Set([...meta.bindings,...(meta.textures||[]),...(meta.surfaces||[]),...(meta.objectHeap?.imports||[])].map(b=>b.name));
     for(const [alias,target]of Object.entries(meta.bufferAliases||{})){known.add(alias);if(Object.hasOwn(buffers,alias)&&buffers[alias]!==buffers[target])throw new Error('Declared buffer alias '+alias+' must use the same resource as '+target);}
     for(const name of Object.keys(buffers))if(!known.has(name))throw new Error(`Unknown buffer '${name}'.`);
     for(const b of meta.bindings){
@@ -282,7 +282,7 @@ export class Invocation {
     if(meta.uniformSize)entries.push({binding:meta.uniformBinding,resource:{buffer:this.runtime.uniformBuffer,offset:0,size:meta.uniformSize}});
     this.bindGroup=this.runtime.device.createBindGroup({label:`${kernel.artifact.name}: persistent bindings`,layout:kernel.layout,entries});this.runtime.stats.bindGroupsCreated++;
     if(kernel.objectLayout){if(!(objectArena instanceof ObjectArena))throw Error('Persistent object kernels require an explicit objectArena binding.');for(const binding of meta.bindings.filter(b=>String(b.elementType).startsWith('cw_objectptr_'))){const resource=buffers[binding.name];if(resource.objectArena&&resource.objectArena!==objectArena)throw Error('Object pointer buffer belongs to another arena.');}
-      this.objectArena=objectArena;this.objectBindGroup=objectArena.bind(kernel);for(const binding of meta.bindings.filter(b=>String(b.elementType).startsWith('cw_objectptr_')))buffers[binding.name].objectArena=objectArena;}
+      this.objectArena=objectArena;this.objectBindGroup=objectArena.bind(kernel,buffers);for(const binding of meta.bindings.filter(b=>String(b.elementType).startsWith('cw_objectptr_')))buffers[binding.name].objectArena=objectArena;}
     this.setScalars(scalars);
   }
   setScalars(values) {const merged={...this.values,...values};packScalars(this.kernel.artifact.metadata,merged,this.uniformData);const view=new DataView(this.uniformData);for(const scale of this.kernel.artifact.metadata.textureScales||[]){const texture=this.buffers[scale.name];view.setFloat32(scale.offset,texture.normalizedCoords===false?1/texture.width:1,true);view.setFloat32(scale.offset+4,texture.normalizedCoords===false?1/texture.height:1,true);if(scale.dimension==='3d')view.setFloat32(scale.offset+8,texture.normalizedCoords===false?1/texture.depth:1,true);if(scale.pointOffset!==undefined)view.setFloat32(scale.pointOffset,texture.normalizedCoords===false&&texture.filter==='nearest'?1:0,true);}for(const length of this.kernel.artifact.metadata.textureLengths||[])view.setUint32(length.offset,this.buffers[length.name].linearLength,true);this.values=merged;this.version++;return this;}

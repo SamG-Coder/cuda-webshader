@@ -185,3 +185,22 @@ references directly into persistent objects are rejected. The full original
 world still needs its pointer-list object, camera and cuRAND integration. The
 three-kernel harness is a verification stage, not the full path tracer or a
 new showcase.
+
+
+## Captured object-list stage
+
+The original hitable_list constructor and hit traversal now execute with
+persistent objects. A captured Class** buffer becomes a bounded buffer/offset
+descriptor; the arena retains the actual GPU buffer across kernel submissions.
+Imported buffers cannot be rebound or shared with another arena. Indexed reads
+resolve the descriptor to the retained buffer. This stage supports direct
+constructor captures and tracks directly allocated target types for dispatch;
+it does not establish support for arbitrary recursive scene graphs.
+
+The native CUDA and real hardware WebGPU harness create two spheres and a list,
+trace a hit and miss, replace the nearer sphere in a later submission, and trace
+again. All eight output values match exactly, including changed closest-hit
+distance and the untouched miss record. Cleanup clears every pointer. The GPU
+trace binds only its output; the arena retains both scene buffers. The original
+list and sphere function bodies are unchanged. Camera, cuRAND and complete
+material scattering still need integration before the full scene can be shown.

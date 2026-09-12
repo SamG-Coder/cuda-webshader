@@ -98,3 +98,11 @@ test('Persistent object pointer buffers require explicit arena mode and storage 
  assert.throws(()=>compile(source),/require objectHeap/);
  const c=compile(source,{objectHeap:'persistent'});assert.equal(c.metadata.bindings[0].stride,4);assert.equal(c.metadata.objectHeap.persistent,true);assert.equal(c.metadata.objectHeap.types[0].byteLength,8192);assert.match(c.wgsl,/atomicCompareExchangeWeak/);assert.match(c.wgsl,/@group\(1\)/);assert.throws(()=>executeCPU(c,{out:new Uint32Array(1)},{},[1]),/no cross-dispatch arena/);
 });
+
+
+test('Original hitable_list captures persistent buffer origins across entries',()=>{
+ const text=['value-class','list-class','list-kernels'].map(n=>readFileSync(new URL('./pathtracer-'+n+'.cuh',import.meta.url),'utf8')).join('\n');
+ const artifacts=['create_list','trace_list','update_list','free_list'].map(entry=>compile(text,{entry,objectHeap:'persistent',workgroupSize:[1,1,1]}));
+ for(const a of artifacts){assert.deepEqual(a.metadata.objectHeap.imports.map(i=>[i.name,i.targets]),[['objects',['sphere']],['world',['hitable_list']]]);assert.deepEqual(a.metadata.objectHeap,artifacts[0].metadata.objectHeap);}
+ assert.throws(()=>compile(text,{entry:'trace_list'}),/persistent object arenas/);
+});

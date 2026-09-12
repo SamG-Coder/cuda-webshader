@@ -284,7 +284,7 @@ export class Parser {
     finishValueClasses(this);
     if (!functions.some(f => f.qualifier === '__global__')) this.fail('No __global__ kernel was found.');
     for(const g of deviceGlobals)if(constantGlobals.some(c=>c.name===g.name)||sharedGlobals.some(c=>c.name===g.name)||functions.some(f=>f.name===g.name))this.fail('Duplicate global storage name.',g.token);
-    return {kind: 'module', functions:functions.concat(this.staticFunctions), constantGlobals,sharedGlobals,deviceGlobals,typeAliases:Object.fromEntries(this.typeAliases),interfaces:[...this.structs.values()].filter(s=>s.interfaceOnly),objectPointerTypes:[...(this.objectPointerTypes||[])],structs:[...this.structs.values()].filter(s=>!s.forward&&!s.interfaceOnly),typeTraits:[...this.typeTraits.values()], source: this.source};
+    return {kind: 'module', functions:functions.concat(this.staticFunctions), constantGlobals,sharedGlobals,deviceGlobals,typeAliases:Object.fromEntries(this.typeAliases),objectListTypes:[...(this.objectListTypes||[])],interfaces:[...this.structs.values()].filter(s=>s.interfaceOnly),objectPointerTypes:[...(this.objectPointerTypes||[])],structs:[...this.structs.values()].filter(s=>!s.forward&&!s.interfaceOnly),typeTraits:[...this.typeTraits.values()], source: this.source};
   }
   staticStruct(name,argument,parameter,token){
     let owner=this.staticTemplates.get(name);

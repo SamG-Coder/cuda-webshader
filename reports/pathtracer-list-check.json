@@ -1,0 +1,7 @@
+{
+  "values": 8,
+  "nativeExact": true,
+  "capturedBufferMutation": true,
+  "missPreserved": true,
+  "fullPathtracerSupported": false
+}
