@@ -11,8 +11,7 @@
   },
   {
     "file": "vec3-device-only",
-    "compiled": false,
-    "error": "Expected '(', found '+'. (46:41)\n__host__ __device__ inline vec3 operator+(const vec3 &v1, const vec3 &v2) {\r\n                                        ^"
+    "compiled": true
   },
   {
     "file": "hitable.h",

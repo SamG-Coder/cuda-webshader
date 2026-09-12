@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {compile} from '../src/compiler/compiler.js';
@@ -51,4 +52,11 @@ test('External mutable methods and compound class operators update the receiver'
  assert.throws(()=>compile(mutable+'__global__ void k(){vec3 a(1.0f,2.0f,3.0f);a+=a;}'),/Aliased/);
  assert.throws(()=>compile(mutable.replace('vec3::clear()', 'vec3::missing()')+'__global__ void k(){}'),/signature/);
  assert.throws(()=>compile(mutable.replace('return *this;','return v;')+'__global__ void k(){}'),/return/);
+});
+
+test('Original device vec3 definitions support free operators and readonly self dot products',()=>{
+ const full=readFileSync(new URL('./pathtracer-value-class.cuh',import.meta.url),'utf8');
+ const c=compile(full+'__global__ void k(float*out){vec3 a(2.0f,4.0f,8.0f),b(1.0f,2.0f,4.0f);vec3 sum=a+b,delta=a-b,product=a*b,ratio=a/b,scaled=2.0f*a,other=a*2.0f,half=a/2.0f;out[0]=sum.x();out[1]=delta.y();out[2]=product.z();out[3]=ratio.x();out[4]=scaled.y();out[5]=other.z();out[6]=half.x();out[7]=dot(a,a);vec3 normal=unit_vector(vec3(3.0f,0.0f,4.0f));out[8]=normal.x();}',{workgroupSize:[1,1,1]}),out=new Float32Array(9);executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[3,2,32,2,8,16,1,84,Math.fround(0.6)]);
+ assert.throws(()=>compile(source+'__device__ vec3 operator+(vec3 a){return a;}__global__ void k(){}'),/two/);
+ assert.throws(()=>compile(source+'__device__ vec3 operator+(vec3 &a,vec3 b){return b;}__global__ void k(){}'),/const-reference/);
 });

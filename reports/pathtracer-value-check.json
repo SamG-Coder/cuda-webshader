@@ -1,6 +1,6 @@
 {
   "cases": 512,
-  "values": 19456,
+  "values": 33792,
   "nativeExact": true,
   "copyIsolation": true,
   "fullPathtracerSupported": false
