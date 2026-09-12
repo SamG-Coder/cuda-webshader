@@ -7,6 +7,9 @@ export function kernelSource(source){
  const spans=[],pattern=/\b(?:template\s*<[^>]*>\s*)?(?:static\s+)?(?:__launch_bounds__\s*\([^)]*\)\s*)?__(?:global|device)__\s+[^;{}]+?\([^;{}]*\)\s*\{/g;let match;
  while((match=pattern.exec(masked))){let depth=1,end=pattern.lastIndex;for(;end<masked.length&&depth;end++){if(masked[end]==='{')depth++;else if(masked[end]==='}')depth--;}if(depth)throw Error('Unclosed CUDA device function.');spans.push([match.index,end]);pattern.lastIndex=end;}
  if(!spans.length)throw Error('No standalone __global__ / __device__ functions found. Templates, classes and host-only CUDA files need a supported kernel entry.');
+ // Keep supported zip functors intact; extracting operator() alone loses its state.
+ const functors=/\bstruct\s+\w+\s*\{/g;
+ while((match=functors.exec(masked))){let depth=1,end=functors.lastIndex;for(;end<masked.length&&depth;end++){if(masked[end]==='{')depth++;else if(masked[end]==='}')depth--;}if(!depth&&/\boperator\s*\(\s*\)\s*\(/.test(masked.slice(functors.lastIndex,end))){while(/\s/.test(masked[end]||'')&&end<masked.length)end++;if(masked[end]===';')spans.push([match.index,end+1]);}functors.lastIndex=end;}
  const defines=/^\s*#\s*define\s+\w+\s+[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFuU]?\s*$/gm;
  while((match=defines.exec(masked)))spans.push([match.index,match.index+match[0].length]);
  const forwards=/^[ \t]*#[ \t]*define[^\n]*/gm;

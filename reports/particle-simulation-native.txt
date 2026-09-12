@@ -1,0 +1,4 @@
+PASS native original Thrust integration and collisions at frame 1.
+PASS native original Thrust integration and collisions at frame 8.
+PASS native original Thrust integration and collisions at frame 32.
+PASS native original Thrust integration and collisions at frame 64.

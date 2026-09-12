@@ -1,0 +1,276 @@
+{
+  "pipeline": {
+    "animate": true,
+    "buffers": {
+      "positions": {
+        "type": "vec4<f32>",
+        "records": 1024,
+        "fill": "binary-f32",
+        "source": "showcases/particle-collision/positions.bin"
+      },
+      "velocities": {
+        "type": "vec4<f32>",
+        "records": 1024,
+        "fill": "zero"
+      },
+      "sortedPos": {
+        "type": "vec4<f32>",
+        "records": 1024,
+        "fill": "zero"
+      },
+      "sortedVel": {
+        "type": "vec4<f32>",
+        "records": 1024,
+        "fill": "zero"
+      },
+      "hash": {
+        "type": "u32",
+        "records": 1024,
+        "fill": "zero"
+      },
+      "index": {
+        "type": "u32",
+        "records": 1024,
+        "fill": "zero"
+      },
+      "cellStart": {
+        "type": "u32",
+        "records": 262144,
+        "fill": "zero"
+      },
+      "cellEnd": {
+        "type": "u32",
+        "records": 262144,
+        "fill": "zero"
+      }
+    },
+    "steps": [
+      {
+        "entry": "integrate_functor",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          8,
+          1,
+          1
+        ],
+        "bindings": {
+          "tuple0": "positions",
+          "tuple1": "velocities"
+        },
+        "scalars": {
+          "constant.cudaParams.particleRadius": 0.015625,
+          "constant.cudaParams.colliderRadius": 0.2,
+          "constant.cudaParams.spring": 0.5,
+          "constant.cudaParams.damping": 0.02,
+          "constant.cudaParams.shear": 0.1,
+          "constant.cudaParams.attraction": 0,
+          "constant.cudaParams.globalDamping": 1,
+          "constant.cudaParams.boundaryDamping": -0.5,
+          "constant.cudaParams.numCells": 262144,
+          "constant.cudaParams.numBodies": 1024,
+          "constant.cudaParams.gridSize.x": 64,
+          "constant.cudaParams.worldOrigin.x": -1,
+          "constant.cudaParams.cellSize.x": 0.03125,
+          "constant.cudaParams.colliderPos.x": 0,
+          "constant.cudaParams.gravity.x": 0,
+          "constant.cudaParams.gridSize.y": 64,
+          "constant.cudaParams.worldOrigin.y": -1,
+          "constant.cudaParams.cellSize.y": 0.03125,
+          "constant.cudaParams.colliderPos.y": -0.5,
+          "constant.cudaParams.gravity.y": -0.0003,
+          "constant.cudaParams.gridSize.z": 64,
+          "constant.cudaParams.worldOrigin.z": -1,
+          "constant.cudaParams.cellSize.z": 0.03125,
+          "constant.cudaParams.colliderPos.z": 0,
+          "constant.cudaParams.gravity.z": 0,
+          "count": 1024,
+          "deltaTime": 0.5
+        }
+      },
+      {
+        "entry": "calcHashD",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          8,
+          1,
+          1
+        ],
+        "bindings": {
+          "gridParticleHash": "hash",
+          "gridParticleIndex": "index",
+          "pos": "positions"
+        },
+        "scalars": {
+          "constant.cudaParams.particleRadius": 0.015625,
+          "constant.cudaParams.colliderRadius": 0.2,
+          "constant.cudaParams.spring": 0.5,
+          "constant.cudaParams.damping": 0.02,
+          "constant.cudaParams.shear": 0.1,
+          "constant.cudaParams.attraction": 0,
+          "constant.cudaParams.globalDamping": 1,
+          "constant.cudaParams.boundaryDamping": -0.5,
+          "constant.cudaParams.numCells": 262144,
+          "constant.cudaParams.numBodies": 1024,
+          "constant.cudaParams.gridSize.x": 64,
+          "constant.cudaParams.worldOrigin.x": -1,
+          "constant.cudaParams.cellSize.x": 0.03125,
+          "constant.cudaParams.colliderPos.x": 0,
+          "constant.cudaParams.gravity.x": 0,
+          "constant.cudaParams.gridSize.y": 64,
+          "constant.cudaParams.worldOrigin.y": -1,
+          "constant.cudaParams.cellSize.y": 0.03125,
+          "constant.cudaParams.colliderPos.y": -0.5,
+          "constant.cudaParams.gravity.y": -0.0003,
+          "constant.cudaParams.gridSize.z": 64,
+          "constant.cudaParams.worldOrigin.z": -1,
+          "constant.cudaParams.cellSize.z": 0.03125,
+          "constant.cudaParams.colliderPos.z": 0,
+          "constant.cudaParams.gravity.z": 0,
+          "numParticles": 1024
+        }
+      },
+      {
+        "sortPairs": {
+          "keys": "hash",
+          "values": "index",
+          "count": 1024
+        }
+      },
+      {
+        "entry": "clearParticleCells",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bindings": {
+          "cellStart": "cellStart",
+          "cellEnd": "cellEnd"
+        },
+        "scalars": {
+          "count": 262144
+        }
+      },
+      {
+        "entry": "reorderDataAndFindCellStartD",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          8,
+          1,
+          1
+        ],
+        "bindings": {
+          "cellStart": "cellStart",
+          "cellEnd": "cellEnd",
+          "sortedPos": "sortedPos",
+          "sortedVel": "sortedVel",
+          "gridParticleHash": "hash",
+          "gridParticleIndex": "index",
+          "oldPos": "positions",
+          "oldVel": "velocities"
+        },
+        "scalars": {
+          "constant.cudaParams.particleRadius": 0.015625,
+          "constant.cudaParams.colliderRadius": 0.2,
+          "constant.cudaParams.spring": 0.5,
+          "constant.cudaParams.damping": 0.02,
+          "constant.cudaParams.shear": 0.1,
+          "constant.cudaParams.attraction": 0,
+          "constant.cudaParams.globalDamping": 1,
+          "constant.cudaParams.boundaryDamping": -0.5,
+          "constant.cudaParams.numCells": 262144,
+          "constant.cudaParams.numBodies": 1024,
+          "constant.cudaParams.gridSize.x": 64,
+          "constant.cudaParams.worldOrigin.x": -1,
+          "constant.cudaParams.cellSize.x": 0.03125,
+          "constant.cudaParams.colliderPos.x": 0,
+          "constant.cudaParams.gravity.x": 0,
+          "constant.cudaParams.gridSize.y": 64,
+          "constant.cudaParams.worldOrigin.y": -1,
+          "constant.cudaParams.cellSize.y": 0.03125,
+          "constant.cudaParams.colliderPos.y": -0.5,
+          "constant.cudaParams.gravity.y": -0.0003,
+          "constant.cudaParams.gridSize.z": 64,
+          "constant.cudaParams.worldOrigin.z": -1,
+          "constant.cudaParams.cellSize.z": 0.03125,
+          "constant.cudaParams.colliderPos.z": 0,
+          "constant.cudaParams.gravity.z": 0,
+          "numParticles": 1024
+        },
+        "sharedMemoryBytes": 516
+      },
+      {
+        "entry": "collideD",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          8,
+          1,
+          1
+        ],
+        "bindings": {
+          "newVel": "velocities",
+          "oldPos": "sortedPos",
+          "oldVel": "sortedVel",
+          "gridParticleIndex": "index",
+          "cellStart": "cellStart",
+          "cellEnd": "cellEnd"
+        },
+        "scalars": {
+          "constant.cudaParams.particleRadius": 0.015625,
+          "constant.cudaParams.colliderRadius": 0.2,
+          "constant.cudaParams.spring": 0.5,
+          "constant.cudaParams.damping": 0.02,
+          "constant.cudaParams.shear": 0.1,
+          "constant.cudaParams.attraction": 0,
+          "constant.cudaParams.globalDamping": 1,
+          "constant.cudaParams.boundaryDamping": -0.5,
+          "constant.cudaParams.numCells": 262144,
+          "constant.cudaParams.numBodies": 1024,
+          "constant.cudaParams.gridSize.x": 64,
+          "constant.cudaParams.worldOrigin.x": -1,
+          "constant.cudaParams.cellSize.x": 0.03125,
+          "constant.cudaParams.colliderPos.x": 0,
+          "constant.cudaParams.gravity.x": 0,
+          "constant.cudaParams.gridSize.y": 64,
+          "constant.cudaParams.worldOrigin.y": -1,
+          "constant.cudaParams.cellSize.y": 0.03125,
+          "constant.cudaParams.colliderPos.y": -0.5,
+          "constant.cudaParams.gravity.y": -0.0003,
+          "constant.cudaParams.gridSize.z": 64,
+          "constant.cudaParams.worldOrigin.z": -1,
+          "constant.cudaParams.cellSize.z": 0.03125,
+          "constant.cudaParams.colliderPos.z": 0,
+          "constant.cudaParams.gravity.z": 0,
+          "numParticles": 1024
+        }
+      }
+    ],
+    "preview": {
+      "kind": "particles",
+      "positions": "positions",
+      "count": 1024,
+      "radius": 0.015625
+    }
+  }
+}

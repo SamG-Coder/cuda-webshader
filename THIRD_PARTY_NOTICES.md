@@ -180,3 +180,9 @@ code under MIT. The browser does not redistribute or execute cuFFT.
 `particles/particles_kernel.cuh` and `particles/particles_kernel_impl.cuh` at
 commit `5443602d89ed99aede2e4b7bf329daddeadb320e`. The runtime sorting kernels and
 native validation harness are project code under MIT.
+
+The particle simulation also retains the original `integrate_functor` definition
+in `tests/particle-integration-kernel.cuh` and `showcases/particle-collision/kernel.cu`.
+The original BSD-3-Clause notice remains intact. Compiler zip-launch lowering,
+project initial-condition data and the labelled cell-clearing CUDA adapter are
+project code under MIT.

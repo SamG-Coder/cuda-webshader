@@ -133,11 +133,26 @@ export class Parser {
     if (this.is('*')) this.fail('Pointer-to-pointer types are not supported.');
     return {type, constant, shared, pointer,reference,external};
   }
+  zipFunctorAhead(){
+    if(!this.is('struct')||this.peek(2).value!=='{')return false;
+    let depth=0;for(let i=2;i<4096;i++){const t=this.peek(i);if(t.kind==='eof')return false;if(t.value==='{')depth++;if(t.value==='}'&&--depth===0)return false;if(t.value==='operator'&&this.peek(i+1).value==='('&&this.peek(i+2).value===')')return true;}return false;
+  }
+  zipFunctor(){
+    const token=this.take('struct'),name=this.name();this.take('{');this.take('float');const field=this.name();this.take(';');
+    if(['tuple0','tuple1','count','cw_zip_index'].includes(field))this.fail('Zip functor state conflicts with launch parameters.',token);
+    this.take('__host__');this.take('__device__');this.take(name);this.take('(');this.take('float');const argument=this.name();this.take(')');this.take(':');this.take(field);this.take('(');this.take(argument);this.take(')');this.take('{');this.take('}');
+    this.take('template');this.take('<');if(!this.match('typename'))this.take('class');const tupleType=this.name();this.take('>');this.take('__device__');this.take('void');this.take('operator');this.take('(');this.take(')');this.take('(');this.take(tupleType);const tuple=this.name();this.take(')');
+    this.zipTuple=tuple;const body=this.block();this.zipTuple=null;this.take('}');this.take(';');
+    // The launch adapter replaces a Thrust zip iteration, not its user calculation.
+    const launch=new Parser('__global__ void '+name+'(float4*tuple0,float4*tuple1,float '+field+',unsigned count){unsigned cw_zip_index=blockIdx.x*blockDim.x+threadIdx.x;if(cw_zip_index>=count)return;}').parse().functions[0];
+    launch.token=token;launch.body.body.push(...body.body);launch.zipFunctor=true;this.functionNames.add(name);return launch;
+  }
   parse() {
     const functions = [],constantGlobals=[],sharedGlobals=[];
     while (this.peek().kind !== 'eof') {
       const token = this.peek();
       let templateParameter=null,templateKind=null,templateParameters=[];this.templateTypeNames=new Set();this.templateParameterName=null;this.deferUnsupportedTypes=false;
+      if(this.zipFunctorAhead()){functions.push(this.zipFunctor());continue;}
       if(this.is('typedef')&&this.peek(1).value==='struct'||this.is('struct')&&this.peek(2).value==='{'){
         const alias=this.match('typedef');this.take('struct');let name=this.is('{')?null:this.name();this.take('{');const fields=[];
         while(!this.is('}')){const fieldToken=this.peek(),spec=this.type(),fieldName=this.name(),dimensions=[];if(spec.pointer||spec.reference||spec.shared||spec.external||spec.constant||(['void','texture3d','surface2d','thread-block','cw_extent'].includes(spec.type)||spec.type.startsWith('cw_struct_')))this.fail('Struct fields require plain scalar/vector value types.',fieldToken);while(this.match('[')){dimensions.push(this.expression(2));this.take(']');}this.take(';');if(dimensions.length>1||fields.length>=64)this.fail('Structs support at most 64 fields and one-dimensional field arrays.',fieldToken);if(fields.some(f=>f.name===fieldName))this.fail('Duplicate struct field.',fieldToken);fields.push({name:fieldName,type:spec.type,dimensions,token:fieldToken});}
@@ -290,7 +305,7 @@ export class Parser {
   }
   declaration(semicolon = true) {
     const token = this.peek(),volatileSnapshot=this.match('volatile'),d = this.type(),declarations=[];
-    do {const name=this.name(),dimensions=[];if(this.typeAliases.has(name))this.fail('Value declarations cannot shadow a type alias.',token);while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.initializer():null;if(volatileSnapshot&&(d.pointer||d.reference||d.shared||d.external||dimensions.length||!init))this.fail('Volatile is supported only on initialized local value snapshots.',token);declarations.push({kind:'decl',token,name,...d,...(volatileSnapshot?{constant:true,volatileSnapshot:true}:{}),dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
+    do {const name=this.name(),dimensions=[];if(this.zipTuple&&['tuple0','tuple1','count','cw_zip_index'].includes(name))this.fail('Zip functor local name conflicts with generated launch storage.',token);if(this.typeAliases.has(name))this.fail('Value declarations cannot shadow a type alias.',token);while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.initializer():null;if(volatileSnapshot&&(d.pointer||d.reference||d.shared||d.external||dimensions.length||!init))this.fail('Volatile is supported only on initialized local value snapshots.',token);declarations.push({kind:'decl',token,name,...d,...(volatileSnapshot?{constant:true,volatileSnapshot:true}:{}),dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
     if (semicolon) this.take(';');return declarations.length===1?declarations[0]:{kind:'decls',token,declarations};
   }
   statement() {
@@ -340,7 +355,10 @@ export class Parser {
     let value;
     if (token.kind === 'number') { this.take(); value = {kind: 'literal', token, value: token.value}; }
     else if (this.match('(')) { value = this.expression(); this.take(')'); }
-    else if (token.kind === 'word') { const name=this.qualifiedName();if(this.staticMemberNames?.has(name))this.fail('Unqualified static member references require explicit template qualification.',token);value = {kind: 'id', token, name}; }
+    else if(this.zipTuple&&token.value==='cuda'){
+      this.take('cuda');this.take('::');this.take('std');this.take('::');this.take('get');this.take('<');const element=this.take();if(!['0','1'].includes(element.value))this.fail('Zip functors support exactly two float4 tuple elements.',element);this.take('>');this.take('(');this.take(this.zipTuple);this.take(')');value={kind:'index',token,base:{kind:'id',token,name:'tuple'+element.value},index:{kind:'id',token,name:'cw_zip_index'}};
+    }
+    else if (token.kind === 'word') { const name=this.qualifiedName();if(this.zipTuple&&['tuple0','tuple1','count','cw_zip_index'].includes(name))this.fail('Zip functor name conflicts with generated launch storage.',token);if(this.staticMemberNames?.has(name))this.fail('Unqualified static member references require explicit template qualification.',token);value = {kind: 'id', token, name}; }
     else this.fail('Expected an expression.', token);
     while (true) {
       if(value.kind==='id'&&this.staticTemplates.has(value.name)&&this.is('<')){const argument=this.templateArgument();this.take('::');const method=this.name();if(!this.is('('))this.fail('Static data member access is unsupported.',token);value={...value,name:this.staticMethod(value.name,argument,method,token)};}

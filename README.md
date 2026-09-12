@@ -527,7 +527,15 @@ All numerical stages were compared with native CUDA/cuFFT at three animation
 times; maximum absolute error was 3.17e-7. The preview uses project rendering,
 and no cuFFT performance parity is claimed. See [validation details](reports/ocean-progress.md).
 
-The next 3D candidate is NVIDIA's collision-based particle simulation. Its
-original hash, cell reorder and collision kernels now pass native comparisons,
-with a GPU key/value sort replacing the Thrust library step. Integration and
-animated preview work remains; see [particle collision progress](reports/particle-collision-progress.md).
+### NVIDIA particle collisions
+
+[Run the particle simulation](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=particle-collision)
+(or [locally](http://localhost:5173/sandbox.html?example=particle-collision)).
+Watch 1,024 spheres fall and collide using NVIDIA's original integration functor,
+spatial hashing and collision kernels. Sorting and cell clearing also run on the
+GPU, with positions shared directly with the renderer. Pause/resume and orbit
+controls are available in the sandbox.
+
+The complete simulation is compared with native Thrust/CUDA after 1, 8, 32 and
+64 steps, with maximum position error below 8.35e-7. The preview uses project
+initial conditions and rendering. See [validation and support boundaries](reports/particle-collision-progress.md).

@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "positions",
+      "maxError": 8.344650268554688e-7
+    },
+    {
+      "name": "velocities",
+      "maxError": 1.4086253941059113e-8
+    }
+  ],
+  "particles": 1024,
+  "simulationSteps": 64,
+  "animationFrames": 6,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "controlReadbackBytes": 0,
+  "animationReadbackBytes": 0,
+  "passes": [
+    "1. integrate_functor",
+    "2. calcHashD",
+    "3. sortPrepare",
+    "4. sortStage",
+    "5. sortFinish",
+    "6. clearParticleCells",
+    "7. reorderDataAndFindCellStartD",
+    "8. collideD"
+  ],
+  "sourceUnchanged": true,
+  "pauseResume": true,
+  "presetSwitching": true,
+  "screenshotStep": 256,
+  "boundsCheckedThroughStep": 256,
+  "mobileOverflow": false,
+  "softwareAdapterRequested": false
+}

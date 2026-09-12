@@ -1,0 +1,71 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "intermediateReadbackBytes": 0,
+  "results": [
+    {
+      "frame": 1,
+      "buffer": "positions",
+      "maxError": 0,
+      "components": 4096
+    },
+    {
+      "frame": 1,
+      "buffer": "velocities",
+      "maxError": 5.820766091346741e-11,
+      "components": 4096
+    },
+    {
+      "frame": 8,
+      "buffer": "positions",
+      "maxError": 4.470348358154297e-8,
+      "components": 4096
+    },
+    {
+      "frame": 8,
+      "buffer": "velocities",
+      "maxError": 1.4872057363390923e-8,
+      "components": 4096
+    },
+    {
+      "frame": 32,
+      "buffer": "positions",
+      "maxError": 4.023313522338867e-7,
+      "components": 4096
+    },
+    {
+      "frame": 32,
+      "buffer": "velocities",
+      "maxError": 1.4086253941059113e-8,
+      "components": 4096
+    },
+    {
+      "frame": 64,
+      "buffer": "positions",
+      "maxError": 8.344650268554688e-7,
+      "components": 4096
+    },
+    {
+      "frame": 64,
+      "buffer": "velocities",
+      "maxError": 1.4086253941059113e-8,
+      "components": 4096
+    }
+  ]
+}
