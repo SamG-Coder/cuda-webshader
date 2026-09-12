@@ -1,0 +1,154 @@
+{
+  "pipeline": {
+    "buffers": {
+      "values": {
+        "type": "f32",
+        "records": 3145728,
+        "fill": "zero"
+      },
+      "positions": {
+        "type": "vec4<f32>",
+        "records": 1048576,
+        "fill": "zero"
+      }
+    },
+    "steps": [
+      {
+        "entry": "quasirandomGeneratorKernel",
+        "block": [
+          128,
+          3,
+          1
+        ],
+        "groups": [
+          128,
+          1,
+          1
+        ],
+        "bindings": {
+          "d_Output": "values"
+        },
+        "scalars": {
+          "constant.c_Table[0][0]": 1073741824,
+          "constant.c_Table[0][1]": 536870912,
+          "constant.c_Table[0][2]": 268435456,
+          "constant.c_Table[0][3]": 134217728,
+          "constant.c_Table[0][4]": 67108864,
+          "constant.c_Table[0][5]": 33554432,
+          "constant.c_Table[0][6]": 16777216,
+          "constant.c_Table[0][7]": 8388608,
+          "constant.c_Table[0][8]": 4194304,
+          "constant.c_Table[0][9]": 2097152,
+          "constant.c_Table[0][10]": 1048576,
+          "constant.c_Table[0][11]": 524288,
+          "constant.c_Table[0][12]": 262144,
+          "constant.c_Table[0][13]": 131072,
+          "constant.c_Table[0][14]": 65536,
+          "constant.c_Table[0][15]": 32768,
+          "constant.c_Table[0][16]": 16384,
+          "constant.c_Table[0][17]": 8192,
+          "constant.c_Table[0][18]": 4096,
+          "constant.c_Table[0][19]": 2048,
+          "constant.c_Table[0][20]": 1024,
+          "constant.c_Table[0][21]": 512,
+          "constant.c_Table[0][22]": 256,
+          "constant.c_Table[0][23]": 128,
+          "constant.c_Table[0][24]": 64,
+          "constant.c_Table[0][25]": 32,
+          "constant.c_Table[0][26]": 16,
+          "constant.c_Table[0][27]": 8,
+          "constant.c_Table[0][28]": 4,
+          "constant.c_Table[0][29]": 2,
+          "constant.c_Table[0][30]": 1,
+          "constant.c_Table[1][0]": 1073741824,
+          "constant.c_Table[1][1]": 1610612736,
+          "constant.c_Table[1][2]": 1342177280,
+          "constant.c_Table[1][3]": 2013265920,
+          "constant.c_Table[1][4]": 1140850688,
+          "constant.c_Table[1][5]": 1711276032,
+          "constant.c_Table[1][6]": 1426063360,
+          "constant.c_Table[1][7]": 2139095040,
+          "constant.c_Table[1][8]": 1077936128,
+          "constant.c_Table[1][9]": 1616904192,
+          "constant.c_Table[1][10]": 1347420160,
+          "constant.c_Table[1][11]": 2021130240,
+          "constant.c_Table[1][12]": 1145307136,
+          "constant.c_Table[1][13]": 1717960704,
+          "constant.c_Table[1][14]": 1431633920,
+          "constant.c_Table[1][15]": 2147450880,
+          "constant.c_Table[1][16]": 1073758208,
+          "constant.c_Table[1][17]": 1610637312,
+          "constant.c_Table[1][18]": 1342197760,
+          "constant.c_Table[1][19]": 2013296640,
+          "constant.c_Table[1][20]": 1140868096,
+          "constant.c_Table[1][21]": 1711302144,
+          "constant.c_Table[1][22]": 1426085120,
+          "constant.c_Table[1][23]": 2139127680,
+          "constant.c_Table[1][24]": 1077952576,
+          "constant.c_Table[1][25]": 1616928864,
+          "constant.c_Table[1][26]": 1347440720,
+          "constant.c_Table[1][27]": 2021161080,
+          "constant.c_Table[1][28]": 1145324612,
+          "constant.c_Table[1][29]": 1717986918,
+          "constant.c_Table[1][30]": 1431655765,
+          "constant.c_Table[2][0]": 1610612736,
+          "constant.c_Table[2][1]": 1207959552,
+          "constant.c_Table[2][2]": 939524096,
+          "constant.c_Table[2][3]": 2046820352,
+          "constant.c_Table[2][4]": 1577058304,
+          "constant.c_Table[2][5]": 914358272,
+          "constant.c_Table[2][6]": 1702887424,
+          "constant.c_Table[2][7]": 1260388352,
+          "constant.c_Table[2][8]": 1046478848,
+          "constant.c_Table[2][9]": 2127036416,
+          "constant.c_Table[2][10]": 1572339712,
+          "constant.c_Table[2][11]": 827981824,
+          "constant.c_Table[2][12]": 1614675968,
+          "constant.c_Table[2][13]": 1216249856,
+          "constant.c_Table[2][14]": 945651712,
+          "constant.c_Table[2][15]": 2050039808,
+          "constant.c_Table[2][16]": 1583374336,
+          "constant.c_Table[2][17]": 919095296,
+          "constant.c_Table[2][18]": 1706571776,
+          "constant.c_Table[2][19]": 1264220672,
+          "constant.c_Table[2][20]": 1044274688,
+          "constant.c_Table[2][21]": 2130622080,
+          "constant.c_Table[2][22]": 1574823296,
+          "constant.c_Table[2][23]": 823225120,
+          "constant.c_Table[2][24]": 1610636896,
+          "constant.c_Table[2][25]": 1207973576,
+          "constant.c_Table[2][26]": 939550136,
+          "constant.c_Table[2][27]": 2046839642,
+          "constant.c_Table[2][28]": 1577074238,
+          "constant.c_Table[2][29]": 914390782,
+          "constant.c_Table[2][30]": 1702911453,
+          "N": 1048576,
+          "seed": 0
+        }
+      },
+      {
+        "entry": "packQuasirandomPoints",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "scalars": {
+          "N": 1048576
+        }
+      }
+    ],
+    "preview": {
+      "kind": "particles",
+      "glyph": "points",
+      "positions": "positions",
+      "count": 1048576,
+      "radius": 0.0005
+    }
+  }
+}

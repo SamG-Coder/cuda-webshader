@@ -8,5 +8,5 @@ test('Integer constant arrays preserve 32-bit values and reject invalid updates 
 });
 test('Desktop extraction retains initialized constant arrays and rejects writes and unsupported shapes',()=>{
  const source='#include <cuda_runtime.h>\n__constant__ float a[2]={1.0f,2.0f};__global__ void k(float* out){out[0]=a[1];}';assert.equal(compile(kernelSource(source).source).metadata.scalars.length,2);
- for(const source of ['__constant__ float a[2];__global__ void k(){a[0]=1.0f;}','__constant__ float a[2][2];__global__ void k(){}','__constant__ float a[257];__global__ void k(float* out){out[0]=a[0];}','__constant__ float a[1]={1.0f,2.0f};__global__ void k(float* out){out[0]=a[0];}'])assert.throws(()=>compile(source),/constant|Constant/);
+ for(const source of ['__constant__ float a[2];__global__ void k(){a[0]=1.0f;}','__constant__ float a[2][2][2];__global__ void k(){}','__constant__ float a[257];__global__ void k(float* out){out[0]=a[0];}','__constant__ float a[1]={1.0f,2.0f};__global__ void k(float* out){out[0]=a[0];}'])assert.throws(()=>compile(source),/constant|Constant/);
 });

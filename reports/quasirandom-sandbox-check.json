@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "points": 1048576,
+  "matchedNativeCoordinates": 3145728,
+  "sourceCoordinatesUnchanged": true,
+  "controlReadbackBytes": 0,
+  "softwareAdapterRequested": false,
+  "passes": [
+    "1. quasirandomGeneratorKernel",
+    "2. packQuasirandomPoints"
+  ],
+  "sourceUnchanged": true
+}

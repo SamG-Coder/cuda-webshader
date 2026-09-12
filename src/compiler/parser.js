@@ -171,6 +171,7 @@ export class Parser {
     const functions = [],constantGlobals=[],sharedGlobals=[];
     while (this.peek().kind !== 'eof') {
       const token = this.peek();
+      if(this.match('static')&&!['__constant__','__global__','__device__'].includes(this.peek().value))this.fail('Static module declarations require CUDA constant storage or a device function.',token);
       let templateParameter=null,templateKind=null,templateParameters=[];this.templateTypeNames=new Set();this.templateParameterName=null;this.deferUnsupportedTypes=false;
       if(this.zipFunctorAhead()){functions.push(this.zipFunctor());continue;}
       if(this.is('typedef')&&this.peek(1).value==='struct'||this.is('struct')&&this.peek(2).value==='{'){
@@ -191,7 +192,7 @@ export class Parser {
       if(this.match('__constant__')){
         this.deferUnsupportedTypes=true;const valueType=this.type(),name=this.name();
         if(valueType.pointer||valueType.reference||valueType.shared||valueType.external)this.fail('Constant globals support scalar values and fixed scalar arrays only.',token);
-        const dimensions=[];while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}if(dimensions.length>1)this.fail('Constant arrays must be one-dimensional.',token);
+        const dimensions=[];while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}if(dimensions.length>2||dimensions.length===2&&dimensions.includes(null))this.fail('Constant arrays support at most two fixed dimensions.',token);
         const init=this.match('=')?this.initializer():null;this.take(';');
         if(dimensions[0]===null){if(init?.kind!=='initializer'||!init.items.length)this.fail('Inferred constant arrays require a nonempty initializer.',token);dimensions[0]={kind:'literal',value:String(init.items.length),token};}
         if(constantGlobals.some(g=>g.name===name))this.fail('Duplicate constant global.',token);
