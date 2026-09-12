@@ -1,4 +1,5 @@
 /** A deliberately bounded CUDA C frontend. No eval, regex transpilation, or source-specific rewrites. */
+import {parseValueClass} from './value-classes.js';
 import {forwardingMacro,expressionMacro} from './macros.js';
 import {integerExpression} from './integer-expression.js';
 export class CompileError extends Error {
@@ -174,6 +175,7 @@ export class Parser {
       const token = this.peek();
       if(this.match('static')&&!['__constant__','__global__','__device__'].includes(this.peek().value))this.fail('Static module declarations require CUDA constant storage or a device function.',token);
       let templateParameter=null,templateKind=null,templateParameters=[];this.templateTypeNames=new Set();this.templateParameterName=null;this.deferUnsupportedTypes=false;
+      if(this.is('class')){if(builtinType(this.peek(1).value))this.fail('Class name conflicts with a built-in type.');functions.push(...parseValueClass(this));continue;}
       if(this.zipFunctorAhead()){functions.push(this.zipFunctor());continue;}
       if(this.is('typedef')&&this.peek(1).value==='struct'||this.is('struct')&&this.peek(2).value==='{'){
         const alias=this.match('typedef');this.take('struct');let name=this.is('{')?null:this.name();this.take('{');const fields=[];
@@ -335,7 +337,7 @@ export class Parser {
   }
   declaration(semicolon = true) {
     const token = this.peek(),volatileSnapshot=this.match('volatile'),d = this.type(),declarations=[];
-    do {const name=this.name(),dimensions=[];if(this.zipTuple&&['tuple0','tuple1','tuple2','tuple3','count','cw_zip_index'].includes(name))this.fail('Zip functor local name conflicts with generated launch storage.',token);if(this.typeAliases.has(name))this.fail('Value declarations cannot shadow a type alias.',token);while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.initializer():null;const volatileShared=volatileSnapshot&&d.shared&&!d.pointer&&!d.reference&&!d.external&&!d.constant&&!init&&['f32','i32','u32'].includes(d.type);if(volatileSnapshot&&!volatileShared&&(d.pointer||d.reference||d.shared||d.external||dimensions.length||!init))this.fail('Volatile is supported only on initialized local value snapshots.',token);declarations.push({kind:'decl',token,name,...d,...(volatileShared?{volatileShared:true}:volatileSnapshot?{constant:true,volatileSnapshot:true}:{}),dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
+    do {const name=this.name(),dimensions=[];if(this.zipTuple&&['tuple0','tuple1','tuple2','tuple3','count','cw_zip_index'].includes(name))this.fail('Zip functor local name conflicts with generated launch storage.',token);if(this.typeAliases.has(name))this.fail('Value declarations cannot shadow a type alias.',token);while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}let init=this.match('=')?this.initializer():null;const record=[...this.structs.values()].find(s=>s.type===d.type&&s.valueClass);if(record&&!d.pointer&&!d.reference&&!dimensions.length&&!init){const args=[];if(this.match('(')){if(!this.is(')'))do{args.push(this.expression(2));}while(this.match(','));this.take(')');}if(record.constructors.length)init={kind:'call',token,callee:{kind:'id',name:'cw_ctor_'+record.name,token},args};else if(args.length)this.fail('No value-class constructor is declared.',token);}const volatileShared=volatileSnapshot&&d.shared&&!d.pointer&&!d.reference&&!d.external&&!d.constant&&!init&&['f32','i32','u32'].includes(d.type);if(volatileSnapshot&&!volatileShared&&(d.pointer||d.reference||d.shared||d.external||dimensions.length||!init))this.fail('Volatile is supported only on initialized local value snapshots.',token);declarations.push({kind:'decl',token,name,...d,...(volatileShared?{volatileShared:true}:volatileSnapshot?{constant:true,volatileSnapshot:true}:{}),dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
     if (semicolon) this.take(';');return declarations.length===1?declarations[0]:{kind:'decls',token,declarations};
   }
   statement() {

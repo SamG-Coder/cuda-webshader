@@ -27,9 +27,19 @@ The manifest records source and image hashes. This is a native baseline,
 ## Current compiler findings
 
 `scripts/probe-pathtracer.mjs` records the first actual errors. Loading
-`main.cu` directly stops at its external includes. Isolating header declarations
-from includes and include guards stops at `class vec3` and `class material`.
-No original function bodies are rewritten by those probes.
+`main.cu` directly stops at its external includes. The compiler now parses plain
+public value classes, constructors, array fields and const methods, lowering
+them to records and device helpers. The isolated `vec3.h` probe now reaches
+its first operator overload (`operator+`) before stopping; the scene header
+still stops at its forward class declaration. No original function bodies are
+rewritten by those probes.
+
+The first class-stage test compares 512 constructor/copy/accessor/squared-length
+cases, with 3,584 values matching native CUDA exactly. Native compilation uses
+the complete original `vec3.h`; the GPU fixture retains the unchanged supported
+constructors and accessors, with unsupported operators/mutable methods omitted
+explicitly. This is a focused language test, not support for the complete header
+or path tracer. Const writes and resolved recursive class calls are rejected.
 
 Source inspection identifies the following connected work:
 

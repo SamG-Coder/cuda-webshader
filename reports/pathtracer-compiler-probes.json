@@ -7,11 +7,11 @@
   {
     "file": "vec3.h",
     "compiled": false,
-    "error": "Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported. (2:1)\nclass vec3  {\r\n^"
+    "error": "Class operator overloads are not yet supported. (15:5)\n    __host__ __device__ inline const vec3& operator+() const { return *this; }\r\n    ^"
   },
   {
     "file": "hitable.h",
     "compiled": false,
-    "error": "Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported. (2:1)\nclass material;\r\n^"
+    "error": "Expected '{', found ';'. (2:15)\nclass material;\r\n              ^"
   }
 ]

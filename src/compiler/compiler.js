@@ -452,6 +452,15 @@ class Emitter {
     return this.referenceHelpers.get(key);
   }
   call(n) {
+    if(n.callee.kind==='id'){
+      const record=[...this.structs.values()].find(s=>s.valueClass&&s.name===n.callee.name);
+      if(record){if(!record.constructors.length)this.fail('No value-class constructor is declared.',n);n.callee={kind:'id',token:n.token,name:'cw_ctor_'+record.name};}
+    }
+    if(n.callee.kind==='member'&&n.callee.member!=='sync'){
+      const receiver=n.callee.base,value=this.expr(receiver),record=this.structs.get(value.type),method=record?.methods?.find(m=>m.name===n.callee.member);
+      if(!method)this.fail('Unknown or unsupported value-class method.',n);
+      n.args=[receiver,...n.args];n.callee={kind:'id',token:n.token,name:method.helper};
+    }
     const groupSync=n.callee.kind==='id'&&n.callee.name==='cooperative_groups::sync';
     const memberSync=n.callee.kind==='member'&&n.callee.member==='sync';
     if(groupSync||memberSync){
@@ -1081,6 +1090,7 @@ export function compile(source, options = {},bufferUsage=null) {
   const overloadGroups=new Map();for(const f of ast.functions)if(f.specializationArgument===undefined){const group=overloadGroups.get(f.name)||[];group.push(f);overloadGroups.set(f.name,group);}let overloadIndex=0;const occupied=new Set(ast.functions.map(f=>f.name));for(const [name,group]of overloadGroups)if(group.length>1){if(group.some(f=>f.qualifier!=='__device__'||f.templateParameter))throw new CompileError('Overloads support non-template device helpers only.',group[0].token,source);const signatures=new Set();for(const f of group){const signature=JSON.stringify(f.params.map(p=>[p.type,p.pointer,p.reference,(p.pointer||p.reference)&&p.constant]));if(signatures.has(signature))throw new CompileError('Duplicate function signature '+name,f.token,source);signatures.add(signature);let unique='cw_overload_'+overloadIndex+++'_'+name;while(occupied.has(unique))unique+='_';occupied.add(unique);f.overloadName=name;f.name=unique;}}
   const templates=instantiateHelperTemplates(ast,kernel);
   const emitter=new Emitter(ast,kernel,options,templates,bufferUsage),result=emitter.emit();
+  emitter.checkRecursion(); // Class calls have now resolved to concrete helpers.
   if(tiledGroups)result.metadata.tiledGroups='predicated-first-tile';
   if(scalarConstraints.length||emitter.pointerConstraints.length)result.metadata.scalarConstraints=[...scalarConstraints,...emitter.pointerConstraints];
   const changed=['reads','writes','atomic'].some(k=>[...emitter.usage[k]].some(name=>!emitter.initialBufferUsage[k].has(name)));
