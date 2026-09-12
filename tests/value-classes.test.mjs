@@ -69,3 +69,10 @@ test('Nested class default constructors execute before the enclosing constructor
  const c=compile('class Inner{public:int x;__device__ Inner(){x=7;}};class Outer{public:Inner v;__device__ Outer(){v.x+=2;}};__global__ void k(int*out){Outer o;out[0]=o.v.x;}',{workgroupSize:[1,1,1]}),out=new Int32Array(1);executeCPU(c,{out},{},[1]);assert.equal(out[0],9);
  const implicit=compile('class Inner{public:int x;__device__ Inner(){x=7;}};class Outer{public:Inner v;};__global__ void k(int*out){Outer o;out[0]=o.v.x;}',{workgroupSize:[1,1,1]});executeCPU(implicit,{out},{},[1]);assert.equal(out[0],7);
 });
+
+test('Member initializer lists follow field order and initialize nested values without default constructors',()=>{
+ const src='class Inner{public:int x;__device__ Inner(int v):x(v){}};class Outer{public:int first;int second;Inner nested;__device__ Outer():nested(9),second(first+2),first(5){}};__global__ void k(int*out){Outer o;out[0]=o.first;out[1]=o.second;out[2]=o.nested.x;}';
+ const c=compile(src,{workgroupSize:[1,1,1]}),out=new Int32Array(3);executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[5,7,9]);
+ assert.throws(()=>compile(src.replace('first(5)','first(5),first(6)')),/Duplicate member/);
+ assert.throws(()=>compile(src.replace('first(5)','missing(5)')),/Unknown member/);
+});

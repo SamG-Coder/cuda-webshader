@@ -33,10 +33,10 @@ them to records and device helpers. The isolated `vec3.h` probe now reaches
 the host-only stream operators before stopping; the scene header
 still stops at its forward class declaration. Const unary signs, indexed reads and writes now compile. No original function bodies are rewritten by those probes.
 
-The class-stage test compares 512 cases with **41,472 values matching native
+The class-stage test compares 512 cases with **45,568 values matching native
 CUDA exactly**, covering construction, copying, accessors, squared length,
 unary signs, dynamic indexed reads/writes, compound indexed updates, all six compound vector/scalar operators, normalization, free binary operators, dot/cross products and assignment copy isolation. Native
-compilation uses the complete original `vec3.h` and `ray.h`; the GPU fixture retains
+compilation uses the complete original `vec3.h`, `ray.h` and `material.h`; the GPU fixture retains
 all unchanged CUDA vec3 and ray definitions, omitting only includes, header guards and
 host stream functions.
 This is a focused language test, not support for the complete header or path
@@ -47,7 +47,7 @@ incorrect shared value after copying a class containing an array. The emitter
 now constructs independent aggregate fields explicitly for initialization and
 assignment. Both copy cases match native CUDA; the precise backend cause has
 not been isolated. The full regression run passes 197 GPU checks with no
-software adapter requested, alongside 615 unit tests.
+software adapter requested, alongside 616 unit tests.
 
 Writable indexing currently accepts the original `return field[index]` reference
 accessor and lowers it to an lvalue into the original receiver. It does not
@@ -65,6 +65,14 @@ members invoke default constructors before the containing constructor body;
 classes without an explicit constructor receive one when nested members need
 initialization. Recursive class storage and arrays of nested classes remain
 unsupported.
+
+Member initializer lists now initialize fields in declaration order, before
+the body, including nested copies and explicit nested constructor calls. The
+focused lambertian, metal and dielectric constructor fixtures retain their
+original constructors and data fields but omit inheritance and scatter methods.
+Their albedo copies, fuzz clamp and refractive indices match the complete
+original native classes. This does not establish pointer or virtual dispatch
+support and is not a browser material rendering result.
 
 Source inspection identifies the following connected work:
 

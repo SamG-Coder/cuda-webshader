@@ -1,1 +1,1 @@
-Original complete vec3 header: 512 constructor/copy/accessor/squared-length cases, 41472 values
+Original complete vec3 header: 512 constructor/copy/accessor/squared-length cases, 45568 values

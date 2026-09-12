@@ -474,6 +474,7 @@ class Emitter {
   call(n) {
     if(n.callee.kind==='id'){
       const record=[...this.structs.values()].find(s=>s.valueClass&&s.name===n.callee.name);
+      if(record&&n.classMemberInit&&n.args.length===1&&!this.ast.functions.some(f=>f.classConstructor&&f.classOwner===record.name&&f.params.length===1&&f.params[0].type===record.type)){const value=this.expr(n.args[0]);if(value.type===record.type){n.classIdentity=n.args[0];return this.result(n,record.type,value.code,value.pre);}}
       if(record){if(!record.constructors.length)this.fail('No value-class constructor is declared.',n);n.callee={kind:'id',token:n.token,name:'cw_ctor_'+record.name};}
     }
     if(n.callee.kind==='member'&&n.callee.member!=='sync'){

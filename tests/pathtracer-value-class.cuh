@@ -152,3 +152,18 @@ class ray
         vec3 B;
 };
 
+
+// Focused material constructor fixtures: original constructors and data fields.
+// Inheritance and scatter methods are omitted; full material support is not claimed.
+class lambertian {public:
+ __device__ lambertian(const vec3& a) : albedo(a) {}
+ vec3 albedo;
+};
+class metal {public:
+ __device__ metal(const vec3& a, float f) : albedo(a) { if (f < 1) fuzz = f; else fuzz = 1; }
+ vec3 albedo;float fuzz;
+};
+class dielectric {public:
+ __device__ dielectric(float ri) : ref_idx(ri) {}
+ float ref_idx;
+};
