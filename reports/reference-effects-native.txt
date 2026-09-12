@@ -1,0 +1,2 @@
+PASS reference chains, short-circuit updates, const uchar4 references and explicit float casts
+1.25 3 3 1 3 1 1 3 12 4 4.125 0.100000001 -0 
