@@ -1,4 +1,4 @@
-# NVIDIA convolutionTexture: in progress
+# NVIDIA convolutionTexture: complete device pipeline
 
 Target: both original texture-based row and column filters from NVIDIA CUDA
 Samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`, in
@@ -6,7 +6,7 @@ Samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`, in
 
 The intended showcase runs the original radius-eight, 17-coefficient unrolled
 helpers and both kernels, with the intermediate buffer copied into the texture
-on the GPU. This is not yet a verified showcase.
+on the GPU. The complete pipeline is now verified and available as a standalone sandbox showcase.
 
 ## Verified: descending integer helper specializations
 
@@ -59,19 +59,6 @@ original KERNEL_LENGTH expression. Native CUDA and GPU probes verify signed
 24-bit IMAD, argument precedence, repeated parameters and dependent constants.
 See reports/expression-macros-native.txt.
 
-Both original convolutionTexture kernels and their unrolled helper chains now
-compile and pass real GPU shader validation, using the licensed fixture in
-tests/convolution-texture-kernel.cuh. That check is explicitly compilation-only;
-it does not establish correct image results with the current runtime settings.
+Both original kernels now execute with pixel-coordinate texture sampling and a GPU buffer-to-texture copy between passes. All pixels and guards match native CUDA and an independent reference across four cases, including odd sizes and the showcase image.
 
-## Remaining work
-
-- Support unnormalized texture coordinates. The original CPU reference clamps
-  boundary indices; compare native boundary behaviour explicitly rather than
-  assuming normalized wrapping applies.
-- Copy the row output buffer into the texture on the GPU before the column pass.
-- Compare complete native and WebGPU results, including borders and odd sizes,
-  then add a standalone card linked to the sandbox.
-
-The original CUDA function bodies remain unchanged. No convolutionTexture
-showcase card has been added while complete output validation is outstanding.
+See [showcase setup and complete validation](../showcases/convolution-texture/README.md). The original CUDA function bodies remain unchanged.

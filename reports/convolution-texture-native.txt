@@ -1,0 +1,8 @@
+scenario=0 128x64 rows PASS all pixels, clamped borders and guards; max independent error 5.96046e-08
+scenario=0 128x64 columns PASS all pixels, clamped borders and guards; max independent error 2.98023e-08
+scenario=1 35x19 rows PASS all pixels, clamped borders and guards; max independent error 5.96046e-08
+scenario=1 35x19 columns PASS all pixels, clamped borders and guards; max independent error 2.98023e-08
+scenario=2 8x5 rows PASS all pixels, clamped borders and guards; max independent error 0
+scenario=2 8x5 columns PASS all pixels, clamped borders and guards; max independent error 0
+scenario=3 512x512 rows PASS all pixels, clamped borders and guards; max independent error 1.78814e-07
+scenario=3 512x512 columns PASS all pixels, clamped borders and guards; max independent error 2.38419e-07

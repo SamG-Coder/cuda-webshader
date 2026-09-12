@@ -13,6 +13,9 @@ See [launch requirements and validation](showcases/nbody/README.md).
 [NVIDIA FDTD3d is also available as a 3D scalar-volume showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fdtd),
 with the original shared-memory stencil, editable constant coefficients and
 GPU-only field feedback. See [volume setup and validation](showcases/fdtd3d/README.md).
+[NVIDIA texture convolution](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=convolution)
+runs the original 17-tap row and column filters, with pixel-coordinate texture
+sampling and an intermediate GPU image copy. See [setup and native comparisons](showcases/convolution-texture/README.md).
 [NVIDIA surface write](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=surface)
 runs the original surface-write and texture-rotation kernels as two GPU passes.
 See [surface support and validation](showcases/surface-write/README.md).
@@ -37,11 +40,9 @@ runs the original row and column filters as a GPU pass sequence, with both
 generated shaders available for comparison. See [pass setup and validation](showcases/convolution-separable/README.md).
 Device helper integer arguments also support bounded signed arithmetic such as
 `filter<i - 1>` and negative terminating specializations. Native CUDA and
-NVIDIA WebGPU verify the expansion, including INT_MIN. This is a prerequisite
-for the [texture-convolution candidate currently in progress](reports/convolution-texture-progress.md).
-Its original row and column shaders now compile and pass GPU validation, including
-texture handles in nested helpers and the IMAD expression macro. Complete image
-execution still needs unnormalized coordinates and the intermediate GPU texture copy.
+NVIDIA WebGPU verify the expansion, including INT_MIN. These features now power the
+[verified texture-convolution showcase](showcases/convolution-texture/README.md),
+including texture handles in nested helpers and the original IMAD macro.
 Device helpers now
 support one built-in type or explicit integer template argument, including nested
 calls and arguments forwarded from a kernel template. Type-trait structs containing typedef members, including explicit type specializations

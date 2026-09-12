@@ -23,6 +23,7 @@ export function packScalars(metadata, values, target = new ArrayBuffer(metadata.
     else if(p.type === 'i32') view.setInt32(p.offset,v,true);
     else view.setFloat32(p.offset,v,true);
   }
+  for(const scale of metadata.textureScales||[]){view.setFloat32(scale.offset,1,true);view.setFloat32(scale.offset+4,1,true);}
   return target;
 }
 export function validateWorkgroup(metadata, limits) {
@@ -67,10 +68,11 @@ export class GpuRuntime {
     const info=this.adapter?.info;
     return {vendor:info?.vendor || 'not exposed',architecture:info?.architecture || '',device:info?.device || '',description:info?.description || '',features:[...this.device.features],timestampQuery:this.device.features.has('timestamp-query'),limits:{maxComputeInvocationsPerWorkgroup:this.device.limits.maxComputeInvocationsPerWorkgroup,maxComputeWorkgroupStorageSize:this.device.limits.maxComputeWorkgroupStorageSize,maxStorageBufferBindingSize:this.device.limits.maxStorageBufferBindingSize}};
   }
-  createTexture2D(data,{width,height,filter='linear',addressMode='repeat',label='CUDA float texture',storage=false}={}){
+  createTexture2D(data,{width,height,filter='linear',addressMode='repeat',label='CUDA float texture',storage=false,normalizedCoords=true}={}){
     this.assertAlive();if(![width,height].every(n=>Number.isInteger(n)&&n>0&&n<=this.device.limits.maxTextureDimension2D)||!(data===null&&storage)&&(!(data instanceof Float32Array)||data.length!==width*height||data.some(v=>!Number.isFinite(v))))throw new RangeError('2D texture requires finite floats matching width and height within device limits.');
+    if(typeof normalizedCoords!=='boolean'||(!normalizedCoords&&addressMode!=='clamp-to-edge'))throw Error('Unnormalized 2D textures require clamp-to-edge addressing.');
     if(!this.device.features.has('float32-filterable'))throw Error('Float textures require float32-filterable on this device.');if(!['linear','nearest'].includes(filter)||!['repeat','clamp-to-edge','mirror-repeat'].includes(addressMode))throw Error('Unsupported texture sampler settings.');
-    const gpuTexture=this.device.createTexture({label,size:[width,height,1],dimension:'2d',format:'r32float',usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST|(storage?GPUTextureUsage.STORAGE_BINDING:0)});if(data)this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width*4,rowsPerImage:height},[width,height,1]);const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode}),format:'r32float',dimension:'2d',width,height,depth:1,storage};this.textures.add(resource);this.stats.dataBytesUploaded+=data?.byteLength||0;return resource;
+    const gpuTexture=this.device.createTexture({label,size:[width,height,1],dimension:'2d',format:'r32float',usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST|(storage?GPUTextureUsage.STORAGE_BINDING:0)});if(data)this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width*4,rowsPerImage:height},[width,height,1]);const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode}),format:'r32float',dimension:'2d',width,height,depth:1,storage,normalizedCoords};this.textures.add(resource);this.stats.dataBytesUploaded+=data?.byteLength||0;return resource;
   }
   createTexture1D(data,{filter='linear',addressMode='clamp-to-edge',label='CUDA float4 transfer texture'}={}){
     this.assertAlive();if(!(data instanceof Float32Array)||!data.length||data.length%4||data.length/4>this.device.limits.maxTextureDimension2D||data.some(v=>!Number.isFinite(v)))throw new RangeError('1D texture requires finite float4 records within device width limits.');if(!this.device.features.has('float32-filterable'))throw Error('Float4 transfer textures require float32-filterable on this device.');if(!['linear','nearest'].includes(filter)||!['repeat','clamp-to-edge','mirror-repeat'].includes(addressMode))throw Error('Unsupported texture sampler settings.');const width=data.length/4,gpuTexture=this.device.createTexture({label,size:[width,1,1],dimension:'2d',format:'rgba32float',usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST});this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width*16,rowsPerImage:1},[width,1,1]);const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:'clamp-to-edge',addressModeW:'clamp-to-edge'}),format:'rgba32float',dimension:'2d',width,height:1,depth:1};this.textures.add(resource);this.stats.dataBytesUploaded+=data.byteLength;return resource;
@@ -166,7 +168,7 @@ export class Invocation {
     this.bindGroup=this.runtime.device.createBindGroup({label:`${kernel.artifact.name}: persistent bindings`,layout:kernel.layout,entries});this.runtime.stats.bindGroupsCreated++;
     this.setScalars(scalars);
   }
-  setScalars(values) {const merged={...this.values,...values};packScalars(this.kernel.artifact.metadata,merged,this.uniformData);this.values=merged;this.version++;return this;}
+  setScalars(values) {const merged={...this.values,...values};packScalars(this.kernel.artifact.metadata,merged,this.uniformData);const view=new DataView(this.uniformData);for(const scale of this.kernel.artifact.metadata.textureScales||[]){const texture=this.buffers[scale.name];view.setFloat32(scale.offset,texture.normalizedCoords===false?1/texture.width:1,true);view.setFloat32(scale.offset+4,texture.normalizedCoords===false?1/texture.height:1,true);}this.values=merged;this.version++;return this;}
 }
 export class ComputeBatch {
   constructor(runtime,{label='compute batch',timestampWrites}={}) {
@@ -198,6 +200,16 @@ export class ComputeBatch {
     if(this.lastPipeline!==invocation.kernel.pipeline){pass.setPipeline(invocation.kernel.pipeline);this.lastPipeline=invocation.kernel.pipeline;}
     if(this.lastBindGroup!==invocation.bindGroup||this.lastOffset!==offset){pass.setBindGroup(0,invocation.bindGroup,meta.uniformSize?[offset]:[]);this.lastBindGroup=invocation.bindGroup;this.lastOffset=offset;}
     pass.dispatchWorkgroups(...groups);this.dispatchCount++;return this;
+  }
+  copyToTexture(source,target,{sourceOffset=0}={}){
+    this.assertOpen();this.runtime.checkResource(source);this.runtime.checkResource(target);
+    if(!source.gpuBuffer||!target.gpuTexture||target.dimension!=='2d'||target.format!=='r32float')throw Error('Texture copy requires a buffer and a 2D r32float texture.');
+    const rowBytes=target.width*4,bytes=rowBytes*target.height;
+    if(!Number.isSafeInteger(sourceOffset)||sourceOffset<0||sourceOffset%4||sourceOffset+bytes>source.byteLength)throw Error('Texture copy source range must be aligned and contain the complete image.');
+    this.endPass();
+    if(rowBytes%256===0)this.encoder.copyBufferToTexture({buffer:source.gpuBuffer,offset:sourceOffset,bytesPerRow:rowBytes,rowsPerImage:target.height},{texture:target.gpuTexture},[target.width,target.height,1]);
+    else for(let y=0;y<target.height;y++)this.encoder.copyBufferToTexture({buffer:source.gpuBuffer,offset:sourceOffset+y*rowBytes},{texture:target.gpuTexture,origin:[0,y,0]},[target.width,1,1]);
+    return this;
   }
   clear(resource){this.assertOpen();this.runtime.checkResource(resource);this.endPass();this.encoder.clearBuffer(resource.gpuBuffer,0,resource.size);return this;}
   copy(source,target,range){this.assertOpen();this.runtime.checkResource(source);this.runtime.checkResource(target);if(!source.gpuBuffer||!target.gpuBuffer)throw Error('Copy requires buffer resources.');if(source.gpuBuffer===target.gpuBuffer)throw new RangeError('Copy requires distinct buffers.');if(range===undefined&&(source.byteLength!==target.byteLength||source.byteLength%4))throw new RangeError('Feedback copy requires equal aligned byte length.');const {sourceOffset=0,targetOffset=0,byteLength=source.byteLength}=range??{};if([sourceOffset,targetOffset,byteLength].some(n=>!Number.isSafeInteger(n)||n<0||n%4)||sourceOffset+byteLength>source.byteLength||targetOffset+byteLength>target.byteLength)throw new RangeError('Copy range must be aligned and within both buffers.');this.endPass();if(byteLength)this.encoder.copyBufferToBuffer(source.gpuBuffer,sourceOffset,target.gpuBuffer,targetOffset,byteLength);return this;}
