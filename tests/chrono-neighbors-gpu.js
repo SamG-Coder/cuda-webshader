@@ -1,8 +1,8 @@
 export async function checkChronoNeighbors(runtime){
- const source=await(await fetch('/tests/chrono-neighbors.cu')).text();
+ const source=await(await fetch(new URL('chrono-neighbors.cu',import.meta.url))).text();
  const cells=await runtime.kernel(source,{entry:'findCellStartEndD',workgroupSize:[128],sharedMemoryBytes:516,predicatedReturns:true});
  const mapping=await runtime.kernel(source,{entry:'OriginalToSortedD',workgroupSize:[128]});
- const native=await(await fetch('/reports/chrono-neighbors-native.json')).json();
+ const native=await(await fetch(new URL('../reports/chrono-neighbors-native.json',import.meta.url))).json();
  const sizes=[0,1,31,127,128,129,255,256,257,1027];let compared=0;
  for(const n of sizes){
   const count=Math.max(1,n),hashes=Uint32Array.from({length:count},(_,i)=>Math.floor(i/7)),indices=Uint32Array.from({length:count},(_,i)=>n-1-i),cellCount=Math.ceil(count/7)+2;
