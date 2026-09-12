@@ -251,3 +251,24 @@ cg::sync(tile32): predicated workgroup phases and recursive execution remain.
 
 Specification reference: https://www.w3.org/TR/WGSL/ (subgroup builtins, subgroup
 index mapping, subgroup size control and uniformity diagnostics).
+
+## Complete-tile memory phases
+
+Static tile sync now supports a complete-tile branch at workgroup scope, selected
+by a constant CUDA warp index. The compiler predicates scalar initialization and
+memory operations, lifts literal-bound loops, and makes every thread reach each
+workgroup barrier. Inactive threads do not evaluate the tile's memory reads.
+Partial-tile branches, early exits, modified induction variables, and collectives
+inside the lifted phases are rejected. General GPU uniformity validation remains
+enabled. NVIDIA's original device bodies and source hash are unchanged.
+
+A shared-memory offset test preserves a row's snapshot before other lanes update
+that row. It checks 256 WebGPU values across selected tiles 0 and 2. The matching
+native CUDA fixture checks 128 values with zero mismatches. All 671 unit tests,
+220 real NVIDIA GPU tests, and Bezier/path-tracer sandbox regressions pass.
+
+The original quadtree probe now reaches its volatile shared-pointer compound
+assignment (`s_num_pts[row][tile32.thread_rank()] += sum`). This is the next
+unsupported operation. The full quadtree still needs compilation and recursive
+execution before it can become a showcase; these phase tests do not establish
+full-sample support.

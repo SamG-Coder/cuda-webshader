@@ -5,7 +5,7 @@
   "results": [
     {
       "compiled": false,
-      "error": "Static tile memory synchronization requires predicated workgroup phases. (402:13)\n            cg::sync(tile32);\r\n            ^"
+      "error": "Use explicit atomicAdd/Min/Max/Exch rather than compound assignments to atomic arrays. (405:54)\n                s_num_pts[row][tile32.thread_rank()] += sum;\r\n                                                     ^"
     }
   ]
 }

@@ -1,3 +1,4 @@
+import {lowerNativeTilePhases} from './native-tile-phases.js';
 // A CUDA tile maps to an explicitly sized WGSL subgroup. Logical CUDA thread
 // indices are remapped from subgroup IDs, never assumed to equal physical IDs.
 export function lowerNativeTiles(ast,walk,fail){
@@ -6,8 +7,8 @@ export function lowerNativeTiles(ast,walk,fail){
   if(!handles.size)continue;
   walk(fn.body,n=>{if(n.kind==='decl'&&handles.has(n.name))fail('Static tile handles cannot be shadowed.',n);
    if(n.kind==='call'&&n.callee.kind==='member'&&n.callee.base.kind==='id'&&handles.has(n.callee.base.name)){const method=n.callee.member;if(!['thread_rank','any','ballot','shfl','shfl_up'].includes(method))fail('Unsupported static tile operation '+method,n);n.callee={kind:'id',name:'cw_native_tile_'+method,token:n.token};}
-   if(n.kind==='call'&&n.callee.name==='cooperative_groups::sync'&&n.args.some(a=>handles.has(a.name)))fail('Static tile memory synchronization requires predicated workgroup phases.',n);
   });
+  lowerNativeTilePhases(fn,handles,walk,fail);
   // The vote itself makes the loop decision identical within a tile. Some
   // validators retain its predicate's lane dependence around the back-edge.
   // Restrict the diagnostic override to loops with no divergent collectives
