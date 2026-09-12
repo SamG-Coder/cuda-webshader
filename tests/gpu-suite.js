@@ -51,6 +51,18 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
       }finally{await runtime.idle();runtime.destroyBuffer(out);runtime.destroyBuffer(bits);}
     }
   });
+  await run('NVIDIA N-body vector traits resolve in kernel buffers and device helpers',async()=>{
+    const source=await (await fetch('/tests/nbody-vector-traits.cuh')).text()+'\n'+await (await fetch('/tests/type-traits.cu')).text();
+    const kernel=await runtime.kernel(source,{entry:'traitPositions<float>',workgroupSize:[128,1,1]});
+    for(const n of [1,129,1025]){
+      const data=Float32Array.from({length:(n+4)*4},(_,i)=>i<n*4?(i%17-8)*0.125:-12345),positions=runtime.createBuffer(data);
+      try{
+        runtime.batch().dispatch(kernel.bind({positions},{n,dt:0.25}),[Math.ceil(n/128)]).submit();
+        const output=await runtime.read(positions),delta=[0.125,-0.0625,0.25,0];
+        for(let i=0;i<data.length;i++)if(output[i]!==data[i]+(i<n*4?delta[i%4]:0))throw Error('N-body trait layout/update mismatch at '+i);
+      }finally{await runtime.idle();runtime.destroyBuffer(positions);}
+    }
+  });
   // Explicitly exercise workgroup variants used by the tuner, beyond the catalogue defaults.
   for(const block of [64,256])await run(`SAXPY workgroup specialization ${block}`,async()=>{
     const n=1031,xData=Float32Array.from({length:n},(_,i)=>i*0.125),x=runtime.createBuffer(xData),y=runtime.createBuffer(n*4);

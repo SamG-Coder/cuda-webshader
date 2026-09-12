@@ -13,8 +13,10 @@ export function kernelSource(source){
  while((match=forwards.exec(masked)))if(forwardingMacro(match[0].trim()))spans.push([match.index,match.index+match[0].length]);
  const aliases=/\bnamespace\s+\w+\s*=\s*cooperative_groups\s*;/g;
  while((match=aliases.exec(masked)))spans.push([match.index,match.index+match[0].length]);
+ const traits=/\btemplate\s*<[^>]*>\s*struct\s+\w+(?:\s*<[^>]*>)?\s*\{([^{}]*)\}\s*;/g;
+ while((match=traits.exec(masked)))if(/^(?:\s*typedef\s+(?:unsigned\s+)?\w+\s+\w+\s*;)+\s*$/.test(match[1]))spans.push([match.index,match.index+match[0].length]);
  const chars=source.replace(/[^\n]/g,' ').split('');for(const [start,end]of spans)for(let i=start;i<end;i++)chars[i]=source[i];
  // Retain single-function C linkage when extracting a desktop translation unit.
  for(const [start] of spans){const linkage=/\bextern\s+"[^"]*"\s*$/.exec(source.slice(0,start));if(linkage)for(let i=linkage.index;i<start;i++)chars[i]=source[i];}
- return {source:chars.join(''),extracted:true,functions:spans.filter(([start])=>/^(?:__|template\b|static\b)/.test(masked.slice(start))).length};
+ return {source:chars.join(''),extracted:true,functions:spans.filter(([start,end])=>/\b__(?:global|device)__\b/.test(masked.slice(start,end))).length};
 }

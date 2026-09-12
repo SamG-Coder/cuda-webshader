@@ -260,9 +260,20 @@ N-body compiler groundwork: explicit single-argument device helper templates are
 supported for built-in types and nonnegative 32-bit integers. Nested helpers and
 arguments forwarded from kernel templates are supported, with at most 128
 specializations. Helpers must be declared before explicit template calls. Type
-deduction and explicit specialization declarations remain unsupported, as do the
-N-body dependent vector traits, constant globals and shared-memory helper access.
+deduction and explicit function specialization declarations remain unsupported,
+as do constant globals and shared-memory helper access. The dependent vector
+traits now resolve through typedef-only template structs and explicit type
+specializations; unsupported value types still fail if selected.
 This does not add N-body to the verified catalog. The feature regression fixture
 is `tests/helper-templates.cu`, with its native harness alongside it and results
 in `reports/helper-templates-native.txt`. Hardware coverage is part of the normal
 WebGPU regression suite.
+
+The original N-body `vec3` and `vec4` declarations are retained with their NVIDIA
+license in `tests/nbody-vector-traits.cuh`. The project’s separate
+`tests/type-traits.cu` position-update fixture verifies their buffer layouts and
+helper signatures; it is not NVIDIA’s complete gravity simulation. Native checks
+for 1, 129 and 1,025 records are recorded in `reports/type-traits-native.txt`, and
+the same fixture runs in the hardware WebGPU suite. Reproduce native checks with
+`tests/type-traits-native.cu` using the NVCC flags above. Type traits support one
+type argument and typedef value members, not runtime struct fields or methods.

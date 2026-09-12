@@ -1,0 +1,3 @@
+n=1 PASS original NVIDIA vec3/vec4 traits, position update and guards
+n=129 PASS original NVIDIA vec3/vec4 traits, position update and guards
+n=1025 PASS original NVIDIA vec3/vec4 traits, position update and guards

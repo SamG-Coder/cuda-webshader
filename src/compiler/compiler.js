@@ -402,6 +402,22 @@ class Emitter {
     return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {workgroupSize: this.workgroupSize, bindings, scalars, uniformSize, uniformBinding: uniformSize ? bindings.length : null, workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
   }
 }
+function resolveTraitTypes(fn, ast, parameter, argument) {
+  const resolve=(type,node)=>{
+    if(type?.kind!=='trait-type')return type;
+    const key=type.argument===parameter?argument:type.argument;
+    if(!key||!builtinType(key)||key==='void')throw new CompileError('Type-trait arguments must resolve to supported built-in value types.',node.token,ast.source);
+    const trait=ast.typeTraits.find(t=>t.name===type.name),specialization=trait?.specializations.find(s=>s.argument===key);
+    const member=(specialization?.members||trait?.members)?.find(m=>m.name===type.member);
+    if(!member)throw new CompileError(`Unknown type-trait member '${type.name}::${type.member}'.`,node.token,ast.source);
+    const name=!specialization&&member.type===trait.parameter?key:member.type,resolved=builtinType(name);
+    if(!resolved||resolved==='void')throw new CompileError(`Type-trait member resolves to unsupported value type '${name}'.`,node.token,ast.source);
+    return resolved;
+  };
+  fn.result=resolve(fn.result,fn);
+  for(const p of fn.params)p.type=resolve(p.type,p);
+  walk(fn.body,n=>{if(n.type)n.type=resolve(n.type,n);if(n.target)n.target=resolve(n.target,n);});
+}
 function instantiateHelperTemplates(ast, kernel) {
   const definitions=new Map(),instances=new Map(),visiting=new Set(),done=new Set(),clones=[];
   for(const fn of ast.functions){
@@ -413,6 +429,7 @@ function instantiateHelperTemplates(ast, kernel) {
     if(done.has(fn))return;
     if(visiting.has(fn))fail('Recursive helper calls are unsupported.',fn);
     visiting.add(fn);
+    resolveTraitTypes(fn,ast);
     walk(fn.body,node=>{
       if(node.kind!=='call'||node.callee.kind!=='id')return;
       const callee=node.callee,definition=definitions.get(callee.name),argument=callee.templateArgument;
@@ -442,6 +459,7 @@ function instantiateHelperTemplates(ast, kernel) {
           if(type){if(n.type===placeholder)n.type=type;if(n.target===placeholder)n.target=type;}
           else if(n.kind==='id'&&n.name===parameter){n.kind='literal';n.value=argument;delete n.name;}
         });
+        resolveTraitTypes(instance,ast,parameter,argument);
         let name='cw_specialized_'+instances.size;
         while(definitions.has(name))name+='_';
         instance.name=name;instance.templateParameter=null;instance.templateKind=null;
@@ -474,6 +492,7 @@ export function compile(source, options = {}) {
     walk(kernel.body,n=>{if(['decl','thread-block'].includes(n.kind)&&n.name===name)throw new CompileError('Template parameter shadowing is unsupported.',n.token,source);if(n.kind==='id'&&n.name===name){n.kind='literal';n.value=String(value);delete n.name;}});
   }
   if(specialization)walk(kernel.body,n=>{if(n.templateArgument===kernel.templateParameter)n.templateArgument=specialization[2];});
+  resolveTraitTypes(kernel,ast,kernel.templateParameter,specialization?.[2]);
   instantiateHelperTemplates(ast,kernel);
   const result=new Emitter(ast, kernel, options).emit();if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};return result;
 }
