@@ -143,3 +143,14 @@ The regression passes 643 unit tests and 208 real NVIDIA WebGPU tests.
 The sandbox pipeline accepts `scheduleDeviceLaunches: true` on an individual
 kernel step and exposes generated child WGSL. A generic allocated-curve preview
 and its browser verification are still required before adding the runnable card.
+
+## Runnable sandbox showcase
+
+The complete 256-curve example is now available at `sandbox.html?example=bezier`.
+A generic allocated-float2-curve preview draws directly from the device pool and
+pointer records, with zero geometry readback. Pan and zoom only redraw the view.
+Curve colours are explicitly preview styling; original CUDA functions are
+unchanged. The browser test compares all 3,958 live vertices with native output,
+checks the original editor source and both generated WGSL passes, and verifies
+zoom does not redispatch compute. The standalone showcase card links only to the
+sandbox. Evidence: `bezier-sandbox-check.json` and `bezier-sandbox.png`.

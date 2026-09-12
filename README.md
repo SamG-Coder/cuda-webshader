@@ -1,5 +1,7 @@
 # CUDA → WebShader
 
+**New: [NVIDIA Bezier curves — GPU allocation and child launches](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=bezier)**. All 256 curves run through the original parent and child kernels, with 3,958 vertices compared against native CUDA. [Source and validation](showcases/bezier/README.md).
+
 **New: [Glass, metal and 488 spheres — CUDA path tracer](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=pathtracer)**. Roger Allen’s final scene runs through the compiler and sandbox at 1200 × 800, 10 samples per pixel. [Source, pipeline and validation](showcases/pathtracer/README.md).
 
 

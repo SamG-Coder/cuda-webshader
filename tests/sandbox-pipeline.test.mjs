@@ -92,3 +92,9 @@ test('Pipeline alias compilation rejects bindings that contradict the canonical 
  const {compile}=await import('../src/compiler/compiler.js'),source='__global__ void k(uint*a,uint*b){a[0]=b[0];}',rootArtifact=compile(source,{workgroupSize:[1,1,1]}),plan={buffers:{a:{type:'u32',records:1,fill:'zero'},other:{type:'u32',records:1,fill:'zero'}},steps:[{entry:'k',block:[1,1,1],groups:[1,1,1],bufferAliases:{b:'a'},bindings:{a:'a',b:'other'}}],preview:{kind:'image',buffer:'a',width:1,height:1,format:'rgba8'}};
  let calls=0;await assert.rejects(executePipeline({plan,source,defines:{},rootArtifact,runtime:{},resources:[],textureResources:[],compiler:{compile:async(s,o)=>{calls++;assert.deepEqual(o.bufferAliases,{b:'a'});return {artifact:compile(s,o)};}}}),/Pipeline buffer alias/);assert.equal(calls,1);
 });
+
+test('Allocated curve preview validates pointer-record bounds and view extents',()=>{
+ const preset=()=>JSON.parse(readFileSync('showcases/bezier/pipeline.json','utf8')).pipeline;
+ assert.ok(validatePipeline(preset())>0);
+ for(const change of [p=>p.preview.count=257,p=>p.preview.pointerWord=8,p=>p.preview.recordWords=0,p=>p.preview.bounds[2]=p.preview.bounds[0],p=>p.preview.bounds[0]=NaN,p=>p.buffers.bLines.type='f32',p=>delete p.compilerOptions.objectHeap]){const p=preset();change(p);assert.throws(()=>validatePipeline(p));}
+});

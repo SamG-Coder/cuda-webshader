@@ -1,0 +1,56 @@
+{
+  "pipeline": {
+    "compilerOptions": {
+      "objectHeap": "persistent",
+      "deviceHeap": {
+        "maxAllocations": 256,
+        "maxElements": 32
+      },
+      "deviceLaunchQueue": {
+        "maxLaunches": 256
+      }
+    },
+    "buffers": {
+      "bLines": {
+        "type": "u32",
+        "records": 2048,
+        "recordType": "cw_struct_BezierLine",
+        "fill": "binary-u32",
+        "source": "showcases/bezier/controls.bin"
+      }
+    },
+    "steps": [
+      {
+        "entry": "computeBezierLinesCDP",
+        "block": [
+          64,
+          1,
+          1
+        ],
+        "groups": [
+          4,
+          1,
+          1
+        ],
+        "scalars": {
+          "nLines": 256
+        },
+        "scheduleDeviceLaunches": true
+      }
+    ],
+    "preview": {
+      "kind": "allocated-curves",
+      "records": "bLines",
+      "count": 256,
+      "recordWords": 8,
+      "pointerWord": 6,
+      "pool": "device_vec2_f32_",
+      "bounds": [
+        -0.04,
+        -0.04,
+        1.04,
+        1.04
+      ]
+    }
+  }
+}
