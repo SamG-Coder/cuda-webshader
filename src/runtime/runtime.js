@@ -1,3 +1,4 @@
+import {SCAN_SOURCE} from './scan-kernels.js';
 /** WebGPU runtime: cached pipelines/bindings, batched dispatch and a per-batch uniform snapshot arena. */
 import {compile} from '../compiler/compiler.js';
 const roundUp = (n, alignment) => Math.ceil(n / alignment) * alignment;
@@ -139,6 +140,17 @@ export class GpuRuntime {
       for(let y=0;y<height;y++)for(let x=0;x<width;x++){const offset=y*bytesPerRow+x*bytes;data[y*width+x]=format==='r32float'?view.getFloat32(offset,true):view.getUint8(offset)/255;}
       staging.unmap();this.stats.readbackBytes+=size;return {data,width,height,slice};
     }finally{staging.destroy();}
+  }
+  async exclusiveScan(input,output,{count,total}={}) {
+    this.assertAlive();for(const resource of [input,output,...(total?[total]:[])]){this.checkResource(resource);if(!resource.gpuBuffer)throw Error('Exclusive scan requires storage buffers.');}
+    if(!Number.isSafeInteger(count)||count<1||count>1048576||count*4>input.byteLength||count*4>output.byteLength||total&&total.byteLength<4)throw new RangeError('Exclusive scan count must fit the buffers and be in [1,1048576].');
+    const buffers=[input,output,...(total?[total]:[])];if(new Set(buffers.map(r=>r.gpuBuffer)).size!==buffers.length)throw Error('Exclusive scan input, output and total must not alias.');
+    const blocks=await this.kernel(SCAN_SOURCE,{entry:'scanBlocks',workgroupSize:[256,1,1]}),add=await this.kernel(SCAN_SOURCE,{entry:'addScanOffsets',workgroupSize:[256,1,1]}),scratch=[],batch=this.batch({label:'exclusive uint scan'});
+    try{
+      const record=(source,destination,n)=>{const groups=Math.ceil(n/512),totals=this.createBuffer(groups*4);scratch.push(totals);batch.dispatch(blocks.bind({input:source,output:destination,totals},{count:n}),[groups,1,1]);
+        if(groups===1)return totals;const offsets=this.createBuffer(groups*4);scratch.push(offsets);const sum=record(totals,offsets,groups);batch.dispatch(add.bind({output:destination,offsets},{count:n}),[Math.ceil(n/256),1,1]);return sum;};
+      const sum=record(input,output,count);if(total)batch.copy(sum,total,{byteLength:4});batch.submit();await this.idle();
+    }finally{if(!batch.ended)batch.discard();for(const r of scratch)this.destroyBuffer(r);}
   }
   async kernel(sourceOrArtifact,options={}) {
     this.assertAlive();const artifact=typeof sourceOrArtifact==='string'?compile(sourceOrArtifact,options):sourceOrArtifact;

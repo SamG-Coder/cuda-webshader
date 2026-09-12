@@ -1,0 +1,10 @@
+Native RTX 5080; CUDA scan kernels are SCAN_SOURCE from src/runtime/scan-kernels.js.
+Build: generate .local/exclusive-scan-kernel.cuh from SCAN_SOURCE, then nvcc -O3 -std=c++17 -arch=native tests/exclusive-scan-native.cu.
+PASS count=1 total=2779096485
+PASS count=2 total=3778576825
+PASS count=511 total=3252289814
+PASS count=512 total=922242816
+PASS count=513 total=38737573
+PASS count=4096 total=1101363200
+PASS count=32768 total=2980036608
+PASS count=262145 total=2545919397

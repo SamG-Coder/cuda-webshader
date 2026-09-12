@@ -77,3 +77,17 @@ The original generateTriangles now compiles and executes with USE_SHARED=1. A se
 All 49,920 triangle output components are finite. Position comparison has 300 non-bit-identical components, with maximum absolute error 2.9802322387695312e-8; gradient comparison has 414, with maximum error 9.313225746154785e-10. The test allows absolute error up to 1e-6. Native compilation disables multiply-add fusion. This result is numerical agreement, not a claim of bit-exact mesh output.
 
 473 unit tests and 138 hardware GPU checks pass, plus compile-all and static build. Remaining work includes GPU scan/compaction integration, the original sampled-volume generateTriangles2 pointer-array path, and generic mesh presentation. No showcase card advertises the unfinished complete pipeline.
+
+## GPU scan and full implicit-field compute pipeline
+
+`GpuRuntime.exclusiveScan(input, output, {count, total})` now provides a reusable exclusive unsigned scan. Its original MIT CUDA kernels are compiled by this project's frontend, not handwritten WGSL or CPU simulation. A 512-element block scan is combined recursively with scanned block totals; partial blocks are padded with zeros. Unsigned totals wrap to 32 bits. The API validates separate buffers and a count in [1,1,048,576], optionally copies the GPU total to a caller-supplied buffer, and releases scratch buffers after completion.
+
+Native CUDA and hardware WebGPU agree exactly on eight input sizes: 1, 2, 511, 512, 513, 4,096, 32,768 and 262,145. The largest case exercises three scan levels. All totals also agree, intermediate data remains on the GPU, and scratch resources are reclaimed. Native scan validation additionally compares every value against an independent sequential unsigned sum. To regenerate its include, import SCAN_SOURCE from src/runtime/scan-kernels.js in Node and write it to .local/exclusive-scan-kernel.cuh before compiling tests/exclusive-scan-native.cu.
+
+The original implicit-field classification, two GPU scans, original compactVoxels and original shared generateTriangles now execute as a complete compute sequence. The browser test no longer loads native scans or compaction arrays as inputs. It reads only two 32-bit totals for output allocation and launch sizing (8 bytes); all intermediate arrays stay GPU-resident. Final verification reads results only after the pipeline completes.
+
+The sequence produces 1,024 active voxels, 6,240 vertices and 2,080 triangles. All 4,096 prefix entries and 1,024 compacted indices match native exactly. Position and gradient comparisons retain the previous maximum errors (2.9802322387695312e-8 and 9.313225746154785e-10). Native captures serve only as expected results.
+
+This completes the compute pipeline for the upstream implicit-field profile, not the entire candidate: generic sandbox mesh presentation and the sampled-volume pointer-array path are still outstanding. The GPU scan supplies the host-library primitive used between the unchanged NVIDIA kernels; it is identified as project integration code rather than an NVIDIA kernel.
+
+Validation for the GPU scan and connected implicit pipeline: 475 unit tests, 140 hardware GPU checks, native captures, compile-all and static build pass.
