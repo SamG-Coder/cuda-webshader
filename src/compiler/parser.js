@@ -77,7 +77,8 @@ export class Parser {
     if(!this.groupNamespaces.has(name))this.fail(`Unsupported namespace '${name}'. Only cooperative_groups namespace aliases are supported.`,token);
     return 'cooperative_groups::'+this.name();
   }
-  startsType() { return TYPES.has(this.peek().value) || this.peek().value==='typename' || this.typeTraits.has(this.peek().value) || this.peek().value===this.templateTypeName || QUALIFIERS.has(this.peek().value); }
+  deferredType(name){return this.deferUnsupportedTypes&&/^double[234]?$/.test(name);}
+  startsType() { return TYPES.has(this.peek().value) || this.deferredType(this.peek().value) || this.peek().value==='typename' || this.typeTraits.has(this.peek().value) || this.peek().value===this.templateTypeName || QUALIFIERS.has(this.peek().value); }
   type() {
     let constant = false, shared = false,external=false;
     while (QUALIFIERS.has(this.peek().value)) { const q = this.take().value; constant ||= q === 'const'; shared ||= q === '__shared__';external ||= q==='extern'; }
@@ -88,6 +89,7 @@ export class Parser {
       this.take('<');const argument=this.name();this.take('>');this.take('::');const member=this.name();
       type={kind:'trait-type',name,argument,member};
     }else if (tok.value === 'unsigned') { this.match('int'); type = 'u32'; } else type = tok.value===this.templateTypeName?'template:'+tok.value:builtinType(tok.value);
+    if(!type&&this.deferredType(tok.value))type='unsupported:'+tok.value;
     if (!type) this.fail(`Unsupported type '${tok.value}'. Use float, int, unsigned int, bool or float2/3/4.`, tok);
     if (this.match('const')) constant = true;
     const pointer = this.match('*');
@@ -101,7 +103,7 @@ export class Parser {
     const functions = [];
     while (this.peek().kind !== 'eof') {
       const token = this.peek();
-      let templateParameter=null,templateKind=null;this.templateTypeName=null;this.templateParameterName=null;
+      let templateParameter=null,templateKind=null;this.templateTypeName=null;this.templateParameterName=null;this.deferUnsupportedTypes=false;
       if(this.match('extern')){const linkage=this.take();if(linkage.kind!=='string'||linkage.value!=='"C"')this.fail('Only extern "C" linkage on a single device function definition is supported.',linkage);if(!['__global__','__device__'].includes(this.peek().value))this.fail('extern "C" must precede a single __global__ or __device__ function definition; linkage blocks and templates are unsupported.');}
       if(this.match('template')){
         this.take('<');
@@ -124,13 +126,14 @@ export class Parser {
         else{const trait=this.typeTraits.get(name);if(!trait)this.fail('Declare the primary type trait before its specializations.',token);if(trait.specializations.some(s=>s.argument===argument))this.fail('Duplicate type-trait specialization.',token);trait.specializations.push({argument,members});}
         continue;
       }
-      if(templateKind==='specialization')this.fail('Explicit specialization declarations currently support only type-trait structs.',token);
+      this.deferUnsupportedTypes=templateKind==='specialization';
       if(this.match('namespace')){const alias=this.name();this.take('=');const target=this.name();this.take(';');if(target!=='cooperative_groups'||this.groupNamespaces.has(alias))this.fail('Only distinct aliases of cooperative_groups are supported.',token);this.groupNamespaces.add(alias);continue;}
       while (['static','inline', '__forceinline__'].includes(this.peek().value)) this.take();
       let launchThreads=null;
       const launchBounds=()=>{this.take('__launch_bounds__');this.take('(');const t=this.take();if(t.kind!=='number'||!/^[0-9]+[uU]?$/.test(t.value))this.fail('Launch bounds require a positive integer thread count.',t);launchThreads=Number(t.value.replace(/[uU]$/,''));if(launchThreads<1||launchThreads>1024)this.fail('Launch bounds thread count must be in [1,1024].',t);this.take(')');};
       if(this.is('__launch_bounds__'))launchBounds();
       const qualifier = this.take().value;
+      if(templateKind==='specialization'&&qualifier!=='__device__')this.fail('Explicit function specializations support only device helpers.',token);
       if(templateParameter&&!['__global__','__device__'].includes(qualifier))this.fail('Templates are supported only on kernels and device helpers.',token);
       if (!['__global__', '__device__'].includes(qualifier)) this.fail('Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported.', token);
       while (['inline', '__forceinline__'].includes(this.peek().value)) this.take();
@@ -139,10 +142,12 @@ export class Parser {
       const result = this.type();
       if (result.pointer || result.shared || result.reference || result.external) this.fail('Function return pointers/references/shared/extern qualifiers are unsupported.');
       if(this.peek().forward)this.fail('Function-forwarding macros are supported at call sites, not in function declarations.');
-      const name = this.name(); this.functionNames.add(name); this.take('('); const params = [];
+      const name = this.name();this.functionNames.add(name);let specializationArgument;
+      if(templateKind==='specialization'){this.take('<');specializationArgument=this.take().value;this.take('>');}
+      this.take('('); const params = [];
       if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(); params.push({kind: 'param', token, name, ...type}); } while (this.match(','));
       this.take(')'); const body = this.block();
-      functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads,templateParameter,templateKind});
+      functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads,templateParameter,templateKind,...(specializationArgument!==undefined?{specializationArgument}:{})});
     }
     if (!functions.some(f => f.qualifier === '__global__')) this.fail('No __global__ kernel was found.');
     return {kind: 'module', functions, typeTraits:[...this.typeTraits.values()], source: this.source};
@@ -185,7 +190,7 @@ export class Parser {
     const token = this.peek();
     if(this.match('static_cast')){this.take('<');const type=this.type();if(type.pointer||type.reference||type.shared||type.external)this.fail('static_cast supports value types only.',token);this.take('>');this.take('(');const value=this.expression();this.take(')');return {kind:'cast',token,target:type.type,value};}
     if (['+', '-', '!', '~', '&', '++', '--', '*'].includes(token.value)) { this.take(); return {kind: 'unary', token, op: token.value, value: this.unary(), prefix: true}; }
-    if (this.is('(') && (TYPES.has(this.peek(1).value) || this.peek(1).value==='typename' || this.typeTraits.has(this.peek(1).value) || this.peek(1).value===this.templateTypeName || this.peek(1).value === 'const')) { this.take('('); const type = this.type(); if (type.pointer||type.reference) this.fail('Pointer/reference casts are unsupported.'); this.take(')'); return {kind: 'cast', token, target: type.type, value: this.unary()}; }
+    if (this.is('(') && (TYPES.has(this.peek(1).value) || this.deferredType(this.peek(1).value) || this.peek(1).value==='typename' || this.typeTraits.has(this.peek(1).value) || this.peek(1).value===this.templateTypeName || this.peek(1).value === 'const')) { this.take('('); const type = this.type(); if (type.pointer||type.reference) this.fail('Pointer/reference casts are unsupported.'); this.take(')'); return {kind: 'cast', token, target: type.type, value: this.unary()}; }
     let value;
     if (token.kind === 'number') { this.take(); value = {kind: 'literal', token, value: token.value}; }
     else if (this.match('(')) { value = this.expression(); this.take(')'); }

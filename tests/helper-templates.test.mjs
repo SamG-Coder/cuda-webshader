@@ -4,14 +4,14 @@ test('Device helper templates specialize separately for float and int with neste
 test('Integer helper templates substitute loop bounds and nested template arguments',()=>{const {out}=run('template<int N> __device__ float scale(float x){float r=0.0f;for(int i=0;i<N;i++){r+=x;}return r;} template<int K> __device__ float nested(float x){return scale<K>(x);} __global__ void k(float* out){out[0]=nested<3>(2.0f);out[1]=scale<0>(4.0f);}');assert.equal(out[0],6);assert.equal(out[1],0);});
 test('Kernel type and integer arguments propagate to device helper templates',()=>{for(const [source,entry,expected]of [['template<class U> __device__ U square(U x){return x*x;} template<class T> __global__ void k(float* out){out[0]=square<T>((T)3);}','k<float>',9],['template<int N> __device__ float f(){return (float)N;} template<int K> __global__ void k(float* out){out[0]=f<K>();}','k<7>',7]]){const c=compile(source,{entry,workgroupSize:[1,1,1]}),out=new Float32Array(1);executeCPU(c,{out},{},[1]);assert.equal(out[0],expected);}});
 test('Templated scalar references mutate the caller and vector types specialize by value',()=>{const {out}=run('template<class T> __device__ void swap(T& a,T& b){T t=a;a=b;b=t;} template<class T> __device__ T identity(T a){return a;} __global__ void k(float* out){int a=3;int b=9;swap<int>(a,b);float4 v=identity<float4>(make_float4(1.0f,2.0f,3.0f,4.0f));out[0]=a;out[1]=b;out[2]=v.z;}');assert.deepEqual([...out.slice(0,3)],[9,3,3]);});
-test('Device template recursion, deduction, wrong argument kinds and shadowing fail explicitly',()=>{for(const source of [
+test('Device template recursion, missing deduction inputs, wrong kinds and shadowing fail explicitly',()=>{for(const source of [
  'template<class T> __device__ T f(T x){return f<T>(x);} __global__ void k(){f<float>(1.0f);}',
- 'template<class T> __device__ T f(T x){return x;} __global__ void k(){f(1.0f);}',
+ 'template<class T> __device__ T f(){return (T)1;} __global__ void k(){f();}',
  'template<int N> __device__ int f(){return N;} __global__ void k(){f<float>();}',
  'template<class T> __device__ T f(T x){return x;} __global__ void k(){f<3>(1);}',
  'template<class T> __device__ T f(T T){return T;} __global__ void k(){f<float>(1.0f);}',
  '__device__ float f(float x){return x;} __global__ void k(){f<float>(1.0f);}'
- ])assert.throws(()=>compile(source),/Recursive|explicit template|Template argument|Template type|shadowing|templated device/);});
+ ])assert.throws(()=>compile(source),/Recursive|deduce|explicit template|Template argument|Template type|shadowing|templated device/);});
 test('Desktop extraction keeps helper templates and ordinary comparisons still parse',()=>{const s='#include <cuda_runtime.h>\ntemplate<class T> __device__ T f(T x){return x+x;}\n__global__ void k(float* out){int a=1;int b=2;out[0]=a<b;out[1]=f<float>(3.0f);}\nint main(){return 0;}';const {out}=run(kernelSource(s).source);assert.equal(out[0],1);assert.equal(out[1],6);});
 
 test('Relational expressions around numeric operands are not parsed as template calls',()=>{const {out}=run('__global__ void k(float* out){int a=0;out[0]=a < 1 > (0);}');assert.equal(out[0],1);});

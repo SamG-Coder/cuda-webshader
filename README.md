@@ -7,11 +7,13 @@
 ## CUDA sandbox
 
 Work toward the original NVIDIA N-body 3D sample is underway. Device helpers now
-support one explicit built-in type or integer template argument, including nested
+support one built-in type or explicit integer template argument, including nested
 calls and arguments forwarded from a kernel template. Type-trait structs containing typedef members, including explicit type specializations
 and dependent types such as `typename vec4<T>::Type`, now resolve to built-in
-value types. Template deduction, explicit function specialization declarations,
-constant-memory globals, and shared-memory pointers/barriers inside helpers remain
+value types. Helper type arguments can now be deduced from direct scalar/vector
+parameters, and explicit device-function specializations are selected when present.
+The original N-body `rsqrt_T` float specialization passes the regression fixture.
+Constant-memory globals and shared-memory pointers/barriers inside helpers remain
 unsupported. N-body has not yet been added as a working showcase.
 The helper support and NVIDIA’s original vector-trait declarations pass native
 CUDA and NVIDIA WebGPU tests for 1, 129 and 1,025 records. Coverage includes
@@ -208,7 +210,7 @@ This is source translation. **It does not run CUDA binaries, PTX, the CUDA drive
 
 ## Validated on an RTX 5080
 
-The project is running locally with installed, locked dependencies. **271 Node tests, 81 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
+The project is running locally with installed, locked dependencies. **283 Node tests, 81 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
 
 Open [the measured comparison](reports/performance-comparison.html) or read [the full methodology and results](reports/performance-comparison.md). All ten kernel sources are compiled by NVCC and translated to WGSL at two workload sizes. Raw GPU timestamps, CUDA event timings, ordinary CUDA launch timings, and verification logs are in `reports/`.
 

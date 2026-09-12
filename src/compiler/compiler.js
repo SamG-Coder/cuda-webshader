@@ -58,9 +58,9 @@ function analyse(functions, params) {
   return {atomic, reads, writes, storageBarrier: [...writes].some(x => reads.has(x))};
 }
 class Emitter {
-  constructor(ast, kernel, options) {
+  constructor(ast, kernel, options, templates) {
     this.ast = ast; this.kernel = kernel; this.options = options; this.scopes = [new Map()]; this.temp = 0; this.loopDepth = 0; this.integerIntrinsics=new Set();
-    this.functions = new Map(); this.shared = [];
+    this.functions = new Map(); this.shared = []; this.templates=templates;this.helperCalls=new Map();
     for (const f of ast.functions) {
       if (this.functions.has(f.name)) this.fail(`Duplicate function '${f.name}'.`, f);
       this.functions.set(f.name, f);
@@ -231,15 +231,23 @@ class Emitter {
       if (!numeric(type)) this.fail('min/max accept scalars.', n);
       return this.result(n, type, `${name}(${args.map(a => this.convert(a.code, a.type, type, n)).join(', ')})`, pre);
     }
-    const helper = this.functions.get(name);
+    let helper = this.functions.get(name);
+    if(!helper&&this.templates){
+      helper=this.templates.deduce(name,args.map(a=>a.type),n.callee);
+      if(helper)for(const fn of this.ast.functions)if(fn.qualifier==='__device__'&&!this.functions.has(fn.name)){this.functions.set(fn.name,fn);this.helpers.push(fn);}
+    }
     if (!helper || helper.qualifier !== '__device__') this.fail(`Unsupported function '${name}'. CUDA host APIs, warp intrinsics, dynamic launches and libraries are not available.`, n);
     if (args.length !== helper.params.length) this.fail(`Wrong number of arguments for '${name}'.`, n);
+    const caller=this.currentFunction.name,edges=this.helperCalls.get(caller)||new Set();edges.add(helper.name);this.helperCalls.set(caller,edges);
+    const reaches=(from,target,seen=new Set())=>{if(from===target)return true;if(seen.has(from))return false;seen.add(from);return [...(this.helperCalls.get(from)||[])].some(next=>reaches(next,target,seen));};
+    if(reaches(helper.name,caller))this.fail('Recursive helper calls are unsupported.',n);
+    n.callee.name=helper.name;n.callName=helper.name;
     const references=new Set();n.referenceArgs=helper.params.map(p=>!!p.reference);
     const codes=args.map((a,i)=>{const p=helper.params[i];if(!p.reference)return this.convert(a.code,a.type,p.type,n);
       const node=n.args[i],s=a.rootSymbol;if(node.kind!=='id'||!s||!['local','reference'].includes(s.kind)||s.constant||isArray(a.type)||!numeric(a.type)||a.type!==p.type)this.fail('Reference arguments require a mutable named local scalar of the exact type.',node);
       if(references.has(s))this.fail('Aliased reference arguments are unsupported.',node);references.add(s);return s.kind==='reference'?s.pointerCode:`&${s.code}`;
     });
-    return this.result(n, helper.result, `f_${name}(${codes.join(', ')})`, pre);
+    return this.result(n, helper.result, `f_${helper.name}(${codes.join(', ')})`, pre);
   }
   writable(target, n) {
     const s = target.rootSymbol;
@@ -379,7 +387,8 @@ class Emitter {
     const helperLines = [];
     // Helpers cannot capture kernel arguments; explicit scalar arguments only.
     const kernelScope = this.scopes;
-    for (const helper of this.helpers) {
+    let emittedHelpers=0;
+    const emitHelpers=()=>{while(emittedHelpers<this.helpers.length){const helper=this.helpers[emittedHelpers++];
       this.scopes = [new Map()]; this.currentFunction = helper;
       for (const p of helper.params) {
         if (p.pointer || p.shared || p.external || p.type === 'void') this.fail('Helper arguments must be scalar/vector values, not pointers.', p);
@@ -388,9 +397,11 @@ class Emitter {
       }
       const body = this.body(helper.body);
       helperLines.push(`fn f_${helper.name}(${helper.params.map(p => `${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.reference?`ptr<function, ${p.type}>`:p.type}`).join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
-    }
+    }};
+    emitHelpers();
     this.scopes = kernelScope; this.currentFunction = this.kernel;
     const main = this.body(this.kernel.body);
+    emitHelpers();this.scopes=kernelScope;this.currentFunction=this.kernel;
     if(this.dynamicSharedBytes&&!this.dynamicSharedUsed)this.fail('sharedMemoryBytes was supplied but the kernel has no dynamic shared array.',this.kernel);
     // Runtime parameters preserve CUDA wraparound even when call arguments are literals;
     // WGSL rejects overflowing constant expressions in an inline multiply.
@@ -419,8 +430,15 @@ function resolveTraitTypes(fn, ast, parameter, argument) {
   walk(fn.body,n=>{if(n.type)n.type=resolve(n.type,n);if(n.target)n.target=resolve(n.target,n);});
 }
 function instantiateHelperTemplates(ast, kernel) {
-  const definitions=new Map(),instances=new Map(),visiting=new Set(),done=new Set(),clones=[];
+  const definitions=new Map(),specializations=new Map(),instances=new Map(),visiting=new Set(),done=new Set(),clones=[];
   for(const fn of ast.functions){
+    if(fn.specializationArgument!==undefined){
+      const primary=definitions.get(fn.name),key=fn.name+'<'+fn.specializationArgument+'>';
+      if(!primary?.templateParameter||primary.qualifier!=='__device__')throw new CompileError('Declare a primary device helper template before its specialization.',fn.token,ast.source);
+      if(specializations.has(key))throw new CompileError('Duplicate device helper specialization.',fn.token,ast.source);
+      if(fn.params.length!==primary.params.length)throw new CompileError('Device helper specialization signature does not match its primary template.',fn.token,ast.source);
+      specializations.set(key,fn);continue;
+    }
     if(definitions.has(fn.name))throw new CompileError(`Duplicate function '${fn.name}'.`,fn.token,ast.source);
     definitions.set(fn.name,fn);
   }
@@ -439,15 +457,16 @@ function instantiateHelperTemplates(ast, kernel) {
         return;
       }
       if(definition.qualifier!=='__device__')fail('Device-side kernel launches are unsupported.',callee);
-      if(argument===undefined)fail('Device helper templates require one explicit template argument; deduction is unsupported.',callee);
+      if(argument===undefined)return; // Deduced after argument expression types are known to the emitter.
       const key=definition.name+'<'+argument+'>';
       let instance=instances.get(key);
       if(!instance){
         if(instances.size>=128)fail('At most 128 device helper template specializations are supported.',callee);
-        instance=structuredClone(definition);
-        const parameter=instance.templateParameter,placeholder='template:'+parameter;
+        const selected=specializations.get(key);
+        instance=structuredClone(selected||definition);
+        const parameter=definition.templateParameter,placeholder='template:'+parameter;
         let type;
-        if(instance.templateKind==='type'){
+        if(definition.templateKind==='type'){
           type=builtinType(argument);
           if(!type||type==='void')fail('Template type argument must be a supported built-in value type.',callee);
         }else if(!/^\d+$/.test(argument)||!Number.isSafeInteger(Number(argument))||Number(argument)>2147483647)fail('Template argument must be a nonnegative 32-bit signed integer.',callee);
@@ -460,9 +479,17 @@ function instantiateHelperTemplates(ast, kernel) {
           else if(n.kind==='id'&&n.name===parameter){n.kind='literal';n.value=argument;delete n.name;}
         });
         resolveTraitTypes(instance,ast,parameter,argument);
+        if(selected){
+          const expected={...definition,params:structuredClone(definition.params),body:{kind:'block',body:[]}};
+          if(expected.result===placeholder)expected.result=type;
+          for(const p of expected.params)if(p.type===placeholder)p.type=type;
+          resolveTraitTypes(expected,ast,parameter,argument);
+          if(instance.result!==expected.result||instance.params.some((p,i)=>p.type!==expected.params[i].type||p.pointer!==expected.params[i].pointer||p.reference!==expected.params[i].reference||(p.reference&&p.constant!==expected.params[i].constant)))fail('Device helper specialization signature does not match its primary template.',selected);
+          walk(instance.body,n=>{if([n.type,n.target].some(t=>typeof t==='string'&&t.startsWith('unsupported:')))fail('Double-precision value types are unsupported in selected helper specializations.',n);});
+        }
         let name='cw_specialized_'+instances.size;
         while(definitions.has(name))name+='_';
-        instance.name=name;instance.templateParameter=null;instance.templateKind=null;
+        instance.name=name;instance.templateParameter=null;instance.templateKind=null;delete instance.specializationArgument;
         instances.set(key,instance);definitions.set(name,instance);clones.push(instance);
       }
       process(instance);
@@ -471,8 +498,25 @@ function instantiateHelperTemplates(ast, kernel) {
     visiting.delete(fn);done.add(fn);
   }
   process(kernel);
-  for(const fn of ast.functions)if(fn.qualifier==='__device__'&&!fn.templateParameter)process(fn);
-  ast.functions=ast.functions.filter(fn=>fn.qualifier!=='__device__'||!fn.templateParameter).concat(clones);
+  for(const fn of ast.functions)if(fn.qualifier==='__device__'&&!fn.templateParameter&&fn.specializationArgument===undefined)process(fn);
+  ast.functions=ast.functions.filter(fn=>fn.qualifier!=='__device__'||(!fn.templateParameter&&fn.specializationArgument===undefined)).concat(clones);
+  return {deduce(name,types,callee){
+    const definition=definitions.get(name);
+    if(!definition?.templateParameter)return null;
+    if(definition.qualifier!=='__device__')fail('Device-side kernel launches are unsupported.',callee);
+    if(definition.templateKind!=='type')fail('Integer helper templates require an explicit template argument.',callee);
+    if(types.length!==definition.params.length)fail(`Wrong number of arguments for '${name}'.`,callee);
+    const matches=definition.params.flatMap((p,i)=>p.type==='template:'+definition.templateParameter&&!p.pointer?[types[i]]:[]);
+    if(!matches.length)fail('Cannot deduce helper template type from these parameters; supply an explicit argument.',callee);
+    const type=matches[0];
+    if(matches.some(t=>typeName(t)!==typeName(type)))fail('Conflicting deduced helper template argument types.',callee);
+    const names=['float','int','uint','bool',...['float','int','uint'].flatMap(p=>[2,3,4].map(n=>p+n))],argument=names.find(n=>builtinType(n)===type);
+    if(!argument)fail('Deduced helper template argument must be a supported built-in value type.',callee);
+    const call={kind:'call',token:callee.token,callee:{...callee,templateArgument:argument},args:[]};
+    process({kind:'function',name:'deduction',token:callee.token,result:'void',params:[],body:{kind:'block',body:[call]}});
+    for(const fn of clones)if(!ast.functions.includes(fn))ast.functions.push(fn);
+    return definitions.get(call.callee.name);
+  }};
 }
 export function compile(source, options = {}) {
   const ast = parse(source, options), kernels = ast.functions.filter(f => f.qualifier === '__global__');
@@ -493,8 +537,8 @@ export function compile(source, options = {}) {
   }
   if(specialization)walk(kernel.body,n=>{if(n.templateArgument===kernel.templateParameter)n.templateArgument=specialization[2];});
   resolveTraitTypes(kernel,ast,kernel.templateParameter,specialization?.[2]);
-  instantiateHelperTemplates(ast,kernel);
-  const result=new Emitter(ast, kernel, options).emit();if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};return result;
+  const templates=instantiateHelperTemplates(ast,kernel);
+  const result=new Emitter(ast, kernel, options,templates).emit();if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};return result;
 }
 export function serializableArtifact(compiled) {
   return {version: compiled.version, name: compiled.name, entryPoint: compiled.entryPoint, wgsl: compiled.wgsl, metadata: compiled.metadata};

@@ -35,15 +35,15 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
       }finally{plan?.dispose();runtime.destroyBuffer(input);}
     }
   });
-  await run('Explicit device helper templates: nested types, integer arguments, references and vectors',async()=>{
-    const source=await (await fetch('/tests/helper-templates.cu')).text();
+  await run('Device helper templates: deduction, specialization, nested types, references and vectors',async()=>{
+    const source=await (await fetch('/tests/nbody-rsqrt.cuh')).text()+'\n'+await (await fetch('/tests/helper-templates.cu')).text();
     const kernel=await runtime.kernel(source,{workgroupSize:[128,1,1]});
     for(const n of [1,129,1025]){
       const out=runtime.createBuffer(new Float32Array(n*4+16).fill(-12345)),bits=runtime.createBuffer(new Uint32Array(n+16).fill(0xdeadbeef));
       try{
         runtime.batch().dispatch(kernel.bind({out,bits},{n}),[Math.ceil(n/128)]).submit();
         const values=await runtime.read(out),integers=await runtime.read(bits,Uint32Array);
-        for(let i=0;i<n;i++){const x=(i%13-6)*0.25,expected=[x*x+x,x*3,2,x+1],v=(0x80000000+i)>>>0;
+        for(let i=0;i<n;i++){const x=(i%13-6)*0.25,expected=[x*x+x,x*3,2,x+1.5],v=(0x80000000+i)>>>0;
           for(let j=0;j<4;j++)if(values[i*4+j]!==expected[j])throw Error('Template float mismatch at '+i);
           if(integers[i]!==((Math.imul(v,v)+v)>>>0))throw Error('Template unsigned mismatch at '+i);
         }

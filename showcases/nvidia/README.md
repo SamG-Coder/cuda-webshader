@@ -256,12 +256,16 @@ be powers of two and the launch must contain exactly one thread per pair.
 Reports: `reports/nvidia-bitonic.json` and `reports/nvidia-bitonic-native.txt`.
 Build `bitonic-native.cu` with the native flags above.
 
-N-body compiler groundwork: explicit single-argument device helper templates are
+N-body compiler groundwork: single-argument device helper templates are
 supported for built-in types and nonnegative 32-bit integers. Nested helpers and
 arguments forwarded from kernel templates are supported, with at most 128
 specializations. Helpers must be declared before explicit template calls. Type
-deduction and explicit function specialization declarations remain unsupported,
-as do constant globals and shared-memory helper access. The dependent vector
+deduction is supported for direct scalar/vector template parameters, including
+references with the existing restrictions. Conflicting deductions are rejected;
+integer arguments and non-deduced trait contexts still need explicit arguments
+unless another parameter determines the type. Explicit device-function
+specializations are selected for the deduced or supplied argument. Constant
+globals and shared-memory helper access remain unsupported. The dependent vector
 traits now resolve through typedef-only template structs and explicit type
 specializations; unsupported value types still fail if selected.
 This does not add N-body to the verified catalog. The feature regression fixture
@@ -277,3 +281,9 @@ for 1, 129 and 1,025 records are recorded in `reports/type-traits-native.txt`, a
 the same fixture runs in the hardware WebGPU suite. Reproduce native checks with
 `tests/type-traits-native.cu` using the NVCC flags above. Type traits support one
 type argument and typedef value members, not runtime struct fields or methods.
+
+The original N-body `rsqrt_T` primary template and float/double specializations
+are preserved in `tests/nbody-rsqrt.cuh`. The helper regression fixture calls it
+with a float argument and verifies the float specialization in native CUDA and
+hardware WebGPU. Unused double specialization declarations can be parsed without
+enabling double-precision execution; selected unsupported value types still fail.
