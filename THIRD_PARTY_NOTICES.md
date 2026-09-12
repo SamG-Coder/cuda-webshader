@@ -237,8 +237,10 @@ The assembled `showcases/pathtracer/kernel.cu` and the native/WebGPU pathtracer-
 
 The quadtree showcase and `tests/quadtree-cdp-device.cuh` retain NVIDIA's original Points, Bounding_box, Quadtree_node and Parameters device classes and recursive kernel from cuda-samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`, `cpp/3_CUDA_Features/cdpQuadtree/cdpQuadtree.cu`, under its retained BSD-3-Clause notice. Native input coordinates derive from the sample's original random initializer. The separately labelled setup helper, buffer packing, browser pipeline, scheduler and spatial preview are MIT project code.
 
-## Project Chrono neighbour kernels
+## Project Chrono kernels and type declarations
 
+`tests/chrono-enums.cu` retains the original scoped enum declarations from
+`src/chrono_fsi/sph/ChFsiDefinitionsSPH.h` at the same revision.
 `tests/chrono-neighbors.cu` contains unchanged kernels extracted from
 `src/chrono_fsi/sph/physics/SphCollisionSystem.cu` at Project Chrono commit
 `a92c6f72f422fbcafe0b37125d4070cb6a3b5803`. Their BSD license is retained below;

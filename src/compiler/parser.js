@@ -1,3 +1,4 @@
+import {parseScopedEnum} from './scoped-enums.js';
 import {CURAND_XORWOW_SOURCE} from './curand-xorwow.js';
 /** A deliberately bounded CUDA C frontend. No eval, regex transpilation, or source-specific rewrites. */
 import {parseValueClass,finishValueClasses,parseExternalValueMethod} from './value-classes.js';
@@ -100,7 +101,7 @@ export function tokenize(source, defines = {}) {
 }
 const PRECEDENCE = {'=': 1, '+=': 1, '-=': 1, '*=': 1, '/=': 1, '%=': 1, '&=': 1, '|=': 1, '^=': 1, '<<=': 1, '>>=': 1, '||': 3, '&&': 4, '|': 5, '^': 6, '&': 7, '==': 8, '!=': 8, '<': 9, '>': 9, '<=': 9, '>=': 9, '<<': 10, '>>': 10, '+': 11, '-': 11, '*': 12, '/': 12, '%': 12};
 export class Parser {
-  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); this.functionNames=new Set(['tex3D','tex1D','tex1Dfetch','tex2D','tex2Dgather','tex2DLayered','texCubemap']); this.staticTemplates=new Map();this.staticFunctions=[];this.staticCache=new Map();this.staticResolving=new Set();this.typeAliases=new Map();this.typeTraits=new Map();this.structs=new Map(); this.sharedWrappers=new Map();this.expandedMacroNodes=0; }
+  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); this.functionNames=new Set(['tex3D','tex1D','tex1Dfetch','tex2D','tex2Dgather','tex2DLayered','texCubemap']); this.staticTemplates=new Map();this.staticFunctions=[];this.staticCache=new Map();this.staticResolving=new Set();this.typeAliases=new Map();this.enumTypes=new Map();this.enumValues=new Map();this.typeTraits=new Map();this.structs=new Map(); this.sharedWrappers=new Map();this.expandedMacroNodes=0; }
   peek(offset = 0) { return this.tokens[this.i + offset] || this.tokens.at(-1); }
   is(value) { return this.peek().value === value; }
   take(value) { if (value && !this.is(value)) this.fail(`Expected '${value}', found '${this.peek().value}'.`); return this.tokens[this.i++]; }
@@ -110,6 +111,7 @@ export class Parser {
   qualifiedName() {
     const token=this.peek(),name=this.name();
     if(!this.match('::'))return name;
+    if(this.enumTypes.has(name)){const qualified=name+'::'+this.name();if(!this.enumValues.has(qualified))this.fail('Unknown scoped enum member.',token);return qualified;}
     if(!this.groupNamespaces.has(name))this.fail(`Unsupported namespace '${name}'. Only cooperative_groups namespace aliases are supported.`,token);
     return 'cooperative_groups::'+this.name();
   }
@@ -175,6 +177,7 @@ export class Parser {
     const functions = [],constantGlobals=[],sharedGlobals=[],deviceGlobals=[];
     while (this.peek().kind !== 'eof') {
       const token = this.peek();
+      if(this.is('enum')){parseScopedEnum(this);continue;}
       if(this.match('static')&&!['__constant__','__global__','__device__'].includes(this.peek().value))this.fail('Static module declarations require CUDA constant storage or a device function.',token);
       let templateParameter=null,templateKind=null,templateParameters=[];this.templateTypeNames=new Set();this.templateParameterName=null;this.deferUnsupportedTypes=false;
       if(this.is('class')&&this.peek(2).value===';'){this.take();const name=this.name();this.take(';');if(builtinType(name)||this.typeAliases.has(name)||this.typeTraits.has(name)||this.structs.size>=64)this.fail('Invalid or excessive forward class declaration.',token);if(!this.structs.has(name))this.structs.set(name,{name,type:'cw_struct_'+name,fields:[],methods:[],forward:true});continue;}
@@ -186,7 +189,7 @@ export class Parser {
       }
       if(this.is('typedef')&&this.peek(1).value==='struct'||this.is('struct')&&this.peek(2).value==='{'){
         const alias=this.match('typedef');this.take('struct');let name=this.is('{')?null:this.name();this.take('{');const fields=[];
-        while(!this.is('}')){const fieldToken=this.peek(),spec=this.type(),fieldName=this.name(),dimensions=[];if(spec.pointer){if(!['f32','i32','u32','vec2<f32>','vec3<f32>','vec4<f32>'].includes(spec.type))this.fail('Pointer fields require 32-bit scalar or float-vector elements.',fieldToken);spec.pointerElement=spec.type;spec.type='cw_deviceptr_'+spec.type.replace(/[<>]/g,'_');(this.devicePointerTypes??=new Set()).add(spec.type);}if(spec.reference||spec.shared||spec.external||spec.constant||(['void','texture3d','surface2d','thread-block','cw_extent','cw_size64'].includes(spec.type)))this.fail('Struct fields require plain scalar/vector value types.',fieldToken);while(this.match('[')){dimensions.push(this.expression(2));this.take(']');}this.take(';');if(dimensions.length>1||fields.length>=64)this.fail('Structs support at most 64 fields and one-dimensional field arrays.',fieldToken);if(fields.some(f=>f.name===fieldName))this.fail('Duplicate struct field.',fieldToken);if(spec.pointer&&dimensions.length)this.fail('Arrays of pointer fields are unsupported.',fieldToken);fields.push({name:fieldName,type:spec.type,...(spec.pointer?{pointerElement:spec.pointerElement}:{}),dimensions,token:fieldToken});}
+        while(!this.is('}')){const fieldToken=this.peek(),spec=this.type(),fieldName=this.name(),dimensions=[];if(spec.pointer){if(!['f32','i32','u32','vec2<f32>','vec3<f32>','vec4<f32>'].includes(spec.type))this.fail('Pointer fields require 32-bit scalar or float-vector elements.',fieldToken);spec.pointerElement=spec.type;spec.type='cw_deviceptr_'+spec.type.replace(/[<>]/g,'_');(this.devicePointerTypes??=new Set()).add(spec.type);}if(spec.reference||spec.shared||spec.external||spec.constant||(['void','texture3d','surface2d','thread-block','cw_extent','cw_size64'].includes(spec.type)))this.fail('Struct fields require plain scalar/vector value types.',fieldToken);while(this.match('[')){dimensions.push(this.expression(2));this.take(']');}this.take(';');if(dimensions.length>1||fields.length>=256)this.fail('Structs support at most 256 fields and one-dimensional field arrays.',fieldToken);if(fields.some(f=>f.name===fieldName))this.fail('Duplicate struct field.',fieldToken);if(spec.pointer&&dimensions.length)this.fail('Arrays of pointer fields are unsupported.',fieldToken);fields.push({name:fieldName,type:spec.type,...(spec.pointer?{pointerElement:spec.pointerElement}:{}),dimensions,token:fieldToken});}
         this.take('}');if(alias){const aliasName=this.name();if(name&&name!==aliasName)this.fail('Distinct struct tag/typedef aliases are unsupported.',token);name=aliasName;}this.take(';');if(!name||!fields.length||this.structs.has(name)||this.typeAliases.has(name)||TYPES.has(name)||this.typeTraits.has(name))this.fail('Structs require a distinct name and at least one field.',token);if(this.structs.size>=64)this.fail('At most 64 plain structs are supported.',token);this.structs.set(name,{name,type:'cw_struct_'+name,fields,token,complete:true});continue;
       }
       if(this.is('typedef')&&this.peek(1).value!=='struct'){
@@ -419,7 +422,7 @@ export class Parser {
     else if(this.zipTuple&&token.value==='cuda'){
       this.take('cuda');this.take('::');this.take('std');this.take('::');this.take('get');this.take('<');const element=this.take();if(!['0','1','2','3'].includes(element.value))this.fail('Zip functors support up to four typed tuple elements.',element);this.take('>');this.take('(');this.take(this.zipTuple);this.take(')');value={kind:'index',token,zipElement:Number(element.value),base:{kind:'id',token,name:'tuple'+element.value},index:{kind:'id',token,name:'cw_zip_index'}};
     }
-    else if (token.kind === 'word') { const name=this.qualifiedName();if(this.zipTuple&&['tuple0','tuple1','tuple2','tuple3','count','cw_zip_index'].includes(name))this.fail('Zip functor name conflicts with generated launch storage.',token);if(this.staticMemberNames?.has(name))this.fail('Unqualified static member references require explicit template qualification.',token);value = {kind: 'id', token, name}; }
+    else if (token.kind === 'word') { const name=this.qualifiedName();if(this.zipTuple&&['tuple0','tuple1','tuple2','tuple3','count','cw_zip_index'].includes(name))this.fail('Zip functor name conflicts with generated launch storage.',token);if(this.staticMemberNames?.has(name))this.fail('Unqualified static member references require explicit template qualification.',token);value = this.enumValues.has(name)?{kind:'literal',token,value:this.enumValues.get(name).value}:{kind: 'id', token, name}; }
     else this.fail('Expected an expression.', token);
     while (true) {
       if(value.kind==='id'&&this.staticTemplates.has(value.name)&&this.is('<')){const argument=this.templateArgument();this.take('::');const method=this.name();if(!this.is('('))this.fail('Static data member access is unsupported.',token);value={...value,name:this.staticMethod(value.name,argument,method,token)};}

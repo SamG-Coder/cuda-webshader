@@ -65,9 +65,38 @@ The GPU suite includes the native-reference comparison.
 
 ## Remaining for the water showcase
 
-Handle Chrono's namespaced types and constant parameter structures, compile the
+Handle Chrono's namespaces and the double field in its constant parameter structure, compile the
 actual position hashing and neighbour-list kernels, connect sort/scan stages,
 then add ADAMI boundary forces, WCSPH pressure/viscosity and RK2 integration.
 Compare intermediate buffers and evolved particle states against native CUDA.
 Only then wire the full solver to a sandbox preview and add its showcase card.
 The native CSV sequence must not stand in for browser computation.
+
+## Scoped enum and constant-record support
+
+All 16 scoped enums (52 values) are extracted unchanged into
+`tests/chrono-enums.cu`. The compiler supports 32-bit signed or unsigned scoped
+enums, qualified members and bounded integer constant expressions. Unsigned
+expression arithmetic retains its wraparound and logical-shift semantics.
+Boolean fields in constant records are represented by validated u32 uniforms
+and converted to WGSL booleans. Plain record declarations now allow up to 256
+fields; constant aggregates retain their separate component limit.
+
+The original enum values and all four combinations of two boolean parameters
+match native CUDA exactly. A separate 121-field constant-record GPU probe
+checks first/last field access and boolean branch selection. There are 218
+comparisons in this stage (216 native-backed enum/flag values and two large-record
+checks). The full local suite passes 688 unit tests and 226 NVIDIA GPU tests.
+
+The complete `ChFsiParamsSPH` is not yet accepted: it includes a host initialization
+`double pressure_height` field even in single-precision builds, and its headers
+use namespaces. Those declarations have not been replaced with float fields or
+removed from the original solver. The position-hashing stage still needs that
+type support before it can run.
+
+Native enum reference regeneration, from the Visual Studio developer shell:
+
+```text
+nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-enums-native.cu -o .local/chrono-enums-native.exe
+.local/chrono-enums-native.exe > reports/chrono-enums-native.json
+```
