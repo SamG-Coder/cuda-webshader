@@ -79,10 +79,34 @@ See reports/fluids-pitched-check.json and reports/fluids-pitched-native.txt.
 Validation: 545 unit tests, 167 real NVIDIA GPU checks, compilation and static
 build passed. No original CUDA function body was changed.
 
-The remaining host pipeline requires forward real-to-complex and inverse
-complex-to-real FFT layouts, float2 buffer-to-texture updates, repeated velocity
-feedback and particle rendering/interaction. Current FFT support only provides
-a complex inverse transform.
+## Real FFT support
 
-No fluids showcase card has been added. Multi-step solver error accumulation
-and a native/WebGPU performance comparison have not yet been established.
+The runtime now has forward and inverse complex FFTs and realFFT2D for R2C/C2R
+transforms. Real row strides are explicit; packed spectra contain
+height * (floor(width/2) + 1) float2 records. Inverse transforms are unnormalized,
+as required by the original updateVelocity_k scaling. Runtime transforms support
+in-place buffers; sandbox realFFT steps use typed real and complex buffers.
+The dimensions are bounded powers of two from 1 through 1024.
+
+Native cuFFT comparisons pass for 1x1, 2x4, 8x4, 64x32 and the original 512x512
+fluid grid. Small cases also pass an independent DFT comparison. At 512x512,
+forward maximum absolute error is 0.000518799 with relative L2 error 4.374e-7.
+Normalized inverse error is 9.537e-7 and normalized GPU round-trip error is
+1.669e-6. Row padding and trailing guards remain unchanged where specified.
+
+The sandbox pipeline runs a forward/inverse pair without CPU readback and
+exposes all six FFT/layout helper entries to the CUDA/WGSL comparison.
+These MIT helpers replace the cuFFT host library calls; original NVIDIA
+kernels are unchanged. No cuFFT performance equivalence is claimed.
+
+See reports/real-fft-check.json and reports/real-fft-native.txt.
+Validation: 547 unit tests, 168 real NVIDIA GPU checks, compilation and static
+build passed. No software GPU tests ran.
+
+## Remaining work
+
+The solver still needs float2 buffer-to-texture updates and integration of
+the original kernels with the new FFT steps, then repeated velocity feedback
+and particle rendering/interaction. Multi-step solver error accumulation and a
+native/WebGPU performance comparison have not yet been established.
+No fluids showcase card has been added.

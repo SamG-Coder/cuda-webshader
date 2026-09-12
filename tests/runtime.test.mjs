@@ -79,3 +79,9 @@ test('Float2 textures upload two components and reject mismatched bindings or st
  const kernel=await runtime.kernel('__global__ void k(cudaTextureObject_t tex,float2*out){out[0]=tex2D<float2>(tex,0.5f,0.5f);}'),out=runtime.createBuffer(new Float32Array(2));
  kernel.bind({tex:texture,out});const wrong=runtime.createTexture2D(new Float32Array(128),{width:8,height:4,format:'rgba32float'});assert.throws(()=>kernel.bind({tex:wrong,out}),/rg32float|format|texture/i);runtime.dispose();
 });
+
+test('Real FFT host validation rejects bad layouts before creating scratch storage',async()=>{
+ const {runtime}=setup(),a=runtime.createBuffer(1024),b=runtime.createBuffer(1024);
+ for(const options of [{width:3,height:4},{width:8,height:4,realStride:7},{width:8,height:4,inverse:1},{width:512,height:512},{width:1024,height:2},{width:8,height:4,realStride:1.5}])await assert.rejects(runtime.realFFT2D(a,b,options));
+ runtime.dispose();
+});

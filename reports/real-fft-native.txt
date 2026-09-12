@@ -1,0 +1,5 @@
+Captured cuFFT in-place R2C and unnormalized C2R: 1x1, real stride 2.
+Captured cuFFT in-place R2C and unnormalized C2R: 2x4, real stride 4.
+Captured cuFFT in-place R2C and unnormalized C2R: 8x4, real stride 10.
+Captured cuFFT in-place R2C and unnormalized C2R: 64x32, real stride 66.
+Captured cuFFT in-place R2C and unnormalized C2R: 512x512, real stride 514.

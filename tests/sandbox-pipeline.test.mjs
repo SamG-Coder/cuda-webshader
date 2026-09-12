@@ -53,3 +53,12 @@ test('Smoke previews require bounded typed buffers and explicit sorting steps',(
   const plan=preset();change(plan);assert.throws(()=>validatePipeline(plan),/Smoke preview/);
  }
 });
+
+test('Real FFT pipeline validates padded real rows and packed complex spectra',()=>{
+ const preset=()=>({buffers:{real:{type:'f32',records:40,fill:'zero'},frequency:{type:'vec2<f32>',records:20,fill:'zero'}},steps:[{realFFT:{source:'real',target:'frequency',width:8,height:4,realStride:10}}],preview:{kind:'image',format:'gray-f32',buffer:'real',width:8,height:4}});
+ assert.ok(validatePipeline(preset())>0);
+ for(const change of [p=>p.steps[0].realFFT.width=7,p=>p.steps[0].realFFT.inverse=true,p=>p.steps[0].realFFT.realStride=7,p=>p.steps[0].realFFT.realStride=null,p=>p.buffers.real.records=39,p=>p.buffers.frequency.records=19,p=>p.buffers.frequency.type='f32']){
+  const p=preset();change(p);assert.throws(()=>validatePipeline(p),/Real FFT/);
+ }
+ const p=preset();Object.assign(p.steps[0].realFFT,{source:'frequency',target:'real',inverse:true});assert.ok(validatePipeline(p)>0);
+});

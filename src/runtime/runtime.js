@@ -1,5 +1,5 @@
 import {SORT_SOURCE,SORT_FLOAT_SOURCE} from './sort-kernels.js';
-import {FFT_SOURCE} from './fft-kernels.js';
+import {FFT_SOURCE,FORWARD_FFT_SOURCE,REAL_FFT_SOURCE} from './fft-kernels.js';
 import {SCAN_SOURCE} from './scan-kernels.js';
 /** WebGPU runtime: cached pipelines/bindings, batched dispatch and a per-batch uniform snapshot arena. */
 import {compile} from '../compiler/compiler.js';
@@ -170,13 +170,29 @@ export class GpuRuntime {
     try{const groups=[Math.ceil(padded/128),1,1];batch.dispatch(prepare.bind({keys,values,pairs,order},{count,padded}),groups);for(let size=2;size<=padded;size*=2)for(let stride=size/2;stride>=1;stride/=2)batch.dispatch(stage.bind({pairs,order},{count:padded,size,stride}),groups);batch.dispatch(finish.bind({pairs,keys,values},{count}),[Math.ceil(count/128),1,1]);batch.submit();await this.idle();}
     finally{if(!batch.ended)batch.discard();this.destroyBuffer(pairs);this.destroyBuffer(order);}
   }
-  async inverseFFT2D(input,output,{width,height}={}) {
+  async inverseFFT2D(input,output,{width,height}={}) {return this.complexFFT2D(input,output,{width,height,inverse:true});}
+  async complexFFT2D(input,output,{width,height,inverse=false}={}) {
     this.assertAlive();for(const r of [input,output]){this.checkResource(r);if(!r.gpuBuffer)throw Error('Inverse FFT requires storage buffers.');}
     const valid=n=>Number.isInteger(n)&&n>=1&&n<=1024&&(n&(n-1))===0;
     if(!valid(width)||!valid(height)||width*height*8>input.byteLength||width*height*8>output.byteLength)throw new RangeError('Inverse FFT needs power-of-two dimensions up to 1024 and complete float2 buffers.');
-    const rows=await this.kernel(FFT_SOURCE,{entry:'inverseFftAxis',workgroupSize:[width,1,1]}),columns=await this.kernel(FFT_SOURCE,{entry:'inverseFftAxis',workgroupSize:[height,1,1]}),scratch=this.createBuffer(width*height*8),batch=this.batch({label:'inverse complex 2D FFT'});
+    if(typeof inverse!=='boolean')throw Error('FFT inverse must be boolean.');const source=inverse?FFT_SOURCE:FORWARD_FFT_SOURCE,entry=inverse?'inverseFftAxis':'forwardFftAxis';
+    const rows=await this.kernel(source,{entry,workgroupSize:[width,1,1]}),columns=await this.kernel(source,{entry,workgroupSize:[height,1,1]}),scratch=this.createBuffer(width*height*8),batch=this.batch({label:(inverse?'inverse':'forward')+' complex 2D FFT'});
     try{batch.dispatch(rows.bind({input,output:scratch},{width,height,axis:0}),[height,1,1]);batch.dispatch(columns.bind({input:scratch,output},{width,height,axis:1}),[width,1,1]);batch.submit();await this.idle();}
     finally{if(!batch.ended)batch.discard();this.destroyBuffer(scratch);}
+  }
+  async realFFT2D(input,output,{width,height,inverse=false,realStride=width}={}) {
+    this.assertAlive();for(const r of [input,output]){this.checkResource(r);if(!r.gpuBuffer)throw Error('Real FFT requires storage buffers.');}
+    const valid=n=>Number.isInteger(n)&&n>=1&&n<=1024&&(n&(n-1))===0;
+    if(!valid(width)||!valid(height)||typeof inverse!=='boolean'||!Number.isInteger(realStride)||realStride<width||realStride>65536)throw Error('Real FFT needs power-of-two dimensions up to 1024 and a valid real row stride.');
+    const packed=Math.floor(width/2)+1,realBytes=realStride*height*4,complexBytes=packed*height*8;
+    if(input.byteLength<(inverse?complexBytes:realBytes)||output.byteLength<(inverse?realBytes:complexBytes))throw Error('Real FFT buffers are too small for their row layouts.');
+    const prepare=await this.kernel(REAL_FFT_SOURCE,{entry:inverse?'unpackSpectrum':'realToComplex',workgroupSize:[128,1,1]}),finish=await this.kernel(REAL_FFT_SOURCE,{entry:inverse?'complexToReal':'packSpectrum',workgroupSize:[128,1,1]}),a=this.createBuffer(width*height*8),b=this.createBuffer(width*height*8);
+    try {
+      const scalars={width,height,...(inverse?{}:{stride:realStride})};
+      this.batch().dispatch(prepare.bind({input,output:a},scalars),[Math.ceil(width*height/128),1,1]).submit();
+      await this.complexFFT2D(a,b,{width,height,inverse});
+      this.batch().dispatch(finish.bind({input:b,output},{width,height,...(inverse?{stride:realStride}:{})}),[Math.ceil((inverse?width:packed)*height/128),1,1]).submit();await this.idle();
+    }finally{this.destroyBuffer(a);this.destroyBuffer(b);}
   }
   async exclusiveScan(input,output,{count,total}={}) {
     this.assertAlive();for(const resource of [input,output,...(total?[total]:[])]){this.checkResource(resource);if(!resource.gpuBuffer)throw Error('Exclusive scan requires storage buffers.');}
