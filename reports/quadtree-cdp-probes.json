@@ -5,7 +5,7 @@
   "results": [
     {
       "compiled": false,
-      "error": "Captured buffer has no registered resource. (65:94)\n    __host__ __device__ __forceinline__ float2 get_point(int idx) const { return make_float2(m_x[idx], m_y[idx]); }\r\n                                                                                             ^"
+      "error": "Array initializers are unsupported. Initialize elements explicitly. (300:5)\n    int    warp_cnts[4] = {0, 0, 0, 0};\r\n    ^"
     }
   ]
 }

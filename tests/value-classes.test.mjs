@@ -189,3 +189,5 @@ test('Original Parameters constructors initialize const fields and retain the pa
  for(const statement of ['root.max_depth=9;','root=child;','grandchild.min_points_per_node++;'])assert.throws(()=>compile(s.replace('out[i*6]=root.depth;',statement),{entry:'parameter_values'}),/const/);
  assert.throws(()=>compile(s.replace(', max_depth(max_depth)',''),{entry:'parameter_values'}),/initializer/);
 });
+
+test('Original quadtree storage references bind whole nodes and nested mutable methods',()=>{const s=readFileSync(new URL('quadtree-storage-references.cu',import.meta.url),'utf8'),options={valueBuffers:['nodes'],workgroupSize:[32]},a=compile(s,{...options,entry:'write_nodes'}),b=compile(s,{...options,entry:'read_nodes'});assert.equal(a.metadata.bindings.find(b=>b.name==='nodes').readOnly,false);assert.equal(b.metadata.bindings.find(b=>b.name==='nodes').readOnly,true);assert.throws(()=>compile(s.replace('Quadtree_node &node=nodes[i]','const Quadtree_node &node=nodes[i]'),{...options,entry:'write_nodes'}),/const|mutable/);});

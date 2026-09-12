@@ -190,3 +190,22 @@ the metadata stride rather than assuming the previous record width.
 The unchanged quadtree source reaches Points::get_point, which needs registered
 coordinate resources in the launch harness. Full storage references and recursive
 execution still remain; no quadtree showcase is published yet.
+
+## Storage record references and coordinate setup
+
+The probe now includes a separate setup kernel registering the four scalar
+coordinate buffers and constructing the two original Points records. NVIDIA's
+imported class and kernel bodies are unchanged. The compiler also resolves the
+logical CUDA warpSize constant (32), while preserving local shadowing.
+
+Mutable local references can bind writable storage records with a captured index.
+Reference helper specialization retains nested record paths, so the original
+Quadtree_node::set_bounding_box calls Bounding_box::set on the same stored node.
+Storage writes propagate to binding access analysis. Const restrictions remain
+in effect. Nested const field references retain their address after owner updates.
+
+The GPU test updates 32 original nodes, changes the local index after binding,
+checks 96 values, then checks the same values from a second dispatch. All 663
+unit and 217 real NVIDIA GPU tests pass, plus Bezier/path-tracer sandbox checks.
+The unchanged full source now stops at the local warp_cnts array initializer;
+full recursive execution remains required before publishing a quadtree showcase.

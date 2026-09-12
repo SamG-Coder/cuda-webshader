@@ -1,0 +1,30 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "result": {
+    "name": "Original quadtree storage references preserve node and nested field mutations",
+    "pass": true,
+    "nodes": 32,
+    "checkedValues": 192,
+    "indexCapturedOnce": true,
+    "nestedMutationPersisted": true,
+    "originalClassBodies": true,
+    "wallMs": 42.53499999642372
+  }
+}
