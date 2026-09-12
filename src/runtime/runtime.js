@@ -88,14 +88,14 @@ export class GpuRuntime {
     const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView({dimension:'2d-array'}),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode}),format:'r32float',dimension:'2d-array',width,height:width,depth:6,cubemap:true,filter,normalizedCoords:true};
     this.textures.add(resource);this.stats.dataBytesUploaded+=data.byteLength;return resource;
   }
-  createLayeredTexture2D(data,{width,height,layers,filter='linear',addressMode='clamp-to-edge',storage=false,label='CUDA float4 layered texture'}={}) {
-    this.assertAlive();
+  createLayeredTexture2D(data,{width,height,layers,filter='linear',addressMode='clamp-to-edge',storage=false,format='rgba32float',label='CUDA float4 layered texture'}={}) {
+    this.assertAlive();if(!['r32float','rgba32float'].includes(format))throw Error('Layered texture requires scalar or float4 format.');const components=format==='r32float'?1:4;
     if(![width,height].every(n=>Number.isInteger(n)&&n>0&&n<=this.device.limits.maxTextureDimension2D)||!Number.isInteger(layers)||layers<1||layers>this.device.limits.maxTextureArrayLayers)throw Error('Layered texture dimensions exceed device limits.');
-    if(!(data===null&&storage)&&(!(data instanceof Float32Array)||data.length!==width*height*layers*4||data.some(v=>!Number.isFinite(v))))throw Error('Layered texture requires matching finite float4 data.');
+    if(!(data===null&&storage)&&(!(data instanceof Float32Array)||data.length!==width*height*layers*components||data.some(v=>!Number.isFinite(v))))throw Error('Layered texture requires matching finite scalar or float4 data.');
     if(!this.device.features.has('float32-filterable')||!['linear','nearest'].includes(filter)||!['repeat','clamp-to-edge','mirror-repeat'].includes(addressMode))throw Error('Unsupported layered texture sampling settings.');
-    const gpuTexture=this.device.createTexture({label,size:[width,height,layers],dimension:'2d',format:'rgba32float',usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST|GPUTextureUsage.COPY_SRC|(storage?GPUTextureUsage.STORAGE_BINDING:0)});
-    if(data)this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width*16,rowsPerImage:height},[width,height,layers]);
-    const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView({dimension:'2d-array'}),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode}),format:'rgba32float',dimension:'2d-array',width,height,depth:layers,storage,normalizedCoords:true,filter};
+    const gpuTexture=this.device.createTexture({label,size:[width,height,layers],dimension:'2d',format,usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST|GPUTextureUsage.COPY_SRC|(storage?GPUTextureUsage.STORAGE_BINDING:0)});
+    if(data)this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width*components*4,rowsPerImage:height},[width,height,layers]);
+    const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView({dimension:'2d-array'}),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode}),format,dimension:'2d-array',width,height,depth:layers,storage,normalizedCoords:true,filter};
     this.textures.add(resource);this.stats.dataBytesUploaded+=data?.byteLength||0;return resource;
   }
   createByteTexture2D(data,{width,height,label='CUDA byte element texture'}={}) {

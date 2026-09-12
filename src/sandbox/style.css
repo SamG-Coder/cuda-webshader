@@ -7,3 +7,5 @@
 .image-output{display:grid;place-items:center;min-height:100%;padding:24px}.image-output canvas{width:100%;height:auto;image-rendering:pixelated;box-shadow:0 0 0 1px #314657}
 
 .surface-slice{display:flex;align-items:center;gap:1rem;padding:1rem;color:#a2f5d3}.surface-slice input{flex:1;min-width:60px}.surface-slice span{white-space:nowrap}
+
+.image-panels{width:100%}.image-panel-labels{display:grid;margin-bottom:8px;font-size:11px;color:#9ebdcb;text-align:center}.image-panel-labels span+span{border-left:1px solid #314657}

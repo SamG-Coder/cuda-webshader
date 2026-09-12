@@ -1,0 +1,160 @@
+{
+  "pipeline": {
+    "buffers": {
+      "g_odata": {
+        "type": "f32",
+        "records": 1310720,
+        "fill": "zero"
+      },
+      "image": {
+        "type": "f32",
+        "records": 1310720,
+        "fill": "zero"
+      }
+    },
+    "textures": {
+      "tex": {
+        "kind": "layered-f32",
+        "dimensions": [
+          512,
+          512,
+          5
+        ],
+        "source": "reports/layered-input.bin",
+        "filter": "linear",
+        "addressMode": "repeat"
+      }
+    },
+    "steps": [
+      {
+        "entry": "transformKernel",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          64,
+          64,
+          1
+        ],
+        "scalars": {
+          "width": 512,
+          "height": 512,
+          "layer": 0
+        }
+      },
+      {
+        "entry": "transformKernel",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          64,
+          64,
+          1
+        ],
+        "scalars": {
+          "width": 512,
+          "height": 512,
+          "layer": 1
+        }
+      },
+      {
+        "entry": "transformKernel",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          64,
+          64,
+          1
+        ],
+        "scalars": {
+          "width": 512,
+          "height": 512,
+          "layer": 2
+        }
+      },
+      {
+        "entry": "transformKernel",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          64,
+          64,
+          1
+        ],
+        "scalars": {
+          "width": 512,
+          "height": 512,
+          "layer": 3
+        }
+      },
+      {
+        "entry": "transformKernel",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          64,
+          64,
+          1
+        ],
+        "scalars": {
+          "width": 512,
+          "height": 512,
+          "layer": 4
+        }
+      },
+      {
+        "entry": "arrangeLayers",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          320,
+          64,
+          1
+        ],
+        "bindings": {
+          "input": "g_odata",
+          "image": "image"
+        },
+        "scalars": {
+          "width": 512,
+          "height": 512
+        }
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "image",
+      "width": 2560,
+      "height": 512,
+      "format": "gray-f32",
+      "range": [
+        -262143,
+        4
+      ],
+      "panelLabels": [
+        "Layer 0",
+        "Layer 1",
+        "Layer 2",
+        "Layer 3",
+        "Layer 4"
+      ]
+    }
+  }
+}

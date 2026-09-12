@@ -1,0 +1,19 @@
+{
+  "revision": "5443602d89ed99aede2e4b7bf329daddeadb320e",
+  "width": 512,
+  "height": 512,
+  "layers": 5,
+  "values": 1310720,
+  "files": {
+    "input": {
+      "file": "layered-input.bin",
+      "bytes": 5242880,
+      "sha256": "b759abf652254f770a9efb7f95412454090eab8ee39f1d553f3a00f43ed6c615"
+    },
+    "native": {
+      "file": "layered-native.bin",
+      "bytes": 5242880,
+      "sha256": "ccd915d3b315538d8681e47216799391fd97bfff8e2011a1ea4f60a0daffebf2"
+    }
+  }
+}

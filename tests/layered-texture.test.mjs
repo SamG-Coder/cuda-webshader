@@ -10,7 +10,7 @@ test('Layered float4 sample format propagates through helpers and rejects mixed 
  const c=compile(s);assert.equal(c.metadata.textures[0].dimension,'2d-array');assert.match(c.wgsl,/texture_2d_array<f32>/);
  assert.throws(()=>compile(s.replace('out[0]=f(t,layer);','out[0]=f(t,layer)+tex1D<float4>(t,0);')),/cannot mix/);
  assert.throws(()=>compile(s.replace('0,1,l','0,1,0.5f')),/scalar coordinates/);
- assert.throws(()=>compile(s.replace('tex2DLayered<float4>','tex2DLayered<float>')),/requires a float4/);
+ assert.throws(()=>compile(s.replace('tex2DLayered<float4>','tex2DLayered<int>')),/requires a float/);
 });
 test('Kernel scalar defaults are represented in the launch ABI and can be overridden',()=>{
  const c=compile('__global__ void k(float* out,float value=0.25f,int n=3,bool enabled=true){out[0]=enabled?value*n:0.f;}',{workgroupSize:[1]});

@@ -442,10 +442,11 @@ class Emitter {
       return this.result(n,'f32',`textureSampleLevel(${texture.code}, ${texture.sampler}, ${uv} * 0.5f + vec2<f32>(0.5f), ${face}, 0.0f).x`,pre);
     }
     if(name==='tex2DLayered'){
-      if(n.callee.templateArgument!=='float4'||n.args.length!==4||n.args[0]?.kind!=='id')this.fail('tex2DLayered requires a float4 texture, two coordinates and an integer layer.',n);
+      const scalar=n.callee.templateArgument==='float';
+      if(!['float','float4'].includes(n.callee.templateArgument)||n.args.length!==4||n.args[0]?.kind!=='id')this.fail('tex2DLayered requires a float or float4 texture, two coordinates and an integer layer.',n);
       const texture=this.lookup(n.args[0].name,n.args[0]),x=this.expr(n.args[1]),y=this.expr(n.args[2]),layer=this.expr(n.args[3]);
-      if(texture.kind!=='texture'||texture.dimension!=='2d-array'||![x.type,y.type].every(numeric)||!['i32','u32'].includes(layer.type))this.fail('Layered sampling requires matching float4 layers and scalar coordinates.',n);
-      return this.result(n,'vec4<f32>',`textureSampleLevel(${texture.code}, ${texture.sampler}, vec2<f32>(${this.convert(x.code,x.type,'f32',n)}, ${this.convert(y.code,y.type,'f32',n)}), i32(${layer.code}), 0.0f)`,[...x.pre,...y.pre,...layer.pre]);
+      if(texture.kind!=='texture'||texture.dimension!=='2d-array'||texture.format!==(scalar?'r32float':'rgba32float')||![x.type,y.type].every(numeric)||!['i32','u32'].includes(layer.type))this.fail('Layered sampling requires matching float/float4 layers and scalar coordinates.',n);
+      return this.result(n,scalar?'f32':'vec4<f32>',`textureSampleLevel(${texture.code}, ${texture.sampler}, vec2<f32>(${this.convert(x.code,x.type,'f32',n)}, ${this.convert(y.code,y.type,'f32',n)}), i32(${layer.code}), 0.0f)${scalar?'.x':''}`,[...x.pre,...y.pre,...layer.pre]);
     }
     if(name==='surf2DLayeredwrite'){
       if(![5,6].includes(n.args.length)||n.args[1]?.kind!=='id'||n.args.length===6&&(n.args[5]?.kind!=='id'||n.args[5].name!=='cudaBoundaryModeTrap'))this.fail('Layered stores require float4, global XY byte coordinates and trap mode.',n);

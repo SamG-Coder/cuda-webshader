@@ -1,0 +1,14 @@
+import {chromium} from 'playwright';
+import {writeFile,readFile} from 'node:fs/promises';
+import {createStaticServer} from './serve.mjs';
+const server=createStaticServer(process.cwd()+'/dist');await new Promise(r=>server.listen(0,'127.0.0.1',r));
+const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+try{
+ const page=await browser.newPage({viewport:{width:1500,height:1100}});
+ await page.goto((process.env.CW_BASE_URL||`http://127.0.0.1:${server.address().port}`)+'/sandbox.html?example=layered');
+ await page.waitForFunction(()=>window.sandbox?.completedRuns||window.sandbox?.lastError,{},{timeout:60000});
+ const report=await page.evaluate(async()=>{const s=window.sandbox;if(s.lastError)throw Error(s.lastError);if(s.runtime.describe().vendor!=='nvidia')throw Error('Real NVIDIA required');const r=s.pipelineResult,actual=await s.runtime.read(r.buffers.g_odata),atlas=await s.runtime.read(r.buffers.image),expected=new Float32Array(await(await fetch('reports/layered-native.bin')).arrayBuffer());if(actual.length!==1310720)throw Error('Wrong layer size');for(let i=0;i<actual.length;i++)if(actual[i]!==expected[i])throw Error('Native layer mismatch '+i);const canvas=document.querySelector('#preview .image-output canvas');if(!canvas||canvas.width!==2560||canvas.height!==512)throw Error('Missing five-layer atlas');if(document.querySelectorAll('.image-panel-labels span').length!==5)throw Error('Missing layer labels');const pixels=canvas.getContext('2d').getImageData(0,0,2560,512).data;for(let y=0;y<512;y++)for(let x=0;x<2560;x++){const i=y*2560+x,layer=Math.floor(x/512),value=expected[layer*262144+y*512+x%512];if(atlas[i]!==value)throw Error('Atlas layer mismatch');const shade=Math.round(Math.max(0,Math.min(1,(value+262143)/262147))*255);for(let c=0;c<4;c++)if(pixels[i*4+c]!== (c===3?255:shade))throw Error('Preview pixel mismatch '+i);}return {passed:true,device:s.runtime.describe(),layers:5,width:512,height:512,values:1310720,nativeValuesExact:true,previewPixelsVerified:1310720,controlReadbackBytes:r.controlReadbackBytes,softwareAdapterRequested:false};});
+ if((await page.evaluate(()=>window.sandbox.editor.getValue())).replace(/\r\n/g,'\n')!==(await readFile('showcases/layered/kernel.cu','utf8')).replace(/\r\n/g,'\n'))throw Error('Source changed');
+ await page.locator('#tab-compare').click();const passes=await page.locator('#shader-pass option').allTextContents();if(passes.length!==2)throw Error('Missing shader comparison');
+ await page.screenshot({path:'reports/layered-sandbox.png'});await writeFile('reports/layered-sandbox-check.json',JSON.stringify({...report,passes,sourceUnchanged:true},null,2));console.log(JSON.stringify(report,null,2));
+}finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

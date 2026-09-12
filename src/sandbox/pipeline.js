@@ -34,7 +34,11 @@ export async function executePipeline({plan,source,defines,compiler,runtime,root
  }
  for(const [name,spec]of Object.entries(plan.buffers)){const data=spec.fill==='binary-u32'?new Uint32Array(await(await fetchLocal(spec.source)).arrayBuffer()):spec.fill==='binary-f32'?new Float32Array(await(await fetchLocal(spec.source)).arrayBuffer()):seedBuffer({elementType:spec.type,stride:strides[spec.type]},spec);if(spec.fill==='binary-u32'&&spec.type!=='u32'||data.byteLength!==spec.records*strides[spec.type]||spec.fill==='binary-f32'&&(!['f32','vec2<f32>','vec4<f32>'].includes(spec.type)||data.some(v=>!Number.isFinite(v))))throw Error('Binary float buffer data does not match its declaration.');const custom=allocateBuffer?.(name,spec,data);buffers[name]=custom||runtime.createBuffer(data);if(!custom)resources.push(buffers[name]);}
  let textureBytes=0;for(const [name,spec]of Object.entries(plan.textures||{})){if(buffers[name])throw Error('Duplicate resource '+name);let texture;
- if(spec.kind==='cubemap-f32'){
+ if(spec.kind==='layered-f32'){
+  if(!Array.isArray(spec.dimensions)||spec.dimensions.length!==3||spec.dimensions.some(n=>!Number.isInteger(n)||n<1||n>4096)||spec.storage||spec.normalizedCoords===false)throw Error('Scalar layered texture requires three bounded dimensions and normalized coordinates.');
+  const [width,height,layers]=spec.dimensions;textureBytes+=width*height*layers*4;if(textureBytes>64*1048576)throw Error('Pipeline textures exceed 64 MiB.');
+  const data=new Float32Array(await(await fetchLocal(spec.source)).arrayBuffer());texture=runtime.createLayeredTexture2D(data,{width,height,layers,format:'r32float',filter:spec.filter||'linear',addressMode:spec.addressMode||'clamp-to-edge'});
+ }else if(spec.kind==='cubemap-f32'){
   if(!Array.isArray(spec.dimensions)||spec.dimensions.length!==3||spec.dimensions[0]!==spec.dimensions[1]||spec.dimensions[2]!==6||spec.dimensions.some(n=>!Number.isInteger(n)||n<1||n>4096)||spec.storage||spec.normalizedCoords===false)throw Error('Cubemap requires six square float faces and normalized coordinates.');
   const width=spec.dimensions[0];textureBytes+=width*width*6*4;if(textureBytes>64*1048576)throw Error('Pipeline textures exceed 64 MiB.');
   const data=new Float32Array(await(await fetchLocal(spec.source)).arrayBuffer());texture=runtime.createCubemapTexture(data,{width,filter:spec.filter||'linear',addressMode:spec.addressMode||'clamp-to-edge',seamless:spec.seamless??false});
