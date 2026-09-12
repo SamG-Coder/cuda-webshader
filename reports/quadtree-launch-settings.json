@@ -1,0 +1,28 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "result": {
+    "name": "Queued children use CUDA launch shared-memory allocation",
+    "pass": true,
+    "checkedValues": 64,
+    "childBlocks": 2,
+    "sharedBytesPerBlock": 128,
+    "wallMs": 30.084999978542328
+  }
+}

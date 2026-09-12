@@ -962,6 +962,7 @@ class Emitter {
     this.checkRecursion();
     if (this.kernel.result !== 'void') this.fail('__global__ kernels must return void.', this.kernel);
     const textures=[],surfaces=[],bufferCount=this.kernel.params.filter(p=>p.pointer&&!Object.hasOwn(this.bufferAliases,p.name)&&!this.objectImports.some(i=>i.name===p.name)).length+this.deviceParams.length;
+    if(this.launchConsumer&&this.dynamicSharedBytes!==this.launchConsumer.sharedMemoryBytes)this.fail('Queue consumer shared bytes must match the original child launch.',this.kernel);
     if(this.launchConsumer&&this.workgroupSize.some((v,i)=>v!==this.launchConsumer.block[i]))this.fail('Queue consumer block size must match the original child launch.',this.kernel);
     const bindings = [], scalars = this.launchConsumer?[{name:'cw_launch_slot',type:'u32',offset:0}]:[], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
     for(const {type} of this.ast.bufferReferenceTypes||[])header.push(`alias ${type} = u32;`);
@@ -1271,7 +1272,7 @@ export function compile(source, options = {},bufferUsage=null) {
   if(changed){if(bufferUsage)throw new CompileError('Helper buffer access analysis did not converge.');return compile(source,options,Object.fromEntries(['reads','writes','atomic'].map(k=>[k,[...emitter.usage[k]]])));}if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};if(options.scheduleDeviceLaunches){
     const queues=result.metadata.deviceLaunchQueue?.queues.filter(q=>q.caller===result.name)||[];
     if(!queues.length)throw new CompileError('Scheduled execution requires a parent with child launches.');
-    result.children=queues.map(q=>({queueId:q.id,artifact:compile(source,{...options,scheduleDeviceLaunches:false,deviceLaunchConsumer:q.id,entry:q.child,workgroupSize:q.block})}));
+    result.children=queues.map(q=>({queueId:q.id,artifact:compile(source,{...options,scheduleDeviceLaunches:false,deviceLaunchConsumer:q.id,entry:q.childEntry,workgroupSize:q.block,sharedMemoryBytes:q.sharedMemoryBytes})}));
   }
   return result;
 }

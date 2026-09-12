@@ -1,3 +1,22 @@
+import {integerExpression} from './integer-expression.js';
+// Resolve launch settings from immutable values in their lexical scope.
+function launchConstants(fn,constantValue){
+ const result=new Map();
+ const evaluate=(node,scope)=>{
+  const replace=n=>{if(!n||typeof n!=='object')return n;if(n.kind==='id'){const value=scope.get(n.name);if(!Number.isSafeInteger(value))throw Error('Nonconstant launch setting');return {kind:'literal',value:String(value),token:n.token};}if(Array.isArray(n))return n.map(replace);return Object.fromEntries(Object.entries(n).map(([k,v])=>[k,k==='token'?v:replace(v)]));};
+  return constantValue(replace(node));
+ };
+ const visit=(node,scope)=>{
+  if(!node||typeof node!=='object')return;
+  if(Array.isArray(node)){for(const n of node)visit(n,scope);return;}
+  if(node.kind==='block'){const inner=new Map(scope);for(const n of node.body)visit(n,inner);return;}
+  if(node.kind==='for'){const inner=new Map(scope);visit(node.init,inner);visit(node.body,inner);return;}
+  if(node.kind==='decl'){let value;try{if(node.constant&&!node.pointer&&!node.reference&&node.init)value=evaluate(node.init,scope);}catch{}scope.set(node.name,value);return;}
+  if(node.kind==='device-launch'){const captured=new Map(scope);result.set(node,setting=>evaluate(setting,captured));return;}
+  for(const [key,value] of Object.entries(node))if(!['token','type'].includes(key))visit(value,new Map(scope));
+ };
+ const scope=new Map([['warpSize',32]]);for(const p of fn.params)scope.set(p.name,undefined);visit(fn.body,scope);return result;
+}
 // Explicit producer stage for a bounded GPU child-launch queue.
 // Queue production alone does not execute the queued child work.
 export function launchQueues(e,walk,constantValue){
@@ -5,19 +24,21 @@ export function launchQueues(e,walk,constantValue){
  if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(k=>k!=='maxLaunches')||!Number.isInteger(options.maxLaunches)||options.maxLaunches<1||options.maxLaunches>65535)e.fail('deviceLaunchQueue requires maxLaunches in 1..65535.',e.kernel);
  if(!e.persistentObjects)e.fail('Device launch queues require objectHeap: persistent.',e.kernel);
  const queues=[];
- for(const caller of e.ast.functions){walk(caller.body,n=>{
+ for(const caller of e.ast.functions){const constants=launchConstants(caller,constantValue);walk(caller.body,n=>{
   if(n.kind!=='device-launch')return;
   if(caller.qualifier!=='__global__')e.fail('Device launches in helpers are not supported yet.',n);
   const child=e.ast.functions.find(f=>f.name===n.callee.name&&f.qualifier==='__global__');if(!child)e.fail('Child launch must name a declared global kernel.',n);
-  if(n.configuration.length!==2||child.params.length!==n.args.length)e.fail('Child queues require grid and block dimensions and every argument.',n);
-  let block;try{block=constantValue(n.configuration[1]);}catch{}if(!Number.isInteger(block)||block<1||block>1024)e.fail('Child block size must be a constant in 1..1024.',n);
+  let childEntry=child.name;if(child.templateParameter){if(child.templateKind==='type'||n.callee.templateArgument===undefined)e.fail('Child template launches require explicit integer arguments.',n);let values;try{values=n.callee.templateArgument.split(',').map(integerExpression);}catch{e.fail('Child template arguments must be constant integers.',n);}if(values.length!==(child.templateParameters?.length||1)||values.some(v=>v<0))e.fail('Child template arguments must match nonnegative integer parameters.',n);childEntry+='<' + values.join(',') + '>';}else if(n.callee.templateArgument!==undefined)e.fail('Child template arguments require a templated kernel.',n);
+  if(n.configuration.length<2||n.configuration.length>3||child.params.length!==n.args.length)e.fail('Child queues require grid and block dimensions, optional shared bytes and every argument.',n);
+  let sharedMemoryBytes=0;if(n.configuration.length===3){try{sharedMemoryBytes=constants.get(n)(n.configuration[2]);}catch{sharedMemoryBytes=NaN;}if(!Number.isInteger(sharedMemoryBytes)||sharedMemoryBytes<0||sharedMemoryBytes>16384)e.fail('Child shared bytes must be a constant in 0..16384.',n);}
+  let block;try{block=constants.get(n)(n.configuration[1]);}catch{}if(!Number.isInteger(block)||block<1||block>1024)e.fail('Child block size must be a constant in 1..1024.',n);
   const scalars=[],buffers=[];for(let i=0;i<child.params.length;i++){
    const p=child.params[i],arg=n.args[i];
    if(p.pointer){const parent=caller.params.find(x=>arg.kind==='id'&&x.name===arg.name);if(!parent?.pointer||p.type!==parent.type)e.fail('Child buffer arguments must be matching named parent buffers.',arg);buffers.push({name:p.name,parent:parent.name,type:p.type});}
    else{if(p.reference||!['i32','u32','f32'].includes(p.type))e.fail('Child queue scalar arguments require 32-bit integer or float values.',p);scalars.push({name:p.name,type:p.type,argument:i,word:3+scalars.length});}
   }
-  const id=queues.length,stride=3+scalars.length,queue={id,name:'launch_queue_'+id,caller:caller.name,child:child.name,capacity:options.maxLaunches,block:[block,1,1],stride,scalars,buffers,binding:e.objectHeaps.size+e.objectImports.length+e.deviceHeaps.size+id,byteLength:16+options.maxLaunches*stride*4,variable:'cw_launch_queue_'+id};
-  queue.recordLayout=JSON.stringify({caller:queue.caller,child:queue.child,capacity:queue.capacity,stride,scalars,buffers,block:queue.block});n.queueId=id;queues.push(queue);
+  const id=queues.length,stride=3+scalars.length,queue={id,name:'launch_queue_'+id,caller:caller.name,child:child.name,childEntry,capacity:options.maxLaunches,block:[block,1,1],sharedMemoryBytes,stride,scalars,buffers,binding:e.objectHeaps.size+e.objectImports.length+e.deviceHeaps.size+id,byteLength:16+options.maxLaunches*stride*4,variable:'cw_launch_queue_'+id};
+  queue.recordLayout=JSON.stringify({caller:queue.caller,child:queue.child,childEntry,capacity:queue.capacity,stride,scalars,buffers,block:queue.block,sharedMemoryBytes});n.queueId=id;queues.push(queue);
  });}
  return queues;
 }

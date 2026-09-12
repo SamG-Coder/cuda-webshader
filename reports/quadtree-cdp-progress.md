@@ -135,3 +135,19 @@ NVIDIA GPU tests pass, plus Bezier/path-tracer sandbox regressions. The unchange
 complete source now parses through this declaration and reaches the templated
 recursive launch at line 546. Full recursive execution and storage-record
 references remain required; no quadtree showcase is claimed by this stage.
+
+## Templated launches and child shared memory
+
+The parser now recognizes a template argument followed by CUDA launch syntax.
+Integer-template child launches retain a canonical specialized entry in queue
+metadata and compile the child using that entry. Queued children inherit the
+third launch argument as their dynamic shared allocation, with validation against
+the consumer. Block and shared-memory settings can use lexically scoped const
+integer expressions. Non-default streams remain unsupported.
+
+A real GPU test launches two blocks of an integer-template child through the
+scheduler, each with 128 bytes of dynamic shared memory, and checks 64 reversed
+values after a child barrier. The full suite passes 656 unit tests and 214 NVIDIA
+GPU tests. Bezier and path-tracer sandbox regressions pass. The original quadtree
+source now reaches unsupported child record/pointer arguments. Recursive queue
+execution is still pending; this is not a runnable quadtree showcase yet.
