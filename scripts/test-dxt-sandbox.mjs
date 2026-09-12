@@ -23,7 +23,7 @@ try{
   }
   if(nonblack<10000)throw Error('Empty decoded image');return {passed:true,device:s.runtime.describe(),blocks:16384,nativeWordsMatched:32768,decodedPixelsMatched:262144,nonblack,softwareAdapterRequested:false};
  });
- if(await page.evaluate(()=>window.sandbox.editor.getValue())!==await readFile('showcases/dxt/kernel.cu','utf8'))throw Error('Source changed');
+ if((await page.evaluate(()=>window.sandbox.editor.getValue())).replace(/\r\n/g,'\n')!==(await readFile('showcases/dxt/kernel.cu','utf8')).replace(/\r\n/g,'\n'))throw Error('Source changed');
  await page.locator('#tab-compare').click();const passes=await page.locator('#shader-pass option').allTextContents();if(passes.length!==2)throw Error('Missing shader comparison');
  await page.screenshot({path:'reports/dxt-sandbox.png'});await writeFile('reports/dxt-sandbox-check.json',JSON.stringify({...report,passes,sourceUnchanged:true},null,2));console.log(JSON.stringify(report,null,2));
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
