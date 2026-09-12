@@ -23,3 +23,17 @@ After the lookup change, compile probes report:
 - `generateTriangles2`: `uchar *volume` requires a packed byte-buffer ABI.
 
 Further stages include the original scalar field/voxel classification, prefix scans and compaction, triangle interpolation/generation, and a generic mesh preview with native numeric comparisons. Existing upstream conditional paths and CUDA function bodies must remain intact. There is no new marching-cubes showcase card until its pipeline is actually verified.
+
+## Vector launch values and read-only byte-pointer bindings
+
+Kernel float/int/uint vectors of lengths 2, 3 and 4 now use named component uniforms (`parameter.x/y/z/w`), preserving signedness and validating each value before updating uniform memory. Like existing scalar parameters, these values are read-only in this compiler profile; writable local copies remain available. Three-component vector pointers remain rejected because their buffer layout is a separate concern.
+
+Read-only `uchar*` kernel buffers use packed byte storage (one-byte logical stride, u32 physical words), with byte extraction at the translated address. Helper pointer offsets are applied in bytes, including offsets not aligned to a word. Writable byte pointers remain explicitly rejected. The sandbox seeds byte inputs as Uint8Array and can inspect their exact logical byte count. Local/shared byte values retain their existing physical layout accounting.
+
+Native and hardware WebGPU agree exactly on 2,056 components combining seven vector launch values, signed values, unsigned wraparound and 259 packed input bytes read through shifted helper pointers. Unit coverage includes every float/int/uint vector length, invalid component ranges and transactional updates, and rejection of writes. A real Edge/NVIDIA sandbox check also verifies vector arguments, packed byte inputs and both integer/byte output inspection.
+
+NVIDIA helper_math lerp definitions expose `inline __device__ __host__` qualifiers. The parser now accepts dual host/device helper declarations in either qualifier order while still rejecting host-only functions and host/global combinations. Their function bodies are unchanged.
+
+The original marching-cubes source plus the original helper_math lerp functions now reaches `vertexInterp2`'s `float3&` output parameters. These require vector references to local values/array elements; that is the next compiler blocker. The complete mesh pipeline is still unverified and has no showcase card yet.
+
+Validation: 464 unit tests, 134 NVIDIA hardware GPU checks, native captures, compile-all and static build pass. No software WebGPU checks were used.

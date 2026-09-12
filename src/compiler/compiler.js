@@ -182,6 +182,7 @@ class Emitter {
         if (!isArray(base.type) || !['i32', 'u32'].includes(index.type)) this.fail('Indexing requires an array and a 32-bit integer index.', n);
         const offset=base.rootSymbol?.offsetCode,indexCode=offset?`(${offset} + ${this.convert(index.code,index.type,'i32',n)})`:index.code;
         let code = `${base.code}[${indexCode}]`;const type = base.type.element;
+        if(type==='cw_uchar'&&base.rootSymbol?.rootBufferName){const temp='cw_byte_index_'+this.temp++;return this.result(n,type,`((${base.code}[${temp} >> 2u] >> ((${temp} & 3u) * 8u)) & 255u)`,[...base.pre,...index.pre,`let ${temp} = u32(${indexCode});`],{rootSymbol:base.rootSymbol});}
         const atomic = base.atomicRoot && !isArray(type);
         const addressPre=[];if(atomic&&raw&&type==='cw_uchar4'){const temp='cw_pixel_index_'+this.temp++;addressPre.push(`let ${temp} = ${indexCode};`);code=`${base.code}[${temp}]`;}
         return this.result(n, type, atomic && !raw ? `atomicLoad(&${code})` : code, [...base.pre, ...index.pre,...addressPre], {rootSymbol: base.rootSymbol, atomicRoot: base.atomicRoot, atomic});
@@ -570,20 +571,25 @@ class Emitter {
         const symbol={name:p.name,type:p.type,code:`cw_extent(${fields.map(field=>`vec2<u32>(cw_params.cw_extent_${p.name}_${field}, 0u)`).join(', ')})`,constant:true,atomic:false,kind:'uniform'};
         this.add(p.name,symbol,p,true);p.symbol=symbol;continue;
       }
+      if(!p.pointer&&vectorLength(p.type)){
+        const fields='xyzw'.slice(0,vectorLength(p.type)).split(''),element=vectorElement(p.type);
+        for(const field of fields)scalars.push({name:p.name+'.'+field,type:element,sourceType:'vector-component',field:'cw_vector_'+p.name+'_'+field,offset:scalars.length*4});
+        const symbol={name:p.name,type:p.type,code:`${p.type}(${fields.map(field=>`cw_params.cw_vector_${p.name}_${field}`).join(', ')})`,components:fields.map(field=>p.name+'.'+field),constant:true,atomic:false,kind:'uniform'};this.add(p.name,symbol,p,true);p.symbol=symbol;continue;
+      }
       if(p.type==='surface2d'){if(p.pointer)this.fail('Surface objects must be passed by value.',p);const dimensions=new Set();walk(this.kernel.body,n=>{if(n.kind==='call'&&['surf2Dwrite','surf3Dwrite'].includes(n.callee?.name)&&n.args[1]?.kind==='id'&&n.args[1].name===p.name)dimensions.add(n.callee.name==='surf3Dwrite'?'3d':'2d');});if(dimensions.size>1)this.fail('A surface cannot mix 2D and 3D writes.',p);const dimension=[...dimensions][0]||'2d',binding=bufferCount+this.kernel.params.filter(p=>p.type==='texture3d').length*2+surfaces.length,symbol={name:p.name,type:p.type,code:'cw_surface_'+p.name,kind:'surface',dimension,constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;const metadata={name:p.name,binding,dimension,format:'r32float',access:'write-only',coordinates:dimension==='3d'?'global-xyz':'global-xy'};symbol.metadata=metadata;surfaces.push(metadata);continue;}
       if(p.type==='texture3d'){if(p.pointer)this.fail('Texture objects must be passed by value.',p);const binding=bufferCount+textures.length*2,samplerBinding=binding+1,sampling=p.textureSampling||'tex3D',{dimension,format}=textureShape(sampling);const symbol={name:p.name,type:p.type,code:'t_'+p.name,sampler:'s_'+p.name,coordinateScale:dimension==='3d'?`vec3<f32>(cw_params.cw_tex_${p.name}_sx, cw_params.cw_tex_${p.name}_sy, cw_params.cw_tex_${p.name}_sz)`:`vec2<f32>(cw_params.cw_tex_${p.name}_sx, cw_params.cw_tex_${p.name}_sy)`,pixelPoint:`cw_params.cw_tex_${p.name}_point`,...(sampling.startsWith('fetch_')?{linearFetch:sampling.slice(6),lengthCode:`cw_params.cw_tex_${p.name}_length`}:{}),dimension,format,kind:'texture',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;textures.push({name:p.name,binding,samplerBinding,dimension,format,...(sampling==='tex2Dfloat4'?{coordinates:'2d'}:sampling.startsWith('fetch_')?{coordinates:'linear'}:{})});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_${dimension}<${format==='r32uint'?'u32':'f32'}>;`,`@group(0) @binding(${samplerBinding}) var ${symbol.sampler}: sampler;`);continue;}
       if (p.pointer) {
-        if(p.type==='cw_uchar')this.fail('Byte pointers need a packed byte-buffer ABI; use uchar4 records for storage.',p);
+        if(p.type==='cw_uchar'&&this.usage.writes.has(p.name))this.fail('Byte pointers currently support read-only packed storage; byte writes require an atomic packed-byte ABI.',p);
         if(this.structs.has(p.type))this.fail('Struct buffer layout is not supported; use local struct values.',p);
         if (p.type === 'bool' || vectorLength(p.type)===3) this.fail('bool* and three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
         const atomic = this.usage.atomic.has(p.name), readOnly = p.constant || !this.usage.writes.has(p.name);
         if (p.constant && this.usage.writes.has(p.name)) this.fail(`Cannot write through const buffer '${p.name}'.`, p);
         if (atomic && !['i32', 'u32','cw_uchar4'].includes(p.type)) this.fail('Only 32-bit integer atomics are supported.', p);
         const binding = bindings.length;
-        bindings.push({name: p.name, elementType: p.type, stride: typeStride(p.type), binding, readOnly, atomic});
+        bindings.push({name: p.name, elementType: p.type, stride: p.type==='cw_uchar'?1:typeStride(p.type), binding, readOnly, atomic});
         const symbol = {name: p.name, rootBufferName:p.name, type: arrayOf(p.type), code: `b_${p.name}`, constant: p.constant, atomic, kind: 'buffer',...(shiftedPointers(this.kernel).has(p.name)?{offsetCode:'cw_pointer_'+p.name}:{})};
         this.add(p.name, symbol, p, true); p.symbol = symbol;this.bufferSymbols.set(p.name,symbol);
-        header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type}>` : p.type}>;`);
+        header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type}>` : p.type==='cw_uchar'?'u32':p.type}>;`);
       } else {
         if ((!numeric(p.type)&&!['bool','cw_uchar4'].includes(p.type))||p.type==='cw_uchar') this.fail('Scalar kernel parameters must be float, int, unsigned int, bool or packed uchar4. Put other vectors in buffers.', p);
         scalars.push({name: p.name, type: ['bool','cw_uchar4'].includes(p.type)?'u32':p.type, ...(['bool','cw_uchar4'].includes(p.type)?{sourceType:p.type}:{}), offset: scalars.length * 4});

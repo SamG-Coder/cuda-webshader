@@ -154,7 +154,7 @@ export class GpuRuntime {
         const info=await module.getCompilationInfo();
         const errors=info.messages.filter(m=>m.type==='error');
         if(errors.length)throw new Error(`${artifact.name}: WGSL validation failed\n`+errors.map(m=>`${m.lineNum}:${m.linePos} ${m.message}`).join('\n'));
-        const entries=artifact.metadata.bindings.map(b=>({binding:b.binding,visibility:GPUShaderStage.COMPUTE,buffer:{type:b.readOnly?'read-only-storage':'storage',minBindingSize:b.stride}}));
+        const entries=artifact.metadata.bindings.map(b=>({binding:b.binding,visibility:GPUShaderStage.COMPUTE,buffer:{type:b.readOnly?'read-only-storage':'storage',minBindingSize:Math.max(4,b.stride)}}));
         for(const t of artifact.metadata.textures||[])entries.push({binding:t.binding,visibility:GPUShaderStage.COMPUTE,texture:{sampleType:t.format==='r32uint'?'uint':'float',viewDimension:t.dimension,multisampled:false}},{binding:t.samplerBinding,visibility:GPUShaderStage.COMPUTE,sampler:{type:t.coordinates==='linear'?'non-filtering':'filtering'}});
         for(const surface of artifact.metadata.surfaces||[])entries.push({binding:surface.binding,visibility:GPUShaderStage.COMPUTE,storageTexture:{access:'write-only',format:surface.format,viewDimension:surface.dimension}});
         if(artifact.metadata.uniformSize)entries.push({binding:artifact.metadata.uniformBinding,visibility:GPUShaderStage.COMPUTE,buffer:{type:'uniform',hasDynamicOffset:true,minBindingSize:artifact.metadata.uniformSize}});

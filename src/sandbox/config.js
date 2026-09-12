@@ -63,8 +63,8 @@ export function preparePass(pass,metadata,config,rootMetadata){
  return {bindings,scalars,groups:pass.groups};
 }
 export function seedBuffer(binding,spec){
- const Type=(binding.elementType==='cw_uchar4'||binding.elementType.includes('u32'))?Uint32Array:binding.elementType.includes('i32')?Int32Array:Float32Array;
- const data=new Type(spec.records*binding.stride/4);let state=314159;
+ const Type=binding.elementType==='cw_uchar'?Uint8Array:(binding.elementType==='cw_uchar4'||binding.elementType.includes('u32'))?Uint32Array:binding.elementType.includes('i32')?Int32Array:Float32Array;
+ const data=new Type(spec.records*binding.stride/Type.BYTES_PER_ELEMENT);let state=314159;
  const random=()=>{state^=state<<13;state^=state>>>17;state^=state<<5;return(state>>>0)/4294967296;};
  for(let i=0;i<data.length;i++)data[i]=spec.fill==='one'?1:spec.fill==='ramp'?i%256:spec.fill==='random'?(Type===Float32Array?random()*2-1:Math.floor(random()*256)):0;
  if(spec.fill==='rgba')for(let i=0;i<spec.records;i++){const x=i%spec.width,y=Math.floor(i/spec.width),h=spec.records/spec.width,r=Math.round(x/Math.max(1,spec.width-1)*255),g=Math.round(y/Math.max(1,h-1)*255),b=(Math.floor(x/16)+Math.floor(y/16))%2?240:20;data[i]=(r|(g<<8)|(b<<16)|(255<<24))>>>0;}

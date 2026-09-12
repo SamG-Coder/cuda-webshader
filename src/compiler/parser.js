@@ -185,7 +185,7 @@ export class Parser {
       }
       this.deferUnsupportedTypes=templateKind==='specialization';
       if(this.match('namespace')){const alias=this.name();this.take('=');const target=this.name();this.take(';');if(target!=='cooperative_groups'||this.groupNamespaces.has(alias))this.fail('Only distinct aliases of cooperative_groups are supported.',token);this.groupNamespaces.add(alias);continue;}
-      while (['static','inline', '__forceinline__'].includes(this.peek().value)) this.take();
+      let hostQualified=false;while (['static','inline', '__forceinline__','__host__'].includes(this.peek().value)) {if(this.take().value==='__host__')hostQualified=true;}
       let launchThreads=null;
       const launchBounds=()=>{this.take('__launch_bounds__');this.take('(');const t=this.take();if(t.kind!=='number'||!/^[0-9]+[uU]?$/.test(t.value))this.fail('Launch bounds require a positive integer thread count.',t);launchThreads=Number(t.value.replace(/[uU]$/,''));if(launchThreads<1||launchThreads>1024)this.fail('Launch bounds thread count must be in [1,1024].',t);this.take(')');};
       if(this.is('__launch_bounds__'))launchBounds();
@@ -194,7 +194,8 @@ export class Parser {
       if(templateParameters.length>1&&qualifier!=='__device__')this.fail('Multiple template type parameters are supported on device helpers only.',token);
       if(templateParameter&&!['__global__','__device__'].includes(qualifier))this.fail('Templates are supported only on kernels and device helpers.',token);
       if (!['__global__', '__device__'].includes(qualifier)) this.fail('Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported.', token);
-      while (['inline', '__forceinline__'].includes(this.peek().value)) this.take();
+      while (['inline', '__forceinline__','__host__'].includes(this.peek().value)) {if(this.take().value==='__host__')hostQualified=true;}
+      if(hostQualified&&qualifier!=='__device__')this.fail('__host__ is supported only alongside __device__ helpers.',token);
       if(this.is('__launch_bounds__')){if(launchThreads!==null)this.fail('Duplicate launch bounds.');launchBounds();}
       if(launchThreads!==null&&qualifier!=='__global__')this.fail('Launch bounds apply only to kernels.',token);
       const result = this.type();

@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: MIT
+#include <cuda_runtime.h>
+#include <cstdio>
+#include <vector>
+#include "vector-byte-arguments.cuh"
+#define CHECK(x) do{auto e=(x);if(e!=cudaSuccess){printf("CUDA ERROR %s\n",cudaGetErrorString(e));return 2;}}while(0)
+int main(){const unsigned int n=257;std::vector<unsigned char> input(n+2);for(unsigned int i=0;i<input.size();i++)input[i]=(i*37+11)&255;unsigned char* in;unsigned int* out;float4* p;CHECK(cudaMalloc(&in,input.size()));CHECK(cudaMalloc(&out,n*16));CHECK(cudaMalloc(&p,n*16));CHECK(cudaMemcpy(in,input.data(),input.size(),cudaMemcpyHostToDevice));vectorBytes<<<3,128>>>(in,out,p,n,make_uint3(7,3,31),make_uint3(17,3,5),make_float3(.125f,-.5f,2.f),make_int3(-7,13,-19),make_float2(.25f,-.75f),make_float4(1.5f,-2.5f,3.5f,-4.5f),make_uint2(0xffffffffu,9),make_int4(-101,103,-107,109));CHECK(cudaGetLastError());CHECK(cudaDeviceSynchronize());std::vector<unsigned int> values(n*4);std::vector<float4> positions(n);CHECK(cudaMemcpy(values.data(),out,n*16,cudaMemcpyDeviceToHost));CHECK(cudaMemcpy(positions.data(),p,n*16,cudaMemcpyDeviceToHost));for(int i=0;i<2;i++){FILE* f=fopen(i?"reports/vector-byte-native-positions.bin":"reports/vector-byte-native-integers.bin","wb");if(!f)return 2;fwrite(i?(void*)positions.data():(void*)values.data(),16,n,f);fclose(f);}CHECK(cudaFree(in));CHECK(cudaFree(out));CHECK(cudaFree(p));printf("Captured %u integer components and %u position components; packed byte input length %zu.\n",n*4,n*4,input.size());return 0;}

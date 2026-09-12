@@ -64,7 +64,7 @@ async function run(){
   log(`Dispatch completed in ${elapsed.toFixed(2)} ms (CPU submit-to-completion wall time).`,'success');
   if(!selected){await surfacePreview(active,buffers[config.output],config.surfacePreview?.slice??0);window.sandbox.lastConfig=config;$('animate').checked=false;}else{
   const Type=(selected.elementType==='cw_uchar4'||selected.elementType.includes('u32'))?Uint32Array:selected.elementType.includes('i32')?Int32Array:Float32Array;
-  const data=await runtime.read(buffers[config.output],Type);window.sandbox.lastOutput=Array.from(data.subarray(0,128));window.sandbox.lastConfig=config;
+  const resource=buffers[config.output],data=selected.elementType==='cw_uchar'?new Uint8Array((await runtime.read(resource,Uint32Array,resource.size)).buffer).subarray(0,resource.byteLength):await runtime.read(resource,Type);window.sandbox.lastOutput=Array.from(data.subarray(0,128));window.sandbox.lastConfig=config;
   let nonFinite=0;for(const value of data)if(!Number.isFinite(value))nonFinite++;
   log(`Read ${config.output}: ${data.length.toLocaleString()} components${nonFinite?`, ${nonFinite} non-finite values`:`, all finite`}. This is output inspection, not an algorithm correctness test.`,nonFinite?'error':'info');
   if(points)setupPoints(data,selected,config);else{if(config.image)imagePreview(data,config.image);else numericPreview(data,config.output);$('animate').checked=false;log('Numeric preview ready. Run again to recompute with changed inputs.');}
