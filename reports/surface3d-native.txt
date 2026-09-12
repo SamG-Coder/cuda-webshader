@@ -1,0 +1,1 @@
+PASS 256 float surface voxels; global XYZ writes across eight workgroups
