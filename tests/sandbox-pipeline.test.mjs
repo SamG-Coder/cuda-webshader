@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {validatePipeline,executePipeline,expandPipelineSteps} from '../src/sandbox/pipeline.js';
 const preset=()=>JSON.parse(readFileSync('showcases/marching-cubes/pipeline.json','utf8')).pipeline;
 test('pipeline rejects unsafe allocation, scan aliasing, control offsets and invalid mesh declarations',()=>{
- for(const change of [p=>p.buffers.pos.records=1048577,p=>p.steps[1].scan.target='voxelVerts',p=>p.steps[1].scan.count=4097,p=>p.steps[4].groups[0].index=1,p=>p.steps[0].block=[1024,2,1],p=>p.preview.positions='volume',p=>p.preview.count={buffer:'vertexTotal',divideCeil:0}]){const plan=preset();change(plan);assert.throws(()=>validatePipeline(plan));}
+ for(const change of [p=>p.buffers.pos.records=4194305,p=>p.steps[1].scan.target='voxelVerts',p=>p.steps[1].scan.count=4097,p=>p.steps[4].groups[0].index=1,p=>p.steps[0].block=[1024,2,1],p=>p.preview.positions='volume',p=>p.preview.count={buffer:'vertexTotal',divideCeil:0}]){const plan=preset();change(plan);assert.throws(()=>validatePipeline(plan));}
  assert.ok(validatePipeline(preset())>0);
 });
 test('pipeline invalidates GPU control totals after a write and rejects overflowing draw counts',async()=>{
@@ -69,3 +69,9 @@ test('Signed disparity display validates range and output storage',()=>{const pr
 
 
 test('Repeat pipelines bound expansion and validate every expanded clear',()=>{assert.equal(expandPipelineSteps([{repeat:250,steps:[{clear:'a'},{clear:'b'}]}]).length,500);for(const steps of [[{repeat:0,steps:[{clear:'a'}]}],[{repeat:1001,steps:[{clear:'a'}]}],[{repeat:1000,steps:[{repeat:11,steps:[{clear:'a'}]}]}],[{repeat:2,entry:'k',steps:[{clear:'a'}]}],Array.from({length:257},()=>({clear:'a'}))])assert.throws(()=>expandPipelineSteps(steps));const p=JSON.parse(readFileSync('showcases/optical-flow/pipeline.json','utf8')).pipeline;assert.ok(validatePipeline(p)>0);p.steps.push({repeat:2,steps:[{clear:'missing'}]});assert.throws(()=>validatePipeline(p));});
+
+test('Full-size FFT convolution stays bounded and preserves explicit float display range',()=>{
+ const preset=()=>JSON.parse(readFileSync('showcases/fft-convolution/pipeline.json','utf8')).pipeline;
+ assert.ok(validatePipeline(preset())>64*1048576);
+ for(const change of [p=>p.steps[2].realFFT.width=4096,p=>p.buffers.paddedData.records=4194305,p=>{p.buffers.extra={type:'vec4<f32>',records:4194304,fill:'zero'};},p=>p.preview.range=[1,1],p=>p.preview.range=[0,Infinity]]){const p=preset();change(p);assert.throws(()=>validatePipeline(p));}
+});

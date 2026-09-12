@@ -1,0 +1,166 @@
+{
+  "pipeline": {
+    "buffers": {
+      "input": {
+        "type": "f32",
+        "records": 4000000,
+        "fill": "binary-f32",
+        "source": "reports/fft-convolution-1-input.bin"
+      },
+      "kernel": {
+        "type": "f32",
+        "records": 42,
+        "fill": "binary-f32",
+        "source": "reports/fft-convolution-1-kernel.bin"
+      },
+      "paddedData": {
+        "type": "f32",
+        "records": 4194304,
+        "fill": "zero"
+      },
+      "paddedKernel": {
+        "type": "f32",
+        "records": 4194304,
+        "fill": "zero"
+      },
+      "dataSpectrum": {
+        "type": "vec2<f32>",
+        "records": 2099200,
+        "fill": "zero"
+      },
+      "kernelSpectrum": {
+        "type": "vec2<f32>",
+        "records": 2099200,
+        "fill": "zero"
+      }
+    },
+    "textures": {
+      "inputTexture": {
+        "kind": "linear-f32",
+        "records": 4000000,
+        "source": "reports/fft-convolution-1-input.bin"
+      },
+      "kernelTexture": {
+        "kind": "linear-f32",
+        "records": 42,
+        "source": "reports/fft-convolution-1-kernel.bin"
+      }
+    },
+    "steps": [
+      {
+        "entry": "padKernel_kernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "groups": [
+          1,
+          1,
+          1
+        ],
+        "bindings": {
+          "d_Dst": "paddedKernel",
+          "d_Src": "kernel",
+          "texFloat": "kernelTexture"
+        },
+        "scalars": {
+          "fftH": 2048,
+          "fftW": 2048,
+          "kernelH": 7,
+          "kernelW": 6,
+          "kernelY": 3,
+          "kernelX": 4
+        }
+      },
+      {
+        "entry": "padDataClampToBorder_kernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "groups": [
+          64,
+          256,
+          1
+        ],
+        "bindings": {
+          "d_Dst": "paddedData",
+          "d_Src": "input",
+          "texFloat": "inputTexture"
+        },
+        "scalars": {
+          "fftH": 2048,
+          "fftW": 2048,
+          "kernelH": 7,
+          "kernelW": 6,
+          "kernelY": 3,
+          "kernelX": 4,
+          "dataH": 2000,
+          "dataW": 2000
+        }
+      },
+      {
+        "realFFT": {
+          "source": "paddedKernel",
+          "target": "kernelSpectrum",
+          "width": 2048,
+          "height": 2048,
+          "realStride": 2048
+        }
+      },
+      {
+        "realFFT": {
+          "source": "paddedData",
+          "target": "dataSpectrum",
+          "width": 2048,
+          "height": 2048,
+          "realStride": 2048
+        }
+      },
+      {
+        "entry": "modulateAndNormalize_kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8200,
+          1,
+          1
+        ],
+        "bindings": {
+          "d_Dst": "dataSpectrum",
+          "d_Src": "kernelSpectrum"
+        },
+        "scalars": {
+          "dataSize": 2099200,
+          "c": 2.384185791015625e-07
+        }
+      },
+      {
+        "realFFT": {
+          "source": "dataSpectrum",
+          "target": "paddedData",
+          "width": 2048,
+          "height": 2048,
+          "realStride": 2048,
+          "inverse": true
+        }
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "paddedData",
+      "format": "gray-f32",
+      "width": 2048,
+      "height": 2048,
+      "range": [
+        0,
+        5055.0
+      ]
+    }
+  }
+}

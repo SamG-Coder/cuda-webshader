@@ -1,0 +1,31 @@
+{
+  "results": [
+    {
+      "width": 37,
+      "height": 19,
+      "fftW": 64,
+      "fftH": 32,
+      "components": 2048,
+      "relativeL2": 8.537089707094412e-8,
+      "maxError": 0.0009765625,
+      "originalCpuRelativeL2": 5.998814938972565e-8,
+      "cpuMaxError": 0.0009765625,
+      "intermediateReadbackBytes": 0
+    },
+    {
+      "width": 2000,
+      "height": 2000,
+      "fftW": 2048,
+      "fftH": 2048,
+      "components": 4194304,
+      "relativeL2": 1.9979428385512446e-7,
+      "maxError": 0.0029296875,
+      "originalCpuRelativeL2": 1.385154575358956e-7,
+      "cpuMaxError": 0.0029296875,
+      "intermediateReadbackBytes": 0
+    }
+  ],
+  "source": "Original NVIDIA test0 device bodies",
+  "input": "Original srand(2010), rand()%16 captured on Windows",
+  "passed": true
+}

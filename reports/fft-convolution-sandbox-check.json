@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "relativeL2": 1.9979428385512446e-7,
+  "maxError": 0.0029296875,
+  "components": 4194304,
+  "grayscaleLevels": 182,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "intermediateReadbackBytes": 0,
+  "softwareAdapterRequested": false,
+  "sourceUnchanged": true,
+  "passes": [
+    "1. padKernel_kernel",
+    "2. padDataClampToBorder_kernel",
+    "3. realToComplex",
+    "4. packSpectrum",
+    "5. forwardFftAxis",
+    "6. modulateAndNormalize_kernel",
+    "7. unpackSpectrum",
+    "8. complexToReal",
+    "9. inverseFftAxis"
+  ],
+  "mobileOverflow": false,
+  "presetSwitching": true
+}

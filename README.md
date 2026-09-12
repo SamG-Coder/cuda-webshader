@@ -553,3 +553,7 @@ initial conditions and rendering. See [validation and support boundaries](report
 [Try NVIDIA stereo disparity in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=stereo): compare the original CUDA and generated WGSL while recovering a disparity image from NVIDIA's stereo camera pair. [Details and native verification](showcases/stereo/README.md).
 
 [Try NVIDIA optical flow in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=optical): estimate motion between two images using the original six kernels, five-level pyramid and 7,500 solver iterations. [Configuration and native verification](showcases/optical-flow/README.md).
+
+### NVIDIA FFT convolution
+
+[Run the original-size FFT convolution in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fft-convolution). The unchanged padding and modulation kernels process the original 2000 × 2000 random input through 2048 × 2048 real FFTs. Complete output matches native CUDA with relative L2 error 2.0e-7. [Pipeline, preview and validation](showcases/fft-convolution/README.md).
