@@ -1,0 +1,4 @@
+Captured original smoke Thrust integration and depth keys: frame=1, particles=257.
+Captured original smoke Thrust integration and depth keys: frame=8, particles=257.
+Captured original smoke Thrust integration and depth keys: frame=32, particles=257.
+Captured original smoke Thrust integration and depth keys: frame=64, particles=257.

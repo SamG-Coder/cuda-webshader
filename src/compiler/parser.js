@@ -138,13 +138,32 @@ export class Parser {
     let depth=0;for(let i=2;i<4096;i++){const t=this.peek(i);if(t.kind==='eof')return false;if(t.value==='{')depth++;if(t.value==='}'&&--depth===0)return false;if(t.value==='operator'&&this.peek(i+1).value==='('&&this.peek(i+2).value===')')return true;}return false;
   }
   zipFunctor(){
-    const token=this.take('struct'),name=this.name();this.take('{');this.take('float');const field=this.name();this.take(';');
-    if(['tuple0','tuple1','count','cw_zip_index'].includes(field))this.fail('Zip functor state conflicts with launch parameters.',token);
-    this.take('__host__');this.take('__device__');this.take(name);this.take('(');this.take('float');const argument=this.name();this.take(')');this.take(':');this.take(field);this.take('(');this.take(argument);this.take(')');this.take('{');this.take('}');
-    this.take('template');this.take('<');if(!this.match('typename'))this.take('class');const tupleType=this.name();this.take('>');this.take('__device__');this.take('void');this.take('operator');this.take('(');this.take(')');this.take('(');this.take(tupleType);const tuple=this.name();this.take(')');
+    const token=this.take('struct'),name=this.name(),fields=[];this.take('{');
+    const reserved=n=>['tuple0','tuple1','tuple2','tuple3','count','cw_zip_index'].includes(n);
+    while(!this.is('__host__')){
+      const spec=this.type(),field=this.name();this.take(';');
+      if(fields.length>=4||!['f32','i32','u32','bool','vec2<f32>','vec3<f32>','vec4<f32>','texture3d'].includes(spec.type)||spec.pointer||spec.reference||spec.constant||spec.shared||spec.external)this.fail('Zip functor state requires up to four scalar, float-vector or texture fields.',token);
+      if(reserved(field)||fields.some(f=>f.name===field))this.fail('Zip functor state conflicts with launch parameters.',token);
+      fields.push({...spec,name:field});
+    }
+    if(!fields.length)this.fail('Zip functor requires explicit value state.',token);
+    this.take('__host__');this.take('__device__');this.take(name);this.take('(');const argumentsByName=new Map();
+    for(let i=0;i<fields.length;i++){if(i)this.take(',');const spec=this.type(),argument=this.name();if(spec.pointer||spec.reference||argumentsByName.has(argument))this.fail('Zip constructor requires distinct value parameters.',token);argumentsByName.set(argument,spec.type);}
+    this.take(')');this.take(':');const initialized=new Set(),usedArguments=new Set();
+    for(let i=0;i<fields.length;i++){if(i)this.take(',');const field=this.name(),spec=fields.find(f=>f.name===field);this.take('(');const argument=this.name();this.take(')');if(!spec||initialized.has(field)||usedArguments.has(argument)||argumentsByName.get(argument)!==spec.type)this.fail('Zip constructor must initialize each field from a matching value parameter.',token);initialized.add(field);usedArguments.add(argument);}
+    this.take('{');this.take('}');this.take('template');this.take('<');if(!this.match('typename'))this.take('class');const tupleType=this.name();this.take('>');this.match('__host__');this.take('__device__');this.take('void');this.take('operator');this.take('(');this.take(')');this.take('(');this.take(tupleType);const tuple=this.name();this.take(')');
     this.zipTuple=tuple;const body=this.block();this.zipTuple=null;this.take('}');this.take(';');
-    // The launch adapter replaces a Thrust zip iteration, not its user calculation.
-    const launch=new Parser('__global__ void '+name+'(float4*tuple0,float4*tuple1,float '+field+',unsigned count){unsigned cw_zip_index=blockIdx.x*blockDim.x+threadIdx.x;if(cw_zip_index>=count)return;}').parse().functions[0];
+    const visit=(n,fn)=>{if(!n||typeof n!=='object')return;fn(n);for(const [key,value] of Object.entries(n)){if(key==='token')continue;if(Array.isArray(value))value.forEach(v=>visit(v,fn));else if(value&&typeof value==='object')visit(value,fn);}};
+    const declarations=new Map(),types=new Map(),used=new Set();
+    for(const f of fields)declarations.set(f.name,new Set([f.type]));
+    visit(body,n=>{if(n.kind==='decl'){if(!declarations.has(n.name))declarations.set(n.name,new Set());declarations.get(n.name).add(n.type);}if(n.zipElement!==undefined)used.add(n.zipElement);});
+    const requireType=(n,type)=>{if(n?.zipElement===undefined)return;if(!['f32','vec4<f32>'].includes(type))this.fail('Zip elements require an unambiguous float or float4 value type.',n.token);const previous=types.get(n.zipElement);if(previous&&previous!==type)this.fail('Zip element has conflicting value types.',n.token);types.set(n.zipElement,type);};
+    const infer=n=>{if(!n)return null;if(n.zipElement!==undefined)return types.get(n.zipElement)||null;if(n.kind==='id'){const set=declarations.get(n.name);return set?.size===1?[...set][0]:null;}if(n.kind==='cast')return n.target;if(n.kind==='call')return n.callee?.name==='make_float4'?'vec4<f32>':n.callee?.name==='float'?'f32':null;return null;};
+    for(let pass=0;pass<4;pass++)visit(body,n=>{if(n.kind==='decl'&&n.init?.zipElement!==undefined)requireType(n.init,n.type);if(n.kind==='assign'&&n.left?.zipElement!==undefined){const type=infer(n.right);if(type)requireType(n.left,type);}if(n.kind==='assign'&&n.right?.zipElement!==undefined){const type=infer(n.left);if(type)requireType(n.right,type);}});
+    const count=used.size;if(!count||count>4||[...used].some(i=>i>=count)||[...used].some(i=>!types.has(i)))this.fail('Zip launch needs contiguous, explicitly typed float or float4 elements starting at zero.',token);
+    const spelling=type=>Object.keys(MAP).find(key=>MAP[key]===type);
+    const parameters=[...Array.from({length:count},(_,i)=>(types.get(i)==='f32'?'float':'float4')+'*tuple'+i),...fields.map(f=>spelling(f.type)+' '+f.name),'unsigned count'];
+    const launch=new Parser('__global__ void '+name+'('+parameters.join(',')+'){unsigned cw_zip_index=blockIdx.x*blockDim.x+threadIdx.x;if(cw_zip_index>=count)return;}').parse().functions[0];
     launch.token=token;launch.body.body.push(...body.body);launch.zipFunctor=true;this.functionNames.add(name);return launch;
   }
   parse() {
@@ -305,7 +324,7 @@ export class Parser {
   }
   declaration(semicolon = true) {
     const token = this.peek(),volatileSnapshot=this.match('volatile'),d = this.type(),declarations=[];
-    do {const name=this.name(),dimensions=[];if(this.zipTuple&&['tuple0','tuple1','count','cw_zip_index'].includes(name))this.fail('Zip functor local name conflicts with generated launch storage.',token);if(this.typeAliases.has(name))this.fail('Value declarations cannot shadow a type alias.',token);while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.initializer():null;if(volatileSnapshot&&(d.pointer||d.reference||d.shared||d.external||dimensions.length||!init))this.fail('Volatile is supported only on initialized local value snapshots.',token);declarations.push({kind:'decl',token,name,...d,...(volatileSnapshot?{constant:true,volatileSnapshot:true}:{}),dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
+    do {const name=this.name(),dimensions=[];if(this.zipTuple&&['tuple0','tuple1','tuple2','tuple3','count','cw_zip_index'].includes(name))this.fail('Zip functor local name conflicts with generated launch storage.',token);if(this.typeAliases.has(name))this.fail('Value declarations cannot shadow a type alias.',token);while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.initializer():null;if(volatileSnapshot&&(d.pointer||d.reference||d.shared||d.external||dimensions.length||!init))this.fail('Volatile is supported only on initialized local value snapshots.',token);declarations.push({kind:'decl',token,name,...d,...(volatileSnapshot?{constant:true,volatileSnapshot:true}:{}),dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
     if (semicolon) this.take(';');return declarations.length===1?declarations[0]:{kind:'decls',token,declarations};
   }
   statement() {
@@ -356,9 +375,9 @@ export class Parser {
     if (token.kind === 'number') { this.take(); value = {kind: 'literal', token, value: token.value}; }
     else if (this.match('(')) { value = this.expression(); this.take(')'); }
     else if(this.zipTuple&&token.value==='cuda'){
-      this.take('cuda');this.take('::');this.take('std');this.take('::');this.take('get');this.take('<');const element=this.take();if(!['0','1'].includes(element.value))this.fail('Zip functors support exactly two float4 tuple elements.',element);this.take('>');this.take('(');this.take(this.zipTuple);this.take(')');value={kind:'index',token,base:{kind:'id',token,name:'tuple'+element.value},index:{kind:'id',token,name:'cw_zip_index'}};
+      this.take('cuda');this.take('::');this.take('std');this.take('::');this.take('get');this.take('<');const element=this.take();if(!['0','1','2','3'].includes(element.value))this.fail('Zip functors support up to four typed tuple elements.',element);this.take('>');this.take('(');this.take(this.zipTuple);this.take(')');value={kind:'index',token,zipElement:Number(element.value),base:{kind:'id',token,name:'tuple'+element.value},index:{kind:'id',token,name:'cw_zip_index'}};
     }
-    else if (token.kind === 'word') { const name=this.qualifiedName();if(this.zipTuple&&['tuple0','tuple1','count','cw_zip_index'].includes(name))this.fail('Zip functor name conflicts with generated launch storage.',token);if(this.staticMemberNames?.has(name))this.fail('Unqualified static member references require explicit template qualification.',token);value = {kind: 'id', token, name}; }
+    else if (token.kind === 'word') { const name=this.qualifiedName();if(this.zipTuple&&['tuple0','tuple1','tuple2','tuple3','count','cw_zip_index'].includes(name))this.fail('Zip functor name conflicts with generated launch storage.',token);if(this.staticMemberNames?.has(name))this.fail('Unqualified static member references require explicit template qualification.',token);value = {kind: 'id', token, name}; }
     else this.fail('Expected an expression.', token);
     while (true) {
       if(value.kind==='id'&&this.staticTemplates.has(value.name)&&this.is('<')){const argument=this.templateArgument();this.take('::');const method=this.name();if(!this.is('('))this.fail('Static data member access is unsupported.',token);value={...value,name:this.staticMethod(value.name,argument,method,token)};}
