@@ -14,6 +14,10 @@
     "compiled": true
   },
   {
+    "file": "ray.h",
+    "compiled": true
+  },
+  {
     "file": "hitable.h",
     "compiled": false,
     "error": "Expected '{', found ';'. (2:15)\nclass material;\r\n              ^"

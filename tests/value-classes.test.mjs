@@ -60,3 +60,12 @@ test('Original device vec3 definitions support free operators and readonly self 
  assert.throws(()=>compile(source+'__device__ vec3 operator+(vec3 a){return a;}__global__ void k(){}'),/two/);
  assert.throws(()=>compile(source+'__device__ vec3 operator+(vec3 &a,vec3 b){return b;}__global__ void k(){}'),/const-reference/);
 });
+
+test('Original ray stores independent nested vectors and evaluates ray points',()=>{
+ const full=readFileSync(new URL('./pathtracer-value-class.cuh',import.meta.url),'utf8');const c=compile(full+'__global__ void k(float*out){vec3 a(1.0f,2.0f,3.0f),b(2.0f,4.0f,8.0f);ray r(a,b),copy=r;r.A.e[0]=-99.0f;vec3 point=copy.point_at_parameter(2.0f);out[0]=point.x();out[1]=point.y();out[2]=point.z();}',{workgroupSize:[1,1,1]}),out=new Float32Array(3);executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[5,10,19]);
+ assert.throws(()=>compile('class R{public:R self;};__global__ void k(){}'),/previously completed/);
+});
+test('Nested class default constructors execute before the enclosing constructor body',()=>{
+ const c=compile('class Inner{public:int x;__device__ Inner(){x=7;}};class Outer{public:Inner v;__device__ Outer(){v.x+=2;}};__global__ void k(int*out){Outer o;out[0]=o.v.x;}',{workgroupSize:[1,1,1]}),out=new Int32Array(1);executeCPU(c,{out},{},[1]);assert.equal(out[0],9);
+ const implicit=compile('class Inner{public:int x;__device__ Inner(){x=7;}};class Outer{public:Inner v;};__global__ void k(int*out){Outer o;out[0]=o.v.x;}',{workgroupSize:[1,1,1]});executeCPU(implicit,{out},{},[1]);assert.equal(out[0],7);
+});

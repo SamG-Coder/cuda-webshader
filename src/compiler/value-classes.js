@@ -47,15 +47,21 @@ export function parseValueClass(p) {
       functions.push({kind:'function',token:start,name:helper,qualifier:'__device__',result:spec.type,params,body,classOwner:name,classConstructor:constructor,classMethod:constructor?null:member,classSelfReference:selfReference,classMutableSelf:mutableSelf,classConstant:constant,classDeclaration:declaration,classResultSpec:spec});
       p.match(';');
     } else {
-      if(device||spec.pointer||spec.reference||spec.shared||spec.external||spec.constant||spec.type.startsWith('cw_struct_')||['void','texture3d','surface2d','thread-block','cw_extent','cw_size64'].includes(spec.type))p.fail('Value-class fields require plain scalar/vector values.',start);
+      if(device||spec.pointer||spec.reference||spec.shared||spec.external||spec.constant||['void','texture3d','surface2d','thread-block','cw_extent','cw_size64'].includes(spec.type))p.fail('Value-class fields require plain scalar/vector values.',start);
       const dimensions=[];while(p.match('[')){dimensions.push(p.expression(2));p.take(']');}p.take(';');
       if(dimensions.length>1||record.fields.length>=64||record.fields.some(f=>f.name===member))p.fail('Invalid or duplicate value-class field.',start);
+      if(spec.type.startsWith('cw_struct_')){const nested=[...p.structs.values()].find(r=>r.type===spec.type);if(!nested?.complete||dimensions.length)p.fail('Nested class fields require a previously completed class and no array dimensions.',start);}
       record.fields.push({name:member,type:spec.type,dimensions,token:start});
     }
   }
   p.take('}');p.take(';');
   if(!record.fields.length)p.fail('Value classes require at least one field.',token);
   for(const method of record.methods.filter(m=>m.indexedReference)){const field=record.fields.find(f=>f.name===method.field);if(!field||field.dimensions.length!==1||field.type!==method.result)p.fail('Reference indexing must return an element of a matching array field.',method.token);}
+  if(!functions.some(f=>f.classConstructor)&&record.fields.some(f=>f.type.startsWith('cw_struct_'))){
+    const helper='cw_ctor_'+name;record.constructors.push(helper);
+    functions.push({kind:'function',token,name:helper,qualifier:'__device__',result:record.type,params:[],body:{kind:'block',token,body:[]},classOwner:name,classConstructor:true,classMethod:null,classConstant:false});
+  }
+  record.complete=true;
   (p.valueClassFunctions??=[]).push(...functions);
   return functions;
 }
@@ -63,6 +69,7 @@ export function parseValueClass(p) {
 export function finishValueClasses(p) {
  for(const fn of p.valueClassFunctions||[]) {
     const record=p.structs.get(fn.classOwner),name=record.name,fields=new Set(record.fields.map(f=>f.name));
+    fn.classOriginalArity=fn.params.length;
     if(!fn.body)p.fail('Missing definition for class method '+fn.classMethod,fn.token);
     if(fn.classSelfReference){const ret=fn.body.body[0];if(fn.body.body.length!==1||ret?.kind!=='return'||ret.value?.kind!=='unary'||ret.value.op!=='*'||ret.value.value?.kind!=='id'||ret.value.value.name!=='this')p.fail('Const reference methods currently require exactly return *this.',fn.token);}
 
@@ -80,6 +87,9 @@ export function finishValueClasses(p) {
     };fn.body=rewrite(fn.body);
     if(fn.classConstructor){
       fn.body.body.unshift({kind:'decl',token:fn.token,name:self,type:record.type,pointer:false,reference:false,constant:false,shared:false,external:false,dimensions:[],init:null});
+      const nestedInitializers=[];
+      for(const field of record.fields){const nested=[...p.structs.values()].find(r=>r.type===field.type);if(!nested)continue;const constructors=(p.valueClassFunctions||[]).filter(f=>f.classOwner===nested.name&&f.classConstructor);if(constructors.length){if(!constructors.some(f=>(f.classOriginalArity??f.params.length)===0))p.fail('Nested class members require a default constructor.',field.token);nestedInitializers.push({kind:'expr',token:field.token,value:{kind:'assign',op:'=',token:field.token,left:{kind:'member',base:{kind:'id',name:self,token:field.token},member:field.name,token:field.token},right:{kind:'call',callee:{kind:'id',name:'cw_ctor_'+nested.name,token:field.token},args:[],token:field.token}}});}}
+      fn.body.body.splice(1,0,...nestedInitializers);
       fn.body.body.push({kind:'return',token:fn.token,value:{kind:'id',name:self,token:fn.token}});
     } else fn.params.unshift({kind:'param',token:fn.token,name:self,type:record.type,constant:fn.classConstant,pointer:false,reference:!fn.classConstant,shared:false,external:false});
     p.functionNames.add(fn.name);
