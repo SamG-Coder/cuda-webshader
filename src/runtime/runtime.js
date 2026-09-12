@@ -16,6 +16,7 @@ export function packScalars(metadata, values, target = new ArrayBuffer(metadata.
     writes.push([p,v]);
   }
   // Validate the complete update before touching the destination: failed updates are transactional.
+  for(const c of metadata.scalarConstraints||[]){const v=values[c.name];if(!Number.isInteger(v)||v<c.minimum||v%c.multipleOf!==0)throw new RangeError(`${c.name} must be a nonnegative multiple of ${c.multipleOf} for full-workgroup execution.`);}
   const view = new DataView(target);
   for(const [p,v] of writes) {
     if(p.type === 'u32') view.setUint32(p.offset,v,true);
@@ -180,6 +181,7 @@ export class ComputeBatch {
     pass.dispatchWorkgroups(...groups);this.dispatchCount++;return this;
   }
   clear(resource){this.assertOpen();this.runtime.checkResource(resource);this.endPass();this.encoder.clearBuffer(resource.gpuBuffer,0,resource.size);return this;}
+  copy(source,target){this.assertOpen();this.runtime.checkResource(source);this.runtime.checkResource(target);if(source.gpuBuffer===target.gpuBuffer||source.byteLength!==target.byteLength||source.byteLength%4)throw new RangeError('Feedback copy requires distinct buffers of equal aligned byte length.');this.endPass();if(source.byteLength)this.encoder.copyBufferToBuffer(source.gpuBuffer,0,target.gpuBuffer,0,source.byteLength);return this;}
   submit(){
     this.assertOpen();this.endPass();this.ended=true;
     if(this.cursor){this.runtime.device.queue.writeBuffer(this.runtime.uniformBuffer,0,this.data,0,this.cursor);this.runtime.stats.uniformBytesUploaded+=this.cursor;}

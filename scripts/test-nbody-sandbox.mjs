@@ -1,0 +1,21 @@
+import {chromium} from 'playwright';import {writeFile} from 'node:fs/promises';import {createStaticServer} from './serve.mjs';
+const server=createStaticServer(new URL('../dist/',import.meta.url).pathname.replace(/^\/(\w:)/,'$1'));await new Promise(r=>server.listen(0,'127.0.0.1',r));
+const browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM||'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+try{const page=await browser.newPage({viewport:{width:1500,height:1000}});await page.goto(`http://127.0.0.1:${server.address().port}/sandbox.html?example=nbody`);
+ await page.waitForFunction(()=>window.sandbox?.completedRuns>0||window.sandbox?.lastError,{},{timeout:60000});
+ if(await page.evaluate(()=>window.sandbox.lastError))throw Error(await page.evaluate(()=>window.sandbox.lastError));
+ await page.locator('#stop').click();await page.locator('#tab-compare').click();
+ const before=await page.evaluate(()=>({...window.sandbox.runtime.stats,device:window.sandbox.runtime.describe()}));if(before.device.vendor!=='nvidia')throw Error('NVIDIA hardware required');
+ const imageBefore=await page.locator('#preview canvas').screenshot();
+ await page.locator('#animate').uncheck();await page.locator('#animate').check();
+ await page.waitForFunction(n=>window.sandbox.runtime.stats.dispatches>=n,before.dispatches+120,{timeout:60000});await page.locator('#stop').click();
+ const after=await page.evaluate(()=>({...window.sandbox.runtime.stats,error:window.sandbox.lastError}));if(after.error)throw Error(after.error);
+ if(after.dataBytesUploaded!==before.dataBytesUploaded||after.readbackBytes!==before.readbackBytes)throw Error('Animation transferred simulation data through the CPU');
+ const imageAfter=await page.locator('#preview canvas').screenshot();if(imageBefore.equals(imageAfter))throw Error('Preview did not change during simulation');
+ await page.screenshot({path:'reports/nbody-sandbox.png'});
+ await page.locator('#settings summary').click();
+ await page.locator('#config').fill(await page.locator('#config').inputValue().then(s=>{const c=JSON.parse(s);c.scalars.deviceNumBodies=511;return JSON.stringify(c);}));await page.locator('#run').click();
+ await page.waitForFunction(()=>window.sandbox.lastError);if(!/multiple of 128/.test(await page.evaluate(()=>window.sandbox.lastError)))throw Error('Partial block count was not rejected');
+ await writeFile('reports/nbody-sandbox-check.json',JSON.stringify({passed:true,staticBuild:true,softwareAdapterRequested:false,animationSteps:after.dispatches-before.dispatches,noCPUDataTransferDuringAnimation:true,partialBlockRejected:true,before,after},null,2));
+ console.log('PASS N-body sandbox: 120 animation steps, GPU-only feedback, changing rendered pixels, and partial-block rejection');
+}finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

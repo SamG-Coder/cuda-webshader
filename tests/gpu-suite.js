@@ -1,5 +1,6 @@
 import {prepareReduction} from '../src/runtime/operations.js';import {kernelOptions} from '../src/kernels.js';
 import {makeCases,compareArrays} from './cases.js';
+import {nbodyInitial,nbodyStep} from './nbody-reference.js';
 export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   const results=[],start=performance.now();
   const run=async(name,action)=>{const t=performance.now();let result;try{result={name,pass:true,...await action()};}catch(error){result={name,pass:false,error:String(error.stack||error)};}result.wallMs=performance.now()-t;results.push(result);onCase(result,results.length);};
@@ -121,6 +122,23 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
       for(let i=0;i<n;i++)for(let j=0;j<4;j++)if(actual[i*4+j]!==data[(Math.floor(i/threads)*threads+threads-i%threads-1)*4+j])throw Error('Shared wrapper tile mismatch');
       if(!actual.slice(n*4).every(v=>v===-12345))throw Error('Shared wrapper guard changed');
     }finally{await runtime.idle();runtime.destroyBuffer(input);runtime.destroyBuffer(output);}}
+  });
+  await run('Original NVIDIA N-body advances three steps with an enforced whole-block contract',async()=>{
+    const files=['nbody-vector-traits.cuh','nbody-rsqrt.cuh','nbody-interaction.cuh','nbody-shared-memory.cuh','nbody-integrate.cuh'];
+    const source='namespace cg = cooperative_groups;\n'+(await Promise.all(files.map(async f=>await(await fetch('/tests/'+f)).text()))).join('\n');
+    for(const threads of [32,128])for(const blocks of [1,3,4]){
+      const n=threads*blocks,dt=Math.fround(0.002),damping=Math.fround(0.999),softening=0.125;let expected=nbodyInitial(n);
+      let oldPos=runtime.createBuffer(expected.positions),newPos=runtime.createBuffer(new Float32Array((n+4)*4).fill(-12345));const vel=runtime.createBuffer(expected.velocities);
+      try{const kernel=await runtime.kernel(source,{entry:'integrateBodies<float>',workgroupSize:[threads],sharedMemoryBytes:threads*16,fullWorkgroups:['deviceNumBodies']});
+        for(let step=0;step<3;step++){
+          expected=nbodyStep(expected.positions,expected.velocities,n,dt,damping,softening);
+          runtime.batch().dispatch(kernel.bind({newPos,oldPos,vel},{deviceOffset:0,deviceNumBodies:n,deltaTime:dt,damping,numTiles:blocks,'constant.softeningSquared':softening}),[blocks]).copy(newPos,oldPos).submit();
+          const positions=await runtime.read(newPos),velocities=await runtime.read(vel);
+          for(let i=0;i<positions.length;i++)if(!Number.isFinite(positions[i])||!Number.isFinite(velocities[i])||Math.abs(positions[i]-expected.positions[i])>3e-5||Math.abs(velocities[i]-expected.velocities[i])>3e-5)throw Error(`N-body reference mismatch n=${n} step=${step} index=${i}`);
+
+        }
+      }finally{await runtime.idle();runtime.destroyBuffer(oldPos);runtime.destroyBuffer(newPos);runtime.destroyBuffer(vel);}
+    }
   });
   await run('Original NVIDIA N-body early return remains rejected before a helper barrier',async()=>{
     const files=['nbody-vector-traits.cuh','nbody-rsqrt.cuh','nbody-interaction.cuh','nbody-shared-memory.cuh','nbody-integrate.cuh'];

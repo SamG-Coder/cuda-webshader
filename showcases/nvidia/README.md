@@ -312,9 +312,9 @@ across three blocks. Shared objects are separate for different helper functions
 and template specializations. WebGPU rejects a divergent call into a helper
 barrier. Native results are in `reports/shared-helpers-native.txt`; build
 `tests/shared-helpers-native.cu` with the NVCC flags above.
-The original N-body integration kernel now translates, but WebGPU rejects its
-lane-dependent early return before a shared-memory barrier. Resolving that
-execution contract and full numerical/visual validation remain necessary.
+The original N-body integration kernel now runs with an enforced whole-block
+contract. It has its own [3D sandbox showcase](../nbody/README.md), separate from
+the 38-entry isolated-kernel audit catalog.
 
 Storage-buffer helper pointers are checked by `tests/helper-pointers.cu` in native
 CUDA and hardware WebGPU at 32 and 128 threads across three blocks. Coverage
@@ -355,4 +355,4 @@ hardware WebGPU. Native results: `reports/shared-wrapper-native.txt`; build
 `tests/shared-wrapper-native.cu` with the NVCC flags above. The hardware suite
 separately checks the expected uniformity rejection of the complete original
 integration kernel. That rejection is not a successful simulation run, and
-N-body is not listed as a verified showcase.
+N-body runs through an opt-in whole-block contract in its separate 3D showcase.

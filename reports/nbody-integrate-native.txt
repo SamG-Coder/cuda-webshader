@@ -1,0 +1,6 @@
+n=32 threads=32 steps=3 PASS original integration, independent reference and guards
+n=96 threads=32 steps=3 PASS original integration, independent reference and guards
+n=128 threads=32 steps=3 PASS original integration, independent reference and guards
+n=128 threads=128 steps=3 PASS original integration, independent reference and guards
+n=384 threads=128 steps=3 PASS original integration, independent reference and guards
+n=512 threads=128 steps=3 PASS original integration, independent reference and guards

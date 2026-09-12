@@ -31,6 +31,7 @@ export function validateConfig(config,metadata){
  for(const b of metadata.bindings)for(const key of ['scale','offset'])if(config.buffers[b.name][key]!==undefined&&!Number.isFinite(config.buffers[b.name][key]))throw Error(`${b.name}: ${key} must be a finite number.`);
  if(bytes>64*1024*1024)throw Error('Sandbox buffers are limited to 64 MiB total.');
  if(!metadata.bindings.some(b=>b.name===config.output))throw Error('Choose an existing output buffer.');
+ if(config.feedback!==undefined){if(!config.feedback||typeof config.feedback!=='object'||Array.isArray(config.feedback))throw Error('Feedback must map destination buffer names to source names.');for(const [target,source]of Object.entries(config.feedback)){const a=metadata.bindings.find(b=>b.name===source),b=metadata.bindings.find(b=>b.name===target);if(!a||!b||source===target||a.elementType!==b.elementType||config.buffers[source].records!==config.buffers[target].records)throw Error('Feedback requires distinct buffers with matching types and record counts.');if(Object.hasOwn(config.feedback,source))throw Error('Feedback chains and cycles are unsupported.');}}
  return bytes;
 }
 export function seedBuffer(binding,spec){

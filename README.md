@@ -6,7 +6,11 @@
 
 ## CUDA sandbox
 
-Work toward the original NVIDIA N-body 3D sample is underway. Device helpers now
+[NVIDIA N-body is now a 3D sandbox showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=nbody):
+512 bodies, original force/integration kernels, and GPU position feedback.
+Native CUDA and NVIDIA WebGPU pass three-step independent reference checks.
+See [launch requirements and validation](showcases/nbody/README.md).
+Device helpers now
 support one built-in type or explicit integer template argument, including nested
 calls and arguments forwarded from a kernel template. Type-trait structs containing typedef members, including explicit type specializations
 and dependent types such as `typename vec4<T>::Type`, now resolve to built-in
@@ -24,9 +28,9 @@ type deduction. Local vector brace initializers support full, partial and empty
 lists, including dependent vector types; omitted components become zero. Components
 must match the element type or use explicit casts. Stateless shared-memory
 conversion wrappers now work with an explicitly sized dynamic shared allocation.
-The original N-body integration kernel translates, but WebGPU rejects its
-lane-dependent early return before a barrier. Constant arrays remain unsupported.
-N-body has not yet been added as a complete working showcase.
+N-body uses an explicit whole-block contract to make its early-return guard
+uniform; the runtime rejects partial-block counts. The unchecked original guard
+still fails WebGPU validation. Constant arrays remain unsupported.
 The helper support and NVIDIA’s original vector-trait declarations pass native
 CUDA and NVIDIA WebGPU tests for 1, 129 and 1,025 records. Coverage includes
 unsigned wraparound, reference mutation, vector position updates and output guards.
@@ -222,7 +226,7 @@ This is source translation. **It does not run CUDA binaries, PTX, the CUDA drive
 
 ## Validated on an RTX 5080
 
-The project is running locally with installed, locked dependencies. **310 Node tests, 88 real WebGPU checks (including Three.js rendered-pixel interop and expected validation rejections), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
+The project is running locally with installed, locked dependencies. **317 Node tests, 89 real WebGPU checks (including Three.js rendered-pixel interop and expected validation rejections), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
 
 Open [the measured comparison](reports/performance-comparison.html) or read [the full methodology and results](reports/performance-comparison.md). All ten kernel sources are compiled by NVCC and translated to WGSL at two workload sizes. Raw GPU timestamps, CUDA event timings, ordinary CUDA launch timings, and verification logs are in `reports/`.
 

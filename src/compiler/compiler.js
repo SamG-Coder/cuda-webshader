@@ -1,4 +1,5 @@
 import {parse, CompileError,builtinType} from './parser.js';
+import {uniformBlockGuards} from './full-workgroups.js';
 export {CompileError, parse};
 export const COMPILER_VERSION = '0.1.0';
 export const isArray = t => !!t && typeof t === 'object' && t.kind === 'array';
@@ -613,8 +614,10 @@ export function compile(source, options = {},bufferUsage=null) {
   }
   if(specialization)walk(kernel.body,n=>{if(n.templateArgument===kernel.templateParameter)n.templateArgument=specialization[2];});
   resolveTraitTypes(kernel,ast,kernel.templateParameter,specialization?.[2]);
+  const scalarConstraints=uniformBlockGuards(kernel,options,walk,message=>{throw new CompileError(message,kernel.token,source);});
   const templates=instantiateHelperTemplates(ast,kernel);
   const emitter=new Emitter(ast,kernel,options,templates,bufferUsage),result=emitter.emit();
+  if(scalarConstraints.length)result.metadata.scalarConstraints=scalarConstraints;
   const changed=['reads','writes','atomic'].some(k=>[...emitter.usage[k]].some(name=>!emitter.initialBufferUsage[k].has(name)));
   if(changed){if(bufferUsage)throw new CompileError('Helper buffer access analysis did not converge.');return compile(source,options,Object.fromEntries(['reads','writes','atomic'].map(k=>[k,[...emitter.usage[k]]])));}if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};return result;
 }
