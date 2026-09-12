@@ -13,7 +13,7 @@ function convert(value,type){
   if(type==='cw_ushort')return Number(value)&65535;
   if(type==='cw_uchar')return Number(value)&255;
   if(type==='cw_uchar4')return Number(value)>>>0;
-  if(type==='f32')return f(value);if(type==='u32')return Number(value)>>>0;if(type==='i32')return Number(value)|0;if(type==='bool')return !!value;
+  if(type==='cw_f64')return Number(value);if(type==='f32')return f(Number(value));if(type==='u32')return typeof value==='bigint'?Number(BigInt.asUintN(32,value)):Number(value)>>>0;if(type==='i32')return typeof value==='bigint'?Number(BigInt.asIntN(32,value)):Number(value)|0;if(type==='bool')return !!value;
   const size=vectorLength(type);if(size){if(!Array.isArray(value)||value.length!==size)throw new Error('Invalid vector value.');return value.map(v=>convert(v,vectorElement(type)));}return value;
 }
 function zero(type,structs=[]){const spec=structs.find(s=>s.type===type);if(spec)return Object.fromEntries(spec.fields.map(f=>[f.name,zero(f.resolvedType,structs)]));if(isArray(type))return Array.from({length:type.length},()=>zero(type.element,structs));const n=vectorLength(type);return n?Array(n).fill(0):type==='bool'?false:0;}
@@ -29,8 +29,8 @@ function binary(op,a,b,type){
   a=convert(a,type);b=convert(b,type);
   if(type==='cw_size64'&&op==='*')return BigInt.asUintN(64,a*b);
   switch(op){
-    case '+':return convert(a+b,type);case '-':return convert(a-b,type);case '*':return convert(type==='f32'?a*b:Math.imul(a,b),type);
-    case '/':if(!b&&type!=='f32')throw new Error('Integer division by zero.');return convert(type==='f32'?a/b:Math.trunc(a/b),type);
+    case '+':return convert(a+b,type);case '-':return convert(a-b,type);case '*':return convert(['f32','cw_f64'].includes(type)?a*b:Math.imul(a,b),type);
+    case '/':if(!b&&!['f32','cw_f64'].includes(type))throw new Error('Integer division by zero.');return convert(['f32','cw_f64'].includes(type)?a/b:Math.trunc(a/b),type);
     case '%':if(!b)throw new Error('Integer remainder by zero.');return convert(a%b,type);
     case '<':return a<b;case '>':return a>b;case '<=':return a<=b;case '>=':return a>=b;case '==':return a===b;case '!=':return a!==b;
     case '&':return convert(a&b,type);case '|':return convert(a|b,type);case '^':return convert(a^b,type);

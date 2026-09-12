@@ -16,7 +16,7 @@ test('float4 surface rejects unsafe byte offsets, changing coordinates and bound
  assert.throws(()=>compile(source.replace('if (x < count) surf1Dwrite','x++; if (x < count) surf1Dwrite'),{entry:'writeTransfer'}),/offsets cannot be checked/);
  assert.throws(()=>compile(source.replace('x * sizeof(float4));','x * sizeof(float4), cudaBoundaryModeClamp);'),{entry:'writeTransfer'}),/trap mode/);
 });
-test('original volume integration remains blocked explicitly on double arithmetic',()=>{
+test('original volume integration compiles unchanged with emulated double expressions',()=>{
  const original=readFileSync(new URL('./volume-transfer-kernel.cuh',import.meta.url),'utf8');
- assert.throws(()=>compile(original,{entry:'d_integrate_trapezoidal'}),/Double-precision literals are unsupported/);
+ const artifact=compile(original,{entry:'d_integrate_trapezoidal'});assert.match(artifact.wgsl,/cw_d_div/);assert.match(artifact.wgsl,/cw_d_lt/);
 });

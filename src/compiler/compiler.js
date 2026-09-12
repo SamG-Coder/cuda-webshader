@@ -1,3 +1,4 @@
+import {FLOAT64_WGSL} from './float64.js';
 import {inferTextureTypes,textureShape} from './texture-types.js';
 import {integerExpression} from './integer-expression.js';
 import {parse, CompileError,builtinType} from './parser.js';
@@ -140,6 +141,7 @@ class Emitter {
   add(name, symbol, n, global = false) { const scope = global ? this.scopes[0] : this.scopes.at(-1); if (scope.has(name)) this.fail(`Duplicate identifier '${name}'.`, n); scope.set(name, symbol); return symbol; }
   common(a, b, n) {
     if (typeName(a) === typeName(b) && !isArray(a) && a !== 'void') return a;
+    if((a==='cw_f64'||b==='cw_f64')&&[a,b].every(t=>t==='cw_f64'||numeric(t)||t==='bool'))return 'cw_f64';
     // C++ promotes a bool to int before the usual scalar arithmetic conversions.
     if(a==='bool'&&numeric(b))a='i32';
     if(b==='bool'&&numeric(a))b='i32';
@@ -149,6 +151,10 @@ class Emitter {
   convert(code, from, to, n) {
     if(to==='bool'&&isArray(from)&&from.length===null&&n){return 'true';} // All runtime storage bindings are required and non-null.
     if (typeName(from) === typeName(to) && !isArray(to)) return code;
+    if(to==='cw_f64'&&(numeric(from)||from==='bool')){this.float64Used=true;return from==='bool'?`cw_d_from_u32(select(0u,1u,${code}))`:from==='f32'?`cw_d_from_f32(${code})`:['i32','cw_short'].includes(from)?`cw_d_from_i32(i32(${code}))`:`cw_d_from_u32(u32(${code}))`;}
+    if(from==='cw_f64'&&to==='f32'){this.float64Used=true;return `cw_d_to_f32(${code})`;}
+    if(from==='cw_f64'&&to==='bool'){this.float64Used=true;return `!cw_d_zero(${code})`;}
+    if(from==='cw_size64'&&to==='f32'){this.float64Used=true;return `cw_d_u64_to_f32(${code})`;}
     if(to==='cw_short'||to==='cw_ushort'){if(from==='bool')return to==='cw_short'?`select(0i,1i,${code})`:`select(0u,1u,${code})`;if(numeric(from)){const word=`i32(${code})`;return to==='cw_short'?`(bitcast<i32>((bitcast<u32>(${word}) & 65535u) << 16u) >> 16u)`:`(u32(${word}) & 65535u)`;}}
     if(from==='cw_short'||from==='cw_ushort'){if(to==='bool')return `(${code} != ${from==='cw_short'?'0i':'0u'})`;if(numeric(to)&&to!=='cw_uchar')return `${to}(${code})`;}
     if(to==='cw_uchar'){if(from==='bool')return `select(0u,1u,${code})`;if(numeric(from))return `(${from==='f32'?`u32(i32(${code}))`:`u32(${code})`} & 255u)`;}
@@ -174,7 +180,7 @@ class Emitter {
       case 'sizeof': {const size=cudaValueSize(n.target);if(size===null)this.fail('sizeof requires a supported built-in value type.',n);this.extentUsed=true;n.numericValue=size;return this.result(n,'cw_size64',`vec2<u32>(${size}u, 0u)`);}
       case 'literal': {
         const isHex = /^0[xX]/.test(n.value), isFloat = !isHex && /[fF]$/.test(n.value), isUnsigned = /[uU]$/.test(n.value);
-        if (!isFloat && /[.eE]/.test(n.value) && !/^0[xX]/.test(n.value)) this.fail('Double-precision literals are unsupported. Use an f suffix, for example 0.5f.', n);
+        if (!isFloat && /[.eE]/.test(n.value) && !/^0[xX]/.test(n.value)) {const value=Number(n.value);if(!Number.isFinite(value))this.fail('Invalid double literal.',n);const bits=new DataView(new ArrayBuffer(8));bits.setFloat64(0,value,true);this.float64Used=true;n.numericValue=value;return this.result(n,'cw_f64',`vec2<u32>(${bits.getUint32(0,true)}u, ${bits.getUint32(4,true)}u)`);}
         let value = Number(n.value.replace(isHex ? /[uU]$/ : /[fFuU]$/, ''));
         if (!Number.isFinite(value)) this.fail('Invalid numeric literal.', n);
         let type = isFloat ? 'f32' : isUnsigned || (/^0[xX]/.test(n.value) && value > 2147483647) ? 'u32' : 'i32';
@@ -234,6 +240,7 @@ class Emitter {
         if (n.op === '&' || n.op === '*') this.fail('Pointers are supported only as kernel buffer parameters and &buffer[index] atomic targets.', n);
         let value = this.expr(n.value);if(narrow(value.type))value={...value,type:'i32',code:`i32(${value.code})`};
         if (n.op === '!') return this.result(n, 'bool', `(!${this.convert(value.code, value.type, 'bool', n)})`, value.pre);
+        if(value.type==='cw_f64'&&['+','-'].includes(n.op))return this.result(n,'cw_f64',n.op==='+'?value.code:`cw_d_neg(${value.code})`,value.pre);
         if (!numeric(value.type) || (n.op === '~' && value.type === 'f32')) this.fail('Invalid unary operator/type.', n);
         if (n.op === '-' && value.type === 'u32') return this.result(n, 'u32', `(0u - ${value.code})`, value.pre);
         return this.result(n, value.type, n.op === '+' ? value.code : `(${n.op}${value.code})`, value.pre);
@@ -248,9 +255,10 @@ class Emitter {
           return this.result(n, 'bool', tmp, pre);
         }
         if(a.type==='cw_size64'||b.type==='cw_size64'){
-          if(!['==','!=','<','>','<=','>=','*'].includes(n.op)||![a.type,b.type].every(t=>['cw_size64','i32','u32','bool'].includes(t)))this.fail('Size values support integer comparisons and multiplication only.',n);
+          if(!['==','!=','<','>','<=','>=','*','+','-'].includes(n.op)||![a.type,b.type].every(t=>['cw_size64','i32','u32','bool'].includes(t)))this.fail('Size values support integer comparisons and multiplication only.',n);
           const left='cw_size_left_'+this.temp++,right='cw_size_right_'+this.temp++,promote=(v,code)=>v.type==='cw_size64'?code:v.type==='bool'?`vec2<u32>(select(0u, 1u, ${code}), 0u)`:v.type==='i32'?`vec2<u32>(u32(${code}), select(0u, 4294967295u, ${code} < 0i))`:`vec2<u32>(u32(${code}), 0u)`;
           const pre=[...a.pre,`let ${left} = ${a.code};`,...b.pre,`let ${right} = ${b.code};`],ac=promote(a,left),bc=promote(b,right);this.extentUsed=true;n.operandType='cw_size64';
+          if(['+','-'].includes(n.op)){this.float64Used=true;return this.result(n,'cw_size64',`${n.op==='+'?'cw_d_uadd':'cw_d_usub'}(${ac}, ${bc})`,pre);}
           if(n.op==='*'){this.sizeMultiplyUsed=true;return this.result(n,'cw_size64',`cw_size_multiply(${ac}, ${bc})`,pre);}
           const code=n.op==='=='?`all(${ac} == ${bc})`:n.op==='!='?`any(${ac} != ${bc})`:n.op==='<'?`cw_size_less(${ac}, ${bc})`:n.op==='>'?`cw_size_less(${bc}, ${ac})`:n.op==='<='?`!cw_size_less(${bc}, ${ac})`:`!cw_size_less(${ac}, ${bc})`;
           return this.result(n,'bool',code,pre);
@@ -264,6 +272,11 @@ class Emitter {
         const ac = this.convert(a.code, a.type, common, n), bc = this.convert(b.code, b.type, ['<<', '>>'].includes(n.op) ? 'u32' : common, n);
         const out = ['==', '!=', '<', '>', '<=', '>='].includes(n.op) ? 'bool' : common;
         n.operandType = common;
+        if(common==='cw_f64'){
+          this.float64Used=true;const functions={'+':'cw_d_add','-':'cw_d_sub','*':'cw_d_mul','/':'cw_d_div','==':'cw_d_eq','<':'cw_d_lt'};
+          const code=functions[n.op]?`${functions[n.op]}(${ac}, ${bc})`:n.op==='!='?`!cw_d_eq(${ac}, ${bc})`:n.op==='>'?`cw_d_lt(${bc}, ${ac})`:n.op==='<='?`cw_d_le(${ac}, ${bc})`:`cw_d_le(${bc}, ${ac})`;
+          return this.result(n,out,code,[...a.pre,...b.pre]);
+        }
         if(n.op==='/'&&common==='f32'){this.compensatedDivisionUsed=true;return this.result(n,out,`cw_divide_f32(${ac}, ${bc})`,[...a.pre,...b.pre]);}
         return this.result(n, out, `(${ac} ${n.op} ${bc})`, [...a.pre, ...b.pre]);
       }
@@ -287,7 +300,7 @@ class Emitter {
     if(scale!==1)return node?.kind==='binary'&&node.op==='*'&&((literal(node.right,scale)&&this.surfaceGridCoordinate(node.left,axis,1,seen))||(literal(node.left,scale)&&this.surfaceGridCoordinate(node.right,axis,1,seen)));
     if(node?.kind==='id'){
       if(seen.has(node.name))return false;const declarations=[];let changed=false;
-      walk(this.kernel.body,n=>{if(n.kind==='decl'&&n.name===node.name)declarations.push(n);if(n.kind==='call'&&!['surf1Dwrite','surf2Dwrite','surf3Dwrite'].includes(n.callee?.name)&&!(/^make_(?:float|int|uint)[234]$/.test(n.callee?.name||'')&&!this.ast.functions.some(f=>f.name===n.callee.name)))for(const arg of n.args)walk(arg,a=>{if(a.kind==='id'&&a.name===node.name)changed=true;});if((n.kind==='assign'&&n.left?.kind==='id'&&n.left.name===node.name)||(n.kind==='unary'&&['++','--'].includes(n.op)&&n.value?.name===node.name))changed=true;});
+      walk(this.kernel.body,n=>{if(n.kind==='decl'&&n.name===node.name)declarations.push(n);if(n.kind==='call'&&!['surf1Dwrite','surf2Dwrite','surf3Dwrite'].includes(n.callee?.name)&&!(/^(?:make_(?:float|int|uint)[234]|float|int|uint|unsigned)$/.test(n.callee?.name||'')&&!this.ast.functions.some(f=>f.name===n.callee.name)))for(const arg of n.args)walk(arg,a=>{if(a.kind==='id'&&a.name===node.name)changed=true;});if((n.kind==='assign'&&n.left?.kind==='id'&&n.left.name===node.name)||(n.kind==='unary'&&['++','--'].includes(n.op)&&n.value?.name===node.name))changed=true;});
       if(changed||declarations.length!==1)return false;return this.surfaceGridCoordinate(declarations[0].init,axis,1,new Set([...seen,node.name]));
     }
     const member=(n,name)=>n?.kind==='member'&&n.base?.kind==='id'&&n.base.name===name&&n.member===axis;
@@ -536,7 +549,7 @@ class Emitter {
         const op = n.op.slice(0, -1); if (target.atomic) this.fail('Use explicit atomicAdd/Min/Max/Exch rather than compound assignments to atomic arrays.', n);
         const type = ['<<', '>>'].includes(op) ? (narrow(target.type)?'i32':target.type) : this.common(narrow(target.type)?'i32':target.type, value.type==='cw_uchar'?'i32':value.type, n), rhsType = ['<<', '>>'].includes(op) ? 'u32' : type;
         if (['<<', '>>', '%', '&', '|', '^'].includes(op) && !['i32', 'u32'].includes(type)) this.fail('Integer operator requires integer operands.', n);
-        if(op==='/'&&type==='f32'){this.compensatedDivisionUsed=true;code=this.convert(`cw_divide_f32(${this.convert(target.code,target.type,type,n)}, ${this.convert(value.code,value.type,rhsType,n)})`,type,target.type,n);}else code = this.convert(`(${this.convert(target.code, target.type, type, n)} ${op} ${this.convert(value.code, value.type, rhsType, n)})`, type, target.type, n);
+        if(type==='cw_f64'){const fn={'+':'cw_d_add','-':'cw_d_sub','*':'cw_d_mul','/':'cw_d_div'}[op];if(!fn)this.fail('Unsupported double compound operator.',n);this.float64Used=true;code=this.convert(`${fn}(${this.convert(target.code,target.type,type,n)}, ${this.convert(value.code,value.type,type,n)})`,type,target.type,n);}else if(op==='/'&&type==='f32'){this.compensatedDivisionUsed=true;code=this.convert(`cw_divide_f32(${this.convert(target.code,target.type,type,n)}, ${this.convert(value.code,value.type,rhsType,n)})`,type,target.type,n);}else code = this.convert(`(${this.convert(target.code, target.type, type, n)} ${op} ${this.convert(value.code, value.type, rhsType, n)})`, type, target.type, n);
         n.operandType = type;
       }
       n.type = target.type;
@@ -737,6 +750,7 @@ class Emitter {
     if(this.integerIntrinsics.has('__umul24'))helperLines.unshift('fn cw_umul24(a: u32, b: u32) -> u32 { return (a & 16777215u) * (b & 16777215u); }');
     // A float32 significand times a 16-bit integer fits exactly in 40 bits.
     // Integer limbs preserve the original double product before truncating to a byte.
+    if(this.float64Used)helperLines.unshift(FLOAT64_WGSL);
     if(this.sizeMultiplyUsed)helperLines.unshift(`fn cw_size_multiply(a: vec2<u32>, b: vec2<u32>) -> vec2<u32> {
   let a0 = a.x & 65535u; let a1 = a.x >> 16u;
   let b0 = b.x & 65535u; let b1 = b.x >> 16u;

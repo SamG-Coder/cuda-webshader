@@ -1,0 +1,1 @@
+Captured 8817 binary64 input pairs: 10 results per pair, native double arithmetic and conversions.

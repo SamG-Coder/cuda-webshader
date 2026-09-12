@@ -41,8 +41,15 @@ int main() {
     for(const auto& value:output)for(int c=0;c<4;c++)if(!std::isfinite(((const float*)&value)[c]))return 5;
     file=fopen("reports/volume-transfer-native.bin","wb");if(!file)return 2;
     fwrite(output.data(),sizeof(float4),width,file);fclose(file);
-    printf("CAPTURED original d_integrate_trapezoidal: 64 finite float4 records. WebGPU translation still blocked on double arithmetic.\n");
+    printf("CAPTURED original d_integrate_trapezoidal: 64 finite float4 records.\n");
     CHECK(cudaDestroySurfaceObject(integratedSurface));CHECK(cudaFreeArray(integratedArray));
+    for(int size:{37,1024}){
+        CHECK(cudaMallocArray(&integratedArray,&desc,size,0,cudaArraySurfaceLoadStore));resource.res.array.array=integratedArray;CHECK(cudaCreateSurfaceObject(&integratedSurface,&resource));
+        d_integrate_trapezoidal<<<(size+31)/32,32>>>(make_cudaExtent(size,0,0),texture,integratedSurface);CHECK(cudaGetLastError());CHECK(cudaDeviceSynchronize());
+        output.resize(size);CHECK(cudaMemcpyFromArray(output.data(),integratedArray,0,0,size*sizeof(float4),cudaMemcpyDeviceToHost));
+        char path[128];snprintf(path,sizeof(path),"reports/volume-transfer-%d-native.bin",size);file=fopen(path,"wb");if(!file)return 2;fwrite(output.data(),sizeof(float4),size,file);fclose(file);
+        printf("CAPTURED unchanged integration kernel: %d records.\n",size);CHECK(cudaDestroySurfaceObject(integratedSurface));CHECK(cudaFreeArray(integratedArray));
+    }
     CHECK(cudaDestroyTextureObject(texture));CHECK(cudaDestroySurfaceObject(surface));CHECK(cudaFreeArray(array));
     CHECK(cudaFree(deviceInput));CHECK(cudaFree(deviceOutput));return 0;
 }

@@ -20,7 +20,7 @@ const bad=[
  ['double pointer','__global__ void k(double* x){}',/Unsupported type/],
  ['float3 ABI','__global__ void k(float3* x){}',/incompatible/],
  ['bool ABI','__global__ void k(bool* x){}',/incompatible/],
- ['double literal',wrap('output[0]=0.5;'),/suffix/],
+ ['double storage',wrap('double x=0.5;output[0]=x;'),/Expected|unsupported/],
  ['float atomics',wrap('atomicAdd(&output[0],1.0f);'),/integer atomics/],
  ['dynamic shared',wrap('extern __shared__ float a[];'),/sharedMemoryBytes/],
  ['local pointer',wrap('float a[4];float* x=a;'),/Local pointers/],

@@ -1,0 +1,38 @@
+{
+  "softwareAdapterRequested": false,
+  "results": [
+    {
+      "name": "Integer-limb binary64 arithmetic matches native CUDA bits",
+      "pass": true,
+      "pairs": 8817,
+      "results": 88170,
+      "compiledExpressions": 52902,
+      "bitExactExceptNaNPayloads": true,
+      "softwareAdapterRequested": false,
+      "wallMs": 839.9050000011921
+    },
+    {
+      "name": "Original volume transfer integration matches native CUDA",
+      "pass": true,
+      "comparisons": [
+        {
+          "size": 64,
+          "components": 256,
+          "maxError": 0
+        },
+        {
+          "size": 37,
+          "components": 148,
+          "maxError": 0
+        },
+        {
+          "size": 1024,
+          "components": 4096,
+          "maxError": 0
+        }
+      ],
+      "originalKernelUnchanged": true,
+      "wallMs": 209.37999999523163
+    }
+  ]
+}
