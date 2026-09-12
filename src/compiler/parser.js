@@ -330,6 +330,13 @@ export class Parser {
   }
   statement() {
     const token = this.peek();
+    if(this.match('asm')||this.match('__asm__')){
+      this.match('volatile');this.take('(');let instruction='';while(this.peek().kind==='string')instruction+=this.take().value.slice(1,-1);
+      if(!/^\s*vabsdiff4\.u32\.u32\.u32\.add\s+%0\s*,\s*%1\s*,\s*%2\s*,\s*%3\s*;\s*$/.test(instruction))this.fail('Inline PTX supports only vabsdiff4.u32.u32.u32.add with four positional registers.',token);
+      this.take(':');this.take('"=r"');this.take('(');const left=this.expression();this.take(')');this.take(':');const args=[];
+      for(let i=0;i<3;i++){if(i)this.take(',');this.take('"r"');this.take('(');args.push(this.expression());this.take(')');}
+      this.take(')');this.take(';');if(left.kind!=='id')this.fail('PTX output requires a named 32-bit integer register.',token);return {kind:'expr',token,value:{kind:'assign',op:'=',token,left,right:{kind:'ptx-sad4',token,args,outputName:left.name}}};
+    }
     if(this.match('do')){const body=this.statement();this.take('while');this.take('(');const condition=this.expression();this.take(')');this.take(';');return {kind:'do',token,body,condition};}
     if(this.groupNamespaces.has(token.value)&&this.peek(1).value==='::'&&this.peek(2).value==='thread_block'){
       this.qualifiedName();const name=this.name();this.take('=');const factory=this.qualifiedName();this.take('(');this.take(')');this.take(';');

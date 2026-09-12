@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {compile} from '../src/compiler/compiler.js';import {executeCPU} from '../src/compiler/cpu-oracle.js';
+const source=readFileSync('tests/ptx-sad-kernel.cuh','utf8');
+test('Original NVIDIA SIMD SAD helper sums unsigned byte distances and wraps accumulator',()=>{const a=compile(source,{workgroupSize:[1,1,1]}),input=Uint32Array.from([0,0xffffffff,0,0x01020304,0x04030201,0xffffffff,0xff000080,0x008000ff,123]),output=new Uint32Array(3);executeCPU(a,{input,output},{n:3},[3]);assert.deepEqual([...output],[1020,7,633]);});
+test('Inline PTX rejects unsupported instructions, constraints, clobbers and register types',()=>{for(const changed of [source.replace('vabsdiff4.u32.u32.u32.add','vadd4.u32.u32.u32.add'),source.replace('"=r"','"+r"'),source.replace('"r"(C));','"r"(C):"memory");'),source.replace('unsigned int result;','float result;'),source.replace('unsigned int A','float A')])assert.throws(()=>compile(changed));});
+

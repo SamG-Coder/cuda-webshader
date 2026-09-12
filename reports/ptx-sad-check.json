@@ -1,0 +1,8 @@
+{
+  "name": "Original NVIDIA inline PTX SAD matches native",
+  "pass": true,
+  "components": 4100,
+  "nativeExact": true,
+  "independentByteSumExact": true,
+  "wallMs": 28.46000000834465
+}

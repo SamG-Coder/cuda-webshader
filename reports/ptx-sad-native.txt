@@ -1,0 +1,1 @@
+Captured 4100 original NVIDIA __usad4 results, including unsigned lanes and wrapping accumulators.

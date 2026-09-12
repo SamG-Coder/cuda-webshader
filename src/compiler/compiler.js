@@ -239,6 +239,13 @@ class Emitter {
         if (!size || n.member.length !== 1 || 'xyzw'.indexOf(n.member) < 0 || 'xyzw'.indexOf(n.member) >= size) this.fail('Only valid single vector components (.x/.y/.z/.w) are supported.', n);
         return this.result(n, vectorElement(base.type), `${base.code}.${n.member}`, base.pre, {rootSymbol: base.rootSymbol});
       }
+      case 'ptx-sad4': {
+        const output=this.expr({kind:'id',name:n.outputName,token:n.token},true);if(!['u32','i32'].includes(output.type))this.fail('PTX output requires a 32-bit integer register.',n);
+        const values=n.args.map(a=>this.expr(a)),pre=[],names=[];
+        for(const v of values){if(!['u32','i32'].includes(v.type))this.fail('PTX r operands require 32-bit integers.',n);const name='cw_sad_'+this.temp++;pre.push(...v.pre,`let ${name}: u32 = u32(${v.code});`);names.push(name);}
+        const [a,b,c]=names,terms=[0,8,16,24].map(shift=>`u32(abs(i32((${a} >> ${shift}u) & 255u) - i32((${b} >> ${shift}u) & 255u)))`);
+        return this.result(n,'u32',`(${c} + ${terms.join(' + ')})`,pre);
+      }
       case 'cast': {
         if(n.target==='cw_uchar'&&n.value.kind==='binary'&&n.value.op==='*'){
           const doubleInteger=a=>a.kind==='literal'&&/[.eE]/.test(a.value)&&!/^0[xX]/.test(a.value)&&!/[fFuU]$/.test(a.value)&&Number.isInteger(Number(a.value))&&Number(a.value)>=1&&Number(a.value)<=65535;

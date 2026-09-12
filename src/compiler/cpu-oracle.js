@@ -72,6 +72,7 @@ class Context {
         if(n.base.kind==='id'&&this.ids[n.base.name])return this.ids[n.base.name]['xyz'.indexOf(n.member)];
         const base=yield* this.eval(n.base);if(n.base.type==='cw_uchar4')return(base>>>('xyzw'.indexOf(n.member)*8))&255;return base[typeof n.base.type==='string'&&n.base.type.startsWith('cw_struct_')?n.member:'xyzw'.indexOf(n.member)];
       }
+      case 'ptx-sad4':{const values=[];for(const a of n.args)values.push((yield* this.eval(a))>>>0);let sum=values[2];for(let shift=0;shift<32;shift+=8)sum+=Math.abs(((values[0]>>>shift)&255)-((values[1]>>>shift)&255));return sum>>>0;}
       case 'cast':if(n.byteScale!==undefined)return convert((yield* this.eval(n.byteScaleValue))*n.byteScale,n.target);return convert(yield* this.eval(n.value),n.target);
       case 'unary':{
         if(['++','--'].includes(n.op)){const r=yield* this.ref(n.value),old=r.get(),value=convert(old+(n.op==='++'?1:-1),n.type);r.set(value);return n.prefix?value:old;}
