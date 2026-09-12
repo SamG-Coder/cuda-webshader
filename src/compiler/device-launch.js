@@ -20,12 +20,13 @@ function launchConstants(fn,constantValue){
 }
 // Explicit producer stage for a bounded GPU child-launch queue.
 // Queue production alone does not execute the queued child work.
-export function launchQueues(e,walk,constantValue){
+export function launchQueues(e,walk,constantValue,pointerParts){
  const options=e.options.deviceLaunchQueue;if(options===undefined)return [];
  if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(k=>k!=='maxLaunches')||!Number.isInteger(options.maxLaunches)||options.maxLaunches<1||options.maxLaunches>65535)e.fail('deviceLaunchQueue requires maxLaunches in 1..65535.',e.kernel);
  if(!e.persistentObjects)e.fail('Device launch queues require objectHeap: persistent.',e.kernel);
  const queues=[];
- for(const caller of e.ast.functions){const constants=launchConstants(caller,constantValue);walk(caller.body,n=>{
+ for(const caller of e.ast.functions){const constants=launchConstants(caller,constantValue),aliases=new Map();walk(caller.body,n=>{if(n.kind==='decl'){if(aliases.has(n.name))aliases.set(n.name,null);else aliases.set(n.name,pointerParts(n.init)?.base?.name||null);}});
+ const rootOf=(name,seen=new Set())=>{if(seen.has(name))return null;if(caller.params.some(p=>p.name===name))return name;seen.add(name);return aliases.get(name)?rootOf(aliases.get(name),seen):null;};walk(caller.body,n=>{
   if(n.kind!=='device-launch')return;
   if(caller.qualifier!=='__global__')e.fail('Device launches in helpers are not supported yet.',n);
   const child=e.ast.functions.find(f=>f.name===n.callee.name&&f.qualifier==='__global__');if(!child)e.fail('Child launch must name a declared global kernel.',n);
@@ -35,11 +36,12 @@ export function launchQueues(e,walk,constantValue){
   let block;try{block=constants.get(n)(n.configuration[1]);}catch{}if(!Number.isInteger(block)||block<1||block>1024)e.fail('Child block size must be a constant in 1..1024.',n);
   const scalars=[],buffers=[];for(let i=0;i<child.params.length;i++){
    const p=child.params[i],arg=n.args[i];
-   if(p.pointer){const parent=caller.params.find(x=>arg.kind==='id'&&x.name===arg.name);if(!parent?.pointer||p.type!==parent.type)e.fail('Child buffer arguments must be matching named parent buffers.',arg);buffers.push({name:p.name,parent:parent.name,type:p.type});}
+   if(p.pointer){const root=rootOf(pointerParts(arg)?.base?.name),parent=caller.params.find(x=>x.name===root);if(!parent?.pointer||p.type!==parent.type)e.fail('Child buffer arguments must derive from matching named parent buffers.',arg);if(parent.constant&&!p.constant)e.fail('Child buffer arguments cannot discard const.',arg);buffers.push({name:p.name,parent:parent.name,type:p.type,argument:i});}
    else if(!p.reference&&e.structs.has(p.type)){for(const leaf of recordLeaves(e,p.type,p))scalars.push({name:p.name+'.'+leaf.path.join('.'),type:leaf.type,recordType:p.type,path:leaf.path,argument:i,word:3+scalars.length});}
    else{if(p.reference||!['i32','u32','f32'].includes(p.type))e.fail('Child queue scalar arguments require 32-bit integer or float values.',p);scalars.push({name:p.name,type:p.type,argument:i,word:3+scalars.length});}
   }
-  const id=queues.length,stride=3+scalars.length,queue={id,name:'launch_queue_'+id,caller:caller.name,child:child.name,childEntry,capacity:options.maxLaunches,block:[block,1,1],sharedMemoryBytes,stride,scalars,buffers,binding:e.objectHeaps.size+e.objectImports.length+e.deviceHeaps.size+id,byteLength:16+options.maxLaunches*stride*4,variable:'cw_launch_queue_'+id};
+  buffers.forEach((b,i)=>b.offsetWord=3+scalars.length+i);
+  const id=queues.length,stride=3+scalars.length+buffers.length,queue={id,name:'launch_queue_'+id,caller:caller.name,child:child.name,childEntry,capacity:options.maxLaunches,block:[block,1,1],sharedMemoryBytes,stride,scalars,buffers,binding:e.objectHeaps.size+e.objectImports.length+e.deviceHeaps.size+id,byteLength:16+options.maxLaunches*stride*4,variable:'cw_launch_queue_'+id};
   queue.recordLayout=JSON.stringify({caller:queue.caller,child:queue.child,childEntry,capacity:queue.capacity,stride,scalars,buffers,block:queue.block,sharedMemoryBytes});n.queueId=id;queues.push(queue);
  });}
  return queues;
@@ -52,9 +54,11 @@ export function emitLaunch(e,n){
  const q=e.launchQueues.find(q=>q.id===n.queueId);if(!q)e.fail('Device child-kernel launches require GPU scheduling support.',n);
  const grid=e.expr(n.configuration[0]);if(!['i32','u32','f32'].includes(grid.type))e.fail('Child grid must be a one-dimensional scalar.',n);
  const name='cw_launch_'+e.temp++,pre=[...grid.pre,`let ${name}_grid=${grid.code};`],values=[];
+ const pointerGuards=[];
+ for(const buffer of q.buffers){const value=e.argument(n.args[buffer.argument]),root=value.rootSymbol;if(!root||!['buffer','buffer-alias'].includes(root.kind)||root.rootBufferName!==buffer.parent||value.type.element!==buffer.type)e.fail('Child pointer must retain its original typed storage allocation.',n.args[buffer.argument]);const local=name+'_offset_'+buffer.offsetWord;pre.push(...value.pre,`let ${local}: i32 = ${value.pointerCode||'0i'};`);values.push({word:buffer.offsetWord,code:`bitcast<u32>(${local})`});pointerGuards.push(`${local}>=0i && u32(${local})<=arrayLength(&${value.code})`);}
  const records=new Map();
  for(const scalar of q.scalars){let value;if(scalar.path){let snapshot=records.get(scalar.argument);if(!snapshot){const record=e.expr(n.args[scalar.argument]);if(record.type!==scalar.recordType)e.fail('Child record argument type must match.',n.args[scalar.argument]);snapshot=name+'_record_'+scalar.argument;pre.push(...record.pre,`let ${snapshot}=${record.code};`);records.set(scalar.argument,snapshot);}value={type:scalar.type,code:snapshot+scalar.path.map(p=>'.cw_field_'+p).join(''),pre:[]};}else value=e.expr(n.args[scalar.argument]);const code=e.convert(value.code,value.type,scalar.type,n.args[scalar.argument]),local=name+'_'+scalar.word;pre.push(...value.pre,`let ${local}=${code};`);values.push({word:scalar.word,code:scalar.type==='u32'?local:scalar.type==='bool'?`select(0u,1u,${local})`:`bitcast<u32>(${local})`});}
  const max=grid.type==='f32'?'65535.0f':grid.type==='u32'?'65535u':'65535i',minimum=grid.type==='f32'?'1.0f':grid.type==='u32'?'1u':'1i';
- pre.push(`if(${name}_grid>=${minimum} && ${name}_grid<=${max}) {`,`let ${name}_slot=atomicAdd(&${q.variable}.count,1u);`,`if(${name}_slot<${q.capacity}u) {`,`let ${name}_base=${name}_slot*${q.stride}u;`,`${q.variable}.words[${name}_base]=u32(${name}_grid);`,`${q.variable}.words[${name}_base+1u]=1u;`,`${q.variable}.words[${name}_base+2u]=1u;`,...values.map(v=>`${q.variable}.words[${name}_base+${v.word}u]=${v.code};`),`} else { atomicStore(&${q.variable}.overflow,1u); }`,`} else { atomicStore(&${q.variable}.overflow,1u); }`);
+ pre.push(`if(${name}_grid>=${minimum} && ${name}_grid<=${max}${pointerGuards.length?' && '+pointerGuards.join(' && '):''}) {`,`let ${name}_slot=atomicAdd(&${q.variable}.count,1u);`,`if(${name}_slot<${q.capacity}u) {`,`let ${name}_base=${name}_slot*${q.stride}u;`,`${q.variable}.words[${name}_base]=u32(${name}_grid);`,`${q.variable}.words[${name}_base+1u]=1u;`,`${q.variable}.words[${name}_base+2u]=1u;`,...values.map(v=>`${q.variable}.words[${name}_base+${v.word}u]=${v.code};`),`} else { atomicStore(&${q.variable}.overflow,1u); }`,`} else { atomicStore(&${q.variable}.overflow,1u); }`);
  return e.result(n,'void','',pre);
 }

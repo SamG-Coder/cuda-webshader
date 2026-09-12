@@ -1,0 +1,29 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "result": {
+    "name": "Queued offset pointers preserve disjoint child ranges and reject invalid offsets",
+    "pass": true,
+    "childLaunches": 8,
+    "checkedValues": 40,
+    "invalidOffsetsRejected": 2,
+    "parentAliasMutationIsolated": true,
+    "wallMs": 86.33500000834465
+  }
+}

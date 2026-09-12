@@ -171,3 +171,22 @@ The full-source probe now explicitly binds nodes and points as class value
 buffers, matching the native host allocations. It stops at the offset child-node
 pointer, &children[child_offset]. Offset pointers, storage references, and full
 recursive execution remain before this can be a runnable quadtree showcase.
+
+## Offset child buffer pointers
+
+Child launches now retain element offsets into typed parent allocations, including
+local aliases and previously shifted parent pointers. Each buffer argument gets
+an offset word in the queue; the child starts its pointer at the captured offset.
+Negative and beyond-allocation offsets flag queue failure and do not launch work.
+Const removal and unrelated/local allocations remain rejected. The same offset
+initialization applies to registered scalar buffer imports.
+
+The GPU test checks eight children writing disjoint ranges, prefix/suffix sentinel
+preservation, later parent alias mutation, and rejection of two invalid offsets
+without output changes. All 661 unit and 216 real NVIDIA GPU tests pass. Bezier
+and path-tracer sandbox regressions pass. The Bezier queue inspection now reads
+the metadata stride rather than assuming the previous record width.
+
+The unchanged quadtree source reaches Points::get_point, which needs registered
+coordinate resources in the launch harness. Full storage references and recursive
+execution still remain; no quadtree showcase is published yet.

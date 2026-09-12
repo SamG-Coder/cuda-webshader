@@ -20,7 +20,7 @@ export async function checkBezierParent(runtime){
   const tiny=await runtime.kernel(tinySource,{entry:'parent',workgroupSize:[8],objectHeap:'persistent',deviceLaunchQueue:{maxLaunches:2}}),smallArena=runtime.createObjectArena(),out=runtime.createBuffer(32);
   try{
    runtime.batch().dispatch(tiny.bind({out},{grid:1},{objectArena:smallArena,queueOnly:true}),[1]).submit();const small=await runtime.read(smallArena.buffers[0],Uint32Array),floats=new Float32Array(small.buffer);
-   if(small[0]!==8||small[1]!==1)throw Error('Queue overflow was not recorded');const ids=new Set();for(let slot=0;slot<2;slot++){const base=4+slot*5,index=small[base+3];if(index>=8||ids.has(index)||floats[base+4]!==index*.25-3.5)throw Error('Queue argument snapshot mismatch');ids.add(index);}
+   if(small[0]!==8||small[1]!==1)throw Error('Queue overflow was not recorded');const ids=new Set();for(let slot=0;slot<2;slot++){const queue=tiny.artifact.metadata.deviceLaunchQueue.queues[0],base=4+slot*queue.stride,index=small[base+3];if(index>=8||ids.has(index)||floats[base+4]!==index*.25-3.5)throw Error('Queue argument snapshot mismatch');ids.add(index);}
    runtime.batch().clear(smallArena.buffers[0]).dispatch(tiny.bind({out},{grid:0.5},{objectArena:smallArena,queueOnly:true}),[1]).submit();const invalid=await runtime.read(smallArena.buffers[0],Uint32Array);if(invalid[0]!==0||invalid[1]!==1)throw Error('Invalid child grid was silently accepted');
   }finally{smallArena.dispose();runtime.destroyBuffer(out);}
   return {curves:256,queuedLaunches:256,countsMatchNative:true,originalParentBody:true,allocationAndCurvatureOnGpu:true,queueOverflow:false,overflowCaseVerified:true,argumentSnapshotsVerified:true,invalidGridRejected:true,allFreed:true,childrenExecuted:false};

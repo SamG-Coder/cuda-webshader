@@ -107,7 +107,7 @@ class Emitter {
     this.containsDevicePointer=type=>(String(type).startsWith('cw_deviceptr_')||String(type).startsWith('cw_bufferref_'))||isArray(type)&&this.containsDevicePointer(type.element)||this.structs.has(type)&&this.structs.get(type).fields.some(f=>this.containsDevicePointer(f.resolvedType));
     for(const heap of this.objectHeaps.values()){heap.aliveCode=heap.code+'_alive';if(this.persistentObjects){const layout=storageLayout(heap.type);heap.binding=this.objectHeaps.size?heap.tag-1:0;heap.byteLength=Math.ceil((heap.capacity*4)/layout.align)*layout.align+layout.size*heap.capacity;heap.recordLayout=JSON.stringify([...this.structs.values()].map(s=>({type:s.type,fields:s.fields.map(f=>({name:f.name,type:f.resolvedType}))})));heap.variable=heap.code+'_storage';heap.code=heap.variable+'.objects';heap.aliveCode=heap.variable+'.alive';}}
     this.deviceHeaps=deviceHeaps(this);
-    this.launchQueues=launchQueues(this,walk,constantValue);
+    this.launchQueues=launchQueues(this,walk,constantValue,pointerParts);
     if(options.deviceLaunchConsumer!==undefined){
       this.launchConsumer=this.launchQueues.find(q=>q.id===options.deviceLaunchConsumer&&q.child===kernel.name);
       if(!this.launchConsumer||this.launchQueues.some(q=>q.caller===kernel.name))this.fail('Queue consumers require a matching leaf child kernel.',kernel);
@@ -975,7 +975,7 @@ class Emitter {
     for(const s of this.structs.values())header.push(`struct ${s.type} {`,...s.fields.map(f=>`  cw_field_${f.name}: ${typeName(f.resolvedType)},`),'}');
     const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t==='f32'?'u32':t}>`;
     for (const p of [...this.kernel.params,...this.deviceParams]) {
-      const imported=this.objectImports.find(i=>i.name===p.name);if(imported&&p.pointer){const symbol={name:p.name,rootBufferName:p.name,type:arrayOf(p.type),code:'cw_import_'+imported.id,constant:p.constant,atomic:false,kind:'buffer',objectImport:imported};this.add(p.name,symbol,p,true);p.symbol=symbol;this.bufferSymbols.set(p.name,symbol);continue;}
+      const imported=this.objectImports.find(i=>i.name===p.name);if(imported&&p.pointer){const symbol={name:p.name,rootBufferName:p.name,type:arrayOf(p.type),code:'cw_import_'+imported.id,constant:p.constant,atomic:false,kind:'buffer',objectImport:imported,...(shiftedPointers(this.kernel).has(p.name)||this.launchConsumer?.buffers.some(b=>b.name===p.name)?{offsetCode:'cw_pointer_'+p.name}:{})};this.add(p.name,symbol,p,true);p.symbol=symbol;this.bufferSymbols.set(p.name,symbol);continue;}
       if (p.shared || p.reference || p.external || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
       if(!p.pointer&&this.structs.has(p.type)){
         const leaves=recordLeaves(this,p.type,p),codes=new Map();
@@ -1016,7 +1016,7 @@ class Emitter {
         if (atomic && !['i32', 'u32','cw_uchar4','cw_uchar'].includes(p.type)) this.fail('Only 32-bit integer atomics are supported.', p);
         const binding = bindings.length;
         if(canonical===p.name)bindings.push({name: p.name, elementType: p.type, stride: p.storageStride||(p.type==='cw_uchar'?1:typeStride(p.type)), binding, readOnly, atomic,...(p.origin?{origin:p.origin,count:p.count,minBindingSize:p.count*(p.storageStride||typeStride(p.type)),...(p.fields?{fields:p.fields,storageType:'u32'}:{})}:{})});
-        const symbol = {name: p.name, rootBufferName:canonical, type: arrayOf(p.type), code: `b_${canonical}`, constant: p.constant, atomic, kind: 'buffer',...(p.origin?{deviceGlobal:true}:{}),...(!p.origin&&shiftedPointers(this.kernel).has(p.name)?{offsetCode:'cw_pointer_'+p.name}:{})};
+        const symbol = {name: p.name, rootBufferName:canonical, type: arrayOf(p.type), code: `b_${canonical}`, constant: p.constant, atomic, kind: 'buffer',...(p.origin?{deviceGlobal:true}:{}),...(!p.origin&&(shiftedPointers(this.kernel).has(p.name)||this.launchConsumer?.buffers.some(b=>b.name===p.name))?{offsetCode:'cw_pointer_'+p.name}:{})};
         if(p.origin)this.globalSymbols.set(p.name,symbol);else this.add(p.name, symbol, p, true); p.symbol = symbol;if(p.origin)(p.origin==='constant-struct-storage'?this.ast.constantGlobals:this.ast.deviceGlobals).find(g=>g.name===p.name).symbol=symbol;this.bufferSymbols.set(p.name,symbol);
         if(canonical===p.name)header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type}>` : p.type==='cw_uchar'?'u32':p.type}>;`);
       } else {
@@ -1061,7 +1061,7 @@ class Emitter {
     }};
     emitHelpers();
     this.scopes = kernelScope; this.currentFunction = this.kernel;
-    const main = [...recordParameterLines,...this.kernel.params.filter(p=>p.pointer&&p.symbol.offsetCode).map(p=>`var ${p.symbol.offsetCode}: i32 = 0i;`),...this.body(this.kernel.body)];
+    const main = [...recordParameterLines,...this.kernel.params.filter(p=>p.pointer&&p.symbol.offsetCode).map(p=>`var ${p.symbol.offsetCode}: i32 = ${this.launchConsumer?.buffers.some(b=>b.name===p.name)?'bitcast<i32>('+this.launchConsumer.variable+'.words[cw_params.p_cw_launch_slot*'+this.launchConsumer.stride+'u+'+this.launchConsumer.buffers.find(b=>b.name===p.name).offsetWord+'u])':'0i'};`),...this.body(this.kernel.body)];
     emitHelpers();this.scopes=kernelScope;this.currentFunction=this.kernel;
     for(const surface of surfaces)header.push(`@group(0) @binding(${surface.binding}) var cw_surface_${surface.name}: texture_storage_${surface.dimension.replace('-','_')}<${surface.format}, write>;`);
     for(const scalar of this.constantScalars)scalars.push({...scalar,offset:scalars.length*4});
