@@ -30,12 +30,12 @@ The manifest records source and image hashes. This is a native baseline,
 `main.cu` directly stops at its external includes. The compiler now parses plain
 public value classes, constructors, array fields and const methods, lowering
 them to records and device helpers. The isolated `vec3.h` probe now reaches
-compound addition operator declaration before stopping; the scene header
+the host-only stream operators before stopping; the scene header
 still stops at its forward class declaration. Const unary signs, indexed reads and writes now compile. No original function bodies are rewritten by those probes.
 
-The class-stage test compares 512 cases with **8,704 values matching native
+The class-stage test compares 512 cases with **19,456 values matching native
 CUDA exactly**, covering construction, copying, accessors, squared length,
-unary signs, dynamic indexed reads/writes, compound indexed updates and assignment copy isolation. Native
+unary signs, dynamic indexed reads/writes, compound indexed updates, all six compound vector/scalar operators, normalization and assignment copy isolation. Native
 compilation uses the complete original `vec3.h`; the GPU fixture retains the
 unchanged supported method bodies and explicitly omits unsupported methods.
 This is a focused language test, not support for the complete header or path
@@ -46,11 +46,16 @@ incorrect shared value after copying a class containing an array. The emitter
 now constructs independent aggregate fields explicitly for initialization and
 assignment. Both copy cases match native CUDA; the precise backend cause has
 not been isolated. The full regression run passes 197 GPU checks with no
-software adapter requested, alongside 611 unit tests.
+software adapter requested, alongside 612 unit tests.
 
 Writable indexing currently accepts the original `return field[index]` reference
 accessor and lowers it to an lvalue into the original receiver. It does not
-claim general reference-returning methods or mutable method support.
+claim general reference-returning methods. Mutable void methods and compound
+operators ending in `return *this` now use a reference to the receiver.
+Out-of-class definitions must match their declared signature. Compound class
+operators currently work as statements; aliasing reference arguments remain
+rejected. The device-only probe explicitly omits host stream operators and
+then stops at the first free binary operator overload.
 
 Source inspection identifies the following connected work:
 

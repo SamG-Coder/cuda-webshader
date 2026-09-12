@@ -7,7 +7,12 @@
   {
     "file": "vec3.h",
     "compiled": false,
-    "error": "This class operator overload is not yet supported. (20:5)\n    __host__ __device__ inline vec3& operator+=(const vec3 &v2);\r\n    ^"
+    "error": "Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported. (37:1)\ninline std::istream& operator>>(std::istream &is, vec3 &t) {\r\n^"
+  },
+  {
+    "file": "vec3-device-only",
+    "compiled": false,
+    "error": "Expected '(', found '+'. (46:41)\n__host__ __device__ inline vec3 operator+(const vec3 &v1, const vec3 &v2) {\r\n                                        ^"
   },
   {
     "file": "hitable.h",

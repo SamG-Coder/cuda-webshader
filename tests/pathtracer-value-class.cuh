@@ -1,5 +1,5 @@
 // Focused fixture: unchanged supported methods from Roger Allen vec3.h.
-// General mutable methods and binary operators remain unsupported.
+// Free binary operators and host stream operators remain outside this fixture.
 class vec3  {
 
 
@@ -18,5 +18,61 @@ public:
     __host__ __device__ inline vec3 operator-() const { return vec3(-e[0], -e[1], -e[2]); }
     __host__ __device__ inline float operator[](int i) const { return e[i]; }
     __host__ __device__ inline float& operator[](int i) { return e[i]; };
+    __host__ __device__ inline vec3& operator+=(const vec3 &v2);
+    __host__ __device__ inline vec3& operator-=(const vec3 &v2);
+    __host__ __device__ inline vec3& operator*=(const vec3 &v2);
+    __host__ __device__ inline vec3& operator/=(const vec3 &v2);
+    __host__ __device__ inline vec3& operator*=(const float t);
+    __host__ __device__ inline vec3& operator/=(const float t);
+    __host__ __device__ inline void make_unit_vector();
     float e[3];
 };
+
+__host__ __device__ inline void vec3::make_unit_vector() {
+    float k = 1.0 / sqrt(e[0]*e[0] + e[1]*e[1] + e[2]*e[2]);
+    e[0] *= k; e[1] *= k; e[2] *= k;
+}
+
+__host__ __device__ inline vec3& vec3::operator+=(const vec3 &v){
+    e[0]  += v.e[0];
+    e[1]  += v.e[1];
+    e[2]  += v.e[2];
+    return *this;
+}
+
+__host__ __device__ inline vec3& vec3::operator*=(const vec3 &v){
+    e[0]  *= v.e[0];
+    e[1]  *= v.e[1];
+    e[2]  *= v.e[2];
+    return *this;
+}
+
+__host__ __device__ inline vec3& vec3::operator/=(const vec3 &v){
+    e[0]  /= v.e[0];
+    e[1]  /= v.e[1];
+    e[2]  /= v.e[2];
+    return *this;
+}
+
+__host__ __device__ inline vec3& vec3::operator-=(const vec3& v) {
+    e[0]  -= v.e[0];
+    e[1]  -= v.e[1];
+    e[2]  -= v.e[2];
+    return *this;
+}
+
+__host__ __device__ inline vec3& vec3::operator*=(const float t) {
+    e[0]  *= t;
+    e[1]  *= t;
+    e[2]  *= t;
+    return *this;
+}
+
+__host__ __device__ inline vec3& vec3::operator/=(const float t) {
+    float k = 1.0/t;
+
+    e[0]  *= k;
+    e[1]  *= k;
+    e[2]  *= k;
+    return *this;
+}

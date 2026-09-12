@@ -1,5 +1,5 @@
 /** A deliberately bounded CUDA C frontend. No eval, regex transpilation, or source-specific rewrites. */
-import {parseValueClass} from './value-classes.js';
+import {parseValueClass,finishValueClasses,parseExternalValueMethod} from './value-classes.js';
 import {forwardingMacro,expressionMacro} from './macros.js';
 import {integerExpression} from './integer-expression.js';
 export class CompileError extends Error {
@@ -255,6 +255,7 @@ export class Parser {
       if(this.is('__launch_bounds__')){if(launchThreads!==null)this.fail('Duplicate launch bounds.');launchBounds();}
       if(launchThreads!==null&&qualifier!=='__global__')this.fail('Launch bounds apply only to kernels.',token);
       const result = this.type();
+      if(this.structs.has(this.peek().value)&&this.peek(1).value==='::'){parseExternalValueMethod(this,result,qualifier,token);continue;}
       if (result.pointer || result.shared || result.reference || result.external || result.type==='cw_extent') this.fail('Function return pointers/references/shared/extern qualifiers are unsupported.');
       if(this.peek().forward||this.peek().expressionMacro)this.fail('Function-like macros are supported at call sites, not in function declarations.');
       const name = this.name();
@@ -275,6 +276,7 @@ export class Parser {
       this.take(')'); const body = this.block();
       functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads,templateParameter,templateParameters,templateKind,...(specializationArgument!==undefined?{specializationArgument}:{})});
     }
+    finishValueClasses(this);
     if (!functions.some(f => f.qualifier === '__global__')) this.fail('No __global__ kernel was found.');
     for(const g of deviceGlobals)if(constantGlobals.some(c=>c.name===g.name)||sharedGlobals.some(c=>c.name===g.name)||functions.some(f=>f.name===g.name))this.fail('Duplicate global storage name.',g.token);
     return {kind: 'module', functions:functions.concat(this.staticFunctions), constantGlobals,sharedGlobals,deviceGlobals,typeAliases:Object.fromEntries(this.typeAliases),structs:[...this.structs.values()],typeTraits:[...this.typeTraits.values()], source: this.source};
