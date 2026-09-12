@@ -119,3 +119,19 @@ and path-tracer sandbox checks.
 The unchanged full-source probe now stops at `volatile int *s_num_pts[4]` in the
 quadtree kernel. Shared pointer-array volatility and the remaining recursive
 execution interfaces still need support. No quadtree showcase is published yet.
+
+## Volatile shared pointer arrays
+
+The compiler accepts local arrays of volatile int/unsigned-int shared pointers,
+including the original quadtree's `(volatile int *)&smem[...]` assignments.
+Slots retain evaluated element offsets into one shared allocation. The allocation
+uses WGSL atomic storage, and reads/writes through slots retain atomic access.
+This preserves individual memory accesses; CUDA synchronization still needs its
+own translated barriers. Casts cannot change element types or remove qualifiers.
+
+A 32-lane hardware test checks 128 cross-lane values through four shared pointer
+slots, with a CPU reference check and negative tests. All 653 unit and 213 real
+NVIDIA GPU tests pass, plus Bezier/path-tracer sandbox regressions. The unchanged
+complete source now parses through this declaration and reaches the templated
+recursive launch at line 546. Full recursive execution and storage-record
+references remain required; no quadtree showcase is claimed by this stage.

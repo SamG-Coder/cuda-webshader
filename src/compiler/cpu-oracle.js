@@ -97,7 +97,7 @@ class Context {
       }
       case 'conditional':return convert(yield* this.eval((yield* this.eval(n.condition))?n.yes:n.no),n.type);
       case 'assign':{
-        if(n.pointerArrayAssignment){const target=yield* this.ref(n.left),offset=yield* this.eval(n.right.value.index);target.set(convert(offset,'i32'));return offset;}
+        if(n.pointerArrayAssignment){const target=yield* this.ref(n.left),offset=yield* this.eval(n.pointerArrayOffset||n.right.value.index);target.set(convert(offset,'i32'));return offset;}
         if(n.pointerRebind){let base=n.right.pointerArrayElement?yield* this.eval(n.right):this.env.get(n.right.pointerBaseSymbol)?.value;const offset=n.right.pointerOffset?yield* this.eval(n.right.pointerOffset):0;if(Array.isArray(base))base=new BufferView(base,n.right.pointerBaseSymbol.type.element);if(!(base instanceof BufferView))throw Error('Expected pointer allocation.');const result=new BufferView(base.data,base.type,convert(base.offset+convert(offset,'i32'),'i32'));this.env.get(n.left.symbol).value=result;return result;}
         if(n.pointerShift){const cell=this.env.get(n.left.symbol),base=cell.value,delta=yield* this.eval(n.right);if(!(base instanceof BufferView))throw Error('Expected a storage pointer.');const offset=binary(n.op==='+='?'+':'-',base.offset,convert(delta,'i32'),'i32');cell.value=new BufferView(base.data,base.type,offset);return cell.value;}
         let target,value;if(n.packedAtomicAssignment||n.destinationEffects){value=yield* this.eval(n.right);target=yield* this.ref(n.left);}else{target=yield* this.ref(n.left);value=yield* this.eval(n.right);}

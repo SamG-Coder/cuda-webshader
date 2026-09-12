@@ -258,6 +258,7 @@ class Emitter {
         const atomic=s.atomic&&!isArray(s.type);return this.result(n, s.type, atomic&&!raw?(s.volatileShared&&s.type==='f32'?`bitcast<f32>(atomicLoad(&${s.code}))`:`atomicLoad(&${s.code})`):s.code, [], {rootSymbol: s, atomicRoot: s.atomic,atomic});
       }
       case 'index': {
+        if(n.base.kind==='pointer-cast'&&n.base.volatilePointer)this.fail('Volatile pointer casts require shared pointer slot assignment.',n);
         if(n.base.kind==='pointer-cast'&&n.base.target==='cw_uchar2') {
           const cast=n.base,pointer=this.argument(cast.value),index=this.expr(n.index);
           if(pointer.type?.element!=='cw_uchar'||!pointer.rootSymbol?.rootBufferName||!['i32','u32'].includes(index.type))this.fail('uchar2 pointer views require byte storage and an integer index.',n);
@@ -316,7 +317,7 @@ class Emitter {
           if(!['i32','u32'].includes(index.type))this.fail('Pointer array indices must be 32-bit integers.',n);
           const temp='cw_shared_pointer_'+this.temp++;n.pointerArrayElement=true;n.pointerBaseSymbol=root;
           const pointerCode=temp,symbol={...root,kind:'buffer-alias',constant:slots.constant||root.constant,sharedPointer:root.code,offsetCode:pointerCode};
-          return this.result(n,arrayOf(slots.elementType),root.code,[...base.pre,...index.pre,`let ${temp}: i32 = ${slots.code}[${index.code}];`],{rootSymbol:symbol,pointerCode});
+          return this.result(n,arrayOf(slots.elementType),root.code,[...base.pre,...index.pre,`let ${temp}: i32 = ${slots.code}[${index.code}];`],{rootSymbol:symbol,pointerCode,atomicRoot:root.atomic});
         }
         if(String(base.type).startsWith('cw_bufferref_'))return bufferReferenceIndex(this,n,base,this.expr(n.index),raw);
         if(String(base.type).startsWith('cw_deviceptr_'))return deviceHeapIndex(this,n,base,index,raw);
@@ -802,13 +803,13 @@ class Emitter {
       }
       if(n.left.kind==='index'&&n.left.base.kind==='id'&&this.lookup(n.left.base.name,n.left).kind==='pointer-array'){
         if(n.destinationEffects)this.fail('Increment/decrement in shared pointer-array destinations is unsupported.',n);
-        const slots=this.lookup(n.left.base.name,n.left),address=n.right.kind==='unary'&&n.right.op==='&'?n.right.value:null;
+        const slots=this.lookup(n.left.base.name,n.left);let rhs=n.right;if(rhs.kind==='pointer-cast'){if(rhs.target!==slots.elementType||rhs.constant&&!slots.constant||rhs.volatilePointer&&!slots.volatilePointer)this.fail('Pointer array casts must preserve pointee type and qualifiers.',n);rhs=rhs.value;}const address=rhs.kind==='unary'&&rhs.op==='&'?rhs.value:null;
         if(n.op!=='='||address?.kind!=='index'||address.base.kind!=='id')this.fail('Pointer array assignments require a shared-array element address.',n);
-        const root=this.lookup(address.base.name,address);if(root.kind!=='shared'||root.atomic||!isArray(root.type)||root.type.element!==slots.elementType)this.fail('Pointer arrays require a matching non-atomic shared array.',n);
+        const root=this.lookup(address.base.name,address);if(root.kind!=='shared'||(root.atomic&&!slots.volatilePointer)||!isArray(root.type)||root.type.element!==slots.elementType)this.fail('Pointer arrays require a matching non-atomic shared array.',n);
         if(root.constant&&!slots.constant)this.fail('Cannot discard const in a pointer array.',n);
         if(slots.pointerRoot&&slots.pointerRoot!==root)this.fail('A pointer array must refer to one shared allocation.',n);
         slots.pointerRoot=root;const left=this.expr(n.left.base),index=this.expr(n.left.index),offset=this.expr(address.index);if(!['i32','u32'].includes(index.type)||!['i32','u32'].includes(offset.type))this.fail('Pointer array offsets must be 32-bit integers.',n);
-        n.pointerArrayAssignment=true;n.left.type='i32';n.type='i32';
+        n.pointerArrayAssignment=true;n.pointerArrayOffset=address.index;n.left.type='i32';n.type='i32';
         return [...left.pre,...index.pre,...offset.pre,`${slots.code}[${index.code}] = ${this.convert(offset.code,offset.type,'i32',n)};`];
       }
       const target = this.expr(n.left, true); this.writable(target, n.left); let value = String(target.type).startsWith('cw_bufferref_')?this.argument(n.right):this.expr(n.right);if(String(target.type).startsWith('cw_bufferref_')&&isArray(value.type)){const captured=bufferReferenceArgument(this,value,target.type,n);value={...value,...captured,type:target.type};}if(n.destinationEffects){if(target.packedAtomic||target.packedBase||target.packedPairComponents||target.scalarVectorComponents)this.fail('Increment/decrement in packed assignment destinations is unsupported.',n);const snapshot='cw_assignment_rhs_'+this.temp++;target.pre=[...value.pre,`let ${snapshot}: ${typeName(value.type)} = ${value.code};`,...target.pre];value={...value,code:snapshot,pre:[]};}let packedPre;if(target.packedAtomic){n.packedAtomicAssignment=true;const tmp='cw_byte_value_'+this.temp++;packedPre=[...value.pre,`let ${tmp}: ${typeName(value.type)} = ${value.code};`,...target.pre];value={...value,code:tmp,pre:[]};}
@@ -872,7 +873,7 @@ class Emitter {
     if(n.pointer&&n.dimensions.length){
       const length=n.dimensions.length===1?constantValue(n.dimensions[0]):null;
       if(n.shared||n.external||n.init||!Number.isInteger(length)||length<1||length>256||!(numeric(n.type)||vectorLength(n.type)))this.fail('Pointer arrays require 1..256 local slots and scalar/vector shared pointees.',n);
-      const code='v_'+n.name,symbol={name:n.name,kind:'pointer-array',type:arrayOf(arrayOf(n.type),length),elementType:n.type,code,constant:n.constant};this.add(n.name,symbol,n);n.symbol=symbol;n.resolvedDimensions=[length];n.resolvedType=arrayOf('i32',length);
+      const code='v_'+n.name,symbol={name:n.name,kind:'pointer-array',type:arrayOf(arrayOf(n.type),length),elementType:n.type,code,constant:n.constant,volatilePointer:!!n.volatilePointer};this.add(n.name,symbol,n);n.symbol=symbol;n.resolvedDimensions=[length];n.resolvedType=arrayOf('i32',length);
       return [`var ${code}: array<i32, ${length}>;`];
     }
     if(n.pointer){
@@ -891,7 +892,8 @@ class Emitter {
     for (let i = dims.length - 1; i >= 0; i--) type = arrayOf(type, dims[i]);
     if (n.shared && n.init) this.fail('__shared__ variables cannot have an initializer.', n);
     if (isArray(type) && n.init) this.fail('Array initializers are unsupported. Initialize elements explicitly.', n);
-    const atomic = n.shared && (n.volatileShared||analyse([this.currentFunction],[]).atomic.has(n.name));
+    let volatileAliased=false;if(n.shared){const slots=new Set();walk(this.currentFunction.body,x=>{if(x.kind==='decl'&&x.volatilePointer)slots.add(x.name);});walk(this.currentFunction.body,x=>{if(x.kind!=='assign'||x.left.kind!=='index'||!slots.has(x.left.base.name))return;const rhs=x.right.kind==='pointer-cast'?x.right.value:x.right;if(rhs.kind==='unary'&&rhs.op==='&'&&rhs.value.kind==='index'&&rhs.value.base.name===n.name)volatileAliased=true;});}
+    const atomic = n.shared && (volatileAliased||n.volatileShared||analyse([this.currentFunction],[]).atomic.has(n.name));
     if (atomic && !['i32', 'u32'].includes(n.type)&&!(n.volatileShared&&n.type==='f32')) this.fail('Shared atomics require int or unsigned int.', n);
     if(n.init?.kind==='initializer')n.init.target=type;
     const init = n.init ? this.expr(n.init) : null;
