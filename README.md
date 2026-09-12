@@ -478,3 +478,8 @@ The static build includes the project license, third-party notices and Three.js 
 ### NVIDIA 3D volume filtering
 
 [Try the volume filter in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=volume-filter). Run the unchanged NVIDIA filter on its original 32³ Bucky volume, compare CUDA/WGSL and move through the output with a Z-slice slider. Separate presets expose voxel coordinates, nearest sampling and the original normalized/wrap settings. Sixteen native volume captures match hardware WebGPU exactly for the tested configurations. [Supported scope and why upstream settings produce a flat volume](showcases/volume-filter/README.md).
+
+### NVIDIA marching cubes
+
+[Open the implicit 3D mesh in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=marching).
+Original NVIDIA kernels classify a 16³ field, compact voxels and generate 2,080 triangles with shared memory. Project CUDA scan kernels connect the stages on the GPU. Compare all generated shaders and orbit the resulting position/normal buffers directly. Native CUDA and hardware WebGPU agree within 1e-6 for every mesh component. [Setup, pipeline format and supported scope](showcases/marching-cubes/README.md). The sampled-volume pointer-array branch remains compiler work in progress.

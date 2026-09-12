@@ -1,0 +1,203 @@
+{
+  "defines": {
+    "_DEFINES_H_": 1,
+    "SAMPLE_VOLUME": 0,
+    "USE_SHARED": 1,
+    "NTHREADS": 32,
+    "SKIP_EMPTY_VOXELS": 1
+  },
+  "pipeline": {
+    "buffers": {
+      "voxelVerts": {
+        "type": "u32",
+        "records": 4096,
+        "fill": "zero"
+      },
+      "voxelOccupied": {
+        "type": "u32",
+        "records": 4096,
+        "fill": "zero"
+      },
+      "vertexScan": {
+        "type": "u32",
+        "records": 4096,
+        "fill": "zero"
+      },
+      "occupiedScan": {
+        "type": "u32",
+        "records": 4096,
+        "fill": "zero"
+      },
+      "compacted": {
+        "type": "u32",
+        "records": 4096,
+        "fill": "zero"
+      },
+      "vertexTotal": {
+        "type": "u32",
+        "records": 1,
+        "fill": "zero"
+      },
+      "occupiedTotal": {
+        "type": "u32",
+        "records": 1,
+        "fill": "zero"
+      },
+      "pos": {
+        "type": "vec4<f32>",
+        "records": 61440,
+        "fill": "zero"
+      },
+      "norm": {
+        "type": "vec4<f32>",
+        "records": 61440,
+        "fill": "zero"
+      },
+      "volume": {
+        "type": "cw_uchar",
+        "records": 4,
+        "fill": "zero"
+      }
+    },
+    "textures": {
+      "numVertsTex": {
+        "kind": "linear-u32",
+        "source": "showcases/marching-cubes/tables.json",
+        "key": "counts"
+      },
+      "triTex": {
+        "kind": "linear-u32",
+        "source": "showcases/marching-cubes/tables.json",
+        "key": "triangles"
+      },
+      "volumeTex": {
+        "kind": "volume-u8",
+        "dimensions": [
+          1,
+          1,
+          1
+        ],
+        "values": [
+          0
+        ]
+      }
+    },
+    "steps": [
+      {
+        "entry": "classifyVoxel",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          32,
+          1,
+          1
+        ],
+        "scalars": {
+          "gridSize.x": 16,
+          "gridSize.y": 16,
+          "gridSize.z": 16,
+          "gridSizeShift.x": 0,
+          "gridSizeShift.y": 4,
+          "gridSizeShift.z": 8,
+          "gridSizeMask.x": 15,
+          "gridSizeMask.y": 15,
+          "gridSizeMask.z": 15,
+          "voxelSize.x": 0.125,
+          "voxelSize.y": 0.125,
+          "voxelSize.z": 0.125,
+          "isoValue": 0.5,
+          "numVoxels": 4096
+        }
+      },
+      {
+        "scan": {
+          "source": "voxelVerts",
+          "target": "vertexScan",
+          "total": "vertexTotal",
+          "count": 4096
+        }
+      },
+      {
+        "scan": {
+          "source": "voxelOccupied",
+          "target": "occupiedScan",
+          "total": "occupiedTotal",
+          "count": 4096
+        }
+      },
+      {
+        "entry": "compactVoxels",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          32,
+          1,
+          1
+        ],
+        "bindings": {
+          "compactedVoxelArray": "compacted",
+          "voxelOccupiedScan": "occupiedScan"
+        },
+        "scalars": {
+          "numVoxels": 4096
+        }
+      },
+      {
+        "entry": "generateTriangles",
+        "block": [
+          32,
+          1,
+          1
+        ],
+        "groups": [
+          {
+            "buffer": "occupiedTotal",
+            "divideCeil": 32
+          },
+          1,
+          1
+        ],
+        "skipIfZero": {
+          "buffer": "occupiedTotal"
+        },
+        "bindings": {
+          "compactedVoxelArray": "compacted",
+          "numVertsScanned": "vertexScan"
+        },
+        "scalars": {
+          "gridSize.x": 16,
+          "gridSize.y": 16,
+          "gridSize.z": 16,
+          "gridSizeShift.x": 0,
+          "gridSizeShift.y": 4,
+          "gridSizeShift.z": 8,
+          "gridSizeMask.x": 15,
+          "gridSizeMask.y": 15,
+          "gridSizeMask.z": 15,
+          "voxelSize.x": 0.125,
+          "voxelSize.y": 0.125,
+          "voxelSize.z": 0.125,
+          "isoValue": 0.5,
+          "activeVoxels": {
+            "buffer": "occupiedTotal"
+          },
+          "maxVerts": 61440
+        }
+      }
+    ],
+    "preview": {
+      "kind": "triangles",
+      "positions": "pos",
+      "normals": "norm",
+      "count": {
+        "buffer": "vertexTotal"
+      }
+    }
+  }
+}

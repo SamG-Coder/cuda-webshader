@@ -91,3 +91,27 @@ The sequence produces 1,024 active voxels, 6,240 vertices and 2,080 triangles. A
 This completes the compute pipeline for the upstream implicit-field profile, not the entire candidate: generic sandbox mesh presentation and the sampled-volume pointer-array path are still outstanding. The GPU scan supplies the host-library primitive used between the unchanged NVIDIA kernels; it is identified as project integration code rather than an NVIDIA kernel.
 
 Validation for the GPU scan and connected implicit pipeline: 475 unit tests, 140 hardware GPU checks, native captures, compile-all and static build pass.
+
+## Generic sandbox pipeline and mesh showcase
+
+The original implicit-field profile now has a standalone showcase card linking
+only to the sandbox. A generic declarative pipeline supplies buffers, lookup
+textures, dispatches, GPU exclusive scans and uint control values; the preview
+reads positions and normals from the exact GPU buffers written by the compiled
+CUDA kernels. No per-sample JavaScript meshing algorithm is used.
+
+The built sandbox produces 6,240 vertices / 2,080 triangles and matches all native
+position/gradient components within the previously measured errors. Execution
+reads 8 control bytes; final position inspection frames the camera. Orbiting
+requires neither compute dispatch nor geometry transfer. All five generated
+compute shaders are accessible, with runtime scan helpers labelled separately.
+Source equality, empty-surface handling, control-cache invalidation, allocation
+limits, scan aliases, invalid draw counts and mobile layout are checked.
+
+The sampled-volume `generateTriangles2` pointer-array path remains outstanding.
+The new showcase specifically advertises the verified implicit profile; it does
+not claim to execute the complete desktop host application.
+
+Validation: 477 unit tests, 140 real NVIDIA hardware GPU checks, compile-all,
+static build, the marching mesh browser check, and all 26 built-in presets plus
+38 imported NVIDIA sandbox entries pass. No software adapter was requested.

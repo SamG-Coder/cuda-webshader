@@ -85,3 +85,15 @@ The original volume-filter kernel and conversion templates in `tests/volume-filt
 `tests/marching-interpolation.cuh` retains the original `vertexInterp2` helper from NVIDIA CUDA Samples `marchingCubes/marchingCubes_kernel.cu`, and `tests/marching-lerp.cuh` retains its scalar/vector interpolation dependencies from `Common/helper_math.h`, at revision `5443602d89ed99aede2e4b7bf329daddeadb320e`. Their original bodies and NVIDIA notices are preserved. Native/GPU validation wrappers are MIT.
 
 `tests/marching-cubes-kernel.cuh` contains device declarations extracted from NVIDIA CUDA Samples `marchingCubes/defines.h` and `marchingCubes_kernel.cu`. `tests/marching-cubes-tables.cuh` and `tests/marching-bucky.raw` are the original `tables.h` and `data/Bucky.raw` from the same sample, revision `5443602d89ed99aede2e4b7bf329daddeadb320e`. NVIDIA code/data retain BSD-3-Clause licensing and source notices. Native and WebGPU classification hosts are MIT.
+
+### Marching-cubes showcase assets
+
+`showcases/marching-cubes/kernel.cu` retains the original device functions,
+header declarations and interpolation helpers from NVIDIA CUDA Samples commit
+`5443602d89ed99aede2e4b7bf329daddeadb320e`; its NVIDIA BSD-3-Clause notice is
+included in the file. `showcases/marching-cubes/tables.json` reproduces
+`triTable` and `numVertsTable` from the same sample's `tables.h` and is covered
+by that same notice (also retained in `tests/marching-cubes-tables.cuh`).
+The JSON launch configuration, generic sandbox pipeline, scan kernels and mesh
+renderer are original MIT project code. Neither the MIT license nor the
+translation into WGSL changes the NVIDIA source's BSD-3-Clause license.

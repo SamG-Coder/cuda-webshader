@@ -15,8 +15,8 @@ export function createShaderView(sourceEditor,{download,onView=()=>{}}){
  $('save-wgsl').onclick=()=>artifact&&download(`${artifact.name}${stale?'-last-compiled':''}.wgsl`,artifact.wgsl);
  select('cuda');
  return {generatedEditor,select,get view(){return view;},
-  generated(next){artifact=next;stale=false;generatedEditor.setValue(next.wgsl);$('save-wgsl').disabled=false;status(`${next.name}.wgsl · generated from current CUDA · GPU validation pending`);},
-  validated(){if(artifact&&!stale)status(`${artifact.name}.wgsl · generated from current CUDA · accepted by GPU`);},
+  generated(next){artifact=next;stale=false;generatedEditor.setValue(next.wgsl);$('save-wgsl').disabled=false;status(`${next.name}.wgsl · generated from ${next.sourceLabel||'current CUDA'} · GPU validation pending`);},
+  validated(){if(artifact&&!stale)status(`${artifact.name}.wgsl · generated from ${artifact.sourceLabel||'current CUDA'} · accepted by GPU`);},
   markStale(){stale=true;if(artifact)status('OUTDATED — CUDA or block settings changed. Showing the last generated shader; compile again to update.',true);},
   failed(){if(artifact)status(stale?'COMPILE FAILED — showing the previous generated shader.':'Run failed — generated WGSL is available; see the execution log.',true);else status('No generated shader — fix the CUDA error and compile again.',true);},
   dispose(){generatedEditor.dispose();}
