@@ -27,6 +27,8 @@ export function validateConfig(config,metadata){
  if(config.passes!==undefined&&(!Array.isArray(config.passes)||config.passes.length>8||config.passes.some(p=>!p||typeof p.entry!=='string'||!Array.isArray(p.block)||p.block.length!==3)))throw Error('Additional passes require entry, three block dimensions and groups; at most eight passes are supported.');
  if(!Array.isArray(config.groups)||config.groups.length!==3||config.groups.some(n=>!Number.isInteger(n)||n<1||n>65535)||config.groups.reduce((a,b)=>a*b,1)*metadata.workgroupSize.reduce((a,b)=>a*b,1)>4194304)throw Error('Launch must contain three positive block counts, each ≤65,535, and at most 4,194,304 invocations.');
  if(!config.scalars||!config.buffers)throw Error('Settings need scalars and buffers objects.');
+ validateCopies(config.copies,metadata,config);
+ for(const pass of config.passes||[])validateCopies(pass.copies,metadata,config);
  let bytes=0;
  for(const b of metadata.bindings){const spec=config.buffers[b.name];if(!spec||!Number.isInteger(spec.records)||spec.records<1||spec.records>1048576)throw Error(`${b.name}: records must be in [1,1048576].`);if(!['zero','one','ramp','random','sphere'].includes(spec.fill))throw Error(`${b.name}: unknown fill pattern.`);if(spec.fill==='sphere'&&b.elementType!=='vec4<f32>')throw Error('sphere fill requires float4 storage.');bytes+=spec.records*b.stride;}
  for(const b of metadata.bindings)for(const key of ['scale','offset'])if(config.buffers[b.name][key]!==undefined&&!Number.isFinite(config.buffers[b.name][key]))throw Error(`${b.name}: ${key} must be a finite number.`);
@@ -52,4 +54,10 @@ export function seedBuffer(binding,spec){
  if(spec.fill==='sphere')for(let i=0;i<spec.records;i++){const angle=random()*Math.PI*2,r=1+random()*6;data.set([Math.cos(angle)*r,(random()-0.5)*2,Math.sin(angle)*r,random()],i*4);}
  if(spec.scale!==undefined||spec.offset!==undefined)for(let i=0;i<data.length;i++){data[i]=data[i]*(spec.scale??1)+(spec.offset??0);if(!Number.isFinite(data[i]))throw Error('Buffer scale/offset exceeds the storage type range.');}
  return data;
+}
+
+export function validateCopies(copies,metadata,config){
+ if(copies===undefined)return;
+ if(!Array.isArray(copies)||copies.length>8)throw Error('Copies must be an array of at most eight GPU ranges.');
+ for(const copy of copies){const a=metadata.bindings.find(b=>b.name===copy?.source),b=metadata.bindings.find(b=>b.name===copy?.target);if(!a||!b||a.name===b.name||a.elementType!==b.elementType)throw Error('Copy requires distinct buffers with matching element types.');const {sourceOffset=0,targetOffset=0,byteLength}=copy;if([sourceOffset,targetOffset,byteLength].some(n=>!Number.isSafeInteger(n)||n<0||n%4)||sourceOffset+byteLength>(config.buffers[a.name]?.records??0)*a.stride||targetOffset+byteLength>(config.buffers[b.name]?.records??0)*b.stride)throw Error('Copy range must be aligned and within both buffers.');}
 }

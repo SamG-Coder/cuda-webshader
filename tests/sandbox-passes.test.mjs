@@ -5,3 +5,5 @@ test('Pass configuration rejects missing buffers, unknown overrides and invalid 
  for(const p of [{...pass,bindings:{input:'missing',output:'a'}},{...pass,bindings:{...pass.bindings,typo:'a'}},{...pass,scalars:{scale:1,typo:2}},{...pass,groups:[0,1,1]}])assert.throws(()=>preparePass(p,next.metadata,config,root.metadata));
  for(const passes of [{},Array(9).fill(pass),[{entry:'second',block:[128]}]])assert.throws(()=>validateConfig({...config,passes},root.metadata),/passes/);
 });
+
+test('Per-pass copies validate root buffer ranges before execution',()=>{const copy={source:'a',target:'b',byteLength:16};assert.doesNotThrow(()=>validateConfig({...config,copies:[copy],passes:[{...pass,copies:[copy]}]},root.metadata));for(const c of [{...copy,target:'missing'},{...copy,target:'a'},{...copy,byteLength:3},{...copy,sourceOffset:-4},{...copy,byteLength:999999999},{...copy,byteLength:undefined}])assert.throws(()=>validateConfig({...config,passes:[{...pass,copies:[c]}]},root.metadata),/Copy/);});

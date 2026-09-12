@@ -1,0 +1,4 @@
+n=4 PASS original Haar kernel, full transform, output guards, max error 0
+n=32 PASS original Haar kernel, full transform, output guards, max error 1.1920929e-07
+n=1024 PASS original Haar kernel, full transform, output guards, max error 4.76837158e-07
+n=4096 PASS original Haar kernel, full transform, output guards, max error 4.76837158e-07
