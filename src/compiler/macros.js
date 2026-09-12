@@ -7,3 +7,14 @@ export function forwardingMacro(directive) {
  if(params.some(p=>!/^[A-Za-z_]\w*$/.test(p))||new Set(params).size!==params.length||params.length!==args.length||params.some((p,i)=>p!==args[i]))return null;
  return {name:m[1],target:m[3],arity:params.length};
 }
+
+// Parenthesized expression macros preserve argument precedence when expanded
+// into the AST. Other textual C preprocessing remains outside this subset.
+export function expressionMacro(directive){
+ const m=directive.match(/^#\s*define\s+([A-Za-z_]\w*)\(([^()]*)\)\s+(.*?)\s*(?:\/\/[^\n]*)?$/);if(!m)return null;
+ const params=m[2].trim()?m[2].split(',').map(p=>p.trim()):[],body=m[3];
+ if(params.length>16||params.some(p=>!/^[A-Za-z_]\w*$/.test(p))||new Set(params).size!==params.length||body.length>1024||!body.startsWith('(')||!body.endsWith(')')||/[#;{}"'\\]/.test(body))return null;
+ let depth=0;for(let i=0;i<body.length;i++){if(body[i]==='(')depth++;if(body[i]===')')depth--;if(depth<0||(depth===0&&i<body.length-1))return null;}if(depth)return null;
+ for(const match of body.matchAll(/[A-Za-z_]\w*/g))if(params.includes(match[0])&&(!body.slice(0,match.index).trimEnd().endsWith('(')||!body.slice(match.index+match[0].length).trimStart().startsWith(')')))return null;
+ return {name:m[1],params,body};
+}

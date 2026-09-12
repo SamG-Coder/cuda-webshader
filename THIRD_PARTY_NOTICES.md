@@ -15,6 +15,7 @@ licenses; the project's MIT license does not relicense them.
 | NVIDIA CUDA Samples simpleGL kernel | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Imported, unchanged showcase kernel |
 | NVIDIA CUDA Samples N-body device code | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original integration kernel, helpers and type declarations in the N-body showcase and tests |
 | NVIDIA CUDA Samples FDTD3d kernel | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original 3D finite-difference kernel and launch constants in the volume showcase and tests |
+| NVIDIA CUDA Samples convolutionTexture | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original row/column kernels, unrolled helpers, IMAD macro and constant declarations in the compiler validation fixture |
 | NVIDIA CUDA Samples simpleSurfaceWrite | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original surface-write and transform kernels, teapot512.pgm and derived validation images |
 | NVIDIA CUDA Samples simpleTexture | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original transformKernel, teapot512.pgm image and derived validation images |
 | NVIDIA CUDA Samples volumeRender | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original ray-marching device functions, camera declarations, Bucky volume and transfer table in the showcase and validation fixtures |

@@ -58,7 +58,7 @@ single handle cannot mix 1D and 3D sampling.
 
 Sandbox transfer settings use `dimensions: [width]`, a flat `values` array
 with four finite numbers per record, plus `filter` and `addressMode`. Texture
-lifetimes and data uploads are managed by the runtime. Helper texture parameters remain unsupported. Additional passes can now bind
+lifetimes and data uploads are managed by the runtime. Texture parameters now pass through statically resolved device helper chains. Additional passes can bind
 existing textures and surfaces with matching formats.
 
 Native CUDA and hardware WebGPU probes combine both texture dimensions in one

@@ -1,0 +1,1 @@
+PASS native texture helper forwarding: all eight values exact; distinct images, nearest/linear samplers, swapped arguments and descending templates

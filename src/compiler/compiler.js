@@ -1,3 +1,4 @@
+import {inferTextureTypes,textureShape} from './texture-types.js';
 import {integerExpression,substituteTemplateArgument} from './integer-expression.js';
 import {parse, CompileError,builtinType} from './parser.js';
 import {uniformBlockGuards} from './full-workgroups.js';
@@ -64,7 +65,7 @@ class Emitter {
   constructor(ast, kernel, options, templates,bufferUsage) {
     this.ast = ast; this.kernel = kernel; this.options = options; this.scopes = [new Map()]; this.temp = 0; this.loopDepth = 0; this.integerIntrinsics=new Set();
     this.structs=new Map((ast.structs||[]).map(s=>[s.type,s]));for(const s of this.structs.values())for(const field of s.fields){let type=field.type;for(const dim of [...field.dimensions].reverse()){const length=constantValue(dim);if(!Number.isSafeInteger(length)||length<1||length>256)this.fail('Struct field array dimensions must be 1..256.',field);type=arrayOf(type,length);}field.resolvedType=type;}
-    this.textureKinds=new Map();walk(kernel.body,n=>{if(n.kind==='call'&&['tex1D','tex3D','tex2D'].includes(n.callee?.name)&&n.args[0]?.kind==='id'){const name=n.args[0].name,dimension=n.callee.name;if(this.textureKinds.has(name)&&this.textureKinds.get(name)!==dimension)this.fail('A texture parameter cannot mix sampling dimensions or formats.',n);this.textureKinds.set(name,dimension);}});
+    inferTextureTypes(ast.functions,kernel,walk,(message,node)=>this.fail(message,node));
     this.overloads=new Map();for(const f of ast.functions)if(f.overloadName){const list=this.overloads.get(f.overloadName)||[];list.push(f);this.overloads.set(f.overloadName,list);}
     this.functions = new Map(); this.shared = []; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
     for (const f of ast.functions) {
@@ -371,7 +372,7 @@ class Emitter {
     if(reaches(helper.name,caller))this.fail('Recursive helper calls are unsupported.',n);
     n.callee.name=helper.name;n.callName=helper.name;
     const references=new Set();n.constRefTemporaries=[];n.localPointerArgs=helper.params.map(p=>!!p.localPointer);n.referenceArgs=helper.params.map(p=>!!p.reference);n.groupArgs=helper.params.map(p=>p.type==='thread-block');n.pointerArgs=helper.params.map(p=>!!p.pointer);
-    const codes=args.map((a,i)=>{const p=helper.params[i];if(p.localPointer){if(references.has(a.rootSymbol))this.fail('Aliased local pointer/reference arguments are unsupported.',n.args[i]);references.add(a.rootSymbol);return a.pointerCode;}if(p.pointer)return a.pointerCode;if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
+    const codes=args.map((a,i)=>{const p=helper.params[i];if(p.type==='texture3d'){const shape=textureShape(p.textureSampling),symbol=a.rootSymbol;if(symbol?.kind!=='texture'||symbol.dimension!==shape.dimension||symbol.format!==shape.format)this.fail('Texture helper argument requires the same inferred sampling format.',n.args[i]);return symbol.code+', '+symbol.sampler;}if(p.localPointer){if(references.has(a.rootSymbol))this.fail('Aliased local pointer/reference arguments are unsupported.',n.args[i]);references.add(a.rootSymbol);return a.pointerCode;}if(p.pointer)return a.pointerCode;if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
       const node=n.args[i],s=a.rootSymbol;
       if(p.constant){if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.add(s);if(s?.kind==='reference')return s.pointerCode;if(s?.kind==='local'&&!s.constant&&['id','member'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
       if(node.kind!=='id'||!s||!['local','reference'].includes(s.kind)||s.constant||isArray(a.type)||!numeric(a.type)||a.type!==p.type)this.fail('Reference arguments require a mutable named local scalar of the exact type.',node);
@@ -420,6 +421,7 @@ class Emitter {
     return [...value.pre, value.type === 'void' ? `${value.code};` : `_ = ${value.code};`];
   }
   declare(n) {
+    if(['texture3d','surface2d'].includes(n.type))this.fail('Texture and surface handles require kernel or supported helper parameters, not local aliases.',n);
     if(n.init?.kind==='shared-conversion'){
       if(!n.pointer||n.reference||n.shared||n.external||n.dimensions.length||n.type!==n.init.target)this.fail('Shared conversion requires a matching local pointer declaration.',n);
       if(!n.init.conversions.includes(false)&&!n.constant)this.fail('Cannot discard const from shared wrapper conversion.',n);
@@ -512,7 +514,7 @@ class Emitter {
     for (const p of this.kernel.params) {
       if (p.shared || p.reference || p.external || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
       if(p.type==='surface2d'){if(p.pointer)this.fail('Surface objects must be passed by value.',p);const binding=bufferCount+this.kernel.params.filter(p=>p.type==='texture3d').length*2+surfaces.length,symbol={name:p.name,type:p.type,code:'cw_surface_'+p.name,kind:'surface',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;surfaces.push({name:p.name,binding,dimension:'2d',format:'r32float',access:'write-only',coordinates:'global-xy'});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_storage_2d<r32float, write>;`);continue;}
-      if(p.type==='texture3d'){if(p.pointer)this.fail('Texture objects must be passed by value.',p);const binding=bufferCount+textures.length*2,samplerBinding=binding+1,sampling=this.textureKinds.get(p.name)||'tex3D',dimension=sampling==='tex3D'?'3d':'2d',format=sampling==='tex1D'?'rgba32float':sampling==='tex2D'?'r32float':'r8unorm';const symbol={name:p.name,type:p.type,code:'t_'+p.name,sampler:'s_'+p.name,dimension,format,kind:'texture',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;textures.push({name:p.name,binding,samplerBinding,dimension,format});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_${dimension}<f32>;`,`@group(0) @binding(${samplerBinding}) var ${symbol.sampler}: sampler;`);continue;}
+      if(p.type==='texture3d'){if(p.pointer)this.fail('Texture objects must be passed by value.',p);const binding=bufferCount+textures.length*2,samplerBinding=binding+1,sampling=p.textureSampling||'tex3D',{dimension,format}=textureShape(sampling);const symbol={name:p.name,type:p.type,code:'t_'+p.name,sampler:'s_'+p.name,dimension,format,kind:'texture',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;textures.push({name:p.name,binding,samplerBinding,dimension,format});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_${dimension}<f32>;`,`@group(0) @binding(${samplerBinding}) var ${symbol.sampler}: sampler;`);continue;}
       if (p.pointer) {
         if(this.structs.has(p.type))this.fail('Struct buffer layout is not supported; use local struct values.',p);
         if (p.type === 'bool' || vectorLength(p.type)===3) this.fail('bool* and three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
@@ -538,14 +540,15 @@ class Emitter {
     const emitHelpers=()=>{while(emittedHelpers<this.helpers.length){const helper=this.helpers[emittedHelpers++];
       this.scopes = [new Map()]; this.currentFunction = helper;
       for (const p of helper.params) {
-        if (p.shared || p.external || p.type === 'void'||p.type==='texture3d') this.fail('Invalid helper parameter.', p);
+        if (p.shared || p.external || p.type === 'void'||p.type==='surface2d') this.fail('Invalid helper parameter.', p);
+        if(p.type==='texture3d'){if(p.pointer||p.reference)this.fail('Texture helper parameters must be passed by value.',p);const {dimension,format}=textureShape(p.textureSampling);p.symbol=this.add(p.name,{name:p.name,type:p.type,code:'cw_texture_'+p.name,sampler:'cw_sampler_'+p.name,dimension,format,kind:'texture',constant:true},p);continue;}
         if(p.pointer){const base=this.bufferSymbols.get(p.boundBuffer);if(!base)this.fail('Helper buffer pointer was not specialized.',p);p.symbol=this.add(p.name,{...base,name:p.name,kind:'buffer-alias',constant:p.constant||p.boundConstant,offsetCode:'cw_buffer_offset_'+helper.params.indexOf(p)},p);continue;}
         if(p.type==='thread-block'){if(p.reference)this.fail('thread_block helper parameters must be passed by value.',p);p.symbol=this.add(p.name,{name:p.name,type:p.type,kind:'thread-block',constant:true},p);continue;}
         if(p.reference&&!numeric(p.type)&&!(p.constant&&(vectorLength(p.type)||this.structs.has(p.type))))this.fail('Helper references require a 32-bit numeric scalar.',p);
         p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined, constant:p.constant, atomic: false, kind: p.reference?'reference':'local'}, p);
       }
       const body = this.body(helper.body);
-      helperLines.push(`fn f_${helper.name}(${[...helper.params.filter(p=>p.type!=='thread-block').map(p => p.pointer?`cw_buffer_arg_${helper.params.indexOf(p)}: i32`:`${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.reference?`ptr<function, ${p.type}>`:p.type}`),'cw_thread: vec3<u32>','cw_block: vec3<u32>','cw_grid: vec3<u32>'].join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>p.pointer).map(p=>`var cw_buffer_offset_${helper.params.indexOf(p)}: i32 = cw_buffer_arg_${helper.params.indexOf(p)};`)),...indent(helper.params.filter(p=>p.type!=='thread-block'&&!p.pointer&&!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
+      helperLines.push(`fn f_${helper.name}(${[...helper.params.filter(p=>p.type!=='thread-block').map(p => p.type==='texture3d'?`cw_texture_${p.name}: texture_${textureShape(p.textureSampling).dimension}<f32>, cw_sampler_${p.name}: sampler`:p.pointer?`cw_buffer_arg_${helper.params.indexOf(p)}: i32`:`${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.reference?`ptr<function, ${p.type}>`:p.type}`),'cw_thread: vec3<u32>','cw_block: vec3<u32>','cw_grid: vec3<u32>'].join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>p.pointer).map(p=>`var cw_buffer_offset_${helper.params.indexOf(p)}: i32 = cw_buffer_arg_${helper.params.indexOf(p)};`)),...indent(helper.params.filter(p=>p.type!=='thread-block'&&p.type!=='texture3d'&&!p.pointer&&!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
     }};
     emitHelpers();
     this.scopes = kernelScope; this.currentFunction = this.kernel;

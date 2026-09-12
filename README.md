@@ -39,6 +39,9 @@ Device helper integer arguments also support bounded signed arithmetic such as
 `filter<i - 1>` and negative terminating specializations. Native CUDA and
 NVIDIA WebGPU verify the expansion, including INT_MIN. This is a prerequisite
 for the [texture-convolution candidate currently in progress](reports/convolution-texture-progress.md).
+Its original row and column shaders now compile and pass GPU validation, including
+texture handles in nested helpers and the IMAD expression macro. Complete image
+execution still needs unnormalized coordinates and the intermediate GPU texture copy.
 Device helpers now
 support one built-in type or explicit integer template argument, including nested
 calls and arguments forwarded from a kernel template. Type-trait structs containing typedef members, including explicit type specializations
@@ -388,7 +391,7 @@ Supports `__global__ void` kernels; by-value scalar/vector `__device__` helpers;
 
 Floating constants need an `f` suffix, e.g. `0.5f`. Mixed scalar expressions are explicitly typed. Guarded ternary expressions become real branches, not an eager `select()` that could evaluate an unselected buffer access or atomic operation.
 
-**Not supported:** arbitrary host CUDA execution, kernel launch syntax inside compiled device code, cudaMalloc/streams/events host APIs, binary/PTX input, C++ STL, unrestricted C++ classes or templates, nested or storage-buffer structs, general pointers and unrestricted pointer arithmetic, runtime recursion, cooperative grid barriers, warp shuffles/votes, inline PTX, tensor cores/WMMA, half/double/64-bit arithmetic, or floating-point atomics. Float3 and bool pointer-buffer ABIs are rejected rather than guessed. The feature-specific sections above describe supported templates, local structs, dynamic shared memory, helper pointers and vector operations. Texture support is currently tex3D<float>, tex2D<float>, and tex1D<float4> with bound kernel handles. Surface support is float surf2Dwrite with checked global XY coordinates; arbitrary coordinates, surface reads and texture/surface helper parameters remain unsupported.
+**Not supported:** arbitrary host CUDA execution, kernel launch syntax inside compiled device code, cudaMalloc/streams/events host APIs, binary/PTX input, C++ STL, unrestricted C++ classes or templates, nested or storage-buffer structs, general pointers and unrestricted pointer arithmetic, runtime recursion, cooperative grid barriers, warp shuffles/votes, inline PTX, tensor cores/WMMA, half/double/64-bit arithmetic, or floating-point atomics. Float3 and bool pointer-buffer ABIs are rejected rather than guessed. The feature-specific sections above describe supported templates, local structs, dynamic shared memory, helper pointers and vector operations. Fully parenthesized expression macros such as IMAD can expand into the typed syntax tree; nested expression macros remain unsupported. Texture support is currently tex3D<float>, tex2D<float>, and tex1D<float4> with bound kernel handles or explicitly typed helper chains. Surface support is float surf2Dwrite with checked global XY coordinates; arbitrary coordinates, surface reads and surface helper parameters remain unsupported.
 
 Unsupported syntax/types fail explicitly where recognized. The browser's WGSL compiler remains the final validation gate for emitted code, including uniformity and implementation limits. Finite f32 numerical agreement is tested with tolerances; do not assume NVCC bit-for-bit equivalence, identical FMA contraction, denormal handling, NaN behavior or transcendental precision. This is an experimental compiler/runtime, not a production-hardened general CUDA replacement.
 

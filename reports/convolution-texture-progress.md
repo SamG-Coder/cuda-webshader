@@ -34,15 +34,38 @@ for the NVIDIA filter or a showcase. See
 `reports/integer-helper-expressions-native.txt`,
 `tests/integer-helper-expressions.test.mjs`, and its GPU regression entry.
 
+## Verified: texture helpers and expression macros
+
+The compiler propagates a single sampling format through connected kernel and
+helper texture parameters. Each WGSL helper receives the actual texture and
+sampler as separate arguments. This covers ordinary and explicitly specialized
+integer helpers, including the unused texture argument in the negative base
+specialization. Different texture resources and sampler settings can use the
+same helper. Mixing formats on one parameter chain, opaque handle returns,
+local aliases and implicitly resolved texture helper templates are rejected.
+
+Native CUDA and NVIDIA WebGPU return the same eight exact values for two input
+images using distinct nearest/linear samplers, swapped arguments, and descending
+helper templates. Separate GPU checks cover 3D volume and float4 transfer handles.
+See tests/texture-helpers.cu and reports/texture-helpers-native.txt.
+
+The original IMAD macro is preserved by desktop extraction and expanded as a
+parenthesized expression AST. Each parameter occurrence must itself be fully
+parenthesized to preserve argument precedence. Bodies are limited to 1,024
+characters and 16 parameters; expanded ASTs are limited to 65,536 nodes. Nested
+expression macro calls are rejected. Numeric object macros can use bounded
+integer arithmetic with previously defined numeric constants, covering the
+original KERNEL_LENGTH expression. Native CUDA and GPU probes verify signed
+24-bit IMAD, argument precedence, repeated parameters and dependent constants.
+See reports/expression-macros-native.txt.
+
+Both original convolutionTexture kernels and their unrolled helper chains now
+compile and pass real GPU shader validation, using the licensed fixture in
+tests/convolution-texture-kernel.cuh. That check is explicitly compilation-only;
+it does not establish correct image results with the current runtime settings.
+
 ## Remaining work
 
-With the header constants provided, the imported original source now gets past
-integer template expansion and reports `Invalid helper parameter` at the
-`cudaTextureObject_t texSrc` helper argument. Required next steps are:
-
-- Pass texture/sampler bindings through ordinary and specialized device helpers.
-- Preserve the original IMAD expression macro during desktop-source extraction
-  and preprocessing. The compiler already supports the underlying __mul24.
 - Support unnormalized texture coordinates. The original CPU reference clamps
   boundary indices; compare native boundary behaviour explicitly rather than
   assuming normalized wrapping applies.
@@ -50,5 +73,5 @@ integer template expansion and reports `Invalid helper parameter` at the
 - Compare complete native and WebGPU results, including borders and odd sizes,
   then add a standalone card linked to the sandbox.
 
-The current prerequisite tests do not prove that either complete filter pass
-runs. The original CUDA function bodies will be preserved.
+The original CUDA function bodies remain unchanged. No convolutionTexture
+showcase card has been added while complete output validation is outstanding.

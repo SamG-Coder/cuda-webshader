@@ -1,5 +1,6 @@
 /** A deliberately bounded CUDA C frontend. No eval, regex transpilation, or source-specific rewrites. */
-import {forwardingMacro} from './macros.js';
+import {forwardingMacro,expressionMacro} from './macros.js';
+import {integerExpression} from './integer-expression.js';
 export class CompileError extends Error {
   constructor(message, token = {}, source = '') {
     const line = token.line || 1, column = token.column || 1;
@@ -25,7 +26,7 @@ export function tokenize(source, defines = {}) {
     return [k, String(v)];
   }));
   const conditionals=[];let enabled=true;
-  const tokens = [],forwarders=new Map(); let i = 0, line = 1, column = 1;
+  const tokens = [],forwarders=new Map(),expressions=new Map();let numericMacroSnapshot=null; let i = 0, line = 1, column = 1;
   const advance = str => { for (const c of str) { if (c === '\n') { line++; column = 1; } else column++; } i += str.length; };
   while (i < source.length) {
     const rest = source.slice(i), token = {line, column, offset: i};
@@ -43,12 +44,14 @@ export function tokenize(source, defines = {}) {
       if(/^#\s*(elif|ifdef|ifndef)\b/.test(directive))throw new CompileError('Unsupported conditional directive; preprocess it first.',token,source);
       if(!enabled){advance(directive);continue;}
       if(/^#\s*pragma\s+unroll(?:\s+[1-9]\d*)?\s*(?:\/\/.*)?$/.test(directive.trimEnd())){advance(directive);continue;}
+      const expression=expressionMacro(directive.trimEnd());if(expression){if(macros.has(expression.name)||forwarders.has(expression.name)||expressions.has(expression.name))throw new CompileError('Macro redefinition is unsupported.',token,source);expressions.set(expression.name,expression);advance(directive);continue;}
       const forward=forwardingMacro(directive.trimEnd());
-      if(forward){if(macros.has(forward.name)||forwarders.has(forward.name))throw new CompileError('Macro redefinition is unsupported.',token,source);forwarders.set(forward.name,forward);advance(directive);continue;}
+      if(forward){if(macros.has(forward.name)||forwarders.has(forward.name)||expressions.has(forward.name))throw new CompileError('Macro redefinition is unsupported.',token,source);forwarders.set(forward.name,forward);advance(directive);continue;}
       const m = directive.trimEnd().match(/^#\s*define\s+([A-Za-z_]\w*)\s+([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFuU]?)\s*(?:\/\/.*)?$/);
+      if(!m){const object=directive.trimEnd().match(/^#\s*define\s+([A-Za-z_]\w*)\s+(.+?)\s*(?:\/\/.*)?$/);if(object){try{const value=integerExpression(object[2].replace(/[A-Za-z_]\w*/g,name=>macros.has(name)?'('+macros.get(name)+')':name));if(forwarders.has(object[1])||expressions.has(object[1]))throw Error('Macro redefinition is unsupported.');if(!macros.has(object[1])){macros.set(object[1],String(value));numericMacroSnapshot=null;}advance(directive);continue;}catch(error){throw new CompileError(error.message,token,source);}}}
       if (!m) throw new CompileError('Only numeric object-like #define directives and direct function-forwarding macros are supported; preprocess other directives first.', token, source);
-      if(forwarders.has(m[1]))throw new CompileError('Macro redefinition is unsupported.',token,source);
-      if (!macros.has(m[1])) macros.set(m[1], m[2]); advance(directive); continue;
+      if(forwarders.has(m[1])||expressions.has(m[1]))throw new CompileError('Macro redefinition is unsupported.',token,source);
+      if (!macros.has(m[1])){macros.set(m[1], m[2]);numericMacroSnapshot=null;} advance(directive); continue;
     }
     if(!enabled){advance(rest.split('\n')[0]);continue;}
     if(rest[0]==='"') {const literal=rest.match(/^"[^"\n\r\\]*"/);if(!literal)throw new CompileError('Unsupported or unterminated string literal.',token,source);tokens.push({...token,kind:'string',value:literal[0]});advance(literal[0]);continue;}
@@ -64,7 +67,7 @@ export function tokenize(source, defines = {}) {
       } else {
         const chain=[];let target=value;const seen=new Set();
         while(forwarders.has(target)&&!seen.has(target)&&chain.length<32){seen.add(target);const f=forwarders.get(target);chain.push(f);target=f.target;}
-        tokens.push({...token, kind: 'word', value,...(chain.length?{forward:{chain,target,tooDeep:forwarders.has(target)&&!seen.has(target),recursive:seen.has(target),numericTarget:macros.has(target)}}:{})});
+        tokens.push({...token, kind: 'word', value,...(expressions.has(value)?{expressionMacro:{...expressions.get(value),defines:(numericMacroSnapshot??=Object.fromEntries(macros)),forbidden:[...expressions.keys(),...forwarders.keys()]}}:{}),...(chain.length?{forward:{chain,target,tooDeep:forwarders.has(target)&&!seen.has(target),recursive:seen.has(target),numericTarget:macros.has(target)}}:{})});
       }
       advance(value); continue;
     }
@@ -78,7 +81,7 @@ export function tokenize(source, defines = {}) {
 }
 const PRECEDENCE = {'=': 1, '+=': 1, '-=': 1, '*=': 1, '/=': 1, '%=': 1, '&=': 1, '|=': 1, '^=': 1, '<<=': 1, '>>=': 1, '||': 3, '&&': 4, '|': 5, '^': 6, '&': 7, '==': 8, '!=': 8, '<': 9, '>': 9, '<=': 9, '>=': 9, '<<': 10, '>>': 10, '+': 11, '-': 11, '*': 12, '/': 12, '%': 12};
 export class Parser {
-  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); this.functionNames=new Set(['tex3D','tex1D','tex2D']); this.typeTraits=new Map();this.structs=new Map(); this.sharedWrappers=new Map(); }
+  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); this.functionNames=new Set(['tex3D','tex1D','tex2D']); this.typeTraits=new Map();this.structs=new Map(); this.sharedWrappers=new Map();this.expandedMacroNodes=0; }
   peek(offset = 0) { return this.tokens[this.i + offset] || this.tokens.at(-1); }
   is(value) { return this.peek().value === value; }
   take(value) { if (value && !this.is(value)) this.fail(`Expected '${value}', found '${this.peek().value}'.`); return this.tokens[this.i++]; }
@@ -183,7 +186,7 @@ export class Parser {
       if(launchThreads!==null&&qualifier!=='__global__')this.fail('Launch bounds apply only to kernels.',token);
       const result = this.type();
       if (result.pointer || result.shared || result.reference || result.external) this.fail('Function return pointers/references/shared/extern qualifiers are unsupported.');
-      if(this.peek().forward)this.fail('Function-forwarding macros are supported at call sites, not in function declarations.');
+      if(this.peek().forward||this.peek().expressionMacro)this.fail('Function-like macros are supported at call sites, not in function declarations.');
       const name = this.name();this.functionNames.add(name);let specializationArgument;
       if(templateKind==='specialization')specializationArgument=this.templateArgument();
       this.take('('); const params = [];
@@ -239,6 +242,13 @@ export class Parser {
     }
     return left;
   }
+  expandExpressionMacro(macro,args,token){
+    if(args.length!==macro.params.length)this.fail('Wrong argument count for expression macro '+macro.name,token);
+    const parser=new Parser([...Object.entries(macro.defines).map(([name,value])=>'#define '+name+' '+value),macro.body].join('\n'));parser.functionNames=new Set(this.functionNames);
+    if(parser.tokens.some(t=>t.kind==='word'&&macro.forbidden.includes(t.value)))this.fail('Nested or recursive expression macros are unsupported.',token);
+    const expression=parser.expression();if(parser.peek().kind!=='eof')this.fail('Expression macro must contain one expression.',token);
+    const copy=(node,substitute)=>{if(!node||typeof node!=='object')return node;if(node.kind&&++this.expandedMacroNodes>65536)this.fail('Expression macro expansion exceeds 65,536 AST nodes.',token);if(substitute&&node.kind==='id'&&macro.params.includes(node.name))return copy(args[macro.params.indexOf(node.name)],false);if(Array.isArray(node))return node.map(n=>copy(n,substitute));return Object.fromEntries(Object.entries(node).map(([key,value])=>[key,key==='token'?(substitute?token:value):copy(value,substitute)]));};return copy(expression,true);
+  }
   templateCallAhead(){for(let offset=1;offset<=65;offset++){const token=this.peek(offset);if(token.value==='>')return this.peek(offset+1).value==='(';if(!['word','number'].includes(token.kind)&&!['+','-','*','/','%','(',')'].includes(token.value))return false;}return false;}
   templateArgument(){this.take('<');const parts=[];while(!this.is('>')){const token=this.peek();if(parts.length>=64||(!['word','number'].includes(token.kind)&&!['+','-','*','/','%','(',')'].includes(token.value)))this.fail('Template arguments support one type or bounded integer arithmetic.',token);parts.push(this.take().value);}this.take('>');if(!parts.length)this.fail('Missing template argument.');return parts.join(' ');}
   unary() {
@@ -257,7 +267,7 @@ export class Parser {
       else if (this.match('.')) { value = {kind: 'member', token, base: value, member: this.name()}; }
       else if (this.match('(')) { const args = []; if (!this.is(')')) do { args.push(this.expression(2)); } while (this.match(',')); this.take(')');
         if(value.kind==='id'&&value.token.forward){const f=value.token.forward;if(f.tooDeep)this.fail('Forwarding macro chains are limited to 32 calls.',value.token);if(f.recursive||f.numericTarget)this.fail('Recursive or non-function forwarding macro target is unsupported.',value.token);if(f.chain.some(m=>m.arity!==args.length))this.fail(`Wrong argument count for forwarding macro '${value.name}'.`,value.token);value={...value,name:f.target};}
-        value = {kind: 'call', token, callee: value, args}; }
+        value = value.kind==='id'&&value.token.expressionMacro?this.expandExpressionMacro(value.token.expressionMacro,args,value.token):{kind: 'call', token, callee: value, args}; }
       else if (this.is('++') || this.is('--')) { value = {kind: 'unary', token, op: this.take().value, value, prefix: false}; }
       else break;
     }

@@ -1,6 +1,6 @@
 // Extract device functions from desktop .cu files without interpreting host code.
 // Whitespace padding preserves original source locations for Monaco diagnostics.
-import {forwardingMacro} from '../compiler/macros.js';
+import {forwardingMacro,expressionMacro} from '../compiler/macros.js';
 export function kernelSource(source){
  const masked=source.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g,text=>text.replace(/[^\n]/g,' '));
  if(!/^\s*#\s*include\b/m.test(masked)&&!masked.includes('<<<')&&!/\bmain\s*\(/.test(masked))return {source,extracted:false};
@@ -10,7 +10,7 @@ export function kernelSource(source){
  const defines=/^\s*#\s*define\s+\w+\s+[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFuU]?\s*$/gm;
  while((match=defines.exec(masked)))spans.push([match.index,match.index+match[0].length]);
  const forwards=/^[ \t]*#[ \t]*define[^\n]*/gm;
- while((match=forwards.exec(masked)))if(forwardingMacro(match[0].trim()))spans.push([match.index,match.index+match[0].length]);
+ while((match=forwards.exec(masked)))if(forwardingMacro(match[0].trim())||expressionMacro(match[0].trim())||/^\s*#\s*define\s+\w+\s+\([^#;{}]*\)\s*$/.test(match[0]))spans.push([match.index,match.index+match[0].length]);
  const aliases=/\bnamespace\s+\w+\s*=\s*cooperative_groups\s*;/g;
  while((match=aliases.exec(masked)))spans.push([match.index,match.index+match[0].length]);
  const wrappers=[],structures=/\btemplate\s*<[^>]*>\s*struct\s+\w+\s*\{/g;
