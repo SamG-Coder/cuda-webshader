@@ -26,7 +26,7 @@ const bad=[
  ['local pointer',wrap('float a[4];float* x=a;'),/Local pointers/],
  ['unexpanded include','#include <cuda.h>\n__global__ void k(){}',/preprocess/],
  ['function macro','#define F(x) x\n__global__ void k(){}',/numeric/],
- ['CUDA allocation',wrap('cudaMalloc(output,n);'),/Unsupported function/],
+ ['Invalid CUDA allocation output',wrap('cudaMalloc(output,n);'),/pointerField/],
  ['warp shuffle',wrap('output[0]=__shfl_sync(0xffffffffu,1.0f,0);'),/Unsupported function/],
  ['const write','__global__ void k(const float* x){x[0]=1.0f;}',/const/],
  ['pointer multiplication',wrap('output=output*2;'),/scalar|operand|allocation/],

@@ -12,7 +12,7 @@ export class CompileError extends Error {
 }
 const NUM = /^(?:0[xX][\da-fA-F]+(?:[uU][lL]?|[lL][uU])?|(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?(?:[uU][lL]?|[lL][uU]|[fF])?)/;
 const WORD = /^[A-Za-z_]\w*/;
-const OPERATORS = ['<<=', '>>=', '::', '++', '--', '+=', '-=', '*=', '/=', '%=', '==', '!=', '<=', '>=', '&&', '||', '<<', '>>', '&=', '|=', '^=', '->'];
+const OPERATORS = ['<<<', '>>>', '<<=', '>>=', '::', '++', '--', '+=', '-=', '*=', '/=', '%=', '==', '!=', '<=', '>=', '&&', '||', '<<', '>>', '&=', '|=', '^=', '->'];
 const TYPES = new Set(['float', 'int', 'uint', 'unsigned', 'bool', 'void', 'float2', 'float3', 'float4']);
 const QUALIFIERS = new Set(['const', '__shared__', '__restrict__', '__restrict', 'restrict','extern']);
 const MAP = { float: 'f32', int: 'i32', uint: 'u32', bool: 'bool', void: 'void', float2: 'vec2<f32>', float3: 'vec3<f32>', float4: 'vec4<f32>' };
@@ -403,6 +403,7 @@ export class Parser {
     if(this.match('sizeof')){this.take('(');const spec=this.type();if(spec.pointer||spec.reference||spec.shared||spec.external)this.fail('sizeof supports built-in value types only.',token);this.take(')');return {kind:'sizeof',token,target:spec.type};}
     if(this.match('static_cast')){this.take('<');const type=this.type();if(type.pointer||type.reference||type.shared||type.external)this.fail('static_cast supports value types only.',token);this.take('>');this.take('(');const value=this.expression();this.take(')');return {kind:'cast',token,target:type.type,value};}
     if (['+', '-', '!', '~', '&', '++', '--', '*'].includes(token.value)) { this.take(); return {kind: 'unary', token, op: token.value, value: this.unary(), prefix: true}; }
+    if(this.is('(')&&this.peek(1).value==='void'&&this.peek(2).value==='*'&&this.peek(3).value==='*'&&this.peek(4).value===')'){for(let i=0;i<5;i++)this.take();return {kind:'allocation-output',token,value:this.unary()};}
     if(this.is('(')&&this.peek(1).value==='char'&&this.peek(2).value==='*'&&this.peek(3).value===')'){this.take('(');this.take('char');this.take('*');this.take(')');return {kind:'pointer-cast',token,target:'byte-address',constant:false,value:this.unary()};}
     if (this.is('(') && this.peek(2).value!=='(' && (this.structs.has(this.peek(1).value)||this.typeAliases.has(this.peek(1).value)||TYPES.has(this.peek(1).value) || this.deferredType(this.peek(1).value) || this.peek(1).value==='typename' || this.typeTraits.has(this.peek(1).value) || this.templateTypeNames?.has(this.peek(1).value) || this.peek(1).value === 'const')) { this.take('('); const type = this.type(); if(type.reference)this.fail('Reference casts are unsupported.'); this.take(')'); return {kind:type.pointer?'pointer-cast':'cast',token,target:type.type,constant:type.constant,value:this.unary()}; }
     let value;
@@ -416,6 +417,7 @@ export class Parser {
     while (true) {
       if(value.kind==='id'&&this.staticTemplates.has(value.name)&&this.is('<')){const argument=this.templateArgument();this.take('::');const method=this.name();if(!this.is('('))this.fail('Static data member access is unsupported.',token);value={...value,name:this.staticMethod(value.name,argument,method,token)};}
       else if(value.kind==='id'&&this.functionNames.has(value.name)&&this.is('<')&&this.templateCallAhead())value.templateArgument=this.templateArgument();
+      else if(value.kind==='id'&&this.match('<<<')){const configuration=[];do{configuration.push(this.expression(2));}while(this.match(','));this.take('>>>');if(configuration.length<2||configuration.length>4)this.fail('Device launches require grid, block, optional shared bytes and stream.',token);this.take('(');const args=[];if(!this.is(')'))do{args.push(this.expression(2));}while(this.match(','));this.take(')');value={kind:'device-launch',token,callee:value,configuration,args};}
       else if (this.match('[')) { const index = this.expression(); this.take(']'); value = {kind: 'index', token, base: value, index}; }
       else if(this.match('->')){value={kind:'member',token,base:{kind:'object-deref',token,value},member:this.name()};}
       else if (this.match('.')) { value = {kind: 'member', token, base: value, member: this.name()}; }

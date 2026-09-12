@@ -1,0 +1,50 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "results": [
+    {
+      "name": "Original Bezier child and cleanup match all native curves",
+      "pass": true,
+      "curves": 256,
+      "vertices": 3958,
+      "maxError": 1.1920928955078125e-07,
+      "originalVertexAndFreeBodies": true,
+      "allFreed": true,
+      "parentSchedulingSupported": false,
+      "launchCountsFromNativeFixture": true,
+      "wallMs": 179.0300000011921
+    },
+    {
+      "name": "Device allocations persist, match native CUDA and reuse freed slots",
+      "pass": true,
+      "allocationsPerCycle": 256,
+      "cycles": 2,
+      "liveElementsPerCycle": 4224,
+      "floatComponentsCompared": 32768,
+      "nativeExact": true,
+      "allFreed": true,
+      "reused": true,
+      "arenaIsolation": true,
+      "capacityFailure": true,
+      "zeroByteAllocation": true,
+      "boundsIsolation": true,
+      "wallMs": 122.92500001192093
+    }
+  ]
+}

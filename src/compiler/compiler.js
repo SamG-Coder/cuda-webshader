@@ -1,3 +1,4 @@
+import {deviceHeaps,deviceHeapDeclarations,deviceHeapCall,deviceHeapIndex} from './device-heap.js';
 import {lowerConstantRows} from './constant-rows.js';
 import {lowerDeferredPointers} from './deferred-pointers.js';
 import {lowerTiledGroups} from './tiled-groups.js';
@@ -56,6 +57,7 @@ function analyse(functions, params) {
     if(n.kind==='block'||n.kind==='for'){const saved=aliases;aliases=new Map(aliases);if(n.kind==='block')n.body.forEach(s=>scan(s));else{scan(n.init);scan(n.condition);scan(n.body);scan(n.step);}aliases=saved;return;}
     if(['if','while','do'].includes(n.kind)){scan(n.condition);const saved=aliases;aliases=new Map(saved);scan(n.kind==='if'?n.yes:n.body);aliases=new Map(saved);if(n.kind==='if')scan(n.no);aliases=saved;return;}
     if(n.kind==='decl'){scan(n.init);const base=pointerParts(n.init)?.base;aliases.set(n.name,n.pointer&&base?.kind==='id'?resolve(base.name):null);return;}
+    if(n.kind==='call'&&n.callee.kind==='id'&&n.callee.name==='cudaMalloc'){scan(n.args[0]?.value?.value,'write');scan(n.args[1]);return;}
     if (n.kind === 'assign') { scan(n.left, n.op === '=' ? 'write' : 'both'); scan(n.right); return; }
     if (n.kind === 'unary' && ['++', '--'].includes(n.op)) { scan(n.value, 'both'); return; }
     if (n.kind === 'call' && n.callee.kind === 'id' && ['atomicAdd', 'atomicMin', 'atomicMax', 'atomicExch','atomicCAS'].includes(n.callee.name)) {
@@ -98,7 +100,9 @@ class Emitter {
     }
     const storageLayout=type=>{if(isArray(type)){const e=storageLayout(type.element),stride=Math.ceil(e.size/e.align)*e.align;return {align:e.align,size:stride*type.length};}if(this.structs.has(type)){let size=0,align=4;for(const f of this.structs.get(type).fields){const v=storageLayout(f.resolvedType);align=Math.max(align,v.align);size=Math.ceil(size/v.align)*v.align+v.size;}return {align,size:Math.ceil(size/align)*align};}const width=vectorLength(type);if(width)return {align:width===2?8:16,size:width*4};if(['f32','i32','u32','cw_uchar','cw_uchar2','cw_uchar4','cw_short','cw_ushort'].includes(type)||(String(type).startsWith('cw_objectptr_')||String(type).startsWith('cw_objectlist_')||String(type).startsWith('cw_deviceptr_')))return {align:4,size:4};this.fail('Persistent object fields require host-shareable scalar, vector or record values.',kernel);};
     this.storageLayout=storageLayout;
+    this.containsDevicePointer=type=>String(type).startsWith('cw_deviceptr_')||isArray(type)&&this.containsDevicePointer(type.element)||this.structs.has(type)&&this.structs.get(type).fields.some(f=>this.containsDevicePointer(f.resolvedType));
     for(const heap of this.objectHeaps.values()){heap.aliveCode=heap.code+'_alive';if(this.persistentObjects){const layout=storageLayout(heap.type);heap.binding=this.objectHeaps.size?heap.tag-1:0;heap.byteLength=Math.ceil((heap.capacity*4)/layout.align)*layout.align+layout.size*heap.capacity;heap.recordLayout=JSON.stringify([...this.structs.values()].map(s=>({type:s.type,fields:s.fields.map(f=>({name:f.name,type:f.resolvedType}))})));heap.variable=heap.code+'_storage';heap.code=heap.variable+'.objects';heap.aliveCode=heap.variable+'.alive';}}
+    this.deviceHeaps=deviceHeaps(this);
     this.overloads=new Map();for(const f of ast.functions)if(f.overloadName){const list=this.overloads.get(f.overloadName)||[];list.push(f);this.overloads.set(f.overloadName,list);}
     this.functions = new Map(); this.shared = [];this.pointerConstraints=[]; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
     for (const f of ast.functions) {
@@ -305,7 +309,7 @@ class Emitter {
           const pointerCode=temp,symbol={...root,kind:'buffer-alias',constant:slots.constant||root.constant,sharedPointer:root.code,offsetCode:pointerCode};
           return this.result(n,arrayOf(slots.elementType),root.code,[...base.pre,...index.pre,`let ${temp}: i32 = ${slots.code}[${index.code}];`],{rootSymbol:symbol,pointerCode});
         }
-        if(String(base.type).startsWith('cw_deviceptr_'))this.fail('Device pointer field dereference requires device heap allocation support.',n);
+        if(String(base.type).startsWith('cw_deviceptr_'))return deviceHeapIndex(this,n,base,index,raw);
         if(n.dereference&&!['buffer','buffer-alias'].includes(base.rootSymbol?.kind))this.fail('Dereference requires a storage-buffer pointer.',n);
         if (!isArray(base.type) || !['i32', 'u32'].includes(index.type)) this.fail('Indexing requires an array and a 32-bit integer index.', n);
         const offset=base.code===base.rootSymbol?.code?base.rootSymbol.offsetCode:undefined;let indexCode=offset?`(${offset} + ${this.convert(index.code,index.type,'i32',n)})`:index.code;
@@ -328,7 +332,7 @@ class Emitter {
         if(this.structs.has(base.type)){const field=this.structs.get(base.type).fields.find(f=>f.name===n.member);if(!field)this.fail('Unknown struct field '+n.member,n);return this.result(n,field.resolvedType,`${base.code}.cw_field_${n.member}`,base.pre,{rootSymbol:base.rootSymbol,...(String(field.resolvedType).startsWith('cw_objectlist_')?{objectListOrigins:this.structs.get(base.type).listOrigins[n.member]}:{})});}
         if (!size || n.member.length !== 1 || 'xyzw'.indexOf(n.member) < 0 || 'xyzw'.indexOf(n.member) >= size) this.fail('Only valid single vector components (.x/.y/.z/.w) are supported.', n);
         if(raw&&base.scalarVectorComponents)return this.result(n,vectorElement(base.type),base.scalarVectorComponents['xyzw'.indexOf(n.member)],base.pre,{rootSymbol:base.rootSymbol});
-        return this.result(n, vectorElement(base.type), `${base.code}.${n.member}`, base.pre, {rootSymbol: base.rootSymbol});
+        return this.result(n, vectorElement(base.type), `${base.code}.${n.member}`, base.pre, {rootSymbol: base.rootSymbol,...(base.devicePointerGuard?{devicePointerGuard:base.devicePointerGuard}:{})});
       }
       case 'ptx-sad4': {
         const output=this.expr({kind:'id',name:n.outputName,token:n.token},true);if(!['u32','i32'].includes(output.type))this.fail('PTX output requires a 32-bit integer register.',n);
@@ -379,6 +383,7 @@ class Emitter {
         const value=this.expr(n.value),name=String(value.type).replace('cw_objectptr_',''),heaps=[...this.objectHeaps.values()].filter(h=>h.name===name||this.structs.get(h.type)?.base===name);if(!heaps.length)this.fail('delete requires an allocated class or interface.',n);n.deleteHeapTags=heaps.map(h=>({name:h.name,tag:h.tag}));
         const snapshot='cw_delete_'+this.temp++;return this.result(n,'void','',[...value.pre,`let ${snapshot} = ${value.code};`,...heaps.map(heap=>`if ((${snapshot} >> 20u) == ${heap.tag}u && (${snapshot} & 1048575u) != 0u) { ${this.persistentObjects?`atomicStore(&${heap.aliveCode}[(${snapshot} & 1048575u) - 1u], 0u);`:`${heap.aliveCode}[(${snapshot} & 1048575u) - 1u] = false;`} }`)]);
       }
+      case 'device-launch': this.fail('Device child-kernel launches require GPU scheduling support.',n);
       case 'binary': {
         let a = this.expr(n.left), b = this.expr(n.right);if(narrow(a.type))a={...a,type:'i32',code:`i32(${a.code})`};if(narrow(b.type))b={...b,type:'i32',code:`i32(${b.code})`};
         if([a.type,b.type].some(t=>String(t).startsWith('cw_deviceptr_'))){
@@ -528,6 +533,7 @@ class Emitter {
     return this.referenceHelpers.get(key);
   }
   call(n) {
+    const allocation=deviceHeapCall(this,n);if(allocation)return allocation;
     if(n.callee.kind==='member'&&n.callee.base.kind==='object-deref'&&!n.callee.base.concreteHeap){
       const pointer=n.callee.base.value,value=this.expr(pointer),baseName=String(value.type).replace('cw_objectptr_',''),iface=this.ast.interfaces?.find(i=>i.name===baseName);
       if(iface){
@@ -812,10 +818,11 @@ class Emitter {
       n.type = target.type;
       if(target.packedAtomic){this.packedAtomicUsed=true;return [...packedPre,`cw_store_byte(&${target.packedBase}, ${target.packedShiftCode??target.packedShift+'u'}, u32(${code}));`];}
       if(target.packedBase)return [...target.pre,...value.pre,`${target.packedBase} = (${target.packedBase} & ${(~(255<<target.packedShift))>>>0}u) | ((u32(${code}) & 255u) << ${target.packedShift}u);`];
+      if(target.devicePointerGuard)return [...target.pre,...value.pre,`if(${target.devicePointerGuard}) { ${target.code} = ${code}; }`];
       return [...target.pre, ...value.pre, target.atomic ? `atomicStore(&${target.code}, ${target.rootSymbol?.volatileShared&&target.type==='f32'?`bitcast<u32>(${code})`:code});` : `${target.code} = ${code};`];
     }
     if (n.kind === 'unary' && ['++', '--'].includes(n.op)) {
-      const target = this.expr(n.value, true); this.writable(target, n.value); if (target.atomic || !numeric(target.type)) this.fail('Increment/decrement require a non-atomic scalar.', n);
+      const target = this.expr(n.value, true); this.writable(target, n.value); if(target.rootSymbol?.deviceAllocation)this.fail('Device heap increments require an explicit indexed assignment.',n); if (target.atomic || !numeric(target.type)) this.fail('Increment/decrement require a non-atomic scalar.', n);
       n.type = target.type;if(target.packedAtomic){this.packedAtomicUsed=true;return [...target.pre,`cw_store_byte(&${target.packedBase}, ${target.packedShiftCode??target.packedShift+'u'}, u32(i32(${target.code}) ${n.op==='++'?'+':'-'} 1i));`];}if(['cw_short','cw_ushort'].includes(target.type))return [...target.pre,`${target.code} = ${this.convert(`i32(${target.code}) ${n.op==='++'?'+':'-'} 1i`,'i32',target.type,n)};`];if(target.type==='cw_uchar'&&!target.packedBase)return [...target.pre,`${target.code} = (${target.code} ${n.op==='++'?'+':'-'} 1u) & 255u;`];if(target.packedBase)return [...target.pre,`${target.packedBase} = (${target.packedBase} & ${(~(255<<target.packedShift))>>>0}u) | ((u32(i32(${target.code}) ${n.op==='++'?'+':'-'} 1i) & 255u) << ${target.packedShift}u);`]; return [...target.pre, `${target.code} ${n.op === '++' ? '+=' : '-='} ${target.type}(1);`];
     }
     const value = this.expr(n);
@@ -981,6 +988,7 @@ class Emitter {
       if(this.persistentObjects)header.push(`struct CWHeap_${heap.name} { alive: array<atomic<u32>, ${heap.capacity}>, objects: array<${heap.type}, ${heap.capacity}>, }`,`@group(1) @binding(${heap.binding}) var<storage, read_write> ${heap.variable}: CWHeap_${heap.name};`);
       else header.push(`var<private> ${heap.code}: array<${heap.type}, ${heap.capacity}>;`,`var<private> ${heap.aliveCode}: array<bool, ${heap.capacity}>;`);
     }
+    header.push(...deviceHeapDeclarations(this.deviceHeaps));
     const moduleShared=new Map(),usedGlobalNames=new Set();for(const fn of [this.kernel,...this.helpers])walk(fn.body,n=>{if(n.kind==='id')usedGlobalNames.add(n.name);});
     for(const declaration of this.ast.sharedGlobals||[])if(usedGlobalNames.has(declaration.name)){this.declare(declaration);moduleShared.set(declaration.name,declaration.symbol);}
     const helperLines = [];
@@ -1071,7 +1079,7 @@ class Emitter {
     const storageSize = this.shared.reduce((n, s) => n + Math.ceil(typeStride(s.type) / 16) * 16, 0);
     let usesPackedBytes=(this.ast.structs||[]).some(s=>s.fields.some(f=>['cw_uchar','cw_uchar2','cw_uchar4'].includes(f.type)));walk(this.ast,n=>{if(['cw_uchar','cw_uchar2','cw_uchar4'].includes(n.type)||['cw_uchar','cw_uchar2','cw_uchar4'].includes(n.result))usesPackedBytes=true;});let usesShort=false;walk(this.ast,n=>{if(['cw_short','cw_ushort'].includes(n.type)||['cw_short','cw_ushort'].includes(n.result))usesShort=true;});if(usesShort)header.unshift('alias cw_short = i32;','alias cw_ushort = u32;');if(usesPackedBytes)header.unshift('alias cw_uchar = u32;','alias cw_uchar2 = u32;','alias cw_uchar4 = u32;');
     const wgsl = [...header, '', ...helperLines, '', `@compute @workgroup_size(${this.workgroupSize.join(', ')})`, 'fn main(', '  @builtin(local_invocation_id) cw_thread: vec3<u32>,', '  @builtin(workgroup_id) cw_block: vec3<u32>,', '  @builtin(num_workgroups) cw_grid: vec3<u32>', ') {', ...indent(main), '}', ''].join('\n');
-    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {...(this.objectHeaps.size?{objectHeap:{scope:this.persistentObjects?'arena':'invocation',persistent:this.persistentObjects,imports:this.objectImports,types:[...this.objectHeaps.values()].map(h=>({name:h.name,capacity:h.capacity,tag:h.tag,...(this.persistentObjects?{binding:h.binding,byteLength:h.byteLength,recordLayout:h.recordLayout}:{})}))}}:{}),workgroupSize: this.workgroupSize, bindings,...(Object.keys(this.bufferAliases).length?{bufferAliases:{...this.bufferAliases}}:{}), scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2+surfaces.length : null,...(textures.length?{textures}:{}),...(textureScales.length?{textureScales}:{}),...(textureLengths.length?{textureLengths}:{}),...(surfaces.length?{surfaces}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
+    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {...(this.objectHeaps.size||this.deviceHeaps.size?{objectHeap:{scope:this.persistentObjects?'arena':'invocation',persistent:this.persistentObjects,imports:this.objectImports,pointerBuffers:this.deviceHeaps.size?bindings.filter(b=>this.containsDevicePointer(b.elementType)).map(b=>b.name):[],types:[...[...this.deviceHeaps.values()].map(h=>({name:h.name,capacity:h.capacity,binding:h.binding,byteLength:h.byteLength,recordLayout:h.recordLayout})),...[...this.objectHeaps.values()].map(h=>({name:h.name,capacity:h.capacity,tag:h.tag,...(this.persistentObjects?{binding:h.binding,byteLength:h.byteLength,recordLayout:h.recordLayout}:{})}))]}}:{}),workgroupSize: this.workgroupSize, bindings,...(Object.keys(this.bufferAliases).length?{bufferAliases:{...this.bufferAliases}}:{}), scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2+surfaces.length : null,...(textures.length?{textures}:{}),...(textureScales.length?{textureScales}:{}),...(textureLengths.length?{textureLengths}:{}),...(surfaces.length?{surfaces}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
   }
 }
 function resolveTraitTypes(fn, ast, parameter, argument) {

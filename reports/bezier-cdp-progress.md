@@ -64,3 +64,38 @@ NVIDIA test copies 256 records, checks all 2,048 words, clears each original
 pointer independently, and verifies null comparisons including high-bit opaque
 identities. The next complete-source rejection is the `void **` output cast in
 `cudaMalloc`; allocation and child launches still need implementation.
+
+## Device heap and original child-kernel verification
+
+An explicit `deviceHeap: {maxAllocations: 256, maxElements: 32}` option now
+provides typed GPU allocations in a persistent object arena. The original
+`cudaMalloc((void **)&field, byteCount)` form allocates a slot, writes its typed
+identity, and returns a status. `cudaFree` releases the slot. The selected pool
+capacity is a bounded implementation limit, not an unbounded CUDA heap.
+
+Byte counts must be multiples of the pointed-to CUDA value size. Oversized,
+non-integral-element, or exhausted requests return allocation failure (2);
+zero-byte requests return success with a null identity. Out-of-range/null/freed
+accesses are guarded (zero reads and ignored stores). This guard behavior is
+an implementation choice for accesses that are invalid in the CUDA program.
+Pointer arithmetic and general pointer escape remain unsupported. Buffers that
+contain pointer identities, including nested records, retain arena ownership.
+The CPU oracle does not implement persistent arenas.
+
+A native harness and real NVIDIA WebGPU test verify 256 allocations and 4,224
+live float2 elements. Across two allocate/write/read/free cycles all 32,768
+float components, including zero padding, match exactly. Separate checks cover
+exhaustion, zero requests, reuse, bounds isolation and cross-arena rejection.
+
+The parser now retains device-launch syntax without executing it as a helper.
+The unchanged complete module compiles `computeBezierLinePositions` and
+`freeVertexMem`. `computeBezierLinesCDP` is rejected specifically for missing
+GPU child-launch scheduling.
+
+The original vertex and free kernels were executed on all 256 curves using
+native control points and tessellation counts. All 3,958 vertices agree with
+native CUDA within 1.1920928955078125e-7; the original cleanup frees every slot.
+This is stage verification: the test harness supplies 256 child dispatches and
+the captured counts. It is not a substitute for executing the parent's curvature
+calculation, allocation, and dynamic launches. The full sandbox card remains
+pending that scheduler. Results are in `bezier-cdp-stages.json`.

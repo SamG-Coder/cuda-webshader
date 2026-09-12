@@ -5,18 +5,16 @@
   "results": [
     {
       "entry": "computeBezierLinePositions",
-      "compiled": false,
-      "error": "Only class pointer arrays support a second pointer level. (102:31)\n            cudaMalloc((void **)&bLines[lidx].vertexPos, nTessPoints * sizeof(float2));\r\n                              ^"
+      "compiled": true
     },
     {
       "entry": "computeBezierLinesCDP",
       "compiled": false,
-      "error": "Only class pointer arrays support a second pointer level. (102:31)\n            cudaMalloc((void **)&bLines[lidx].vertexPos, nTessPoints * sizeof(float2));\r\n                              ^"
+      "error": "Device child-kernel launches require GPU scheduling support. (105:9)\n        computeBezierLinePositions<<<ceilf((float)bLines[lidx].nVertices / 32.0f), 32>>>(\r\n        ^"
     },
     {
       "entry": "freeVertexMem",
-      "compiled": false,
-      "error": "Only class pointer arrays support a second pointer level. (102:31)\n            cudaMalloc((void **)&bLines[lidx].vertexPos, nTessPoints * sizeof(float2));\r\n                              ^"
+      "compiled": true
     }
   ]
 }
