@@ -8,14 +8,14 @@ function capturedScalar(p,spec){
 // Parse value classes with checked public/private access into storage records and device helpers.
 // Constructors return values; mutable methods receive a reference to the receiver.
 export function parseValueClass(p) {
-  const token=p.take('class'),name=p.name();
+  const token=p.take(),name=p.name();
   if(p.structs.size>=64)p.fail('At most 64 value record types are supported.',token);
   if(p.structs.has(name)&&!p.structs.get(name).forward||p.typeAliases.has(name)||p.typeTraits.has(name))p.fail('Duplicate value class name.',token);
   let base=null;if(p.match(':')){p.take('public');base=p.name();if(!p.structs.get(base)?.interfaceOnly)p.fail('Inheritance currently requires a fieldless abstract interface.',token);}
   p.take('{');
   const record={name,type:'cw_struct_'+name,fields:[],methods:[],constructors:[],token,valueClass:true,base};
   p.structs.set(name,record);
-  const functions=[];let access='private';
+  const functions=[];let access=token.value==='struct'?'public':'private';
   while(!p.is('}')) {
     if(['public','private','protected'].includes(p.peek().value)){access=p.take().value;p.take(':');continue;}
     if(access==='protected')p.fail('Protected class members require inheritance access support.');
@@ -39,7 +39,7 @@ export function parseValueClass(p) {
       if(selfReference&&!['+','-'].includes(operator))p.fail('Const self-reference returns currently require a unary class operator.',start);
       if(!device||spec.pointer||spec.reference&&!selfReference&&!indexedReference&&!mutableSelf&&!fieldReference||spec.shared||spec.external)p.fail('Value-class methods require value returns or supported receiver/array references.',start);
       p.take('(');const params=[];
-      if(!p.is(')'))do{const t=p.peek(),type=p.type(),param=p.name();capturedScalar(p,type);if(type.pointer&&type.type.startsWith('cw_objectptr_')){type.pointer=false;type.type=type.type.replace('cw_objectptr_','cw_objectlist_');(p.objectListTypes??=new Set()).add(type.type);}if(type.pointer&&!type.type.startsWith('cw_struct_')||type.shared||type.external)p.fail('Value-class method parameters require values, references or record pointers.',t);params.push({kind:'param',token:t,name:param,...type});}while(p.match(','));
+      if(!p.is(')'))do{const t=p.peek(),type=p.type(),param=[',',')'].includes(p.peek().value)?'cw_unnamed_param_'+params.length:p.name();capturedScalar(p,type);if(type.pointer&&type.type.startsWith('cw_objectptr_')){type.pointer=false;type.type=type.type.replace('cw_objectptr_','cw_objectlist_');(p.objectListTypes??=new Set()).add(type.type);}if(type.pointer&&!type.type.startsWith('cw_struct_')||type.shared||type.external)p.fail('Value-class method parameters require values, references or record pointers.',t);params.push({kind:'param',token:t,name:param,...type});}while(p.match(','));
       p.take(')');const constant=!!p.match('const');
       if(constructor&&constant)p.fail('Constructors cannot be const.',start);
       if(functions.length>=128)p.fail('At most 128 methods per value class are supported.',start);
@@ -64,12 +64,13 @@ export function parseValueClass(p) {
     } else {
       capturedScalar(p,spec);
       if(spec.pointer&&spec.type.startsWith('cw_objectptr_')){spec.pointer=false;spec.type=spec.type.replace('cw_objectptr_','cw_objectlist_');(p.objectListTypes??=new Set()).add(spec.type);}
-      if(device||spec.pointer||spec.reference||spec.shared||spec.external||spec.constant||['void','texture3d','surface2d','thread-block','cw_extent','cw_size64'].includes(spec.type))p.fail('Value-class fields require plain scalar/vector values.',start);
+      if(device||spec.pointer||spec.reference||spec.shared||spec.external||['void','texture3d','surface2d','thread-block','cw_extent','cw_size64'].includes(spec.type))p.fail('Value-class fields require plain scalar/vector values.',start);
       do {
+        if(spec.constant&&!['f32','i32','u32','bool'].includes(spec.type))p.fail('Const class fields currently require scalar values.',start);
         const dimensions=[];while(p.match('[')){dimensions.push(p.expression(2));p.take(']');}
         if(dimensions.length>1||record.fields.length>=64||record.fields.some(f=>f.name===member))p.fail('Invalid or duplicate value-class field.',start);
         if(spec.type.startsWith('cw_struct_')){const nested=[...p.structs.values()].find(r=>r.type===spec.type);if(!nested?.complete||dimensions.length)p.fail('Nested class fields require a previously completed class and no array dimensions.',start);}
-        record.fields.push({name:member,type:spec.type,access,dimensions,token:start});
+        record.fields.push({name:member,type:spec.type,access,constant:!!spec.constant,dimensions,token:start});
         if(!p.match(','))break;
         member=p.name();
       } while(true);
@@ -127,8 +128,8 @@ export function finishValueClasses(p) {
           if(!constructors.length)continue;
           if(!constructors.some(f=>(f.classOriginalArity??f.params.length)===0))p.fail('Nested class members require a default constructor or explicit initializer.',field.token);
           value={kind:'call',callee:{kind:'id',name:'cw_ctor_'+nested.name,token:field.token},args:[],token:field.token};
-        }else continue;
-        nestedInitializers.push({kind:'expr',token:field.token,value:{kind:'assign',op:'=',token:field.token,left:{kind:'member',base:{kind:'id',name:self,token:field.token},member:field.name,token:field.token},right:value}});
+        }else{if(field.constant)p.fail('Const class field requires a member initializer.',field.token);continue;}
+        nestedInitializers.push({kind:'expr',token:field.token,value:{kind:'assign',op:'=',token:field.token,left:{kind:'member',base:{kind:'id',name:self,token:field.token},member:field.name,token:field.token,initializingField:true},right:value}});
       }
       fn.body.body.splice(1,0,...nestedInitializers);
       fn.body.body.push({kind:'return',token:fn.token,value:{kind:'id',name:self,token:fn.token}});

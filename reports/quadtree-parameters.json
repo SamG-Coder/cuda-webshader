@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-12T20:36:36.749Z",
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "results": [
+    {
+      "name": "Original quadtree Parameters constructors preserve const recursion limits",
+      "pass": true,
+      "threads": 32,
+      "constructors": 96,
+      "originalParameters": true,
+      "wallMs": 28.98999997973442
+    }
+  ]
+}

@@ -183,3 +183,9 @@ test('Original nested field getters preserve const references after owner mutati
  assert.throws(()=>compile(s.replace('const float2 &corner','float2 &corner'),{entry:'field_references'}),/const/);
  assert.throws(()=>compile(s.replace('return m_p_max;','return make_float2(0.f,0.f);'),{entry:'field_references'}),/exactly return field/);
 });
+
+test('Original Parameters constructors initialize const fields and retain the parent values',()=>{
+ const s=readFileSync('tests/quadtree-parameters.cu','utf8'),a=compile(s,{entry:'parameter_values',workgroupSize:[32]}),out=new Int32Array(192);executeCPU(a,{out},{},[1]);for(let i=0;i<32;i++)assert.deepEqual([...out.slice(i*6,i*6+6)],[0,1,0,16,i+5,16]);
+ for(const statement of ['root.max_depth=9;','root=child;','grandchild.min_points_per_node++;'])assert.throws(()=>compile(s.replace('out[i*6]=root.depth;',statement),{entry:'parameter_values'}),/const/);
+ assert.throws(()=>compile(s.replace(', max_depth(max_depth)',''),{entry:'parameter_values'}),/initializer/);
+});

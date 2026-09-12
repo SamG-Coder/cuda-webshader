@@ -339,7 +339,7 @@ class Emitter {
         const base = this.expr(n.base, raw), size = vectorLength(base.type);
         if(base.type==='cw_extent'){if(!['width','height','depth'].includes(n.member))this.fail('cudaExtent has width, height and depth fields.',n);return this.result(n,'cw_size64',`${base.code}.${n.member}`,base.pre,{rootSymbol:base.rootSymbol});}
         if(['cw_uchar2','cw_uchar4'].includes(base.type)){if(n.member.length!==1||!(base.type==='cw_uchar2'?'xy':'xyzw').includes(n.member))this.fail('Packed byte vector has only its declared byte components.',n);const shift='xyzw'.indexOf(n.member)*8,read=base.atomic&&raw?`atomicLoad(&${base.code})`:base.code;return this.result(n,'cw_uchar',`((${read} >> ${shift}u) & 255u)`,base.pre,{rootSymbol:base.rootSymbol,packedBase:base.code,packedShift:shift,packedAtomic:!!base.atomic});}
-        if(this.structs.has(base.type)){const field=this.structs.get(base.type).fields.find(f=>f.name===n.member);if(!field)this.fail('Unknown struct field '+n.member,n);if(field.access==='private'&&this.currentFunction.classOwner!==this.structs.get(base.type).name&&n.accessorOwner!==this.structs.get(base.type).name)this.fail('Private class field '+n.member+' is inaccessible here.',n);return this.result(n,field.resolvedType,`${base.code}.cw_field_${n.member}`,base.pre,{rootSymbol:base.rootSymbol,...(String(field.resolvedType).startsWith('cw_objectlist_')?{objectListOrigins:this.structs.get(base.type).listOrigins[n.member]}:{})});}
+        if(this.structs.has(base.type)){const field=this.structs.get(base.type).fields.find(f=>f.name===n.member);if(!field)this.fail('Unknown struct field '+n.member,n);if(field.access==='private'&&this.currentFunction.classOwner!==this.structs.get(base.type).name&&n.accessorOwner!==this.structs.get(base.type).name)this.fail('Private class field '+n.member+' is inaccessible here.',n);return this.result(n,field.resolvedType,`${base.code}.cw_field_${n.member}`,base.pre,{rootSymbol:field.constant&&!(n.initializingField&&this.currentFunction.classConstructor&&this.currentFunction.classOwner===this.structs.get(base.type).name)?{...base.rootSymbol,constant:true}:base.rootSymbol,...(String(field.resolvedType).startsWith('cw_objectlist_')?{objectListOrigins:this.structs.get(base.type).listOrigins[n.member]}:{})});}
         if (!size || n.member.length !== 1 || 'xyzw'.indexOf(n.member) < 0 || 'xyzw'.indexOf(n.member) >= size) this.fail('Only valid single vector components (.x/.y/.z/.w) are supported.', n);
         if(raw&&base.scalarVectorComponents)return this.result(n,vectorElement(base.type),base.scalarVectorComponents['xyzw'.indexOf(n.member)],base.pre,{rootSymbol:base.rootSymbol});
         return this.result(n, vectorElement(base.type), `${base.code}.${n.member}`, base.pre, {rootSymbol: base.rootSymbol,...(base.devicePointerGuard?{devicePointerGuard:base.devicePointerGuard}:{})});
@@ -767,6 +767,7 @@ class Emitter {
     const s = target.rootSymbol;
     if(target.packedBase&&!target.packedAtomic&&(n.base?.kind!=='id'||s?.kind!=='local'||!['cw_uchar2','cw_uchar4'].includes(s.type)))this.fail('Byte component writes require a named local uchar4; write complete uchar4 records to storage or shared memory.',n);
     if (!s || !['id', 'index', 'member'].includes(n.kind) || isArray(target.type)) this.fail('Assignment requires a scalar/vector variable or array element.', n);
+    const containsConst=type=>this.structs.has(type)&&this.structs.get(type).fields.some(f=>f.constant||containsConst(f.resolvedType));if(containsConst(target.type)&&!n.initializingField)this.fail('Cannot assign a record containing const fields.',n);
     if (s.constant) this.fail(`Cannot write through const '${s.name}'.`, n);
     if (s.kind === 'uniform') this.fail('Scalar kernel parameters are read-only in this subset. Copy the parameter to a local variable first.', n);
   }
@@ -894,6 +895,7 @@ class Emitter {
     if (atomic && !['i32', 'u32'].includes(n.type)&&!(n.volatileShared&&n.type==='f32')) this.fail('Shared atomics require int or unsigned int.', n);
     if(n.init?.kind==='initializer')n.init.target=type;
     const init = n.init ? this.expr(n.init) : null;
+    if(!init&&this.structs.get(type)?.fields.some(f=>f.constant)&&!(this.currentFunction.classConstructor&&n.name==='cw_object_'+this.currentFunction.classOwner))this.fail('Const fields require constructor initialization.',n);
     if (n.constant && !init && !n.shared) this.fail('A const local variable needs an initializer.', n);
     const code = `${n.shared ? (this.currentFunction===this.kernel?'s':'s_'+(this.currentFunction.pointerOrigin||this.currentFunction.name)) : 'v'}_${n.name}`;
     const symbol = {name: n.name, type, code, constant: n.constant, atomic, kind: n.shared ? 'shared' : 'local',...(n.shared?{sharedOwner,volatileShared:!!n.volatileShared}:{})};

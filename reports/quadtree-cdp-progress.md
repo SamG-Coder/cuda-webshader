@@ -99,3 +99,23 @@ path-tracer sandbox regressions pass. The unchanged complete-source probe now
 stops at Parameters, whose struct contains const fields and constructors. That
 record representation and the remaining recursive launch machinery are still
 required before adding a quadtree showcase.
+
+## Parameters constructors and const fields
+
+Structs with device methods/constructors now use the value-class lowering path
+with public default access. Const scalar fields are initialized only through
+constructor member initializers. Later direct writes and whole-record assignment
+are rejected. Copy construction through a local initializer remains distinct from
+assignment. Unnamed method parameters are supported, as required by NVIDIA's
+Parameters copy-and-advance constructor.
+
+The original Parameters definition passes root/child/grandchild construction on
+32 real GPU threads (96 constructor calls). Results preserve the parent's depth,
+toggle point selectors, multiply the level-node count and retain immutable limits.
+Negative tests reject field mutation, whole-record assignment and missing const
+initializers. All 651 unit and 212 real GPU tests pass, as do both existing Bezier
+and path-tracer sandbox checks.
+
+The unchanged full-source probe now stops at `volatile int *s_num_pts[4]` in the
+quadtree kernel. Shared pointer-array volatility and the remaining recursive
+execution interfaces still need support. No quadtree showcase is published yet.
