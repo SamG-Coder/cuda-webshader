@@ -1,0 +1,82 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "results": [
+    {
+      "entry": "CUDAkernel2DCT",
+      "case": 0,
+      "width": 64,
+      "height": 32,
+      "stride": 72,
+      "maxError": 0,
+      "mismatches": 0,
+      "guardsIntact": true
+    },
+    {
+      "entry": "CUDAkernelQuantizationFloat",
+      "case": 0,
+      "width": 64,
+      "height": 32,
+      "stride": 72,
+      "maxError": 0,
+      "mismatches": 0,
+      "guardsIntact": true
+    },
+    {
+      "entry": "CUDAkernel2IDCT",
+      "case": 0,
+      "width": 64,
+      "height": 32,
+      "stride": 72,
+      "maxError": 0,
+      "mismatches": 0,
+      "guardsIntact": true
+    },
+    {
+      "entry": "CUDAkernel2DCT",
+      "case": 1,
+      "width": 512,
+      "height": 512,
+      "stride": 512,
+      "maxError": 0,
+      "mismatches": 0,
+      "guardsIntact": true
+    },
+    {
+      "entry": "CUDAkernelQuantizationFloat",
+      "case": 1,
+      "width": 512,
+      "height": 512,
+      "stride": 512,
+      "maxError": 0,
+      "mismatches": 0,
+      "guardsIntact": true
+    },
+    {
+      "entry": "CUDAkernel2IDCT",
+      "case": 1,
+      "width": 512,
+      "height": 512,
+      "stride": 512,
+      "maxError": 0,
+      "mismatches": 0,
+      "guardsIntact": true
+    }
+  ]
+}

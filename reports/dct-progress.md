@@ -45,8 +45,18 @@ operations retain their existing behavior.
 
 ## Remaining candidate work
 
-3. Test the optimized floating-point `CUDAkernel2DCT` / `CUDAkernel2IDCT` path.
-4. Implement and test the short-integer transform and quantization path. It uses
+The optimized floating-point path is now verified: `CUDAkernel2DCT`, quantization
+and `CUDAkernel2IDCT` match every native float on a 64 × 32 plane with stride 72
+and the 512 × 512 teapot. Padding and trailing guards remain intact. The sandbox
+uses five compiled passes with all intermediate data on the GPU and exact display
+pixel agreement. See `dct-optimized-check.json` and `dct-optimized-sandbox-check.json`.
+
+Local shared pointers, chained positive/negative offsets and helper forwarding
+are supported without changing the original device functions. Source packaging
+omits host includes and supplies original required macros. No performance
+comparison has been established between the two floating-point paths.
+
+1. Implement and test the short-integer transform and quantization path. It uses
    packed short storage and pointer reinterpretations between shorts and words;
    that ABI remains unsupported and the path is not claimed to run.
 

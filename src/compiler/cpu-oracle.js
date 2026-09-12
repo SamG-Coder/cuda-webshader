@@ -137,7 +137,7 @@ class Context {
     this.tick();
     switch(n.kind){
       case 'block':for(const s of n.body){const signal=yield* this.statement(s);if(signal)return signal;}return;
-      case 'decl':if(n.aliasBase){const base=this.env.get(n.aliasBase).value,offset=convert(base.offset+convert(n.aliasOffset?yield* this.eval(n.aliasOffset):0,'i32'),'i32');if(!Number.isInteger(offset))throw new RangeError('CPU alias needs an integer offset.');this.env.set(n.symbol,{value:new BufferView(base.data,base.type,offset)});}else if(!n.shared)this.env.set(n.symbol,{value:n.init?convert(yield* this.eval(n.init),n.resolvedType):zero(n.resolvedType,this.artifact.ast.structs)});return;
+      case 'decl':if(n.aliasBase){let base=this.env.get(n.aliasBase).value;if(Array.isArray(base))base=new BufferView(base,n.aliasBase.type.element);const offset=convert(base.offset+convert(n.aliasOffset?yield* this.eval(n.aliasOffset):0,'i32'),'i32');if(!Number.isInteger(offset))throw new RangeError('CPU alias needs an integer offset.');this.env.set(n.symbol,{value:new BufferView(base.data,base.type,offset)});}else if(!n.shared)this.env.set(n.symbol,{value:n.init?convert(yield* this.eval(n.init),n.resolvedType):zero(n.resolvedType,this.artifact.ast.structs)});return;
       case 'decls':for(const d of n.declarations)yield* this.statement(d);return;
       case 'expr':yield* this.eval(n.value);return;
       case 'if':if(yield* this.eval(n.condition))return yield* this.statement(n.yes);else if(n.no)return yield* this.statement(n.no);return;

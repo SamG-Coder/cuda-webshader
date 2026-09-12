@@ -15,6 +15,13 @@ const uniformScalar=t=>['cw_short','cw_ushort'].includes(t)?{type:t==='cw_short'
 const narrow = t => ['cw_uchar','cw_short','cw_ushort'].includes(t);
 const indent = lines => lines.map(l => `  ${l}`);
 const rootName = n => n?.kind === 'id' ? n.name : ['index', 'member'].includes(n?.kind) ? rootName(n.base) : null;
+// Separate a named pointer root from left-associated element offsets.
+const pointerParts=n=>{
+  if(n?.kind==='id')return {base:n,offset:null};
+  if(n?.kind==='unary'&&n.op==='&'&&n.value.kind==='index'&&n.value.base.kind==='id')return {base:n.value.base,offset:n.value.index};
+  if(n?.kind==='binary'&&['+','-'].includes(n.op)){const p=pointerParts(n.left);if(p)return {base:p.base,offset:p.offset?{...n,left:p.offset}:n.op==='+'?n.right:{kind:'unary',op:'-',value:n.right,token:n.token}};}
+  return null;
+};
 const shiftedPointers=fn=>{const names=new Set();walk(fn.body,n=>{if(n.kind==='assign'&&['=','+=','-='].includes(n.op)&&n.left.kind==='id')names.add(n.left.name);});return names;};
 export function walk(node, visit) {
   if (!node || typeof node !== 'object') return;
@@ -44,7 +51,7 @@ function analyse(functions, params) {
     if (!n || !n.kind) return;
     if(n.kind==='block'||n.kind==='for'){const saved=aliases;aliases=new Map(aliases);if(n.kind==='block')n.body.forEach(s=>scan(s));else{scan(n.init);scan(n.condition);scan(n.body);scan(n.step);}aliases=saved;return;}
     if(['if','while','do'].includes(n.kind)){scan(n.condition);const saved=aliases;aliases=new Map(saved);scan(n.kind==='if'?n.yes:n.body);aliases=new Map(saved);if(n.kind==='if')scan(n.no);aliases=saved;return;}
-    if(n.kind==='decl'){scan(n.init);const base=n.init?.kind==='id'?n.init:n.init?.kind==='binary'&&n.init.op==='+'?n.init.left:null;aliases.set(n.name,n.pointer&&base?.kind==='id'?resolve(base.name):null);return;}
+    if(n.kind==='decl'){scan(n.init);const base=pointerParts(n.init)?.base;aliases.set(n.name,n.pointer&&base?.kind==='id'?resolve(base.name):null);return;}
     if (n.kind === 'assign') { scan(n.left, n.op === '=' ? 'write' : 'both'); scan(n.right); return; }
     if (n.kind === 'unary' && ['++', '--'].includes(n.op)) { scan(n.value, 'both'); return; }
     if (n.kind === 'call' && n.callee.kind === 'id' && ['atomicAdd', 'atomicMin', 'atomicMax', 'atomicExch','atomicCAS'].includes(n.callee.name)) {
@@ -290,19 +297,19 @@ class Emitter {
   argument(n){
     if(n.kind==='unary'&&n.op==='&'&&n.value.kind==='id'){const value=this.expr(n.value),symbol=value.rootSymbol;if(!symbol||!['local','reference'].includes(symbol.kind)||symbol.constant||!numeric(value.type))this.fail('Local pointer arguments require a mutable named numeric scalar.',n);return this.result(n,arrayOf(value.type),value.code,value.pre,{rootSymbol:symbol,localPointer:true,pointerCode:symbol.kind==='reference'?symbol.pointerCode:'&'+value.code});}
     const address=n.kind==='unary'&&n.op==='&'&&n.value.kind==='index'?n.value:null;
-    const base=address?address.base:n.kind==='binary'&&n.op==='+'?n.left:n.kind==='id'?n:null;
+    const parts=pointerParts(n),base=parts?.base;
     if(base?.kind==='id'&&!['true','false'].includes(base.name)){
       const symbol=this.lookup(base.name,base);
       if(symbol.kind==='thread-block'&&n.kind==='id'){n.symbol=symbol;return {type:'thread-block',code:'',pre:[],rootSymbol:symbol};}
       if(symbol.kind==='shared'&&isArray(symbol.type)&&!isArray(symbol.type.element)){
         if(symbol.atomic)this.fail('Shared helper pointers do not support atomic arrays.',n);
-        const node=address?address.index:n.kind==='binary'?n.right:null,offset=node?this.expr(node):{type:'i32',code:'0i',pre:[]};
+        const node=parts.offset,offset=node?this.expr(node):{type:'i32',code:'0i',pre:[]};
         if(!['i32','u32'].includes(offset.type))this.fail('Shared helper offsets must be 32-bit integers.',n);
         n.pointerBaseSymbol=symbol;n.pointerOffset=node;
         return this.result(n,symbol.type,symbol.code,offset.pre,{rootSymbol:{...symbol,sharedPointer:symbol.code},pointerCode:this.convert(offset.code,offset.type,'i32',n)});
       }
       if(['buffer','buffer-alias'].includes(symbol.kind)){
-        const node=address?address.index:n.kind==='binary'?n.right:null,offset=node?this.expr(node):{type:'i32',code:'0i',pre:[]};
+        const node=parts.offset,offset=node?this.expr(node):{type:'i32',code:'0i',pre:[]};
         if(!['i32','u32'].includes(offset.type))this.fail('Helper buffer offsets must be 32-bit integers.',n);
         n.pointerBaseSymbol=symbol;n.pointerOffset=node;
         const pointerCode=symbol.offsetCode?`(${symbol.offsetCode} + ${this.convert(offset.code,offset.type,'i32',n)})`:this.convert(offset.code,offset.type,'i32',n);
@@ -555,9 +562,9 @@ class Emitter {
       return [`var ${code}: array<i32, ${length}>;`];
     }
     if(n.pointer){
-      const baseNode=n.init?.kind==='id'?n.init:n.init?.kind==='binary'&&n.init.op==='+'?n.init.left:null;let offsetNode=n.init?.kind==='binary'?n.init.right:null;
+      const parts=pointerParts(n.init),baseNode=parts?.base;let offsetNode=parts?.offset;
       if(n.shared||n.dimensions.length||baseNode?.kind!=='id')this.fail('Local pointers require a buffer alias with an optional integer offset.',n);
-      const base=this.lookup(baseNode.name,baseNode);if(!['buffer','buffer-alias'].includes(base.kind)||base.type.element!==n.type)this.fail('Local pointers can alias only same-type storage buffers.',n);
+      const base=this.lookup(baseNode.name,baseNode);if(!['buffer','buffer-alias','shared'].includes(base.kind)||base.type.element!==n.type||(base.kind==='shared'&&base.atomic))this.fail('Local pointers can alias only same-type storage buffers or non-atomic shared arrays.',n);
       if(base.constant&&!n.constant)this.fail('Cannot discard const through a buffer alias.',n);
       if(n.byteOffsetCast&&n.type!=='cw_uchar'){
         const stride=cudaValueSize(n.type);if(!stride)this.fail('Byte-address casts need a known pointee alignment.',n);
@@ -570,7 +577,7 @@ class Emitter {
         offsetNode={kind:'binary',op:'/',left:offsetNode,right:{kind:'literal',value:String(stride),token:n.token},token:n.token};
       }
       const offset=offsetNode?this.expr(offsetNode):{type:'i32',code:'0i',pre:[]};if(!['i32','u32'].includes(offset.type))this.fail('Buffer alias offsets must be 32-bit integers.',n);
-      const offsetCode=`cw_offset_${this.temp++}`,symbol={...base,name:n.name,constant:n.constant||base.constant,kind:'buffer-alias',offsetCode};this.add(n.name,symbol,n);n.symbol=symbol;n.aliasBase=base;n.aliasOffset=offsetNode;
+      const offsetCode=`cw_offset_${this.temp++}`,symbol={...base,...(base.kind==='shared'?{sharedPointer:base.code}:{}),name:n.name,constant:n.constant||base.constant,kind:'buffer-alias',offsetCode};this.add(n.name,symbol,n);n.symbol=symbol;n.aliasBase=base;n.aliasOffset=offsetNode;
       return [...offset.pre,`var ${offsetCode} = ${base.offsetCode?base.offsetCode+' + ':''}${this.convert(offset.code,offset.type,'i32',n)};`];
     }
     if(this.structs.has(n.type)&&(n.shared||n.dimensions.length))this.fail('Structs currently support local values only, not shared memory or arrays of structs.',n);

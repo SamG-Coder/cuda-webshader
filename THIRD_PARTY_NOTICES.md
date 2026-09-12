@@ -157,3 +157,8 @@ The DCT showcase also redistributes NVIDIA's original `dct8x8/data/teapot512.ppm
 and the selected kernel source in `showcases/dct/kernel.cu`, under the NVIDIA
 BSD-3-Clause notice retained in that file and `licenses/`. The two explicitly
 labelled pixel-conversion adapter kernels are project code under MIT.
+
+The optimized DCT fixture and showcase retain the original device functions from
+`dct8x8/dct8x8_kernel2.cuh` at the same pinned NVIDIA commit, under BSD-3-Clause.
+Host-only includes are replaced with the required original block/multiply macros.
+The source is in `tests/dct-optimized-kernel.cuh` and `showcases/dct-optimized/kernel.cu`.

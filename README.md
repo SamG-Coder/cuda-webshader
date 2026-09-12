@@ -506,5 +506,10 @@ floating-point DCT, quantization and IDCT kernels reconstruct NVIDIA's 512 × 51
 teapot image. All intermediate values and final pixels match native CUDA on the
 validated NVIDIA Blackwell GPU. Five compiled CUDA passes, including two labelled
 project adapters for host pixel conversion, are available in the comparison view.
-See [validation and remaining DCT paths](reports/dct-progress.md). The optimized
-floating-point and packed-short paths are not yet claimed to work.
+See [validation and remaining DCT paths](reports/dct-progress.md). The packed-short path is not yet claimed to work.
+
+[Run the optimized DCT showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=dct-optimized)
+(or [locally](http://localhost:5173/sandbox.html?example=dct-optimized)). Its original
+shared-memory DCT/IDCT helper functions now run unchanged, with all three stages
+matching native CUDA exactly for a padded 64 × 32 image and the full 512 × 512
+teapot. This establishes correctness; no speedup over the first path is claimed.
