@@ -21,3 +21,11 @@ test('Float image pipelines validate copy storage and preview dimensions',()=>{c
 test('Ocean FFT pipeline rejects incomplete complex buffers and invalid transform shapes',()=>{const preset=()=>JSON.parse(readFileSync('showcases/ocean/pipeline.json','utf8')).pipeline;assert.ok(validatePipeline(preset())>0);for(const change of [p=>p.steps[1].inverseFFT.width=255,p=>p.buffers.ht.type='f32',p=>p.buffers.ht.records=32,p=>p.steps[0].scalars.t={time:false}]){const plan=preset();change(plan);assert.throws(()=>validatePipeline(plan));}});
 
 test('Particle pipelines reject aliasing sorts and invalid particle previews',()=>{const preset=()=>JSON.parse(readFileSync('showcases/particle-collision/pipeline.json','utf8')).pipeline;assert.ok(validatePipeline(preset())>0);for(const change of [p=>p.steps[2].sortPairs.values='hash',p=>p.steps[2].sortPairs.count=1025,p=>p.preview.radius=0,p=>p.preview.count=1025,p=>p.preview.positions='hash']){const plan=preset();change(plan);assert.throws(()=>validatePipeline(plan));}});
+
+test('Float depth sorts require explicit f32 keys and uint payload buffers',()=>{
+ const preset=()=>JSON.parse(readFileSync('showcases/particle-collision/pipeline.json','utf8')).pipeline;
+ const valid=preset();valid.buffers.hash.type='f32';valid.steps[2].sortPairs.keyType='f32';assert.ok(validatePipeline(valid)>0);
+ for(const change of [p=>delete p.steps[2].sortPairs.keyType,p=>p.steps[2].sortPairs.keyType='float',p=>p.steps[2].sortPairs.keyType=null,p=>p.buffers.index.type='f32',p=>p.steps[2].sortPairs.keys='missing']){
+  const plan=structuredClone(valid);change(plan);assert.throws(()=>validatePipeline(plan));
+ }
+});

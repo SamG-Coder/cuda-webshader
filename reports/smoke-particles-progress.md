@@ -65,11 +65,31 @@ including its one-step overshoot before clamping.
 Validation: 533 unit tests, 162 real NVIDIA WebGPU checks, compile-all and static
 build pass. No software GPU execution was used.
 
+## Float depth sorting verified
+
+The runtime and sandbox pipeline now support sortPairs with keyType: f32.
+Depth keys and uint particle indices stay on the GPU. Ordering uses integer
+transforms of float bits, preserving subnormals, signed-zero bits and NaN
+payloads. Equal numeric keys retain their original order, both zeros compare
+equal, and NaNs sort last while retaining their relative order. The existing
+default uint sort is unchanged in behavior.
+
+Four native Thrust sort_by_key captures of the 257-particle smoke depth keys
+(steps 1, 8, 32 and 64) match WebGPU exactly, for both key bits and particle
+indices. Separate IEEE edge-case tests cover 1, 2, 127, 128, 129, 257 and 16,384
+elements, including infinities, NaNs, both signed zeros, positive and negative
+subnormals, and large uint payloads. Guards remain intact and sorting has zero
+CPU readback. The edge-case policy is a documented runtime policy, not a claim
+about native Thrust's NaN ordering.
+
+See reports/float-sort-check.json and reports/smoke-sort-native.txt.
+Validation: 534 unit tests, 163 real NVIDIA WebGPU checks, compile-all and static
+build pass. Original NVIDIA functions have not been edited.
+
 ## Remaining work
 
-Depth keys still need float sorting; the current GPU pair sorter supports uint
-keys. The sandbox then needs integration feedback, depth sorting and the smoke
+The sandbox needs integration feedback, the depth-sort pipeline and the smoke
 presentation, including the original half-angle slicing and volumetric shadows.
-These are not claimed complete by the integration tests, and no smoke card has
+These are not claimed complete by the numerical tests, and no smoke card has
 been added yet. No smoke simulation/rendering performance comparison has been
 established.

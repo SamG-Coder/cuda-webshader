@@ -1,0 +1,4 @@
+Captured native Thrust float depth sort: step 1, 257 particles.
+Captured native Thrust float depth sort: step 8, 257 particles.
+Captured native Thrust float depth sort: step 32, 257 particles.
+Captured native Thrust float depth sort: step 64, 257 particles.

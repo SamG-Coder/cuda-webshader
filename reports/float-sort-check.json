@@ -1,0 +1,96 @@
+{
+  "name": "Float key sorting preserves IEEE bits and matches native smoke depths",
+  "pass": true,
+  "comparisons": [
+    {
+      "label": "IEEE edge cases 1",
+      "count": 1,
+      "exactKeyBits": true,
+      "exactValues": true,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    },
+    {
+      "label": "IEEE edge cases 2",
+      "count": 2,
+      "exactKeyBits": true,
+      "exactValues": true,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    },
+    {
+      "label": "IEEE edge cases 127",
+      "count": 127,
+      "exactKeyBits": true,
+      "exactValues": true,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    },
+    {
+      "label": "IEEE edge cases 128",
+      "count": 128,
+      "exactKeyBits": true,
+      "exactValues": true,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    },
+    {
+      "label": "IEEE edge cases 129",
+      "count": 129,
+      "exactKeyBits": true,
+      "exactValues": true,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    },
+    {
+      "label": "IEEE edge cases 257",
+      "count": 257,
+      "exactKeyBits": true,
+      "exactValues": true,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    },
+    {
+      "label": "IEEE edge cases 16384",
+      "count": 16384,
+      "exactKeyBits": true,
+      "exactValues": true,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    },
+    {
+      "label": "native smoke step 1",
+      "count": 257,
+      "exactKeyBits": true,
+      "exactValues": true,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    },
+    {
+      "label": "native smoke step 8",
+      "count": 257,
+      "exactKeyBits": true,
+      "exactValues": true,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    },
+    {
+      "label": "native smoke step 32",
+      "count": 257,
+      "exactKeyBits": true,
+      "exactValues": true,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    },
+    {
+      "label": "native smoke step 64",
+      "count": 257,
+      "exactKeyBits": true,
+      "exactValues": true,
+      "guardsIntact": true,
+      "intermediateReadbackBytes": 0
+    }
+  ],
+  "softwareAdapterRequested": false,
+  "wallMs": 145.89999997615814
+}
