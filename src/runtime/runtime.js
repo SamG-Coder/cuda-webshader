@@ -1,3 +1,4 @@
+import {SORT_SOURCE} from './sort-kernels.js';
 import {FFT_SOURCE} from './fft-kernels.js';
 import {SCAN_SOURCE} from './scan-kernels.js';
 /** WebGPU runtime: cached pipelines/bindings, batched dispatch and a per-batch uniform snapshot arena. */
@@ -150,6 +151,14 @@ export class GpuRuntime {
       for(let y=0;y<height;y++)for(let x=0;x<width;x++){const offset=y*bytesPerRow+x*bytes;data[y*width+x]=format==='r32float'?view.getFloat32(offset,true):view.getUint8(offset)/255;}
       staging.unmap();this.stats.readbackBytes+=size;return {data,width,height,slice};
     }finally{staging.destroy();}
+  }
+  async sortPairs(keys,values,{count}={}) {
+    this.assertAlive();for(const r of [keys,values]){this.checkResource(r);if(!r.gpuBuffer)throw Error('Pair sort requires uint buffers.');}
+    if(keys.gpuBuffer===values.gpuBuffer)throw Error('Pair sort key and value buffers must be distinct.');
+    if(!Number.isInteger(count)||count<1||count>1048576||count*4>keys.byteLength||count*4>values.byteLength)throw new RangeError('Pair sort count must fit both buffers and be in [1,1048576].');
+    const padded=2**Math.ceil(Math.log2(count)),prepare=await this.kernel(SORT_SOURCE,{entry:'sortPrepare',workgroupSize:[128,1,1]}),stage=await this.kernel(SORT_SOURCE,{entry:'sortStage',workgroupSize:[128,1,1]}),finish=await this.kernel(SORT_SOURCE,{entry:'sortFinish',workgroupSize:[128,1,1]}),pairs=this.createBuffer(padded*8),order=this.createBuffer(padded*4),batch=this.batch({label:'stable uint pair sort'});
+    try{const groups=[Math.ceil(padded/128),1,1];batch.dispatch(prepare.bind({keys,values,pairs,order},{count,padded}),groups);for(let size=2;size<=padded;size*=2)for(let stride=size/2;stride>=1;stride/=2)batch.dispatch(stage.bind({pairs,order},{count:padded,size,stride}),groups);batch.dispatch(finish.bind({pairs,keys,values},{count}),[Math.ceil(count/128),1,1]);batch.submit();await this.idle();}
+    finally{if(!batch.ended)batch.discard();this.destroyBuffer(pairs);this.destroyBuffer(order);}
   }
   async inverseFFT2D(input,output,{width,height}={}) {
     this.assertAlive();for(const r of [input,output]){this.checkResource(r);if(!r.gpuBuffer)throw Error('Inverse FFT requires storage buffers.');}

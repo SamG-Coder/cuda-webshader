@@ -110,7 +110,7 @@ export class Parser {
     return 'cooperative_groups::'+this.name();
   }
   deferredType(name){return this.deferUnsupportedTypes&&/^double[234]?$/.test(name);}
-  startsType() { return this.typeAliases.has(this.peek().value)||this.structs.has(this.peek().value)||TYPES.has(this.peek().value) || this.deferredType(this.peek().value) || this.peek().value==='typename' || this.typeTraits.has(this.peek().value) || this.templateTypeNames?.has(this.peek().value) || QUALIFIERS.has(this.peek().value); }
+  startsType() { return this.peek().value==='volatile'||this.typeAliases.has(this.peek().value)||this.structs.has(this.peek().value)||TYPES.has(this.peek().value) || this.deferredType(this.peek().value) || this.peek().value==='typename' || this.typeTraits.has(this.peek().value) || this.templateTypeNames?.has(this.peek().value) || QUALIFIERS.has(this.peek().value); }
   type() {
     let constant = false, shared = false,external=false;
     while (QUALIFIERS.has(this.peek().value)) { const q = this.take().value; constant ||= q === 'const'; shared ||= q === '__shared__';external ||= q==='extern'; }
@@ -289,8 +289,8 @@ export class Parser {
     this.take('}');return {kind:'initializer',token,items};
   }
   declaration(semicolon = true) {
-    const token = this.peek(), d = this.type(),declarations=[];
-    do {const name=this.name(),dimensions=[];if(this.typeAliases.has(name))this.fail('Value declarations cannot shadow a type alias.',token);while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.initializer():null;declarations.push({kind:'decl',token,name,...d,dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
+    const token = this.peek(),volatileSnapshot=this.match('volatile'),d = this.type(),declarations=[];
+    do {const name=this.name(),dimensions=[];if(this.typeAliases.has(name))this.fail('Value declarations cannot shadow a type alias.',token);while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.initializer():null;if(volatileSnapshot&&(d.pointer||d.reference||d.shared||d.external||dimensions.length||!init))this.fail('Volatile is supported only on initialized local value snapshots.',token);declarations.push({kind:'decl',token,name,...d,...(volatileSnapshot?{constant:true,volatileSnapshot:true}:{}),dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
     if (semicolon) this.take(';');return declarations.length===1?declarations[0]:{kind:'decls',token,declarations};
   }
   statement() {

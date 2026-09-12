@@ -1,3 +1,5 @@
+import {checkSortPairs} from './sort-pairs-gpu.js';
+import {checkParticleCollision} from './particle-collision-gpu.js';
 import {checkFFT} from './fft-gpu.js';
 import {checkOcean} from './ocean-gpu.js';
 import {checkDctOptimized} from './dct-optimized-gpu.js';
@@ -199,6 +201,8 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Complete implicit marching-cubes GPU pipeline matches native CUDA',()=>checkMarchingPipeline(runtime));
   await run('Hierarchical exclusive scan matches native CUDA',()=>checkExclusiveScan(runtime));
   await run('Original shared marching-cubes triangle generation matches native CUDA',()=>checkMarchingTriangles(runtime));
+  await run('GPU stable key/value sort preserves unsigned keys and guards',()=>checkSortPairs(runtime));
+  await run('Original NVIDIA particle collision stages match native CUDA',()=>checkParticleCollision(runtime));
   await run('GPU inverse FFT matches independent DFT and preserves guards',()=>checkFFT(runtime));
   await run('Original NVIDIA ocean stages match native cuFFT pipeline',()=>checkOcean(runtime));
   await run('Original NVIDIA optimized DCT matches native on padded and full images',()=>checkDctOptimized(runtime));

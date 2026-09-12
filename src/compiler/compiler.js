@@ -431,6 +431,7 @@ class Emitter {
       const element=name.startsWith('make_uint')?'u32':name.startsWith('make_int')?'i32':'f32';
       return this.result(n, `vec${count}<${element}>`, `vec${count}<${element}>(${args.map(a => this.convert(a.code, a.type, element, n)).join(', ')})`, pre);
     }
+    if(name==='length'){if(args.length!==1||!vectorLength(args[0].type)||vectorElement(args[0].type)!=='f32')this.fail('length requires a float vector.',n);return this.result(n,'f32',`length(${args[0].code})`,pre);}
     if(name==='dot'||name==='normalize'){const type=args[0]?.type;if(args.length!==(name==='dot'?2:1)||!vectorLength(type)||vectorElement(type)!=='f32'||(name==='dot'&&args[1].type!==type))this.fail(name+' requires matching float vectors.',n);return this.result(n,name==='dot'?'f32':type,`${name}(${args.map(a=>a.code).join(', ')})`,pre);}
     if(['fminf','fmaxf'].includes(name)&&args.some(a=>vectorLength(a.type))){const type=args[0]?.type;if(args.length!==2||!vectorLength(type)||vectorElement(type)!=='f32'||args[1].type!==type)this.fail(name+' requires matching float vectors.',n);return this.result(n,type,`${name==='fminf'?'min':'max'}(${args.map(a=>a.code).join(', ')})`,pre);}
     if(name==='__fdividef'){if(args.length!==2)this.fail('__fdividef requires two arguments.',n);return this.result(n,'f32',`(${args.map(a=>this.convert(a.code,a.type,'f32',n)).join(' / ')})`,pre);}

@@ -1,0 +1,2 @@
+PASS native particles: 128 bodies, original hashes, Thrust sort, shared cell ranges and collisions.
+PASS native particles: 257 bodies, original hashes, Thrust sort, shared cell ranges and collisions.

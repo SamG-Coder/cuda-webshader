@@ -526,3 +526,8 @@ for the original kernels, runtime FFT and labelled CUDA mesh adapter.
 All numerical stages were compared with native CUDA/cuFFT at three animation
 times; maximum absolute error was 3.17e-7. The preview uses project rendering,
 and no cuFFT performance parity is claimed. See [validation details](reports/ocean-progress.md).
+
+The next 3D candidate is NVIDIA's collision-based particle simulation. Its
+original hash, cell reorder and collision kernels now pass native comparisons,
+with a GPU key/value sort replacing the Thrust library step. Integration and
+animated preview work remains; see [particle collision progress](reports/particle-collision-progress.md).

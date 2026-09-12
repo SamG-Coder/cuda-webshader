@@ -1,0 +1,120 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "results": [
+    {
+      "case": 0,
+      "particles": 128,
+      "stage": "hash",
+      "maxError": 0,
+      "components": 128
+    },
+    {
+      "case": 0,
+      "particles": 128,
+      "stage": "index",
+      "maxError": 0,
+      "components": 128
+    },
+    {
+      "case": 0,
+      "particles": 128,
+      "stage": "start",
+      "maxError": 0,
+      "components": 262144
+    },
+    {
+      "case": 0,
+      "particles": 128,
+      "stage": "end",
+      "maxError": 0,
+      "components": 262144
+    },
+    {
+      "case": 0,
+      "particles": 128,
+      "stage": "positions",
+      "maxError": 0,
+      "components": 512
+    },
+    {
+      "case": 0,
+      "particles": 128,
+      "stage": "velocities",
+      "maxError": 0,
+      "components": 512
+    },
+    {
+      "case": 0,
+      "particles": 128,
+      "stage": "collision",
+      "maxError": 4.656612873077393e-10,
+      "components": 512
+    },
+    {
+      "case": 1,
+      "particles": 257,
+      "stage": "hash",
+      "maxError": 0,
+      "components": 257
+    },
+    {
+      "case": 1,
+      "particles": 257,
+      "stage": "index",
+      "maxError": 0,
+      "components": 257
+    },
+    {
+      "case": 1,
+      "particles": 257,
+      "stage": "start",
+      "maxError": 0,
+      "components": 262144
+    },
+    {
+      "case": 1,
+      "particles": 257,
+      "stage": "end",
+      "maxError": 0,
+      "components": 262144
+    },
+    {
+      "case": 1,
+      "particles": 257,
+      "stage": "positions",
+      "maxError": 0,
+      "components": 1028
+    },
+    {
+      "case": 1,
+      "particles": 257,
+      "stage": "velocities",
+      "maxError": 0,
+      "components": 1028
+    },
+    {
+      "case": 1,
+      "particles": 257,
+      "stage": "collision",
+      "maxError": 4.656612873077393e-10,
+      "components": 1028
+    }
+  ]
+}
