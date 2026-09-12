@@ -1,4 +1,5 @@
 import {checkLayered} from './layered-gpu.js';
+import {checkDeferredPointers} from './deferred-pointers-gpu.js';
 import {checkCubemap} from './cubemap-gpu.js';
 import {checkWalshFull} from './walsh-full-gpu.js';
 import {checkBinomial} from './binomial-gpu.js';
@@ -243,6 +244,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('2048-point real FFT axes match native cuFFT',()=>checkLargeFFT(runtime));
   await run('Sincos and first-set-bit intrinsics match native CUDA',()=>checkSincos(runtime));
   await run('Original NVIDIA scalar layered textures match native CUDA',()=>checkLayered(runtime));
+  await run('Deferred pointer assignments preserve batch and channel offsets',()=>checkDeferredPointers(runtime));
   await run('NVIDIA cubemap faces and edge filtering match native CUDA',()=>checkCubemap(runtime));
   await run('Complete NVIDIA Walsh convolution matches native CUDA',()=>checkWalshFull(runtime));
   await run('Original NVIDIA binomial options match all native outputs',()=>checkBinomial(runtime));

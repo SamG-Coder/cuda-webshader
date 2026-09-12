@@ -1,4 +1,5 @@
 import {lowerConstantRows} from './constant-rows.js';
+import {lowerDeferredPointers} from './deferred-pointers.js';
 import {lowerTiledGroups} from './tiled-groups.js';
 import {FLOAT64_WGSL} from './float64.js';
 import {inferTextureTypes,textureShape} from './texture-types.js';
@@ -1012,6 +1013,7 @@ export function compile(source, options = {},bufferUsage=null) {
   }
   if(specialization&&kernel.templateKind==='type')walk(kernel.body,n=>{if(n.templateArgument!==undefined)n.templateArgument=n.templateArgument.replace(/[A-Za-z_]\w*/g,name=>name===kernel.templateParameter?specialization[2]:name);});
   resolveTraitTypes(kernel,ast,kernel.templateParameter,specialization?.[2]);
+  lowerDeferredPointers(ast,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});
   lowerConstantRows(ast,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});
   const tiledGroups=lowerTiledGroups(ast,options,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});
   const scalarConstraints=uniformBlockGuards(kernel,options,walk,message=>{throw new CompileError(message,kernel.token,source);});

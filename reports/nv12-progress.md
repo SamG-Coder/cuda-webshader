@@ -45,7 +45,17 @@ output or replace the full batch with a single-frame test.
 - Conversion currently stops at reinterpretation between packed byte/vector
   pointers and `uint32_t` pointers.
 - NV12 resize requires `uchar2`, packed pair stores and byte-pair texture reads.
-- BGR resize currently stops at a local pointer initialized to `NULL`.
+- BGR resize now compiles unchanged. Deferred pointers initialized to `NULL`
+  or literal zero are lowered only when every use follows an assignment and
+  every assignment retains the same storage parameter. Ambiguous initialization,
+  buffer changes, shadowing and unsupported control flow are rejected.
+  A focused native/WebGPU test exercises 24 batches, three channels, a Z grid
+  of four (six loop iterations per block), linear filtering and padded output
+  rows. All 5,760 captured values match native CUDA and an independent linear
+  ramp calculation exactly. This uses 32 x 8 -> 16 x 4 images to isolate this
+  stage; it does not replace verification of the full default workload.
+  See `tests/nv12-bgr-native.cu`, `tests/nv12-bgr-kernel.cuh`, and the deferred
+  pointer check in `tests/deferred-pointers-gpu.js`.
 - The full-resolution BGR intermediate is 597,196,800 bytes. The original BGR
   wrapper splits its texture into two 12-frame tiles, each still 298,598,400
   bytes, larger than this GPU's 268,435,456-byte WebGPU storage binding limit.

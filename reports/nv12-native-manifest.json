@@ -161,8 +161,8 @@
     },
     {
       "entry": "resizeBGRplanarBatchKernel",
-      "compiled": false,
-      "error": "Unknown identifier 'NULL'. (23:24)\n    float *p         = NULL;\n                       ^"
+      "compiled": true,
+      "wgslLines": 63
     }
   ],
   "processingOrderDifference": {
