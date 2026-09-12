@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {flowPixels} from '../src/sandbox/flow-preview.js';
+test('Motion colour maps directions and magnitude independently of computation',()=>{const pixels=flowPixels([0,8,0,-8,0,4],[0,0,8,0,-8,0],8);assert.deepEqual([...pixels],[255,255,255,255,255,0,0,255,128,255,0,255,0,255,255,255,128,0,255,255,255,128,128,255]);assert.throws(()=>flowPixels([NaN],[0],1));assert.throws(()=>flowPixels([0],[0],0));assert.throws(()=>flowPixels([0],[],1));});

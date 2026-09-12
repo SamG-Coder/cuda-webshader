@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {validatePipeline,executePipeline} from '../src/sandbox/pipeline.js';
+import {validatePipeline,executePipeline,expandPipelineSteps} from '../src/sandbox/pipeline.js';
 const preset=()=>JSON.parse(readFileSync('showcases/marching-cubes/pipeline.json','utf8')).pipeline;
 test('pipeline rejects unsafe allocation, scan aliasing, control offsets and invalid mesh declarations',()=>{
  for(const change of [p=>p.buffers.pos.records=1048577,p=>p.steps[1].scan.target='voxelVerts',p=>p.steps[1].scan.count=4097,p=>p.steps[4].groups[0].index=1,p=>p.steps[0].block=[1024,2,1],p=>p.preview.positions='volume',p=>p.preview.count={buffer:'vertexTotal',divideCeil:0}]){const plan=preset();change(plan);assert.throws(()=>validatePipeline(plan));}
@@ -66,3 +66,6 @@ test('Real FFT pipeline validates padded real rows and packed complex spectra',(
 test('Fluid preview rejects invalid particle counts, force controls and texture pitches',()=>{const fluid=()=>JSON.parse(readFileSync('showcases/fluids/pipeline.json','utf8')).pipeline;assert.ok(validatePipeline(fluid())>0);for(const change of [p=>p.preview.count=262145,p=>p.preview.positions='realX',p=>p.preview.stir.step=99,p=>p.preview.stir.radius=256,p=>p.preview.stir.scale=Infinity,p=>p.preview.stir.fx='absent',p=>p.steps[1].copyToTexture.bytesPerRow=4095,p=>p.steps[1].copyToTexture.bytesPerRow=4088,p=>p.textures.field.kind='scalar-f32']){const p=fluid();change(p);assert.throws(()=>validatePipeline(p));}});
 
 test('Signed disparity display validates range and output storage',()=>{const preset=()=>JSON.parse(readFileSync('showcases/stereo/pipeline.json','utf8')).pipeline;assert.ok(validatePipeline(preset())>0);for(const range of [null,[0,0],[0,Infinity],[0]]){const p=preset();p.preview.range=range;assert.throws(()=>validatePipeline(p));}const p=preset();p.buffers.g_odata.type='f32';assert.throws(()=>validatePipeline(p));});
+
+
+test('Repeat pipelines bound expansion and validate every expanded clear',()=>{assert.equal(expandPipelineSteps([{repeat:250,steps:[{clear:'a'},{clear:'b'}]}]).length,500);for(const steps of [[{repeat:0,steps:[{clear:'a'}]}],[{repeat:1001,steps:[{clear:'a'}]}],[{repeat:1000,steps:[{repeat:11,steps:[{clear:'a'}]}]}],[{repeat:2,entry:'k',steps:[{clear:'a'}]}],Array.from({length:257},()=>({clear:'a'}))])assert.throws(()=>expandPipelineSteps(steps));const p=JSON.parse(readFileSync('showcases/optical-flow/pipeline.json','utf8')).pipeline;assert.ok(validatePipeline(p)>0);p.steps.push({repeat:2,steps:[{clear:'missing'}]});assert.throws(()=>validatePipeline(p));});

@@ -551,3 +551,5 @@ initial conditions and rendering. See [validation and support boundaries](report
 [Try NVIDIA fluid flow in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fluids): drag to stir 262,144 GPU particles, inspect the original CUDA and generated WGSL, and run a 512 × 512 FFT fluid solver. [Implementation and native comparison details](showcases/fluids/README.md).
 
 [Try NVIDIA stereo disparity in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=stereo): compare the original CUDA and generated WGSL while recovering a disparity image from NVIDIA's stereo camera pair. [Details and native verification](showcases/stereo/README.md).
+
+[Try NVIDIA optical flow in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=optical): estimate motion between two images using the original six kernels, five-level pyramid and 7,500 solver iterations. [Configuration and native verification](showcases/optical-flow/README.md).

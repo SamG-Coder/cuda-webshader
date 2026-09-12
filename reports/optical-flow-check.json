@@ -1,0 +1,33 @@
+{
+  "name": "Complete optical flow matches original native pipeline",
+  "pass": true,
+  "checks": [
+    {
+      "name": "u",
+      "maxError": 0,
+      "rms": 0,
+      "meanAbsolute": 0,
+      "maxMagnitude": 41.07566452026367
+    },
+    {
+      "name": "v",
+      "maxError": 0,
+      "rms": 0,
+      "meanAbsolute": 0,
+      "maxMagnitude": 14.071155548095703
+    }
+  ],
+  "entries": [
+    "DownscaleKernel",
+    "WarpingKernel",
+    "ComputeDerivativesKernel",
+    "JacobiIteration",
+    "AddKernel",
+    "UpscaleKernel"
+  ],
+  "levels": 5,
+  "warps": 3,
+  "solverIterations": 500,
+  "intermediateReadbackBytes": 0,
+  "wallMs": 671.2350000143051
+}

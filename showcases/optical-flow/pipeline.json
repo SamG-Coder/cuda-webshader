@@ -1,0 +1,3461 @@
+{
+  "pipeline": {
+    "buffers": {
+      "u": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "zero"
+      },
+      "v": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "zero"
+      },
+      "nu": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "zero"
+      },
+      "nv": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "zero"
+      },
+      "du0": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "zero"
+      },
+      "dv0": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "zero"
+      },
+      "du1": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "zero"
+      },
+      "dv1": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "zero"
+      },
+      "Ix": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "zero"
+      },
+      "Iy": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "zero"
+      },
+      "Iz": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "zero"
+      },
+      "tmp": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "zero"
+      },
+      "image0_0": {
+        "type": "f32",
+        "records": 1920,
+        "fill": "zero"
+      },
+      "image1_0": {
+        "type": "f32",
+        "records": 1920,
+        "fill": "zero"
+      },
+      "image0_1": {
+        "type": "f32",
+        "records": 5760,
+        "fill": "zero"
+      },
+      "image1_1": {
+        "type": "f32",
+        "records": 5760,
+        "fill": "zero"
+      },
+      "image0_2": {
+        "type": "f32",
+        "records": 19200,
+        "fill": "zero"
+      },
+      "image1_2": {
+        "type": "f32",
+        "records": 19200,
+        "fill": "zero"
+      },
+      "image0_3": {
+        "type": "f32",
+        "records": 76800,
+        "fill": "zero"
+      },
+      "image1_3": {
+        "type": "f32",
+        "records": 76800,
+        "fill": "zero"
+      },
+      "image0_4": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "binary-f32",
+        "source": "showcases/optical-flow/frame-0.bin"
+      },
+      "image1_4": {
+        "type": "f32",
+        "records": 307200,
+        "fill": "binary-f32",
+        "source": "showcases/optical-flow/frame-1.bin"
+      }
+    },
+    "textures": {
+      "image0Tex0": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          40,
+          30
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "image1Tex0": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          40,
+          30
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "warpedTex0": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          40,
+          30
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "flowUTex0": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          40,
+          30
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "flowVTex0": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          40,
+          30
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "image0Tex1": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          80,
+          60
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "image1Tex1": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          80,
+          60
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "warpedTex1": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          80,
+          60
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "flowUTex1": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          80,
+          60
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "flowVTex1": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          80,
+          60
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "image0Tex2": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          160,
+          120
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "image1Tex2": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          160,
+          120
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "warpedTex2": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          160,
+          120
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "flowUTex2": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          160,
+          120
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "flowVTex2": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          160,
+          120
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "image0Tex3": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          320,
+          240
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "image1Tex3": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          320,
+          240
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "warpedTex3": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          320,
+          240
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "flowUTex3": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          320,
+          240
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "flowVTex3": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          320,
+          240
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "image0Tex4": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          640,
+          480
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "image1Tex4": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          640,
+          480
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "warpedTex4": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          640,
+          480
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "flowUTex4": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          640,
+          480
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      },
+      "flowVTex4": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          640,
+          480
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "mirror-repeat",
+        "normalizedCoords": true
+      }
+    },
+    "steps": [
+      {
+        "copyToTexture": {
+          "source": "image0_4",
+          "target": "image0Tex4",
+          "bytesPerRow": 2560
+        }
+      },
+      {
+        "copyToTexture": {
+          "source": "image1_4",
+          "target": "image1Tex4",
+          "bytesPerRow": 2560
+        }
+      },
+      {
+        "entry": "DownscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 320,
+          "height": 240,
+          "stride": 320
+        },
+        "bindings": {
+          "out": "image0_3",
+          "texFine": "image0Tex4"
+        },
+        "groups": [
+          10,
+          30,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "image0_3",
+          "target": "image0Tex3",
+          "bytesPerRow": 1280
+        }
+      },
+      {
+        "entry": "DownscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 320,
+          "height": 240,
+          "stride": 320
+        },
+        "bindings": {
+          "out": "image1_3",
+          "texFine": "image1Tex4"
+        },
+        "groups": [
+          10,
+          30,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "image1_3",
+          "target": "image1Tex3",
+          "bytesPerRow": 1280
+        }
+      },
+      {
+        "entry": "DownscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 160,
+          "height": 120,
+          "stride": 160
+        },
+        "bindings": {
+          "out": "image0_2",
+          "texFine": "image0Tex3"
+        },
+        "groups": [
+          5,
+          15,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "image0_2",
+          "target": "image0Tex2",
+          "bytesPerRow": 640
+        }
+      },
+      {
+        "entry": "DownscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 160,
+          "height": 120,
+          "stride": 160
+        },
+        "bindings": {
+          "out": "image1_2",
+          "texFine": "image1Tex3"
+        },
+        "groups": [
+          5,
+          15,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "image1_2",
+          "target": "image1Tex2",
+          "bytesPerRow": 640
+        }
+      },
+      {
+        "entry": "DownscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 80,
+          "height": 60,
+          "stride": 96
+        },
+        "bindings": {
+          "out": "image0_1",
+          "texFine": "image0Tex2"
+        },
+        "groups": [
+          3,
+          8,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "image0_1",
+          "target": "image0Tex1",
+          "bytesPerRow": 384
+        }
+      },
+      {
+        "entry": "DownscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 80,
+          "height": 60,
+          "stride": 96
+        },
+        "bindings": {
+          "out": "image1_1",
+          "texFine": "image1Tex2"
+        },
+        "groups": [
+          3,
+          8,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "image1_1",
+          "target": "image1Tex1",
+          "bytesPerRow": 384
+        }
+      },
+      {
+        "entry": "DownscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 40,
+          "height": 30,
+          "stride": 64
+        },
+        "bindings": {
+          "out": "image0_0",
+          "texFine": "image0Tex1"
+        },
+        "groups": [
+          2,
+          4,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "image0_0",
+          "target": "image0Tex0",
+          "bytesPerRow": 256
+        }
+      },
+      {
+        "entry": "DownscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 40,
+          "height": 30,
+          "stride": 64
+        },
+        "bindings": {
+          "out": "image1_0",
+          "texFine": "image1Tex1"
+        },
+        "groups": [
+          2,
+          4,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "image1_0",
+          "target": "image1Tex0",
+          "bytesPerRow": 256
+        }
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 40,
+          "height": 30,
+          "stride": 64
+        },
+        "bindings": {
+          "u": "u",
+          "v": "v",
+          "out": "tmp",
+          "texToWarp": "image1Tex0"
+        },
+        "groups": [
+          2,
+          5,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex0",
+          "bytesPerRow": 256
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 40,
+          "height": 30,
+          "stride": 64
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex0",
+          "texTarget": "warpedTex0"
+        },
+        "groups": [
+          2,
+          5,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 40,
+              "h": 30,
+              "s": 64,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              2,
+              5,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 40,
+              "h": 30,
+              "s": 64,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              2,
+              5,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 1920
+        },
+        "bindings": {
+          "op1": "u",
+          "op2": "du0",
+          "sum": "nu"
+        },
+        "groups": [
+          8,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 1920
+        },
+        "bindings": {
+          "op1": "v",
+          "op2": "dv0",
+          "sum": "nv"
+        },
+        "groups": [
+          8,
+          1,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 40,
+          "height": 30,
+          "stride": 64
+        },
+        "bindings": {
+          "u": "nu",
+          "v": "nv",
+          "out": "tmp",
+          "texToWarp": "image1Tex0"
+        },
+        "groups": [
+          2,
+          5,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex0",
+          "bytesPerRow": 256
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 40,
+          "height": 30,
+          "stride": 64
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex0",
+          "texTarget": "warpedTex0"
+        },
+        "groups": [
+          2,
+          5,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 40,
+              "h": 30,
+              "s": 64,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              2,
+              5,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 40,
+              "h": 30,
+              "s": 64,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              2,
+              5,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 1920
+        },
+        "bindings": {
+          "op1": "nu",
+          "op2": "du0",
+          "sum": "u"
+        },
+        "groups": [
+          8,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 1920
+        },
+        "bindings": {
+          "op1": "nv",
+          "op2": "dv0",
+          "sum": "v"
+        },
+        "groups": [
+          8,
+          1,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 40,
+          "height": 30,
+          "stride": 64
+        },
+        "bindings": {
+          "u": "u",
+          "v": "v",
+          "out": "tmp",
+          "texToWarp": "image1Tex0"
+        },
+        "groups": [
+          2,
+          5,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex0",
+          "bytesPerRow": 256
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 40,
+          "height": 30,
+          "stride": 64
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex0",
+          "texTarget": "warpedTex0"
+        },
+        "groups": [
+          2,
+          5,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 40,
+              "h": 30,
+              "s": 64,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              2,
+              5,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 40,
+              "h": 30,
+              "s": 64,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              2,
+              5,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 1920
+        },
+        "bindings": {
+          "op1": "u",
+          "op2": "du0",
+          "sum": "nu"
+        },
+        "groups": [
+          8,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 1920
+        },
+        "bindings": {
+          "op1": "v",
+          "op2": "dv0",
+          "sum": "nv"
+        },
+        "groups": [
+          8,
+          1,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "nu",
+          "target": "flowUTex0",
+          "bytesPerRow": 256
+        }
+      },
+      {
+        "copyToTexture": {
+          "source": "nv",
+          "target": "flowVTex0",
+          "bytesPerRow": 256
+        }
+      },
+      {
+        "entry": "UpscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 80,
+          "height": 60,
+          "stride": 96,
+          "scale": 2
+        },
+        "bindings": {
+          "out": "u",
+          "texCoarse": "flowUTex0"
+        },
+        "groups": [
+          3,
+          8,
+          1
+        ]
+      },
+      {
+        "entry": "UpscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 80,
+          "height": 60,
+          "stride": 96,
+          "scale": 2
+        },
+        "bindings": {
+          "out": "v",
+          "texCoarse": "flowVTex0"
+        },
+        "groups": [
+          3,
+          8,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 80,
+          "height": 60,
+          "stride": 96
+        },
+        "bindings": {
+          "u": "u",
+          "v": "v",
+          "out": "tmp",
+          "texToWarp": "image1Tex1"
+        },
+        "groups": [
+          3,
+          10,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex1",
+          "bytesPerRow": 384
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 80,
+          "height": 60,
+          "stride": 96
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex1",
+          "texTarget": "warpedTex1"
+        },
+        "groups": [
+          3,
+          10,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 80,
+              "h": 60,
+              "s": 96,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              3,
+              10,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 80,
+              "h": 60,
+              "s": 96,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              3,
+              10,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 5760
+        },
+        "bindings": {
+          "op1": "u",
+          "op2": "du0",
+          "sum": "nu"
+        },
+        "groups": [
+          23,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 5760
+        },
+        "bindings": {
+          "op1": "v",
+          "op2": "dv0",
+          "sum": "nv"
+        },
+        "groups": [
+          23,
+          1,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 80,
+          "height": 60,
+          "stride": 96
+        },
+        "bindings": {
+          "u": "nu",
+          "v": "nv",
+          "out": "tmp",
+          "texToWarp": "image1Tex1"
+        },
+        "groups": [
+          3,
+          10,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex1",
+          "bytesPerRow": 384
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 80,
+          "height": 60,
+          "stride": 96
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex1",
+          "texTarget": "warpedTex1"
+        },
+        "groups": [
+          3,
+          10,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 80,
+              "h": 60,
+              "s": 96,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              3,
+              10,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 80,
+              "h": 60,
+              "s": 96,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              3,
+              10,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 5760
+        },
+        "bindings": {
+          "op1": "nu",
+          "op2": "du0",
+          "sum": "u"
+        },
+        "groups": [
+          23,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 5760
+        },
+        "bindings": {
+          "op1": "nv",
+          "op2": "dv0",
+          "sum": "v"
+        },
+        "groups": [
+          23,
+          1,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 80,
+          "height": 60,
+          "stride": 96
+        },
+        "bindings": {
+          "u": "u",
+          "v": "v",
+          "out": "tmp",
+          "texToWarp": "image1Tex1"
+        },
+        "groups": [
+          3,
+          10,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex1",
+          "bytesPerRow": 384
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 80,
+          "height": 60,
+          "stride": 96
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex1",
+          "texTarget": "warpedTex1"
+        },
+        "groups": [
+          3,
+          10,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 80,
+              "h": 60,
+              "s": 96,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              3,
+              10,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 80,
+              "h": 60,
+              "s": 96,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              3,
+              10,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 5760
+        },
+        "bindings": {
+          "op1": "u",
+          "op2": "du0",
+          "sum": "nu"
+        },
+        "groups": [
+          23,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 5760
+        },
+        "bindings": {
+          "op1": "v",
+          "op2": "dv0",
+          "sum": "nv"
+        },
+        "groups": [
+          23,
+          1,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "nu",
+          "target": "flowUTex1",
+          "bytesPerRow": 384
+        }
+      },
+      {
+        "copyToTexture": {
+          "source": "nv",
+          "target": "flowVTex1",
+          "bytesPerRow": 384
+        }
+      },
+      {
+        "entry": "UpscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 160,
+          "height": 120,
+          "stride": 160,
+          "scale": 2
+        },
+        "bindings": {
+          "out": "u",
+          "texCoarse": "flowUTex1"
+        },
+        "groups": [
+          5,
+          15,
+          1
+        ]
+      },
+      {
+        "entry": "UpscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 160,
+          "height": 120,
+          "stride": 160,
+          "scale": 2
+        },
+        "bindings": {
+          "out": "v",
+          "texCoarse": "flowVTex1"
+        },
+        "groups": [
+          5,
+          15,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 160,
+          "height": 120,
+          "stride": 160
+        },
+        "bindings": {
+          "u": "u",
+          "v": "v",
+          "out": "tmp",
+          "texToWarp": "image1Tex2"
+        },
+        "groups": [
+          5,
+          20,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex2",
+          "bytesPerRow": 640
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 160,
+          "height": 120,
+          "stride": 160
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex2",
+          "texTarget": "warpedTex2"
+        },
+        "groups": [
+          5,
+          20,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 160,
+              "h": 120,
+              "s": 160,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              5,
+              20,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 160,
+              "h": 120,
+              "s": 160,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              5,
+              20,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 19200
+        },
+        "bindings": {
+          "op1": "u",
+          "op2": "du0",
+          "sum": "nu"
+        },
+        "groups": [
+          75,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 19200
+        },
+        "bindings": {
+          "op1": "v",
+          "op2": "dv0",
+          "sum": "nv"
+        },
+        "groups": [
+          75,
+          1,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 160,
+          "height": 120,
+          "stride": 160
+        },
+        "bindings": {
+          "u": "nu",
+          "v": "nv",
+          "out": "tmp",
+          "texToWarp": "image1Tex2"
+        },
+        "groups": [
+          5,
+          20,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex2",
+          "bytesPerRow": 640
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 160,
+          "height": 120,
+          "stride": 160
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex2",
+          "texTarget": "warpedTex2"
+        },
+        "groups": [
+          5,
+          20,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 160,
+              "h": 120,
+              "s": 160,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              5,
+              20,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 160,
+              "h": 120,
+              "s": 160,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              5,
+              20,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 19200
+        },
+        "bindings": {
+          "op1": "nu",
+          "op2": "du0",
+          "sum": "u"
+        },
+        "groups": [
+          75,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 19200
+        },
+        "bindings": {
+          "op1": "nv",
+          "op2": "dv0",
+          "sum": "v"
+        },
+        "groups": [
+          75,
+          1,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 160,
+          "height": 120,
+          "stride": 160
+        },
+        "bindings": {
+          "u": "u",
+          "v": "v",
+          "out": "tmp",
+          "texToWarp": "image1Tex2"
+        },
+        "groups": [
+          5,
+          20,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex2",
+          "bytesPerRow": 640
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 160,
+          "height": 120,
+          "stride": 160
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex2",
+          "texTarget": "warpedTex2"
+        },
+        "groups": [
+          5,
+          20,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 160,
+              "h": 120,
+              "s": 160,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              5,
+              20,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 160,
+              "h": 120,
+              "s": 160,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              5,
+              20,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 19200
+        },
+        "bindings": {
+          "op1": "u",
+          "op2": "du0",
+          "sum": "nu"
+        },
+        "groups": [
+          75,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 19200
+        },
+        "bindings": {
+          "op1": "v",
+          "op2": "dv0",
+          "sum": "nv"
+        },
+        "groups": [
+          75,
+          1,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "nu",
+          "target": "flowUTex2",
+          "bytesPerRow": 640
+        }
+      },
+      {
+        "copyToTexture": {
+          "source": "nv",
+          "target": "flowVTex2",
+          "bytesPerRow": 640
+        }
+      },
+      {
+        "entry": "UpscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 320,
+          "height": 240,
+          "stride": 320,
+          "scale": 2
+        },
+        "bindings": {
+          "out": "u",
+          "texCoarse": "flowUTex2"
+        },
+        "groups": [
+          10,
+          30,
+          1
+        ]
+      },
+      {
+        "entry": "UpscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 320,
+          "height": 240,
+          "stride": 320,
+          "scale": 2
+        },
+        "bindings": {
+          "out": "v",
+          "texCoarse": "flowVTex2"
+        },
+        "groups": [
+          10,
+          30,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 320,
+          "height": 240,
+          "stride": 320
+        },
+        "bindings": {
+          "u": "u",
+          "v": "v",
+          "out": "tmp",
+          "texToWarp": "image1Tex3"
+        },
+        "groups": [
+          10,
+          40,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex3",
+          "bytesPerRow": 1280
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 320,
+          "height": 240,
+          "stride": 320
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex3",
+          "texTarget": "warpedTex3"
+        },
+        "groups": [
+          10,
+          40,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 320,
+              "h": 240,
+              "s": 320,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              10,
+              40,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 320,
+              "h": 240,
+              "s": 320,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              10,
+              40,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 76800
+        },
+        "bindings": {
+          "op1": "u",
+          "op2": "du0",
+          "sum": "nu"
+        },
+        "groups": [
+          300,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 76800
+        },
+        "bindings": {
+          "op1": "v",
+          "op2": "dv0",
+          "sum": "nv"
+        },
+        "groups": [
+          300,
+          1,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 320,
+          "height": 240,
+          "stride": 320
+        },
+        "bindings": {
+          "u": "nu",
+          "v": "nv",
+          "out": "tmp",
+          "texToWarp": "image1Tex3"
+        },
+        "groups": [
+          10,
+          40,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex3",
+          "bytesPerRow": 1280
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 320,
+          "height": 240,
+          "stride": 320
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex3",
+          "texTarget": "warpedTex3"
+        },
+        "groups": [
+          10,
+          40,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 320,
+              "h": 240,
+              "s": 320,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              10,
+              40,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 320,
+              "h": 240,
+              "s": 320,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              10,
+              40,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 76800
+        },
+        "bindings": {
+          "op1": "nu",
+          "op2": "du0",
+          "sum": "u"
+        },
+        "groups": [
+          300,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 76800
+        },
+        "bindings": {
+          "op1": "nv",
+          "op2": "dv0",
+          "sum": "v"
+        },
+        "groups": [
+          300,
+          1,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 320,
+          "height": 240,
+          "stride": 320
+        },
+        "bindings": {
+          "u": "u",
+          "v": "v",
+          "out": "tmp",
+          "texToWarp": "image1Tex3"
+        },
+        "groups": [
+          10,
+          40,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex3",
+          "bytesPerRow": 1280
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 320,
+          "height": 240,
+          "stride": 320
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex3",
+          "texTarget": "warpedTex3"
+        },
+        "groups": [
+          10,
+          40,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 320,
+              "h": 240,
+              "s": 320,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              10,
+              40,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 320,
+              "h": 240,
+              "s": 320,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              10,
+              40,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 76800
+        },
+        "bindings": {
+          "op1": "u",
+          "op2": "du0",
+          "sum": "nu"
+        },
+        "groups": [
+          300,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 76800
+        },
+        "bindings": {
+          "op1": "v",
+          "op2": "dv0",
+          "sum": "nv"
+        },
+        "groups": [
+          300,
+          1,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "nu",
+          "target": "flowUTex3",
+          "bytesPerRow": 1280
+        }
+      },
+      {
+        "copyToTexture": {
+          "source": "nv",
+          "target": "flowVTex3",
+          "bytesPerRow": 1280
+        }
+      },
+      {
+        "entry": "UpscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 640,
+          "height": 480,
+          "stride": 640,
+          "scale": 2
+        },
+        "bindings": {
+          "out": "u",
+          "texCoarse": "flowUTex3"
+        },
+        "groups": [
+          20,
+          60,
+          1
+        ]
+      },
+      {
+        "entry": "UpscaleKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 640,
+          "height": 480,
+          "stride": 640,
+          "scale": 2
+        },
+        "bindings": {
+          "out": "v",
+          "texCoarse": "flowVTex3"
+        },
+        "groups": [
+          20,
+          60,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 640,
+          "height": 480,
+          "stride": 640
+        },
+        "bindings": {
+          "u": "u",
+          "v": "v",
+          "out": "tmp",
+          "texToWarp": "image1Tex4"
+        },
+        "groups": [
+          20,
+          80,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex4",
+          "bytesPerRow": 2560
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 640,
+          "height": 480,
+          "stride": 640
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex4",
+          "texTarget": "warpedTex4"
+        },
+        "groups": [
+          20,
+          80,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 640,
+              "h": 480,
+              "s": 640,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              20,
+              80,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 640,
+              "h": 480,
+              "s": 640,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              20,
+              80,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 307200
+        },
+        "bindings": {
+          "op1": "u",
+          "op2": "du0",
+          "sum": "nu"
+        },
+        "groups": [
+          1200,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 307200
+        },
+        "bindings": {
+          "op1": "v",
+          "op2": "dv0",
+          "sum": "nv"
+        },
+        "groups": [
+          1200,
+          1,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 640,
+          "height": 480,
+          "stride": 640
+        },
+        "bindings": {
+          "u": "nu",
+          "v": "nv",
+          "out": "tmp",
+          "texToWarp": "image1Tex4"
+        },
+        "groups": [
+          20,
+          80,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex4",
+          "bytesPerRow": 2560
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 640,
+          "height": 480,
+          "stride": 640
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex4",
+          "texTarget": "warpedTex4"
+        },
+        "groups": [
+          20,
+          80,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 640,
+              "h": 480,
+              "s": 640,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              20,
+              80,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 640,
+              "h": 480,
+              "s": 640,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              20,
+              80,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 307200
+        },
+        "bindings": {
+          "op1": "nu",
+          "op2": "du0",
+          "sum": "u"
+        },
+        "groups": [
+          1200,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 307200
+        },
+        "bindings": {
+          "op1": "nv",
+          "op2": "dv0",
+          "sum": "v"
+        },
+        "groups": [
+          1200,
+          1,
+          1
+        ]
+      },
+      {
+        "clear": "du0"
+      },
+      {
+        "clear": "dv0"
+      },
+      {
+        "clear": "du1"
+      },
+      {
+        "clear": "dv1"
+      },
+      {
+        "entry": "WarpingKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 640,
+          "height": 480,
+          "stride": 640
+        },
+        "bindings": {
+          "u": "u",
+          "v": "v",
+          "out": "tmp",
+          "texToWarp": "image1Tex4"
+        },
+        "groups": [
+          20,
+          80,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "tmp",
+          "target": "warpedTex4",
+          "bytesPerRow": 2560
+        }
+      },
+      {
+        "entry": "ComputeDerivativesKernel",
+        "block": [
+          32,
+          6,
+          1
+        ],
+        "scalars": {
+          "width": 640,
+          "height": 480,
+          "stride": 640
+        },
+        "bindings": {
+          "Ix": "Ix",
+          "Iy": "Iy",
+          "Iz": "Iz",
+          "texSource": "image0Tex4",
+          "texTarget": "warpedTex4"
+        },
+        "groups": [
+          20,
+          80,
+          1
+        ]
+      },
+      {
+        "repeat": 250,
+        "steps": [
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 640,
+              "h": 480,
+              "s": 640,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du0",
+              "dv0": "dv0",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du1",
+              "dv1": "dv1"
+            },
+            "groups": [
+              20,
+              80,
+              1
+            ]
+          },
+          {
+            "entry": "JacobiIteration<32,6>",
+            "block": [
+              32,
+              6,
+              1
+            ],
+            "scalars": {
+              "w": 640,
+              "h": 480,
+              "s": 640,
+              "alpha": 0.2
+            },
+            "bindings": {
+              "du0": "du1",
+              "dv0": "dv1",
+              "Ix": "Ix",
+              "Iy": "Iy",
+              "Iz": "Iz",
+              "du1": "du0",
+              "dv1": "dv0"
+            },
+            "groups": [
+              20,
+              80,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 307200
+        },
+        "bindings": {
+          "op1": "u",
+          "op2": "du0",
+          "sum": "nu"
+        },
+        "groups": [
+          1200,
+          1,
+          1
+        ]
+      },
+      {
+        "entry": "AddKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "scalars": {
+          "count": 307200
+        },
+        "bindings": {
+          "op1": "v",
+          "op2": "dv0",
+          "sum": "nv"
+        },
+        "groups": [
+          1200,
+          1,
+          1
+        ]
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "nu",
+      "v": "nv",
+      "width": 640,
+      "height": 480,
+      "format": "flow-xy",
+      "scale": 8
+    },
+    "flowOutput": {
+      "u": "nu",
+      "v": "nv"
+    }
+  }
+}

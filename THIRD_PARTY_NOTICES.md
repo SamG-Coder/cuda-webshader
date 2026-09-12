@@ -202,3 +202,7 @@ project code under MIT.
 `tests/smoke-noise-kernel.cuh` and `tests/smoke-noise-host.cuh` retain NVIDIA's BSD-3-Clause notice and the unchanged noise sampling and generation functions from `smokeParticles` at revision `5443602d89ed99aede2e4b7bf329daddeadb320e`. The surrounding probe and validation harness are MIT project code.
 
 The smoke showcase includes original NVIDIA smokeParticles device functions and a WebGPU adaptation of SmokeShaders.cpp / SmokeRenderer.cpp in src/sandbox/smoke-renderer.js, under the NVIDIA BSD-3-Clause notice in licenses/nvidia-cuda-samples-BSD-3-Clause.txt.
+
+### NVIDIA fluidsGL, stereoDisparity and HSOpticalFlow
+
+The device functions in showcases/fluids, showcases/stereo and showcases/optical-flow, and corresponding tests, retain NVIDIA's BSD-3-Clause notices from cuda-samples revision 5443602d89ed99aede2e4b7bf329daddeadb320e. The relevant source directories are cpp/5_Domain_Specific/fluidsGL, stereoDisparity and HSOpticalFlow. The stereo packed-image inputs derive from stereo.im0.640x533.ppm and stereo.im1.640x533.ppm; the optical float-image inputs derive from frame10.ppm and frame11.ppm. These are NVIDIA sample assets, not new project imagery. The runtime adapters, host pipeline declarations and preview renderers are original MIT project code. See licenses/nvidia-cuda-samples-BSD-3-Clause.txt and each showcase README for provenance and input conversion.
