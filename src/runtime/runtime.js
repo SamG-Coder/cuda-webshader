@@ -11,7 +11,7 @@ export function packScalars(metadata, values, target = new ArrayBuffer(metadata.
   for (const name of Object.keys(values)) if (!known.has(name)) throw new Error(`Unknown scalar parameter '${name}'.`);
   const writes = [];
   for (const p of metadata.scalars) {
-    let v = Object.hasOwn(values,p.name)?values[p.name]:p.origin==='constant'?p.defaultValue:undefined;
+    let v = Object.hasOwn(values,p.name)?values[p.name]:p.defaultValue;
     if(p.sourceType==='bool'){if(![true,false,0,1].includes(v))throw new TypeError(`Scalar '${p.name}' must be a boolean or 0/1.`);v=Number(v);}
     if (typeof v !== 'number' || !Number.isFinite(v)) throw new TypeError(`Scalar '${p.name}' must be finite.`);
     if(['cw_short','cw_ushort'].includes(p.sourceType)&&(!Number.isInteger(v)||v<(p.sourceType==='cw_short'?-32768:0)||v>(p.sourceType==='cw_short'?32767:65535)))throw new RangeError(`${p.name} is outside its 16-bit range.`);
@@ -78,6 +78,16 @@ export class GpuRuntime {
     if(typeof normalizedCoords!=='boolean'||(!normalizedCoords&&addressMode!=='clamp-to-edge'))throw Error('Unnormalized 2D textures require clamp-to-edge addressing.');
     if(!this.device.features.has('float32-filterable'))throw Error('Float textures require float32-filterable on this device.');if(!['linear','nearest'].includes(filter)||!['repeat','clamp-to-edge','mirror-repeat'].includes(addressMode))throw Error('Unsupported texture sampler settings.');
     const gpuTexture=this.device.createTexture({label,size:[width,height,1],dimension:'2d',format,usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST|GPUTextureUsage.COPY_SRC|(storage?GPUTextureUsage.STORAGE_BINDING:0)});if(data)this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width*4*components,rowsPerImage:height},[width,height,1]);const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode}),format,dimension:'2d',width,height,depth:1,storage,normalizedCoords,filter};this.textures.add(resource);this.stats.dataBytesUploaded+=data?.byteLength||0;return resource;
+  }
+  createLayeredTexture2D(data,{width,height,layers,filter='linear',addressMode='clamp-to-edge',storage=false,label='CUDA float4 layered texture'}={}) {
+    this.assertAlive();
+    if(![width,height].every(n=>Number.isInteger(n)&&n>0&&n<=this.device.limits.maxTextureDimension2D)||!Number.isInteger(layers)||layers<1||layers>this.device.limits.maxTextureArrayLayers)throw Error('Layered texture dimensions exceed device limits.');
+    if(!(data===null&&storage)&&(!(data instanceof Float32Array)||data.length!==width*height*layers*4||data.some(v=>!Number.isFinite(v))))throw Error('Layered texture requires matching finite float4 data.');
+    if(!this.device.features.has('float32-filterable')||!['linear','nearest'].includes(filter)||!['repeat','clamp-to-edge','mirror-repeat'].includes(addressMode))throw Error('Unsupported layered texture sampling settings.');
+    const gpuTexture=this.device.createTexture({label,size:[width,height,layers],dimension:'2d',format:'rgba32float',usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST|GPUTextureUsage.COPY_SRC|(storage?GPUTextureUsage.STORAGE_BINDING:0)});
+    if(data)this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width*16,rowsPerImage:height},[width,height,layers]);
+    const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView({dimension:'2d-array'}),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode}),format:'rgba32float',dimension:'2d-array',width,height,depth:layers,storage,normalizedCoords:true,filter};
+    this.textures.add(resource);this.stats.dataBytesUploaded+=data?.byteLength||0;return resource;
   }
   createByteTexture2D(data,{width,height,label='CUDA byte element texture'}={}) {
     this.assertAlive();
@@ -249,7 +259,7 @@ export class ComputeBatch {
   dispatch(invocation,workgroups) {
     this.assertOpen();if(invocation.runtime!==this.runtime)throw new Error('Invocation belongs to another runtime.');
     const groups=Array.isArray(workgroups)?[...workgroups]:[workgroups];while(groups.length<3)groups.push(1);
-    for(const surface of invocation.kernel.artifact.metadata.surfaces||[]){const r=invocation.buffers[surface.name],block=invocation.kernel.artifact.metadata.workgroupSize;if(surface.coordinates==='global-x'&&(r.height!==1||groups[1]*block[1]!==1||groups[2]*block[2]!==1))throw Error('Surface dispatch requires a one-row texture and a one-dimensional launch.');if(!['global-x','global-xy','global-xyz'].includes(surface.coordinates)||groups[0]*block[0]>r.width||groups[1]*block[1]>r.height||groups[2]*block[2]>(surface.coordinates==='global-xyz'?r.depth:1))throw Error('Surface dispatch exceeds the checked global '+(surface.coordinates==='global-xyz'?'XYZ':'XY')+' extent.');}
+    for(const surface of invocation.kernel.artifact.metadata.surfaces||[]){const r=invocation.buffers[surface.name],block=invocation.kernel.artifact.metadata.workgroupSize;if(surface.coordinates==='global-x'&&(r.height!==1||groups[1]*block[1]!==1||groups[2]*block[2]!==1))throw Error('Surface dispatch requires a one-row texture and a one-dimensional launch.');if(surface.coordinates==='global-xy-layer'){const layer=surface.layer?.scalar?(Object.hasOwn(invocation.values,surface.layer.scalar)?invocation.values[surface.layer.scalar]:invocation.kernel.artifact.metadata.scalars.find(p=>p.name===surface.layer.scalar)?.defaultValue):surface.layer?.value;if(!Number.isInteger(layer)||layer<0||layer>=r.depth)throw Error('Surface layer is outside the allocated array.');}if(!['global-x','global-xy','global-xyz','global-xy-layer'].includes(surface.coordinates)||groups[0]*block[0]>r.width||groups[1]*block[1]>r.height||groups[2]*block[2]>(surface.coordinates==='global-xyz'?r.depth:1))throw Error('Surface dispatch exceeds the checked global '+(surface.coordinates==='global-xyz'?'XYZ':'XY')+' extent.');}
     if(groups.length!==3||groups.some(x=>!Number.isSafeInteger(x)||x<0||x>this.runtime.device.limits.maxComputeWorkgroupsPerDimension))throw new RangeError('Invalid workgroup counts. These are block counts, not thread counts.');
     if(groups.some(x=>x===0))return this;
     for(const r of Object.values(invocation.buffers))this.runtime.checkResource(r);

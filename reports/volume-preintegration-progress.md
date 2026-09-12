@@ -3,7 +3,8 @@
 Candidate: `cpp/5_Domain_Specific/volumeFiltering/volumeRender_kernel.cu` at
 NVIDIA CUDA Samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
 
-The full pre-integrated renderer is **not yet a working sandbox showcase**.
+The pre-integrated renderer is now a
+[working sandbox showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=volume-preintegrated).
 The original `d_integrate_trapezoidal` body is retained unchanged in
 `tests/volume-transfer-kernel.cuh`, including its double literals.
 
@@ -52,15 +53,36 @@ zero, subnormals, infinities, overflow, cancellation, halfway rounding and seede
 random bit patterns. See `tests/float64-native.cu`, `tests/float64-gpu.js` and
 `reports/float64-check.json`.
 
-## Remaining work
+## Layered renderer completed
 
-The original pipeline still needs
-layered float4 surface stores, layered transfer texture sampling, and sandbox
-pipeline bindings for these resources. The existing volume-filter showcase
-continues to represent its validated convolution stage only.
+`surf2DLayeredwrite(float4)` now uses checked global XY byte offsets and a uniform
+or literal layer. The runtime rejects out-of-range layers, over-wide/over-high
+dispatches, extra Z lanes and non-writable resources. `tex2DLayered<float4>` passes
+through typed helper chains and samples normalized coordinates within each layer.
+Layered resources use WebGPU `2d-array` views and `rgba32float` texels.
 
-Validation: 521 unit tests, 159 real NVIDIA WebGPU checks,
-compile-all and the static build pass. No software GPU tests were run, and no
-performance claim is made for the unfinished renderer. The integer implementation
-executes on the real GPU but is not native hardware FP64; it can cost substantially
-more instructions than float32 arithmetic.
+The original scalar default arguments are preserved in the launch ABI. The
+original float overload of `exp` is supported; double transcendental functions
+remain unsupported. Five sandbox dispatches create the two original transfer
+tables, then ray march the original Bucky volume. Pipeline float4 textures support
+storage bindings, and the bounded texture budget is 64 MiB to accommodate the
+original pair of 1024² tables (32 MiB).
+
+All 8,192 float components in the 32² two-layer table were compared with native
+CUDA; maximum error is 1.1920928955078125e-7. Six images compare 32² and 1024²
+transfer tables with the front camera, rotated camera, and pre-integration off.
+Each contains 65,536 pixels. Maximum error is one 8-bit channel level, with only
+4–7 channels differing per image. The sandbox uses the original 1024² tables
+and produces the same front-camera result within one channel level, with no
+intermediate CPU readback. See `reports/volume-preintegrated-check.json` and
+`reports/volume-preintegrated-sandbox-check.json`.
+
+The unchanged function bodies and transfer initializers are isolated from the
+desktop includes, globals and host API code. The rendering pipeline is complete
+for this showcase; the separate volume-filter showcase continues to represent
+the convolution stage. The desktop OpenGL UI is not translated.
+
+Validation: 526 unit tests, 160 real NVIDIA WebGPU checks, 81 sandbox presets,
+compile-all and the static build pass. No software GPU tests were run.
+The integer double implementation executes on the real GPU but is not native
+hardware FP64; no performance parity is claimed.

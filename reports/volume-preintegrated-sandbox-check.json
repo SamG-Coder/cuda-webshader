@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "maxChannelError": 1,
+  "coloredPixels": 15144,
+  "controlReadbackBytes": 0,
+  "textureLayers": 2,
+  "tableWidth": 1024,
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false
+}

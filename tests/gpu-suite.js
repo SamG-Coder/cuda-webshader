@@ -1,3 +1,4 @@
+import {checkVolumePreintegrated} from './volume-preintegrated-gpu.js';
 import {checkFloat64} from './float64-gpu.js';
 import {checkVolumeTransfer} from './volume-transfer-gpu.js';
 import {checkFloat4Surface} from './float4-surface-gpu.js';
@@ -205,6 +206,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Complete implicit marching-cubes GPU pipeline matches native CUDA',()=>checkMarchingPipeline(runtime));
   await run('Hierarchical exclusive scan matches native CUDA',()=>checkExclusiveScan(runtime));
   await run('Original shared marching-cubes triangle generation matches native CUDA',()=>checkMarchingTriangles(runtime));
+  await run('Original preintegrated volume tables and ray marching match native CUDA',()=>checkVolumePreintegrated(runtime));
   await run('Integer-limb binary64 arithmetic matches native CUDA bits',()=>checkFloat64(runtime));
   await run('Original volume transfer integration matches native CUDA',()=>checkVolumeTransfer(runtime));
   await run('Float4 1D surfaces match native CUDA with checked extents',()=>checkFloat4Surface(runtime));

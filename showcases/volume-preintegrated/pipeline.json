@@ -1,0 +1,273 @@
+{
+  "pipeline": {
+    "buffers": {
+      "output": {
+        "type": "u32",
+        "records": 65536,
+        "fill": "zero"
+      }
+    },
+    "textures": {
+      "colors0": {
+        "kind": "float4",
+        "dimensions": [
+          9
+        ],
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          1,
+          0.5,
+          0,
+          1,
+          1,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          1,
+          1,
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "colors1": {
+        "kind": "float4",
+        "dimensions": [
+          9
+        ],
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0.125,
+          0,
+          0.5,
+          1,
+          0.125,
+          0,
+          1,
+          1,
+          0.125,
+          0,
+          1,
+          0,
+          0.125,
+          0.25,
+          0.75,
+          0,
+          1,
+          0.75,
+          0.25,
+          0,
+          0.125,
+          1,
+          0.75,
+          0,
+          0.125,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "integrated": {
+        "kind": "float4",
+        "dimensions": [
+          1024
+        ],
+        "storage": true,
+        "fill": "zero"
+      },
+      "tables": {
+        "kind": "float4",
+        "dimensions": [
+          1024,
+          1024,
+          2
+        ],
+        "storage": true,
+        "fill": "zero"
+      },
+      "volume": {
+        "kind": "volume-u8",
+        "dimensions": [
+          32,
+          32,
+          32
+        ],
+        "source": "showcases/volume-render/Bucky.raw",
+        "filter": "linear",
+        "addressMode": "clamp-to-edge"
+      }
+    },
+    "steps": [
+      {
+        "entry": "d_integrate_trapezoidal",
+        "block": [
+          32,
+          1,
+          1
+        ],
+        "groups": [
+          32,
+          1,
+          1
+        ],
+        "bindings": {
+          "transferTex": "colors1",
+          "transferIntegrateSurf": "integrated"
+        },
+        "scalars": {
+          "extent.width": 1024,
+          "extent.height": 0,
+          "extent.depth": 0
+        }
+      },
+      {
+        "entry": "d_preintegrate",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          128,
+          128,
+          1
+        ],
+        "bindings": {
+          "transferTex": "colors1",
+          "transferIntegrateTex": "integrated",
+          "transferLayerPreintSurf": "tables"
+        },
+        "scalars": {
+          "layer": 1,
+          "steps": 1024,
+          "extent.width": 1024,
+          "extent.height": 1024,
+          "extent.depth": 2
+        }
+      },
+      {
+        "entry": "d_integrate_trapezoidal",
+        "block": [
+          32,
+          1,
+          1
+        ],
+        "groups": [
+          32,
+          1,
+          1
+        ],
+        "bindings": {
+          "transferTex": "colors0",
+          "transferIntegrateSurf": "integrated"
+        },
+        "scalars": {
+          "extent.width": 1024,
+          "extent.height": 0,
+          "extent.depth": 0
+        }
+      },
+      {
+        "entry": "d_preintegrate",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          128,
+          128,
+          1
+        ],
+        "bindings": {
+          "transferTex": "colors0",
+          "transferIntegrateTex": "integrated",
+          "transferLayerPreintSurf": "tables"
+        },
+        "scalars": {
+          "layer": 0,
+          "steps": 1024,
+          "extent.width": 1024,
+          "extent.height": 1024,
+          "extent.depth": 2
+        }
+      },
+      {
+        "entry": "d_render_preint",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          32,
+          32,
+          1
+        ],
+        "bindings": {
+          "d_output": "output",
+          "volumeTex": "volume",
+          "transferTex": "colors0",
+          "transferLayerPreintTex": "tables"
+        },
+        "scalars": {
+          "imageW": 256,
+          "imageH": 256,
+          "density": 0.05,
+          "brightness": 1,
+          "transferOffset": 0,
+          "transferScale": 1,
+          "constant.c_invViewMatrix.m[0].x": 1,
+          "constant.c_invViewMatrix.m[0].y": 0,
+          "constant.c_invViewMatrix.m[0].z": 0,
+          "constant.c_invViewMatrix.m[0].w": 0,
+          "constant.c_invViewMatrix.m[1].x": 0,
+          "constant.c_invViewMatrix.m[1].y": 1,
+          "constant.c_invViewMatrix.m[1].z": 0,
+          "constant.c_invViewMatrix.m[1].w": 0,
+          "constant.c_invViewMatrix.m[2].x": 0,
+          "constant.c_invViewMatrix.m[2].y": 0,
+          "constant.c_invViewMatrix.m[2].z": 1,
+          "constant.c_invViewMatrix.m[2].w": 4
+        }
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "output",
+      "width": 256,
+      "height": 256,
+      "format": "rgba8",
+      "alpha": "opaque"
+    }
+  }
+}

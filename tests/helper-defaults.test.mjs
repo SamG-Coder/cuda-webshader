@@ -6,7 +6,7 @@ test('Overloads use supplied argument types and reject ambiguous defaulted calls
 test('Boolean and macro literal defaults survive desktop extraction',()=>{const out=run(kernelSource('#include <cuda_runtime.h>\n#define SCALE 3.5f\n__device__ float f(float x=SCALE,bool enabled=true){return enabled?x:0.0f;}__global__ void k(float* out){out[0]=f();out[1]=f(9.0f,false);}').source);assert.deepEqual([...out.slice(0,2)],[3.5,0]);});
 test('Invalid defaults fail instead of capturing caller names or dropping arguments',()=>{for(const source of [
  '__device__ int f(int a=1,int b){return a+b;}__global__ void k(){}',
- '__global__ void k(int n=1){}',
+ '__global__ void k(int n=missing){}',
  '__device__ int f(int x,int y=x){return y;}__global__ void k(){f(2);}',
  '__device__ int f(int x=1+2){return x;}__global__ void k(){f();}',
  '__device__ int f(int* x=0){return 0;}__global__ void k(){}',

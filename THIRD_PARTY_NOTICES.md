@@ -71,6 +71,13 @@ unchanged `d_integrate_trapezoidal` kernel from `volumeFiltering/volumeRender_ke
 at revision `5443602d89ed99aede2e4b7bf329daddeadb320e`. The float4 surface ABI probe
 and native harness are project code under MIT.
 
+The same upstream volume-rendering source supplies the unchanged functions in
+`tests/volume-preintegrate-kernel.cuh`, `tests/volume-preintegrated-render-kernel.cuh`
+and `showcases/volume-preintegrated/kernel.cu`. Both original transfer initializers
+are retained in `tests/volume-transfer-colors.cuh`; their JSON values and the
+showcase launch configuration include that NVIDIA data. These source/data portions
+are BSD-3-Clause. The launch plumbing, validation code and icon are MIT.
+
 - [MIT license text](https://opensource.org/license/mit)
 - [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 - [NVIDIA CUDA Toolkit EULA](https://docs.nvidia.com/cuda/eula/index.html)

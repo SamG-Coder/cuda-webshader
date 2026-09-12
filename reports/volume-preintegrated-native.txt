@@ -1,0 +1,6 @@
+Captured original renderer: transfer=32²x2, scenario=0, image=256².
+Captured original renderer: transfer=32²x2, scenario=1, image=256².
+Captured original renderer: transfer=32²x2, scenario=2, image=256².
+Captured original renderer: transfer=1024²x2, scenario=0, image=256².
+Captured original renderer: transfer=1024²x2, scenario=1, image=256².
+Captured original renderer: transfer=1024²x2, scenario=2, image=256².

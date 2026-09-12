@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+<defs>
+<radialGradient id="green"><stop stop-color="#d0ff6f"/><stop offset=".6" stop-color="#41d88d"/><stop offset="1" stop-color="#103f49"/></radialGradient>
+<radialGradient id="hot"><stop stop-color="#ffe680"/><stop offset=".6" stop-color="#fa7747"/><stop offset="1" stop-color="#9b3168"/></radialGradient>
+<clipPath id="sphere"><circle cx="320" cy="180" r="116"/></clipPath>
+<pattern id="cells" width="46" height="42" patternUnits="userSpaceOnUse"><path d="M23 2L42 12V31L23 41L4 31V12Z" fill="#081920" fill-opacity=".3" stroke="#c4f4df" stroke-opacity=".5" stroke-width="1.5"/></pattern>
+</defs>
+<rect width="640" height="360" fill="#0a151e"/>
+<g fill="none" stroke="#294b5c"><path d="M204 59H419L490 115V291H275L204 235Z M204 59L275 115H490 M275 115V291 M419 59V235H204 M419 235L490 291"/></g>
+<g clip-path="url(#sphere)"><circle cx="320" cy="180" r="116" fill="url(#green)"/><path d="M320 64H445V300H320Z" fill="url(#hot)"/><circle cx="320" cy="180" r="116" fill="url(#cells)"/></g>
+<ellipse cx="320" cy="180" rx="116" ry="42" fill="none" stroke="#d8ffe8" stroke-opacity=".6"/>
+<path d="M320 64V296" stroke="#d8ffe8" stroke-width="2"/>
+<g fill="#b7d6de" font-family="monospace" font-size="12"><text x="31" y="35">PRE-INTEGRATED VOLUME</text><text x="31" y="330">TWO COLOUR + OPACITY LAYERS</text></g>
+<path d="M49 183H170M470 183H590" stroke="#4b7185" stroke-dasharray="4 6"/>
+</svg>

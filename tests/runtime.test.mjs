@@ -14,6 +14,19 @@ function setup(){
  const runtime=new GpuRuntime(device);const artifact=compile('__global__ void stamp(float* values,unsigned int slot,float value){values[slot]=value;}');const kernel=new Kernel(runtime,artifact,{},{});const values=runtime.createBuffer(new Float32Array(4));
  return {runtime,kernel,values,events,device};
 }
+test('Layered float4 allocation and surface launches validate dimensions, storage and layer defaults',()=>{
+ const {runtime,device,events}=setup();device.features.add('float32-filterable');device.limits.maxTextureArrayLayers=4;
+ const texture=runtime.createLayeredTexture2D(new Float32Array(4*4*2*4),{width:4,height:4,layers:2,storage:true});
+ assert.equal(texture.dimension,'2d-array');assert.deepEqual(events.find(e=>e.kind==='textureUpload').size,[4,4,2]);assert.equal(events.find(e=>e.kind==='textureUpload').layout.bytesPerRow,64);
+ for(const options of [{layers:0},{layers:5},{width:257},{height:-1}])assert.throws(()=>runtime.createLayeredTexture2D(null,{width:4,height:4,layers:2,storage:true,...options}),/dimensions/);
+ assert.throws(()=>runtime.createLayeredTexture2D(new Float32Array(4),{width:4,height:4,layers:2}),/float4 data/);
+ const source='__global__ void write(cudaSurfaceObject_t target,int layer=0){uint x=blockIdx.x*blockDim.x+threadIdx.x;uint y=blockIdx.y*blockDim.y+threadIdx.y;surf2DLayeredwrite(make_float4(1.f),target,x*16,y,layer);}';
+ const artifact=compile(source,{workgroupSize:[4,4,1]}),kernel=new Kernel(runtime,artifact,{},{}),invocation=kernel.bind({target:texture});
+ const batch=runtime.batch();batch.dispatch(invocation,[1,1,1]);invocation.setScalars({layer:1});batch.dispatch(invocation,[1,1,1]);batch.submit();
+ for(const layer of [-1,2]){invocation.setScalars({layer});const bad=runtime.batch();try{assert.throws(()=>bad.dispatch(invocation,[1,1,1]),/Surface layer/);}finally{bad.discard();}}
+ invocation.setScalars({layer:0});for(const groups of [[2,1,1],[1,2,1],[1,1,2]]){const bad=runtime.batch();try{assert.throws(()=>bad.dispatch(invocation,groups),/Surface dispatch/);}finally{bad.discard();}}
+ const readOnly=runtime.createLayeredTexture2D(new Float32Array(4*4*2*4),{width:4,height:4,layers:2});assert.throws(()=>kernel.bind({target:readOnly}),/writable texture/);runtime.dispose();
+});
 test('Each encoded scalar version receives a distinct aligned uniform snapshot',()=>{const {runtime,kernel,values,events}=setup();const inv=kernel.bind({values},{slot:0,value:11}),batch=runtime.batch();batch.dispatch(inv,[1]);inv.setScalars({slot:1,value:22});batch.dispatch(inv,[1]);batch.submit();const upload=events.find(e=>e.kind==='upload'),data=new DataView(upload.bytes.buffer);assert.equal(data.getFloat32(4,true),11);assert.equal(data.getFloat32(260,true),22);const commands=events.find(e=>e.kind==='submit').commands[0];assert.deepEqual(commands.filter(c=>c.kind==='bind').map(c=>c.offsets),[[0],[256]]);runtime.dispose();});
 test('Repeated unchanged dispatches reuse bindings, pipeline and uniform slot',()=>{const {runtime,kernel,values,events}=setup();const inv=kernel.bind({values},{slot:0,value:1}),batch=runtime.batch();for(let i=0;i<20;i++)batch.dispatch(inv,[1]);batch.submit();const cmds=events.find(e=>e.kind==='submit').commands[0];assert.equal(cmds.filter(c=>c.kind==='pipeline').length,1);assert.equal(cmds.filter(c=>c.kind==='bind').length,1);assert.equal(cmds.filter(c=>c.kind==='dispatch').length,20);assert.equal(events.find(e=>e.kind==='upload').bytes.length,16);runtime.dispose();});
 test('Interleaved recording then out-of-order submission preserves each batch data',()=>{const {runtime,kernel,values,events}=setup();const inv=kernel.bind({values},{slot:0,value:3}),a=runtime.batch();a.dispatch(inv,[1]);inv.setScalars({slot:1,value:7});const b=runtime.batch();b.dispatch(inv,[1]);b.submit();a.submit();const uploads=events.filter(e=>e.kind==='upload').map(e=>new DataView(e.bytes.buffer).getFloat32(4,true));assert.deepEqual(uploads,[7,3]);runtime.dispose();});
