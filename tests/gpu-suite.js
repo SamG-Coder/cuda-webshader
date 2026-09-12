@@ -1,3 +1,4 @@
+import {checkLinearFloat} from './linear-float-gpu.js';
 import {checkOpticalFlow} from './optical-flow-gpu.js';
 import {checkOpticalJacobi} from './optical-jacobi-gpu.js';
 import {checkStereo} from './stereo-gpu.js';
@@ -222,6 +223,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Full fluids solver compared with native CUDA and cuFFT',()=>checkFluidsSolver(runtime));
   await run('Real FFT packed transforms match native cuFFT',()=>checkRealFFT(runtime));
   await run('Original fluids pitched kernels match native CUDA',()=>checkFluidsPitched(runtime));
+  await run('Raw float linear texture records match native',()=>checkLinearFloat(runtime));
   await run('Complete optical flow matches original native pipeline',()=>checkOpticalFlow(runtime));
   await run('Original optical flow Jacobi matches 500 native iterations',()=>checkOpticalJacobi(runtime));
   await run('Original stereo disparity matches native pixels',()=>checkStereo(runtime));

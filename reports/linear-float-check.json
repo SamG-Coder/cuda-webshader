@@ -1,0 +1,11 @@
+{
+  "name": "Raw float linear texture records match native",
+  "pass": true,
+  "records": 32771,
+  "lookups": 98325,
+  "components": 229425,
+  "nativeExact": true,
+  "multiRow": true,
+  "outOfRangeZero": true,
+  "wallMs": 37.275000005960464
+}

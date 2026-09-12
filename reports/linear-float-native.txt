@@ -1,0 +1,1 @@
+Captured 32775 lookups of float, float2 and float4 linear textures.
