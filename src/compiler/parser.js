@@ -64,7 +64,7 @@ export function tokenize(source, defines = {}) {
 }
 const PRECEDENCE = {'=': 1, '+=': 1, '-=': 1, '*=': 1, '/=': 1, '%=': 1, '&=': 1, '|=': 1, '^=': 1, '<<=': 1, '>>=': 1, '||': 3, '&&': 4, '|': 5, '^': 6, '&': 7, '==': 8, '!=': 8, '<': 9, '>': 9, '<=': 9, '>=': 9, '<<': 10, '>>': 10, '+': 11, '-': 11, '*': 12, '/': 12, '%': 12};
 export class Parser {
-  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); }
+  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); this.functionNames=new Set(); }
   peek(offset = 0) { return this.tokens[this.i + offset] || this.tokens.at(-1); }
   is(value) { return this.peek().value === value; }
   take(value) { if (value && !this.is(value)) this.fail(`Expected '${value}', found '${this.peek().value}'.`); return this.tokens[this.i++]; }
@@ -96,16 +96,17 @@ export class Parser {
     const functions = [];
     while (this.peek().kind !== 'eof') {
       const token = this.peek();
-      let templateParameter=null,templateKind=null;this.templateTypeName=null;
+      let templateParameter=null,templateKind=null;this.templateTypeName=null;this.templateParameterName=null;
       if(this.match('extern')){const linkage=this.take();if(linkage.kind!=='string'||linkage.value!=='"C"')this.fail('Only extern "C" linkage on a single device function definition is supported.',linkage);if(!['__global__','__device__'].includes(this.peek().value))this.fail('extern "C" must precede a single __global__ or __device__ function definition; linkage blocks and templates are unsupported.');}
       if(this.match('template')){this.take('<');const kind=this.take();if(!['int','class','typename'].includes(kind.value))this.fail('Only one integer or built-in type template parameter is supported.',kind);templateKind=kind.value==='int'?'int':'type';templateParameter=this.name();if(TYPES.has(templateParameter))this.fail('Template parameter must have a distinct name.',token);this.take('>');if(templateKind==='type')this.templateTypeName=templateParameter;}
+      this.templateParameterName=templateParameter;
       if(this.match('namespace')){const alias=this.name();this.take('=');const target=this.name();this.take(';');if(target!=='cooperative_groups'||this.groupNamespaces.has(alias))this.fail('Only distinct aliases of cooperative_groups are supported.',token);this.groupNamespaces.add(alias);continue;}
       while (['static','inline', '__forceinline__'].includes(this.peek().value)) this.take();
       let launchThreads=null;
       const launchBounds=()=>{this.take('__launch_bounds__');this.take('(');const t=this.take();if(t.kind!=='number'||!/^[0-9]+[uU]?$/.test(t.value))this.fail('Launch bounds require a positive integer thread count.',t);launchThreads=Number(t.value.replace(/[uU]$/,''));if(launchThreads<1||launchThreads>1024)this.fail('Launch bounds thread count must be in [1,1024].',t);this.take(')');};
       if(this.is('__launch_bounds__'))launchBounds();
       const qualifier = this.take().value;
-      if(templateParameter&&qualifier!=='__global__')this.fail('Templates are supported only on kernels.',token);
+      if(templateParameter&&!['__global__','__device__'].includes(qualifier))this.fail('Templates are supported only on kernels and device helpers.',token);
       if (!['__global__', '__device__'].includes(qualifier)) this.fail('Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported.', token);
       while (['inline', '__forceinline__'].includes(this.peek().value)) this.take();
       if(this.is('__launch_bounds__')){if(launchThreads!==null)this.fail('Duplicate launch bounds.');launchBounds();}
@@ -113,7 +114,7 @@ export class Parser {
       const result = this.type();
       if (result.pointer || result.shared || result.reference || result.external) this.fail('Function return pointers/references/shared/extern qualifiers are unsupported.');
       if(this.peek().forward)this.fail('Function-forwarding macros are supported at call sites, not in function declarations.');
-      const name = this.name(); this.take('('); const params = [];
+      const name = this.name(); this.functionNames.add(name); this.take('('); const params = [];
       if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(); params.push({kind: 'param', token, name, ...type}); } while (this.match(','));
       this.take(')'); const body = this.block();
       functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads,templateParameter,templateKind});
@@ -166,7 +167,8 @@ export class Parser {
     else if (token.kind === 'word') { value = {kind: 'id', token, name: this.qualifiedName()}; }
     else this.fail('Expected an expression.', token);
     while (true) {
-      if (this.match('[')) { const index = this.expression(); this.take(']'); value = {kind: 'index', token, base: value, index}; }
+      if(value.kind==='id'&&this.functionNames.has(value.name)&&this.is('<')&&this.peek(2).value==='>'&&this.peek(3).value==='('&&(TYPES.has(this.peek(1).value)||this.peek(1).value===this.templateParameterName||this.peek(1).kind==='number')){this.take('<');value.templateArgument=this.take().value;this.take('>');}
+      else if (this.match('[')) { const index = this.expression(); this.take(']'); value = {kind: 'index', token, base: value, index}; }
       else if (this.match('.')) { value = {kind: 'member', token, base: value, member: this.name()}; }
       else if (this.match('(')) { const args = []; if (!this.is(')')) do { args.push(this.expression(2)); } while (this.match(',')); this.take(')');
         if(value.kind==='id'&&value.token.forward){const f=value.token.forward;if(f.tooDeep)this.fail('Forwarding macro chains are limited to 32 calls.',value.token);if(f.recursive||f.numericTarget)this.fail('Recursive or non-function forwarding macro target is unsupported.',value.token);if(f.chain.some(m=>m.arity!==args.length))this.fail(`Wrong argument count for forwarding macro '${value.name}'.`,value.token);value={...value,name:f.target};}

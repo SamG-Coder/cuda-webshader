@@ -9,7 +9,7 @@ test('Template values specialize shared dimensions and remain immutable',()=>{
  assert.throws(()=>compile('__global__ void k(){}',{entry:'k<4>'}),/does not have/);
 });
 test('Missing specializations, defaults, multiple parameters and templated helpers are rejected',()=>{
- for(const declaration of ['template<typename T> __global__ void k(){}','template<int N=4> __global__ void k(){}','template<int N,int M> __global__ void k(){}','template<int N> __device__ void f(){} __global__ void k(){}'])assert.throws(()=>compile(declaration));
+ for(const declaration of ['template<typename T> __global__ void k(){}','template<int N=4> __global__ void k(){}','template<int N,int M> __global__ void k(){}','template<int N,int M> __device__ void f(){} __global__ void k(){}'])assert.throws(()=>compile(declaration));
 });
 test('Host importer preserves template declaration and unroll directive',()=>{
  const original='#include <cuda_runtime.h>\n'+source.replace('out[0]=sum;','#pragma unroll\nfor(int j=0;j<1;j++)out[0]=sum;')+'\nint main(){}',result=kernelSource(original);assert.equal(result.functions,1);assert.match(result.source,/template <int N>/);assert.match(result.source,/#pragma unroll/);assert.equal(compile(result.source,{entry:'k<4>'}).name,'k');

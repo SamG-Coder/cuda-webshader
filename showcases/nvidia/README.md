@@ -255,3 +255,14 @@ This is not the original shared-memory optimized pipeline. Array lengths must
 be powers of two and the launch must contain exactly one thread per pair.
 Reports: `reports/nvidia-bitonic.json` and `reports/nvidia-bitonic-native.txt`.
 Build `bitonic-native.cu` with the native flags above.
+
+N-body compiler groundwork: explicit single-argument device helper templates are
+supported for built-in types and nonnegative 32-bit integers. Nested helpers and
+arguments forwarded from kernel templates are supported, with at most 128
+specializations. Helpers must be declared before explicit template calls. Type
+deduction and explicit specialization declarations remain unsupported, as do the
+N-body dependent vector traits, constant globals and shared-memory helper access.
+This does not add N-body to the verified catalog. The feature regression fixture
+is `tests/helper-templates.cu`, with its native harness alongside it and results
+in `reports/helper-templates-native.txt`. Hardware coverage is part of the normal
+WebGPU regression suite.

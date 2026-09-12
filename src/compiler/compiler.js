@@ -402,6 +402,60 @@ class Emitter {
     return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {workgroupSize: this.workgroupSize, bindings, scalars, uniformSize, uniformBinding: uniformSize ? bindings.length : null, workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
   }
 }
+function instantiateHelperTemplates(ast, kernel) {
+  const definitions=new Map(),instances=new Map(),visiting=new Set(),done=new Set(),clones=[];
+  for(const fn of ast.functions){
+    if(definitions.has(fn.name))throw new CompileError(`Duplicate function '${fn.name}'.`,fn.token,ast.source);
+    definitions.set(fn.name,fn);
+  }
+  const fail=(message,node)=>{throw new CompileError(message,node.token,ast.source);};
+  function process(fn){
+    if(done.has(fn))return;
+    if(visiting.has(fn))fail('Recursive helper calls are unsupported.',fn);
+    visiting.add(fn);
+    walk(fn.body,node=>{
+      if(node.kind!=='call'||node.callee.kind!=='id')return;
+      const callee=node.callee,definition=definitions.get(callee.name),argument=callee.templateArgument;
+      if(!definition?.templateParameter){
+        if(argument!==undefined)fail('Explicit template arguments require a templated device helper.',callee);
+        if(definition?.qualifier==='__device__')process(definition);
+        return;
+      }
+      if(definition.qualifier!=='__device__')fail('Device-side kernel launches are unsupported.',callee);
+      if(argument===undefined)fail('Device helper templates require one explicit template argument; deduction is unsupported.',callee);
+      const key=definition.name+'<'+argument+'>';
+      let instance=instances.get(key);
+      if(!instance){
+        if(instances.size>=128)fail('At most 128 device helper template specializations are supported.',callee);
+        instance=structuredClone(definition);
+        const parameter=instance.templateParameter,placeholder='template:'+parameter;
+        let type;
+        if(instance.templateKind==='type'){
+          type=builtinType(argument);
+          if(!type||type==='void')fail('Template type argument must be a supported built-in value type.',callee);
+        }else if(!/^\d+$/.test(argument)||!Number.isSafeInteger(Number(argument))||Number(argument)>2147483647)fail('Template argument must be a nonnegative 32-bit signed integer.',callee);
+        for(const param of instance.params){if(param.name===parameter)fail('Template parameter shadowing is unsupported.',param);if(param.type===placeholder)param.type=type;}
+        if(instance.result===placeholder)instance.result=type;
+        walk(instance.body,n=>{
+          if(['decl','thread-block'].includes(n.kind)&&n.name===parameter)fail('Template parameter shadowing is unsupported.',n);
+          if(n.templateArgument===parameter)n.templateArgument=argument;
+          if(type){if(n.type===placeholder)n.type=type;if(n.target===placeholder)n.target=type;}
+          else if(n.kind==='id'&&n.name===parameter){n.kind='literal';n.value=argument;delete n.name;}
+        });
+        let name='cw_specialized_'+instances.size;
+        while(definitions.has(name))name+='_';
+        instance.name=name;instance.templateParameter=null;instance.templateKind=null;
+        instances.set(key,instance);definitions.set(name,instance);clones.push(instance);
+      }
+      process(instance);
+      callee.name=instance.name;delete callee.templateArgument;
+    });
+    visiting.delete(fn);done.add(fn);
+  }
+  process(kernel);
+  for(const fn of ast.functions)if(fn.qualifier==='__device__'&&!fn.templateParameter)process(fn);
+  ast.functions=ast.functions.filter(fn=>fn.qualifier!=='__device__'||!fn.templateParameter).concat(clones);
+}
 export function compile(source, options = {}) {
   const ast = parse(source, options), kernels = ast.functions.filter(f => f.qualifier === '__global__');
   const specialization=options.entry?.match(/^([A-Za-z_]\w*)<\s*(\d+|[A-Za-z_]\w*)\s*>$/),entry=specialization?specialization[1]:options.entry;
@@ -419,6 +473,8 @@ export function compile(source, options = {}) {
     for(const p of kernel.params)if(p.name===name)throw new CompileError('Template parameter shadowing is unsupported.',p.token,source);
     walk(kernel.body,n=>{if(['decl','thread-block'].includes(n.kind)&&n.name===name)throw new CompileError('Template parameter shadowing is unsupported.',n.token,source);if(n.kind==='id'&&n.name===name){n.kind='literal';n.value=String(value);delete n.name;}});
   }
+  if(specialization)walk(kernel.body,n=>{if(n.templateArgument===kernel.templateParameter)n.templateArgument=specialization[2];});
+  instantiateHelperTemplates(ast,kernel);
   const result=new Emitter(ast, kernel, options).emit();if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};return result;
 }
 export function serializableArtifact(compiled) {
