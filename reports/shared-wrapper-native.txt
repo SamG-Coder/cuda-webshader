@@ -1,0 +1,2 @@
+threads=32 groups=3 PASS original shared wrapper, float4 tile reversal and guards
+threads=128 groups=3 PASS original shared wrapper, float4 tile reversal and guards

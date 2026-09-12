@@ -22,9 +22,11 @@ arrays, one explicitly sized dynamic shared array, and by-value `thread_block`
 handles. Storage-buffer pointer parameters now support nested calls, offsets and
 type deduction. Local vector brace initializers support full, partial and empty
 lists, including dependent vector types; omitted components become zero. Components
-must match the element type or use explicit casts. Constant arrays and N-body’s
-shared-memory conversion wrapper remain unsupported. N-body has not yet been
-added as a complete working showcase.
+must match the element type or use explicit casts. Stateless shared-memory
+conversion wrappers now work with an explicitly sized dynamic shared allocation.
+The original N-body integration kernel translates, but WebGPU rejects its
+lane-dependent early return before a barrier. Constant arrays remain unsupported.
+N-body has not yet been added as a complete working showcase.
 The helper support and NVIDIA’s original vector-trait declarations pass native
 CUDA and NVIDIA WebGPU tests for 1, 129 and 1,025 records. Coverage includes
 unsigned wraparound, reference mutation, vector position updates and output guards.
@@ -220,7 +222,7 @@ This is source translation. **It does not run CUDA binaries, PTX, the CUDA drive
 
 ## Validated on an RTX 5080
 
-The project is running locally with installed, locked dependencies. **306 Node tests, 86 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
+The project is running locally with installed, locked dependencies. **310 Node tests, 88 real WebGPU checks (including Three.js rendered-pixel interop and expected validation rejections), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
 
 Open [the measured comparison](reports/performance-comparison.html) or read [the full methodology and results](reports/performance-comparison.md). All ten kernel sources are compiled by NVCC and translated to WGSL at two workload sizes. Raw GPU timestamps, CUDA event timings, ordinary CUDA launch timings, and verification logs are in `reports/`.
 

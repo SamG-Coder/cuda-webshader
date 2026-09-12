@@ -13,6 +13,10 @@ export function kernelSource(source){
  while((match=forwards.exec(masked)))if(forwardingMacro(match[0].trim()))spans.push([match.index,match.index+match[0].length]);
  const aliases=/\bnamespace\s+\w+\s*=\s*cooperative_groups\s*;/g;
  while((match=aliases.exec(masked)))spans.push([match.index,match.index+match[0].length]);
+ const wrappers=[],structures=/\btemplate\s*<[^>]*>\s*struct\s+\w+\s*\{/g;
+ while((match=structures.exec(masked))){let depth=1,end=structures.lastIndex;for(;end<masked.length&&depth;end++){if(masked[end]==='{')depth++;else if(masked[end]==='}')depth--;}
+   if(!depth&&/\boperator\s+(?:const\s+)?\w+\s*\*/.test(masked.slice(structures.lastIndex,end))){while(/\s/.test(masked[end]||'')&&end<masked.length)end++;if(masked[end]===';'){wrappers.push([match.index,end+1]);spans.push([match.index,end+1]);}}structures.lastIndex=end;
+ }
  const traits=/\btemplate\s*<[^>]*>\s*struct\s+\w+(?:\s*<[^>]*>)?\s*\{([^{}]*)\}\s*;/g;
  while((match=traits.exec(masked)))if(/^(?:\s*typedef\s+(?:unsigned\s+)?\w+\s+\w+\s*;)+\s*$/.test(match[1]))spans.push([match.index,match.index+match[0].length]);
  const constants=/\b__constant__\b[^;{}]*;/g;
@@ -20,5 +24,5 @@ export function kernelSource(source){
  const chars=source.replace(/[^\n]/g,' ').split('');for(const [start,end]of spans)for(let i=start;i<end;i++)chars[i]=source[i];
  // Retain single-function C linkage when extracting a desktop translation unit.
  for(const [start] of spans){const linkage=/\bextern\s+"[^"]*"\s*$/.exec(source.slice(0,start));if(linkage)for(let i=linkage.index;i<start;i++)chars[i]=source[i];}
- return {source:chars.join(''),extracted:true,functions:spans.filter(([start,end])=>/\b__(?:global|device)__\b/.test(masked.slice(start,end))).length};
+ return {source:chars.join(''),extracted:true,functions:spans.filter(([start,end])=>!wrappers.some(([a,b])=>start>=a&&end<=b)&&/\b__(?:global|device)__\b/.test(masked.slice(start,end))).length};
 }

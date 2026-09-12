@@ -114,6 +114,20 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
       if(!actual.slice(n*12).every(v=>v===-12345))throw Error('Vector initializer guard changed');
     }finally{await runtime.idle();runtime.destroyBuffer(out);}}
   });
+  await run('Original NVIDIA shared-memory conversion wrapper exchanges float4 tiles',async()=>{
+    const source=await(await fetch('/tests/nbody-shared-memory.cuh')).text()+'\n'+await(await fetch('/tests/shared-wrapper.cu')).text();
+    for(const threads of [32,128]){const n=threads*3,data=Float32Array.from({length:n*4},(_,i)=>i*0.125),input=runtime.createBuffer(data),output=runtime.createBuffer(new Float32Array(n*4+16).fill(-12345));try{
+      const kernel=await runtime.kernel(source,{workgroupSize:[threads],sharedMemoryBytes:threads*16});runtime.batch().dispatch(kernel.bind({input,output},{}),[3]).submit();const actual=await runtime.read(output);
+      for(let i=0;i<n;i++)for(let j=0;j<4;j++)if(actual[i*4+j]!==data[(Math.floor(i/threads)*threads+threads-i%threads-1)*4+j])throw Error('Shared wrapper tile mismatch');
+      if(!actual.slice(n*4).every(v=>v===-12345))throw Error('Shared wrapper guard changed');
+    }finally{await runtime.idle();runtime.destroyBuffer(input);runtime.destroyBuffer(output);}}
+  });
+  await run('Original NVIDIA N-body early return remains rejected before a helper barrier',async()=>{
+    const files=['nbody-vector-traits.cuh','nbody-rsqrt.cuh','nbody-interaction.cuh','nbody-shared-memory.cuh','nbody-integrate.cuh'];
+    const source='namespace cg = cooperative_groups;\n'+(await Promise.all(files.map(async f=>await(await fetch('/tests/'+f)).text()))).join('\n');
+    try{await runtime.kernel(source,{entry:'integrateBodies<float>',workgroupSize:[128],sharedMemoryBytes:2048});}catch(error){if(/uniform control flow/.test(error.message))return {expectedRejection:true,reason:'Early return depends on the lane index before a shared-memory barrier.'};throw error;}
+    throw Error('Expected N-body barrier uniformity rejection; review the execution contract before enabling this sample.');
+  });
   await run('GPU rejects divergent entry into a helper barrier',async()=>{
     try{await runtime.kernel('__device__ void barrier(){__syncthreads();} __global__ void k(){if(threadIdx.x==0u)barrier();}',{workgroupSize:[4,1,1]});}catch(error){if(/uniform/i.test(error.message))return;throw error;}
     throw Error('Divergent helper barrier was accepted');

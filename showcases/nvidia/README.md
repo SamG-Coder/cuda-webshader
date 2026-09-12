@@ -312,8 +312,9 @@ across three blocks. Shared objects are separate for different helper functions
 and template specializations. WebGPU rejects a divergent call into a helper
 barrier. Native results are in `reports/shared-helpers-native.txt`; build
 `tests/shared-helpers-native.cu` with the NVCC flags above.
-N-body still needs its shared-memory conversion wrapper, plus integration and
-full numerical/visual validation.
+The original N-body integration kernel now translates, but WebGPU rejects its
+lane-dependent early return before a shared-memory barrier. Resolving that
+execution contract and full numerical/visual validation remain necessary.
 
 Storage-buffer helper pointers are checked by `tests/helper-pointers.cu` in native
 CUDA and hardware WebGPU at 32 and 128 threads across three blocks. Coverage
@@ -335,3 +336,23 @@ and nested aggregate lists remain unsupported. `tests/vector-initializers.cu`
 passes native CUDA and hardware WebGPU checks for 1, 129 and 1,025 records,
 including output guards. Native results: `reports/vector-initializers-native.txt`;
 build `tests/vector-initializers-native.cu` with the NVCC flags above.
+
+NVIDIA's original stateless `SharedMemory<T>` conversion wrapper is preserved in
+`tests/nbody-shared-memory.cuh`; `tests/nbody-integrate.cuh` retains its original
+`computeBodyAccel` and `integrateBodies` functions. These excerpts come from
+`cpp/5_Domain_Specific/nbody/bodysystemcuda.cu` at the pinned upstream revision
+`5443602d89ed99aede2e4b7bf329daddeadb320e`, with NVIDIA's BSD notice retained.
+The compiler supports a template struct whose device conversion operators return
+the shared backing array cast to the template pointer type. This is structural
+support, independent of class/array names; extra statements, offsets, fields,
+and general C++ class behavior are rejected. Mutable local views require matching
+types and explicit `sharedMemoryBytes`. Const views and multiple declarations
+that would alias the dynamic allocation remain unsupported.
+
+`tests/shared-wrapper.cu` checks NVIDIA's original wrapper with templated float4
+tile reversal at 32 and 128 threads across three blocks, in native CUDA and
+hardware WebGPU. Native results: `reports/shared-wrapper-native.txt`; build
+`tests/shared-wrapper-native.cu` with the NVCC flags above. The hardware suite
+separately checks the expected uniformity rejection of the complete original
+integration kernel. That rejection is not a successful simulation run, and
+N-body is not listed as a verified showcase.

@@ -345,6 +345,13 @@ class Emitter {
     return [...value.pre, value.type === 'void' ? `${value.code};` : `_ = ${value.code};`];
   }
   declare(n) {
+    if(n.init?.kind==='shared-conversion'){
+      if(!n.pointer||n.reference||n.shared||n.external||n.dimensions.length||n.type!==n.init.target)this.fail('Shared conversion requires a matching local pointer declaration.',n);
+      if(!n.init.conversions.includes(false)&&!n.constant)this.fail('Cannot discard const from shared wrapper conversion.',n);
+      // A stateless conversion exposes the dispatch's dynamic shared allocation.
+      n.pointer=false;n.shared=true;n.external=true;n.dimensions=[null];n.init=null;
+      if(n.constant)this.fail('Const shared wrapper views are not yet supported.',n);
+    }
     if(n.external&&(!n.shared||n.pointer||n.reference||n.constant||n.init||n.dimensions.length!==1||n.dimensions[0]!==null))this.fail('extern is supported only as extern __shared__ T name[].',n);
     if(n.reference)this.fail('References are supported only as helper parameters, not local declarations.',n);
     if(n.pointer){

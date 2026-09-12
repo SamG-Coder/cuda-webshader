@@ -64,7 +64,7 @@ export function tokenize(source, defines = {}) {
 }
 const PRECEDENCE = {'=': 1, '+=': 1, '-=': 1, '*=': 1, '/=': 1, '%=': 1, '&=': 1, '|=': 1, '^=': 1, '<<=': 1, '>>=': 1, '||': 3, '&&': 4, '|': 5, '^': 6, '&': 7, '==': 8, '!=': 8, '<': 9, '>': 9, '<=': 9, '>=': 9, '<<': 10, '>>': 10, '+': 11, '-': 11, '*': 12, '/': 12, '%': 12};
 export class Parser {
-  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); this.functionNames=new Set(); this.typeTraits=new Map(); }
+  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); this.functionNames=new Set(); this.typeTraits=new Map(); this.sharedWrappers=new Map(); }
   peek(offset = 0) { return this.tokens[this.i + offset] || this.tokens.at(-1); }
   is(value) { return this.peek().value === value; }
   take(value) { if (value && !this.is(value)) this.fail(`Expected '${value}', found '${this.peek().value}'.`); return this.tokens[this.i++]; }
@@ -124,6 +124,20 @@ export class Parser {
         const name=this.name();let argument=null;
         if(templateKind==='specialization'){this.take('<');argument=this.name();this.take('>');}
         this.take('{');const members=[];
+        if(this.is('__device__')){
+          if(templateKind!=='type')this.fail('Shared-memory conversion wrappers require one type parameter.',token);
+          const conversions=[];
+          while(!this.is('}')){
+            this.take('__device__');while(['inline','__forceinline__'].includes(this.peek().value))this.take();
+            this.take('operator');const constant=this.match('const');this.take(templateParameter);this.take('*');this.take('(');this.take(')');const methodConst=this.match('const');
+            this.take('{');this.take('extern');this.take('__shared__');const storage=this.type();const storageName=this.name();this.take('[');this.take(']');this.take(';');
+            if(!['i32','u32','f32'].includes(storage.type)||storage.pointer||storage.reference||storage.constant)this.fail('Shared wrapper backing storage must be an unsized 32-bit scalar array.',token);
+            this.take('return');this.take('(');this.take(templateParameter);this.take('*');this.take(')');this.take(storageName);this.take(';');this.take('}');
+            if(constant!==methodConst||conversions.includes(constant))this.fail('Shared wrapper conversions require distinct mutable and const overloads.',token);conversions.push(constant);
+          }
+          this.take('}');this.take(';');if(this.sharedWrappers.has(name)||this.typeTraits.has(name)||TYPES.has(name))this.fail('Duplicate or reserved shared wrapper name.',token);
+          this.sharedWrappers.set(name,{name,conversions});continue;
+        }
         while(!this.is('}')){
           this.take('typedef');let type=this.name();if(type==='unsigned'){this.match('int');type='uint';}
           const member=this.name();this.take(';');if(members.some(m=>m.name===member))this.fail('Duplicate type-trait member.',token);members.push({name:member,type});
@@ -162,6 +176,11 @@ export class Parser {
   }
   block() { const token = this.take('{'), body = []; while (!this.is('}')) { if (this.peek().kind === 'eof') this.fail('Unclosed block.'); body.push(this.statement()); } this.take('}'); return {kind: 'block', token, body}; }
   initializer(){
+    if(this.sharedWrappers.has(this.peek().value)){
+      const token=this.take(),wrapper=this.sharedWrappers.get(token.value);this.take('<');const type=this.type();this.take('>');this.take('(');this.take(')');
+      if(type.pointer||type.reference||type.shared||type.external||type.constant)this.fail('Shared wrapper arguments must be value types.',token);
+      return {kind:'shared-conversion',token,target:type.type,conversions:wrapper.conversions};
+    }
     if(!this.is('{'))return this.expression(2);
     const token=this.take('{'),items=[];
     while(!this.is('}')){items.push(this.expression(2));if(!this.match(','))break;}
