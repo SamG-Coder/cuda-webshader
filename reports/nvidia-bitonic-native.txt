@@ -1,0 +1,4 @@
+length=256 batches=2 dir=0 PASS complete global-kernel sorting network, keys and value permutation
+length=256 batches=2 dir=1 PASS complete global-kernel sorting network, keys and value permutation
+length=2048 batches=2 dir=0 PASS complete global-kernel sorting network, keys and value permutation
+length=2048 batches=2 dir=1 PASS complete global-kernel sorting network, keys and value permutation

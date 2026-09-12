@@ -3565,8 +3565,30 @@
         ]
       },
       "browser": {
-        "status": "translation-rejected",
-        "reason": "Expected ';', found ':'. (46:7)\n    cg::thread_block cta = cg::this_thread_block();\r\n      ^"
+        "status": "kernel-verified",
+        "reason": "Isolated kernels checked against CPU reference on a real NVIDIA WebGPU adapter. Full host program is not executed.",
+        "checks": [
+          {
+            "sample": "cpp/2_Concepts_and_Techniques/sortingNetworks",
+            "entry": "bitonicMergeGlobal",
+            "pass": true,
+            "values": 1056,
+            "maxError": 0,
+            "failures": 0,
+            "outputs": {
+              "d_DstKey": {
+                "values": 528,
+                "maxError": 0,
+                "failures": 0
+              },
+              "d_DstVal": {
+                "values": 528,
+                "maxError": 0,
+                "failures": 0
+              }
+            }
+          }
+        ]
       }
     },
     {
@@ -9671,11 +9693,11 @@
       }
     }
   ],
-  "executionUpdated": "2026-09-12T00:19:44.552Z",
+  "executionUpdated": "2026-09-12T00:25:44.957Z",
   "counts": {
     "samples": 208,
     "compilerProbes": 350,
-    "webgpuPassed": 37,
+    "webgpuPassed": 38,
     "nativeProgramsAttempted": 149,
     "nativeStatuses": {
       "exited-zero": 142,

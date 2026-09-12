@@ -1,0 +1,108 @@
+{
+  "date": "2026-09-12T00:24:33.701Z",
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "sourceCompiled": true,
+  "results": [
+    {
+      "mode": "single merge pass",
+      "length": 256,
+      "dir": 0,
+      "stride": 1,
+      "pass": true
+    },
+    {
+      "mode": "single merge pass",
+      "length": 256,
+      "dir": 0,
+      "stride": 8,
+      "pass": true
+    },
+    {
+      "mode": "single merge pass",
+      "length": 256,
+      "dir": 0,
+      "stride": 128,
+      "pass": true
+    },
+    {
+      "mode": "single merge pass",
+      "length": 2048,
+      "dir": 0,
+      "stride": 1024,
+      "pass": true
+    },
+    {
+      "mode": "single merge pass",
+      "length": 256,
+      "dir": 1,
+      "stride": 1,
+      "pass": true
+    },
+    {
+      "mode": "single merge pass",
+      "length": 256,
+      "dir": 1,
+      "stride": 8,
+      "pass": true
+    },
+    {
+      "mode": "single merge pass",
+      "length": 256,
+      "dir": 1,
+      "stride": 128,
+      "pass": true
+    },
+    {
+      "mode": "single merge pass",
+      "length": 2048,
+      "dir": 1,
+      "stride": 1024,
+      "pass": true
+    },
+    {
+      "mode": "complete repeated global-kernel network",
+      "length": 256,
+      "batches": 2,
+      "dir": 0,
+      "pass": true
+    },
+    {
+      "mode": "complete repeated global-kernel network",
+      "length": 256,
+      "batches": 2,
+      "dir": 1,
+      "pass": true
+    },
+    {
+      "mode": "complete repeated global-kernel network",
+      "length": 2048,
+      "batches": 2,
+      "dir": 0,
+      "pass": true
+    },
+    {
+      "mode": "complete repeated global-kernel network",
+      "length": 2048,
+      "batches": 2,
+      "dir": 1,
+      "pass": true
+    }
+  ],
+  "passed": true
+}

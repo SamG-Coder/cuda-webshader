@@ -1,3 +1,4 @@
+import {bitonicFixture} from './bitonic-fixtures.js';
 import {driverAddFixture} from './driver-add-fixtures.js';
 import {matrixFixture} from './matrixmul-fixtures.js';
 import {scanUpdateFixture} from './scan-update-fixtures.js';
@@ -12,6 +13,7 @@ import {mpiSqrtFixture} from './mpi-sqrt-fixtures.js';
 import {scalarFixture} from './scalar-fixtures.js';
 import {blackScholesFixture} from './blackscholes-fixtures.js';
 export function fixture(row) {
+ if(row.entry==='bitonicMergeGlobal')return bitonicFixture();
  if(row.entry==='VecAdd_kernel')return driverAddFixture();
  if(row.entry==='simpleMPIKernel')return mpiSqrtFixture();
  if(row.entry==='inverseCNDKernel')return inverseCndFixture();

@@ -187,6 +187,11 @@
       "entry": "VecAdd_kernel",
       "sample": "cpp/0_Introduction/simpleDrvRuntime",
       "passed": true
+    },
+    {
+      "entry": "bitonicMergeGlobal",
+      "sample": "cpp/2_Concepts_and_Techniques/sortingNetworks",
+      "passed": true
     }
   ]
 }

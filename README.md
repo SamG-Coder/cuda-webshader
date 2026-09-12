@@ -6,6 +6,14 @@
 
 ## CUDA sandbox
 
+**[Bitonic key/value merge](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=37)**
+runs NVIDIA’s original global merge kernel and reference-parameter comparator.
+The compiler now promotes mixed Boolean/numeric scalar operands as C++ does.
+The sandbox shows one merge stage. Separate native CUDA and hardware WebGPU
+checks also run complete sorting networks using repeated global-kernel dispatches
+and separate source/destination buffers, checking both keys and value permutations.
+This does not import the original shared-memory optimized sorting pipeline.
+
 **[Driver/runtime vector addition](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=36)**
 compiles the complete original NVIDIA kernel file, including its `extern "C"`
 declaration. Single-function C linkage is now accepted for kernels and helpers;
@@ -157,7 +165,7 @@ per workgroup. See [transpose validation](reports/nvidia-transpose.json).
 
 The main showcase grid contains individual runnable samples; every card opens
 the sandbox directly. The NVIDIA audit covers 208 upstream sample directories,
-350 compiler entry probes, and 37 kernel entries/specializations checked with both native CUDA and
+350 compiler entry probes, and 38 kernel entries/specializations checked with both native CUDA and
 real NVIDIA WebGPU. See [the audit and remaining blockers](reports/nvidia-audit.md)
 and [reproduction instructions](showcases/nvidia/README.md). These kernel checks
 are separate from full native application execution and from performance tests.
@@ -189,7 +197,7 @@ This is source translation. **It does not run CUDA binaries, PTX, the CUDA drive
 
 ## Validated on an RTX 5080
 
-The project is running locally with installed, locked dependencies. **256 Node tests, 79 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
+The project is running locally with installed, locked dependencies. **258 Node tests, 79 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
 
 Open [the measured comparison](reports/performance-comparison.html) or read [the full methodology and results](reports/performance-comparison.md). All ten kernel sources are compiled by NVCC and translated to WGSL at two workload sizes. Raw GPU timestamps, CUDA event timings, ordinary CUDA launch timings, and verification logs are in `reports/`.
 

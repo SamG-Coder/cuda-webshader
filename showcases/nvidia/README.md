@@ -8,7 +8,7 @@ NVIDIA cuda-samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
 The audit scans direct source files for standalone global void kernels. It is
 not a complete C++ preprocessor or a claim to compile every template instance.
 
-The 37 translated entries were run separately with NVCC on RTX 5080 and with
+The 38 translated entries were run separately with NVCC on RTX 5080 and with
 WebGPU on a real NVIDIA adapter. Fixtures use 256 elements or a 32×32 grid,
 with 64×64 matrices for the two transpose kernels and 17 vectors of 1,537
 elements for the scalar-product kernel;
@@ -40,6 +40,7 @@ node scripts/prepare-nvidia-inverse-cnd.mjs
 node scripts/prepare-nvidia-mpi-sqrt.mjs
 node scripts/prepare-nvidia-transpose-naive.mjs
 node scripts/prepare-nvidia-driver-add.mjs
+node scripts/prepare-nvidia-bitonic.mjs
 node scripts/prepare-nvidia-checks.mjs
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor .local/nvidia-checks/check.cu -o .local/nvidia-checks/check.exe
 .local/nvidia-checks/check.exe
@@ -57,6 +58,7 @@ node scripts/test-nvidia-histogram-merge.mjs
 node scripts/test-nvidia-inverse-cnd.mjs
 node scripts/test-nvidia-mpi-sqrt.mjs
 node scripts/test-nvidia-driver-add.mjs
+node scripts/test-nvidia-bitonic.mjs
 ```
 
 Run the server first (`npm start`) for browser checks. The browser script uses
@@ -242,3 +244,14 @@ The combined native harness keeps each fixture in a separate non-inlined functio
 to avoid accumulating all fixture arrays in Windows' default-size stack.
 Audit generation requires a PASS line for every isolated native kernel.
 
+
+The bitonic follow-up preserves `bitonicMergeGlobal` and the original `Comparator`
+helper from `sortingNetworks_common.cuh`. Mixed bool/numeric operands undergo
+scalar integer promotion. Both unsigned keys and associated values are checked.
+The sandbox runs one stage; the separate native and browser harnesses also run
+complete global-kernel sorting networks for two batches of 256 and 2,048 values,
+in both directions, against independently sorted keys and value permutations.
+This is not the original shared-memory optimized pipeline. Array lengths must
+be powers of two and the launch must contain exactly one thread per pair.
+Reports: `reports/nvidia-bitonic.json` and `reports/nvidia-bitonic-native.txt`.
+Build `bitonic-native.cu` with the native flags above.

@@ -80,6 +80,9 @@ class Emitter {
   add(name, symbol, n, global = false) { const scope = global ? this.scopes[0] : this.scopes.at(-1); if (scope.has(name)) this.fail(`Duplicate identifier '${name}'.`, n); scope.set(name, symbol); return symbol; }
   common(a, b, n) {
     if (typeName(a) === typeName(b) && !isArray(a) && a !== 'void') return a;
+    // C++ promotes a bool to int before the usual scalar arithmetic conversions.
+    if(a==='bool'&&numeric(b))a='i32';
+    if(b==='bool'&&numeric(a))b='i32';
     if (numeric(a) && numeric(b)) return a === 'f32' || b === 'f32' ? 'f32' : a === 'u32' || b === 'u32' ? 'u32' : 'i32';
     this.fail(`Incompatible operand types: ${typeName(a)} and ${typeName(b)}. Use explicit scalar/vector components.`, n);
   }

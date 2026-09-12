@@ -1,0 +1,5 @@
+import {readFile,writeFile} from 'node:fs/promises';import {compile,serializableArtifact} from '../src/compiler/compiler.js';
+const sample='cpp/2_Concepts_and_Techniques/sortingNetworks',file=sample+'/bitonicSort.cu',header=await readFile('.local/nvidia-audit/'+sample+'/sortingNetworks_common.cuh','utf8'),source=await readFile('.local/nvidia-audit/'+file,'utf8'),entry='bitonicMergeGlobal';
+const preamble=header.slice(header.indexOf('__device__ inline void Comparator'),header.lastIndexOf('#endif')),kernel=source.slice(source.indexOf('__global__ void '+entry),source.indexOf('// Combined bitonic merge steps'));
+const rows=JSON.parse(await readFile('reports/nvidia-artifacts.json','utf8')).filter(r=>r.entry!==entry);rows.push({sample,file,entry,preamble,artifact:serializableArtifact(compile(preamble+kernel,{entry,workgroupSize:[128,1,1]}))});
+await writeFile('reports/nvidia-artifacts.json',JSON.stringify(rows));console.log('Compiled original bitonic merge kernel and reference-parameter comparator.');
