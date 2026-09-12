@@ -83,7 +83,7 @@ class Emitter {
     this.ast = ast; this.kernel = kernel; this.options = options; this.scopes = [new Map()]; this.temp = 0; this.loopDepth = 0; this.integerIntrinsics=new Set();
     this.structs=new Map((ast.structs||[]).map(s=>[s.type,s]));for(const s of this.structs.values())for(const field of s.fields){let type=field.type;for(const dim of [...field.dimensions].reverse()){const length=constantValue(dim);if(!Number.isSafeInteger(length)||length<1||length>256)this.fail('Struct field array dimensions must be 1..256.',field);type=arrayOf(type,length);}field.resolvedType=type;}
     inferTextureTypes(ast.functions,kernel,walk,(message,node)=>this.fail(message,node));
-    this.objectHeaps=new Map();walk(ast,node=>{if(node.kind==='object-new'&&!this.objectHeaps.has(node.name))this.objectHeaps.set(node.name,{name:node.name,type:'cw_struct_'+node.name,code:'cw_heap_'+node.name,capacity:1024});});
+    this.objectHeaps=new Map();walk(ast,node=>{if(node.kind==='object-new'&&!this.objectHeaps.has(node.name))this.objectHeaps.set(node.name,{name:node.name,type:'cw_struct_'+node.name,code:'cw_heap_'+node.name,capacity:1024,tag:this.objectHeaps.size+1});});
     this.overloads=new Map();for(const f of ast.functions)if(f.overloadName){const list=this.overloads.get(f.overloadName)||[];list.push(f);this.overloads.set(f.overloadName,list);}
     this.functions = new Map(); this.shared = [];this.pointerConstraints=[]; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
     for (const f of ast.functions) {
@@ -168,6 +168,7 @@ class Emitter {
     this.fail(`Incompatible operand types: ${typeName(a)} and ${typeName(b)}. Use explicit scalar/vector components.`, n);
   }
   convert(code, from, to, n) {
+    if(String(from).startsWith('cw_objectptr_')&&String(to).startsWith('cw_objectptr_')&&this.structs.get('cw_struct_'+from.slice(13))?.base===to.slice(13))return code;
     if(to==='bool'&&String(from).startsWith('cw_objectptr_'))return `(${code} != 0u)`;
     if(String(to).startsWith('cw_objectptr_')&&['0i','0u','0'].includes(code)&&['i32','u32'].includes(from))return '0u';
     if(to==='bool'&&isArray(from)&&from.length===null&&n){return 'true';} // All runtime storage bindings are required and non-null.
@@ -342,17 +343,17 @@ class Emitter {
         return this.result(n, value.type, n.op === '+' ? value.code : `(${n.op}${value.code})`, value.pre);
       }
       case 'object-new': {
-        const heap=this.objectHeaps.get(n.name),slot='cw_alloc_'+this.temp++,call=n.constructorCall??={kind:'call',token:n.token,callee:{kind:'id',name:n.name,token:n.token},args:n.args},value=this.call(call);
+        const heap=this.objectHeaps.get(n.name);n.heapTag=heap.tag;const slot='cw_alloc_'+this.temp++,call=n.constructorCall??={kind:'call',token:n.token,callee:{kind:'id',name:n.name,token:n.token},args:n.args},value=this.call(call);
         const pre=[`var ${slot}: u32 = 0u;`,`loop { if (${slot} >= ${heap.capacity}u) { break; } if (!${heap.code}_alive[${slot}]) { break; } ${slot} += 1u; }`,`if (${slot} < ${heap.capacity}u) {`,...indent([`${heap.code}_alive[${slot}] = true;`,...value.pre,`${heap.code}[${slot}] = ${value.code};`]),'}'];
-        return this.result(n,n.pointerType,`select(0u, ${slot} + 1u, ${slot} < ${heap.capacity}u)`,pre);
+        return this.result(n,n.pointerType,`select(0u, ${heap.tag*1048576}u + ${slot} + 1u, ${slot} < ${heap.capacity}u)`,pre);
       }
       case 'object-deref': {
-        const value=this.expr(n.value),name=String(value.type).replace('cw_objectptr_',''),heap=this.objectHeaps.get(name);if(!String(value.type).startsWith('cw_objectptr_')||!heap)this.fail('Object dereference requires a concrete allocated class.',n);
-        n.heapName=name;return this.result(n,heap.type,`${heap.code}[${value.code} - 1u]`,value.pre,{rootSymbol:(heap.symbol??={kind:'local',name:heap.code,code:heap.code,type:heap.type,constant:false,referenceSpace:'private'})});
+        const value=n.virtualHandleCode?{type:'cw_objectptr_'+n.concreteHeap,code:n.virtualHandleCode,pre:[]}:this.expr(n.value),name=String(value.type).replace('cw_objectptr_',''),heap=this.objectHeaps.get(name);if(!String(value.type).startsWith('cw_objectptr_')||!heap)this.fail('Object dereference requires a concrete allocated class.',n);
+        n.heapName=name;return this.result(n,heap.type,`${heap.code}[(${value.code} & 1048575u) - 1u]`,value.pre,{rootSymbol:(heap.symbol??={kind:'local',name:heap.code,code:heap.code,type:heap.type,constant:false,referenceSpace:'private'})});
       }
       case 'object-delete': {
-        const value=this.expr(n.value),name=String(value.type).replace('cw_objectptr_',''),heap=this.objectHeaps.get(name);if(!heap)this.fail('delete requires a concrete allocated class.',n);n.heapName=name;
-        const snapshot='cw_delete_'+this.temp++;return this.result(n,'void','',[...value.pre,`let ${snapshot} = ${value.code};`,`if (${snapshot} != 0u) { ${heap.code}_alive[${snapshot} - 1u] = false; }`]);
+        const value=this.expr(n.value),name=String(value.type).replace('cw_objectptr_',''),heaps=[...this.objectHeaps.values()].filter(h=>h.name===name||this.structs.get(h.type)?.base===name);if(!heaps.length)this.fail('delete requires an allocated class or interface.',n);n.deleteHeapTags=heaps.map(h=>({name:h.name,tag:h.tag}));
+        const snapshot='cw_delete_'+this.temp++;return this.result(n,'void','',[...value.pre,`let ${snapshot} = ${value.code};`,...heaps.map(heap=>`if ((${snapshot} >> 20u) == ${heap.tag}u && (${snapshot} & 1048575u) != 0u) { ${heap.code}_alive[(${snapshot} & 1048575u) - 1u] = false; }`)]);
       }
       case 'binary': {
         let a = this.expr(n.left), b = this.expr(n.right);if(narrow(a.type))a={...a,type:'i32',code:`i32(${a.code})`};if(narrow(b.type))b={...b,type:'i32',code:`i32(${b.code})`};
@@ -493,6 +494,21 @@ class Emitter {
     return this.referenceHelpers.get(key);
   }
   call(n) {
+    if(n.callee.kind==='member'&&n.callee.base.kind==='object-deref'&&!n.callee.base.concreteHeap){
+      const pointer=n.callee.base.value,value=this.expr(pointer),baseName=String(value.type).replace('cw_objectptr_',''),iface=this.ast.interfaces?.find(i=>i.name===baseName);
+      if(iface){
+        const method=iface.abstractMethods.find(m=>m.name===n.callee.member);if(!method)this.fail('Unknown interface method.',n);
+        const slot='cw_dispatch_'+this.temp++,result=slot+'_result',pre=[...value.pre,`let ${slot} = ${value.code};`];if(method.result!=='void')pre.push(`var ${result}: ${method.result};`);
+        const branches=[];
+        for(const heap of this.objectHeaps.values())if(this.structs.get(heap.type)?.base===baseName){
+          const receiver={kind:'object-deref',token:n.token,value:structuredClone(pointer),concreteHeap:heap.name,virtualHandleCode:slot},call={kind:'call',token:n.token,callee:{kind:'member',token:n.token,base:receiver,member:n.callee.member},args:structuredClone(n.args)},emitted=this.call(call);
+          branches.push({tag:heap.tag,call});pre.push(`if ((${slot} >> 20u) == ${heap.tag}u) {`,...indent([...emitted.pre,method.result==='void'?`${emitted.code};`:`${result} = ${emitted.code};`]),'}');
+        }
+        if(!branches.length)this.fail('No allocated implementation of this interface is available.',n);
+        n.virtualDispatch={pointer,slot,branches};return this.result(n,method.result,method.result==='void'?'':result,pre);
+      }
+    }
+
     if(n.callee.kind==='id'){
       const record=[...this.structs.values()].find(s=>s.valueClass&&s.name===n.callee.name);
       if(record&&n.classMemberInit&&n.args.length===1&&!this.ast.functions.some(f=>f.classConstructor&&f.classOwner===record.name&&f.params.length===1&&f.params[0].type===record.type)){const value=this.expr(n.args[0]);if(value.type===record.type){n.classIdentity=n.args[0];return this.result(n,record.type,value.code,value.pre);}}
@@ -762,6 +778,7 @@ class Emitter {
       n.type = target.type;if(target.packedAtomic){this.packedAtomicUsed=true;return [...target.pre,`cw_store_byte(&${target.packedBase}, ${target.packedShiftCode??target.packedShift+'u'}, u32(i32(${target.code}) ${n.op==='++'?'+':'-'} 1i));`];}if(['cw_short','cw_ushort'].includes(target.type))return [...target.pre,`${target.code} = ${this.convert(`i32(${target.code}) ${n.op==='++'?'+':'-'} 1i`,'i32',target.type,n)};`];if(target.type==='cw_uchar'&&!target.packedBase)return [...target.pre,`${target.code} = (${target.code} ${n.op==='++'?'+':'-'} 1u) & 255u;`];if(target.packedBase)return [...target.pre,`${target.packedBase} = (${target.packedBase} & ${(~(255<<target.packedShift))>>>0}u) | ((u32(i32(${target.code}) ${n.op==='++'?'+':'-'} 1i) & 255u) << ${target.packedShift}u);`]; return [...target.pre, `${target.code} ${n.op === '++' ? '+=' : '-='} ${target.type}(1);`];
     }
     const value = this.expr(n);
+    if(value.type==='void'&&!value.code)return value.pre;
     if (n.kind !== 'call') this.fail('Only assignments, increments and function calls may stand alone as statements.', n);
     if (n.callName === '__syncthreads') return [...value.pre, 'workgroupBarrier();', ...(this.usage.storageBarrier ? ['storageBarrier();'] : [])];
     return [...value.pre, value.type === 'void' ? `${value.code};` : `_ = ${value.code};`];
@@ -1004,7 +1021,7 @@ class Emitter {
     const storageSize = this.shared.reduce((n, s) => n + Math.ceil(typeStride(s.type) / 16) * 16, 0);
     let usesPackedBytes=(this.ast.structs||[]).some(s=>s.fields.some(f=>['cw_uchar','cw_uchar2','cw_uchar4'].includes(f.type)));walk(this.ast,n=>{if(['cw_uchar','cw_uchar2','cw_uchar4'].includes(n.type)||['cw_uchar','cw_uchar2','cw_uchar4'].includes(n.result))usesPackedBytes=true;});let usesShort=false;walk(this.ast,n=>{if(['cw_short','cw_ushort'].includes(n.type)||['cw_short','cw_ushort'].includes(n.result))usesShort=true;});if(usesShort)header.unshift('alias cw_short = i32;','alias cw_ushort = u32;');if(usesPackedBytes)header.unshift('alias cw_uchar = u32;','alias cw_uchar2 = u32;','alias cw_uchar4 = u32;');
     const wgsl = [...header, '', ...helperLines, '', `@compute @workgroup_size(${this.workgroupSize.join(', ')})`, 'fn main(', '  @builtin(local_invocation_id) cw_thread: vec3<u32>,', '  @builtin(workgroup_id) cw_block: vec3<u32>,', '  @builtin(num_workgroups) cw_grid: vec3<u32>', ') {', ...indent(main), '}', ''].join('\n');
-    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {...(this.objectHeaps.size?{objectHeap:{scope:'invocation',persistent:false,types:[...this.objectHeaps.values()].map(h=>({name:h.name,capacity:h.capacity}))}}:{}),workgroupSize: this.workgroupSize, bindings,...(Object.keys(this.bufferAliases).length?{bufferAliases:{...this.bufferAliases}}:{}), scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2+surfaces.length : null,...(textures.length?{textures}:{}),...(textureScales.length?{textureScales}:{}),...(textureLengths.length?{textureLengths}:{}),...(surfaces.length?{surfaces}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
+    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {...(this.objectHeaps.size?{objectHeap:{scope:'invocation',persistent:false,types:[...this.objectHeaps.values()].map(h=>({name:h.name,capacity:h.capacity,tag:h.tag}))}}:{}),workgroupSize: this.workgroupSize, bindings,...(Object.keys(this.bufferAliases).length?{bufferAliases:{...this.bufferAliases}}:{}), scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2+surfaces.length : null,...(textures.length?{textures}:{}),...(textureScales.length?{textureScales}:{}),...(textureLengths.length?{textureLengths}:{}),...(surfaces.length?{surfaces}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
   }
 }
 function resolveTraitTypes(fn, ast, parameter, argument) {

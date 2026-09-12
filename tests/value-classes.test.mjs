@@ -88,3 +88,7 @@ test('Object reference stage rejects fabricated addresses, arithmetic and unimpl
 test('Concrete new objects preserve identity, member access and released slot reuse',()=>{
  const c=compile('class V{public:float x;__device__ V(float a):x(a){} __device__ float get() const{return x;}__device__ void set(float v){x=v;}};__global__ void k(float*out){V*p=new V(3.0f);V*q=new V(7.0f);out[0]=p->get();out[1]=q->x;out[2]=float(p!=q);delete p;V*r=new V(10.0f);r->set(11.0f);out[3]=r->get();out[4]=q->get();delete r;delete q;}',{workgroupSize:[1,1,1]}),out=new Float32Array(5);executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[3,7,1,11,7]);assert.equal(c.metadata.objectHeap.scope,'invocation');
 });
+
+test('Tagged base pointers select distinct implementations at runtime',()=>{
+ const fixture=readFileSync(new URL('./pathtracer-dispatch-fixture.cuh',import.meta.url),'utf8');const c=compile(fixture+'__global__ void k(float*out){DispatchBase*a=new DispatchScale(2.0f);DispatchBase*b=new DispatchOffset(7.0f);DispatchBase*p=a;if(threadIdx.x%2)p=b;out[threadIdx.x]=p->value(3.0f);delete a;delete b;}',{workgroupSize:[4,1,1]}),out=new Float32Array(4);executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[6,10,6,10]);assert.notEqual(c.metadata.objectHeap.types[0].tag,c.metadata.objectHeap.types[1].tag);
+});
