@@ -70,19 +70,38 @@ exactly. The built sandbox also loads both resource types and verifies its outpu
 See `reports/transfer-texture-native.txt`,
 `reports/transfer-texture-sandbox-check.json` and the paired-texture GPU check.
 
+## Verified prerequisite: transformation overloads and const references
+
+Non-template device helpers can overload by parameter type. Calls require one
+exact type match; implicit conversion ranking and ambiguous calls are rejected.
+Duplicate signatures, kernel overloads and mixed template overload sets are not
+supported. Internal names keep generated WGSL functions distinct.
+
+Const references accept exact scalar/vector/local-struct types, including
+constant matrices and temporary vector values. Function-addressable local values
+use pointers; immutable values and temporaries receive local storage for the
+call. Aliased reference arguments and references directly to storage-buffer
+components are rejected. Existing mutable references remain limited to named
+local numeric scalars.
+
+The unchanged NVIDIA float3 and float4 `mul` helpers were copied with their
+license into `tests/volume-mul.cuh`. A project-owned validation entry checks
+that directions omit translation while points include it. Native CUDA, the typed
+interpreter and NVIDIA WebGPU all produce the exact expected eight components
+for a non-identity matrix and buffer-supplied point. See
+`reports/volume-mul-native.txt` and the matrix-overload GPU regression entry.
+
 ## Remaining work for the complete candidate
 
 The current full-source importer/compiler probe fails at:
 
 ```
-Duplicate function 'mul'. (96:1)
-__device__ float4 mul(const float3x4 &M, const float4 &v)
+Pointers are supported only as kernel buffer parameters and &buffer[index] atomic targets. (148:54)
+int hit = intersectBox(eyeRay, boxMin, boxMax, &tnear, &tfar);
 ```
 
 Source inspection also identifies these required capabilities:
 
-- Resolve the two overloaded `mul` helpers and their const struct/vector
-  references.
 - Pass addresses of local `tnear`/`tfar` values into `intersectBox`.
 - Configure the original camera matrix and transfer table, validate complete
   native and WebGPU ray-marched images, then expose the verified renderer as its

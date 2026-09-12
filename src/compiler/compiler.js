@@ -64,6 +64,7 @@ class Emitter {
     this.ast = ast; this.kernel = kernel; this.options = options; this.scopes = [new Map()]; this.temp = 0; this.loopDepth = 0; this.integerIntrinsics=new Set();
     this.structs=new Map((ast.structs||[]).map(s=>[s.type,s]));for(const s of this.structs.values())for(const field of s.fields){let type=field.type;for(const dim of [...field.dimensions].reverse()){const length=constantValue(dim);if(!Number.isSafeInteger(length)||length<1||length>256)this.fail('Struct field array dimensions must be 1..256.',field);type=arrayOf(type,length);}field.resolvedType=type;}
     this.textureKinds=new Map();walk(kernel.body,n=>{if(n.kind==='call'&&['tex1D','tex3D'].includes(n.callee?.name)&&n.args[0]?.kind==='id'){const name=n.args[0].name,dimension=n.callee.name==='tex1D'?'2d':'3d';if(this.textureKinds.has(name)&&this.textureKinds.get(name)!==dimension)this.fail('A texture parameter cannot mix 1D and 3D sampling.',n);this.textureKinds.set(name,dimension);}});
+    this.overloads=new Map();for(const f of ast.functions)if(f.overloadName){const list=this.overloads.get(f.overloadName)||[];list.push(f);this.overloads.set(f.overloadName,list);}
     this.functions = new Map(); this.shared = []; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
     for (const f of ast.functions) {
       if (this.functions.has(f.name)) this.fail(`Duplicate function '${f.name}'.`, f);
@@ -329,6 +330,7 @@ class Emitter {
       return this.result(n, type, `${name}(${args.map(a => this.convert(a.code, a.type, type, n)).join(', ')})`, pre);
     }
     let helper = this.functions.get(name);
+    if(this.overloads.has(name)){const matches=this.overloads.get(name).filter(f=>f.params.length===args.length&&f.params.every((p,i)=>typeName(p.pointer?(isArray(args[i].type)?args[i].type.element:null):args[i].type)===typeName(p.type)));if(matches.length!==1)this.fail('Overload '+name+' requires one exact parameter-type match; implicit conversions and ambiguous calls are unsupported.',n);helper=matches[0];}
     if(!helper&&this.templates){
       helper=this.templates.deduce(name,args.map(a=>a.type),n.callee);
       if(helper)for(const fn of this.ast.functions)if(fn.qualifier==='__device__'&&!this.functions.has(fn.name)){this.functions.set(fn.name,fn);if(!fn.params.some(p=>p.pointer))this.helpers.push(fn);}
@@ -340,9 +342,11 @@ class Emitter {
     const reaches=(from,target,seen=new Set())=>{if(from===target)return true;if(seen.has(from))return false;seen.add(from);return [...(this.helperCalls.get(from)||[])].some(next=>reaches(next,target,seen));};
     if(reaches(helper.name,caller))this.fail('Recursive helper calls are unsupported.',n);
     n.callee.name=helper.name;n.callName=helper.name;
-    const references=new Set();n.referenceArgs=helper.params.map(p=>!!p.reference);n.groupArgs=helper.params.map(p=>p.type==='thread-block');n.pointerArgs=helper.params.map(p=>!!p.pointer);
+    const references=new Set();n.constRefTemporaries=[];n.referenceArgs=helper.params.map(p=>!!p.reference);n.groupArgs=helper.params.map(p=>p.type==='thread-block');n.pointerArgs=helper.params.map(p=>!!p.pointer);
     const codes=args.map((a,i)=>{const p=helper.params[i];if(p.pointer)return a.pointerCode;if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
-      const node=n.args[i],s=a.rootSymbol;if(node.kind!=='id'||!s||!['local','reference'].includes(s.kind)||s.constant||isArray(a.type)||!numeric(a.type)||a.type!==p.type)this.fail('Reference arguments require a mutable named local scalar of the exact type.',node);
+      const node=n.args[i],s=a.rootSymbol;
+      if(p.constant){if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.add(s);if(s?.kind==='reference')return s.pointerCode;if(s?.kind==='local'&&!s.constant&&['id','member'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
+      if(node.kind!=='id'||!s||!['local','reference'].includes(s.kind)||s.constant||isArray(a.type)||!numeric(a.type)||a.type!==p.type)this.fail('Reference arguments require a mutable named local scalar of the exact type.',node);
       if(references.has(s))this.fail('Aliased reference arguments are unsupported.',node);references.add(s);return s.kind==='reference'?s.pointerCode:`&${s.code}`;
     });
     return this.result(n, helper.result, `f_${helper.name}(${[...codes.filter(c=>c!==null),'cw_thread','cw_block','cw_grid'].join(', ')})`, pre);
@@ -508,7 +512,7 @@ class Emitter {
         if (p.shared || p.external || p.type === 'void'||p.type==='texture3d') this.fail('Invalid helper parameter.', p);
         if(p.pointer){const base=this.bufferSymbols.get(p.boundBuffer);if(!base)this.fail('Helper buffer pointer was not specialized.',p);p.symbol=this.add(p.name,{...base,name:p.name,kind:'buffer-alias',constant:p.constant||p.boundConstant,offsetCode:'cw_buffer_offset_'+helper.params.indexOf(p)},p);continue;}
         if(p.type==='thread-block'){if(p.reference)this.fail('thread_block helper parameters must be passed by value.',p);p.symbol=this.add(p.name,{name:p.name,type:p.type,kind:'thread-block',constant:true},p);continue;}
-        if(p.reference&&!numeric(p.type))this.fail('Helper references require a 32-bit numeric scalar.',p);
+        if(p.reference&&!numeric(p.type)&&!(p.constant&&(vectorLength(p.type)||this.structs.has(p.type))))this.fail('Helper references require a 32-bit numeric scalar.',p);
         p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined, constant:p.constant, atomic: false, kind: p.reference?'reference':'local'}, p);
       }
       const body = this.body(helper.body);
@@ -664,6 +668,7 @@ export function compile(source, options = {},bufferUsage=null) {
   if(specialization)walk(kernel.body,n=>{if(n.templateArgument===kernel.templateParameter)n.templateArgument=specialization[2];});
   resolveTraitTypes(kernel,ast,kernel.templateParameter,specialization?.[2]);
   const scalarConstraints=uniformBlockGuards(kernel,options,walk,message=>{throw new CompileError(message,kernel.token,source);});
+  const overloadGroups=new Map();for(const f of ast.functions)if(f.specializationArgument===undefined){const group=overloadGroups.get(f.name)||[];group.push(f);overloadGroups.set(f.name,group);}let overloadIndex=0;const occupied=new Set(ast.functions.map(f=>f.name));for(const [name,group]of overloadGroups)if(group.length>1){if(group.some(f=>f.qualifier!=='__device__'||f.templateParameter))throw new CompileError('Overloads support non-template device helpers only.',group[0].token,source);const signatures=new Set();for(const f of group){const signature=JSON.stringify(f.params.map(p=>[p.type,p.pointer,p.reference,(p.pointer||p.reference)&&p.constant]));if(signatures.has(signature))throw new CompileError('Duplicate function signature '+name,f.token,source);signatures.add(signature);let unique='cw_overload_'+overloadIndex+++'_'+name;while(occupied.has(unique))unique+='_';occupied.add(unique);f.overloadName=name;f.name=unique;}}
   const templates=instantiateHelperTemplates(ast,kernel);
   const emitter=new Emitter(ast,kernel,options,templates,bufferUsage),result=emitter.emit();
   if(scalarConstraints.length)result.metadata.scalarConstraints=scalarConstraints;

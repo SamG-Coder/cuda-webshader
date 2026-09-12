@@ -86,6 +86,7 @@ class Context {
     if(name==='__syncthreads'){yield n.token.offset;return;}
     const args=[];for(const [i,a] of n.args.entries()){
       if(n.pointerArgs?.[i]){const base=this.env.get(a.pointerBaseSymbol)?.value,offset=a.pointerOffset?yield* this.eval(a.pointerOffset):0;if(!(base instanceof BufferView)||!Number.isInteger(offset) )throw new RangeError('CPU helper pointer needs an integer offset.');args.push(new BufferView(base.data,base.type,convert(base.offset+convert(offset,'i32'),'i32')));}
+      else if(n.constRefTemporaries?.[i]){let value=yield* this.eval(a);args.push({get:()=>value,set:v=>{value=v;}});}
       else args.push(n.groupArgs?.[i]?null:yield* (n.referenceArgs?.[i]?this.ref(a):this.eval(a)));
     }
     if(name==='__mul24')return Math.imul((args[0]<<8)>>8,(args[1]<<8)>>8);
