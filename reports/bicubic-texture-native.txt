@@ -1,0 +1,15 @@
+scenario=0 mode=0 35x19 native output captured; alpha and guards PASS
+scenario=0 mode=1 35x19 native output captured; alpha and guards PASS
+scenario=0 mode=2 35x19 native output captured; alpha and guards PASS
+scenario=0 mode=3 35x19 native output captured; alpha and guards PASS
+scenario=0 mode=4 35x19 native output captured; alpha and guards PASS
+scenario=1 mode=0 128x96 native output captured; alpha and guards PASS
+scenario=1 mode=1 128x96 native output captured; alpha and guards PASS
+scenario=1 mode=2 128x96 native output captured; alpha and guards PASS
+scenario=1 mode=3 128x96 native output captured; alpha and guards PASS
+scenario=1 mode=4 128x96 native output captured; alpha and guards PASS
+scenario=2 mode=0 512x512 native output captured; alpha and guards PASS
+scenario=2 mode=1 512x512 native output captured; alpha and guards PASS
+scenario=2 mode=2 512x512 native output captured; alpha and guards PASS
+scenario=2 mode=3 512x512 native output captured; alpha and guards PASS
+scenario=2 mode=4 512x512 native output captured; alpha and guards PASS

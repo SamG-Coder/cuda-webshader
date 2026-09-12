@@ -1,6 +1,6 @@
-# NVIDIA bicubicTexture: in progress
+# NVIDIA bicubicTexture: complete device pipeline
 
-Target: the original nearest, bilinear, bicubic B-spline, fast bicubic and Catmull-Rom image paths in NVIDIA CUDA Samples revision 5443602d89ed99aede2e4b7bf329daddeadb320e, cpp/5_Domain_Specific/bicubicTexture/bicubicTexture_kernel.cuh. The full device pipeline must be verified before adding a showcase card.
+Target: the original nearest, bilinear, bicubic B-spline, fast bicubic and Catmull-Rom image paths in NVIDIA CUDA Samples revision 5443602d89ed99aede2e4b7bf329daddeadb320e, cpp/5_Domain_Specific/bicubicTexture/bicubicTexture_kernel.cuh. The complete pipeline is verified and has a standalone sandbox showcase.
 
 ## Verified prerequisite: multiple helper template types
 
@@ -18,7 +18,7 @@ Defaults are restricted to scalar value parameters. References, pointers, vector
 
 Native CUDA and NVIDIA WebGPU both produce exactly 2, 4.5, 12.5, 6.5, -2, 2, 5, -10, 9, 3 for tests/helper-defaults.cu. The probe covers omitted and explicit arguments, nested calls, template deduction, inherited specialization defaults, overloads, and texture helpers. See reports/helper-defaults-native.txt and the helper-defaults GPU regression entry.
 
-The parser also recognizes tex2Dgather template-call syntax in an unused helper. This does not implement gather execution: a selected gather call is still rejected. The original header now parses past its unused gather helper and stops at the packed uchar4 output parameter.
+The parser also recognizes tex2Dgather template-call syntax in an unused helper. This does not implement gather execution: a selected gather call is still rejected. The original unused gather helper parses without rewriting its source.
 
 ## Verified prerequisite: packed uchar4 output
 
@@ -30,10 +30,10 @@ The packed-uchar4 probe validates 257 lanes, 514 four-byte records and 16 output
 
 The built sandbox also passes a pasted uchar4 kernel through compile, dispatch and preview, with all 128 RGBA bytes in its 32-pixel image matching exactly. See reports/packed-image-sandbox-check.json.
 
-All four original bicubic render entries now compile and pass NVIDIA hardware GPU shader validation using tests/bicubic-texture-kernel.cuh. The fixture preserves the upstream CUDA function bodies and BSD notice; desktop declarations and include guards are excluded by the generic device extractor. This check is explicitly shader-compilation-only, not image-result validation.
+All four original render kernels now run in all five modes. Fifteen complete output images match native CUDA and an independent reference within one colour level, including non-power-of-two texture dimensions, image borders, partial blocks and guards. The built sandbox passes all five modes and an edited transform.
 
-## Remaining work
+The image checks exposed normalized-coordinate rounding at integer texel boundaries. Unnormalized nearest sampling now uses clamped integer texel loads, with the mode propagated through helper calls in hidden uniforms. Bilinear sampling continues through the GPU sampler.
 
-Validate the byte-image sampling and complete packed output for all five upstream modes: nearest, bilinear, bicubic, fast bicubic and Catmull-Rom. The current float texture upload can represent normalized byte pixels, but matching native filter behaviour still requires full-image comparisons. The unused gather template parses; gather execution remains unsupported and is not called by these five render paths.
+The pinned bicubicTexture PGM has an invalid payload length. Native and WebGPU validation both use the valid attributed simpleTexture teapot image; the source/data distinction is documented in the showcase README.
 
-After those compiler/runtime requirements, validate every original render mode against native CUDA and an independent reference, including fractional coordinates, edges and partial blocks. Add the sandbox input/settings/preview and its own card only after full output validation. This report and probe do not claim that the bicubic sample already runs.
+See [showcase setup and complete validation](../showcases/bicubic-texture/README.md). The original CUDA function bodies remain unchanged.

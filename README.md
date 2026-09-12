@@ -13,6 +13,10 @@ See [launch requirements and validation](showcases/nbody/README.md).
 [NVIDIA FDTD3d is also available as a 3D scalar-volume showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fdtd),
 with the original shared-memory stencil, editable constant coefficients and
 GPU-only field feedback. See [volume setup and validation](showcases/fdtd3d/README.md).
+[NVIDIA bicubic filtering](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=bicubic)
+provides all five original filter modes, with editable zoom and pan. All 15 tested images
+match native CUDA and an independent reference within one colour level.
+See [filter modes and validation](showcases/bicubic-texture/README.md).
 [NVIDIA texture convolution](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=convolution)
 runs the original 17-tap row and column filters, with pixel-coordinate texture
 sampling and an intermediate GPU image copy. See [setup and native comparisons](showcases/convolution-texture/README.md).
@@ -47,14 +51,14 @@ Device helpers now
 support up to four explicit built-in type arguments or one integer template argument, including nested
 calls and arguments forwarded from a kernel template. Single type arguments can be deduced;
 multiple types currently require explicit arguments. This is a verified prerequisite for
-the [bicubic texture candidate](reports/bicubic-texture-progress.md).
+the [bicubic texture showcase](showcases/bicubic-texture/README.md).
 Device helpers also accept trailing scalar literal defaults, including defaults
 inherited from primary templates; native CUDA and WebGPU verify omitted and explicit
 arguments, overloads and nested texture helpers.
 Packed `uchar4` buffers now retain CUDA’s four-byte record layout. Byte components
 can be read and edited in local records, with integer promotion and narrowing verified
-against native CUDA. All four original bicubic render shaders compile; full image
-validation is still pending before the sample becomes a showcase. Type-trait structs containing typedef members, including explicit type specializations
+against native CUDA. All four original bicubic render shaders now run in the sandbox; all five sampling
+modes pass complete native-image comparisons. Type-trait structs containing typedef members, including explicit type specializations
 and dependent types such as `typename vec4<T>::Type`, now resolve to built-in
 value types. Helper type arguments can now be deduced from direct scalar/vector
 parameters, and explicit device-function specializations are selected when present.

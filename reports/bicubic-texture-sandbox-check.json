@@ -1,0 +1,73 @@
+{
+  "passed": true,
+  "staticBuild": true,
+  "softwareAdapterRequested": false,
+  "comparisons": [
+    {
+      "scenario": 2,
+      "mode": 2,
+      "pixels": 262144,
+      "maxError": 1
+    },
+    {
+      "scenario": 2,
+      "mode": 0,
+      "pixels": 262144,
+      "maxError": 0
+    },
+    {
+      "scenario": 2,
+      "mode": 1,
+      "pixels": 262144,
+      "maxError": 0
+    },
+    {
+      "scenario": 2,
+      "mode": 3,
+      "pixels": 262144,
+      "maxError": 1
+    },
+    {
+      "scenario": 2,
+      "mode": 4,
+      "pixels": 262144,
+      "maxError": 1
+    },
+    {
+      "scenario": 1,
+      "mode": 4,
+      "pixels": 12288,
+      "maxError": 0
+    }
+  ],
+  "modeMenuVerified": true,
+  "editedTransformVerified": true,
+  "mobileLayout": true,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "stats": {
+    "pipelineCompiles": 1,
+    "pipelineCacheHits": 0,
+    "bindGroupsCreated": 1,
+    "submissions": 1,
+    "dispatches": 1,
+    "uniformBytesUploaded": 48,
+    "dataBytesUploaded": 2097152,
+    "readbackBytes": 1048576
+  }
+}
