@@ -1,3 +1,4 @@
+import {checkBinomial} from './binomial-gpu.js';
 import {checkDeviceGlobals} from './device-globals-gpu.js';
 import {checkOddEven} from './odd-even-gpu.js';
 import {checkSortingNetworks} from './sorting-networks-gpu.js';
@@ -238,6 +239,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Original fluids pitched kernels match native CUDA',()=>checkFluidsPitched(runtime));
   await run('2048-point real FFT axes match native cuFFT',()=>checkLargeFFT(runtime));
   await run('Sincos and first-set-bit intrinsics match native CUDA',()=>checkSincos(runtime));
+  await run('Original NVIDIA binomial options match all native outputs',()=>checkBinomial(runtime));
   await run('Device globals persist across dispatches and support helper atomics',()=>checkDeviceGlobals(runtime));
   await run('Complete NVIDIA odd-even sorting matches native CUDA',()=>checkOddEven(runtime));
   await run('Complete NVIDIA bitonic sorting matches native CUDA',()=>checkSortingNetworks(runtime));

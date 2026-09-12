@@ -1,0 +1,43 @@
+{
+  "pipeline": {
+    "buffers": {
+      "d_OptionData": {
+        "type": "u32",
+        "records": 5120,
+        "fill": "binary-u32",
+        "source": "showcases/binomial-options/prepared.bin"
+      },
+      "d_CallValue": {
+        "type": "f32",
+        "records": 1024,
+        "fill": "zero"
+      }
+    },
+    "steps": [
+      {
+        "entry": "binomialOptionsKernel",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          1024,
+          1,
+          1
+        ]
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "d_CallValue",
+      "width": 32,
+      "height": 32,
+      "format": "gray-f32",
+      "range": [
+        0,
+        30
+      ]
+    }
+  }
+}
