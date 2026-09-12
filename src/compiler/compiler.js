@@ -14,7 +14,7 @@ export function walk(node, visit) {
   if (!node || typeof node !== 'object') return;
   if (node.kind) visit(node);
   for (const [key, val] of Object.entries(node)) {
-    if (['token', 'symbol', 'type', 'source', 'resolved'].includes(key)) continue;
+    if (['token', 'symbol', 'type', 'source', 'resolved','pointerBaseSymbol'].includes(key)) continue;
     if (Array.isArray(val)) val.forEach(n => walk(n, visit));
     else if (val && typeof val === 'object') walk(val, visit);
   }
@@ -30,7 +30,7 @@ function constantValue(n) {
   throw new CompileError('Array dimensions must be positive compile-time integer expressions.', n.token);
 }
 function analyse(functions, params) {
-  const atomic = new Set(), reads = new Set(), writes = new Set(), bufferNames = new Set(params.filter(p => p.pointer).map(p => p.name));
+  const atomic = new Set(),atomicBindings=new Set(), reads = new Set(), writes = new Set(), bufferNames = new Set(params.filter(p => p.pointer).map(p => p.name));
   let aliases=new Map();const resolve=name=>aliases.has(name)?aliases.get(name):name;
   const scan = (n, mode = 'read') => {
     if (!n || !n.kind) return;
@@ -41,7 +41,7 @@ function analyse(functions, params) {
     if (n.kind === 'unary' && ['++', '--'].includes(n.op)) { scan(n.value, 'both'); return; }
     if (n.kind === 'call' && n.callee.kind === 'id' && ['atomicAdd', 'atomicMin', 'atomicMax', 'atomicExch','atomicCAS'].includes(n.callee.name)) {
       const target = n.args[0];
-      if (target?.kind === 'unary' && target.op === '&') { const name = rootName(target.value); if (name) atomic.add(resolve(name)??name); scan(target.value, 'both'); }
+      if (target?.kind === 'unary' && target.op === '&') { const name = rootName(target.value); if (name){atomic.add(resolve(name)??name);if(bufferNames.has(resolve(name)))atomicBindings.add(resolve(name));} scan(target.value, 'both'); }
       n.args.slice(1).forEach(a => scan(a)); return;
     }
     if (n.kind === 'index') {
@@ -55,18 +55,22 @@ function analyse(functions, params) {
     }
   };
   functions.forEach(f => {aliases=new Map(f.params.filter(p=>!p.pointer).map(p=>[p.name,null]));scan(f.body);});
-  return {atomic, reads, writes, storageBarrier: [...writes].some(x => reads.has(x))};
+  return {atomic,atomicBindings, reads, writes, storageBarrier: [...writes].some(x => reads.has(x))};
 }
 class Emitter {
-  constructor(ast, kernel, options, templates) {
+  constructor(ast, kernel, options, templates,bufferUsage) {
     this.ast = ast; this.kernel = kernel; this.options = options; this.scopes = [new Map()]; this.temp = 0; this.loopDepth = 0; this.integerIntrinsics=new Set();
     this.functions = new Map(); this.shared = []; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
     for (const f of ast.functions) {
       if (this.functions.has(f.name)) this.fail(`Duplicate function '${f.name}'.`, f);
       this.functions.set(f.name, f);
     }
-    this.helpers = ast.functions.filter(f => f.qualifier === '__device__');
-    this.usage = analyse([kernel, ...this.helpers], kernel.params);
+    this.helpers = ast.functions.filter(f => f.qualifier === '__device__'&&!f.params.some(p=>p.pointer));
+    this.pointerHelpers=new Map();this.bufferSymbols=new Map();
+    this.usage = analyse([kernel], kernel.params);this.usage.atomic=this.usage.atomicBindings;
+    for(const kind of ['reads','writes','atomic'])for(const name of bufferUsage?.[kind]||[])this.usage[kind].add(name);
+    this.usage.storageBarrier=[...this.usage.writes].some(n=>this.usage.reads.has(n));
+    this.initialBufferUsage=Object.fromEntries(['reads','writes','atomic'].map(k=>[k,new Set(this.usage[k])]));
     this.workgroupSize = [...(options.workgroupSize || [128, 1, 1])];
     while (this.workgroupSize.length < 3) this.workgroupSize.push(1);
     if (this.workgroupSize.length !== 3 || this.workgroupSize.some(v => !Number.isSafeInteger(v) || v < 1) || this.workgroupSize.reduce((a, b) => a * b, 1) > 1024) this.fail('Workgroup dimensions must be positive integers with at most 1024 total invocations.', kernel);
@@ -189,6 +193,44 @@ class Emitter {
       default: this.fail(`Unsupported expression '${n.kind}'.`, n);
     }
   }
+  argument(n){
+    const address=n.kind==='unary'&&n.op==='&'&&n.value.kind==='index'?n.value:null;
+    const base=address?address.base:n.kind==='binary'&&n.op==='+'?n.left:n.kind==='id'?n:null;
+    if(base?.kind==='id'&&!['true','false'].includes(base.name)){
+      const symbol=this.lookup(base.name,base);
+      if(symbol.kind==='thread-block'&&n.kind==='id'){n.symbol=symbol;return {type:'thread-block',code:'',pre:[],rootSymbol:symbol};}
+      if(['buffer','buffer-alias'].includes(symbol.kind)){
+        const node=address?address.index:n.kind==='binary'?n.right:null,offset=node?this.expr(node):{type:'i32',code:'0i',pre:[]};
+        if(!['i32','u32'].includes(offset.type))this.fail('Helper buffer offsets must be 32-bit integers.',n);
+        n.pointerBaseSymbol=symbol;n.pointerOffset=node;
+        const pointerCode=symbol.offsetCode?`(${symbol.offsetCode} + ${this.convert(offset.code,offset.type,'i32',n)})`:this.convert(offset.code,offset.type,'i32',n);
+        return this.result(n,symbol.type,symbol.code,offset.pre,{rootSymbol:symbol,pointerCode});
+      }
+    }
+    return this.expr(n);
+  }
+  bindPointerHelper(helper,args,n){
+    const uses=analyse([helper],helper.params),roots=[];
+    for(const [i,p]of helper.params.entries())if(p.pointer){
+      const a=args[i],symbol=a?.rootSymbol,root=symbol?.rootBufferName;
+      if(!root||!isArray(a.type)||a.type.element!==p.type)this.fail('Helper pointers require a same-type storage buffer or buffer offset.',n.args[i]);
+      if(symbol.constant&&!p.constant)this.fail('Cannot discard const through a helper pointer argument.',n.args[i]);
+      roots.push([i,root,!!symbol.constant]);
+      if(uses.reads.has(p.name))this.usage.reads.add(root);
+      if(uses.writes.has(p.name))this.usage.writes.add(root);
+      if(uses.atomicBindings.has(p.name)){this.usage.atomic.add(root);this.bufferSymbols.get(root).atomic=true;}
+    }
+    this.usage.storageBarrier=[...this.usage.writes].some(x=>this.usage.reads.has(x));
+    const key=JSON.stringify([helper.name,roots]);
+    if(!this.pointerHelpers.has(key)){
+      if(this.pointerHelpers.size>=128)this.fail('At most 128 helper buffer specializations are supported.',n);
+      const clone=structuredClone(helper);let name='cw_buffer_helper_'+this.pointerHelpers.size;while(this.functions.has(name))name+='_';
+      clone.name=name;clone.pointerOrigin=helper.name;
+      for(const [i,root,constant]of roots){clone.params[i].boundBuffer=root;clone.params[i].boundConstant=constant;}
+      this.pointerHelpers.set(key,clone);this.functions.set(name,clone);this.helpers.push(clone);this.ast.functions.push(clone);
+    }
+    return this.pointerHelpers.get(key);
+  }
   call(n) {
     const groupSync=n.callee.kind==='id'&&n.callee.name==='cooperative_groups::sync';
     const memberSync=n.callee.kind==='member'&&n.callee.member==='sync';
@@ -216,7 +258,7 @@ class Emitter {
       return this.result(n, target.type, `${atomics[name]}(&${target.code}, ${this.convert(value.code, value.type, target.type, n)})`, [...target.pre, ...value.pre]);
     }
     const casts = {float: 'f32', int: 'i32', uint: 'u32', bool: 'bool'};
-    const args = n.args.map(a => {if(a.kind==='id'&&!['true','false'].includes(a.name)){const s=this.lookup(a.name,a);if(s.kind==='thread-block'){a.symbol=s;return {type:'thread-block',code:'',pre:[],rootSymbol:s};}}return this.expr(a);}), pre = args.flatMap(a => a.pre);
+    const args = n.args.map(a => this.argument(a)), pre = args.flatMap(a => a.pre);
     if(name==='__mul24'||name==='__umul24'){
       if(args.length!==2||args.some(a=>!['i32','u32'].includes(a.type)))this.fail(`${name} requires two 32-bit integer arguments.`,n);
       const signed=name==='__mul24',type=signed?'i32':'u32';
@@ -248,16 +290,17 @@ class Emitter {
     let helper = this.functions.get(name);
     if(!helper&&this.templates){
       helper=this.templates.deduce(name,args.map(a=>a.type),n.callee);
-      if(helper)for(const fn of this.ast.functions)if(fn.qualifier==='__device__'&&!this.functions.has(fn.name)){this.functions.set(fn.name,fn);this.helpers.push(fn);}
+      if(helper)for(const fn of this.ast.functions)if(fn.qualifier==='__device__'&&!this.functions.has(fn.name)){this.functions.set(fn.name,fn);if(!fn.params.some(p=>p.pointer))this.helpers.push(fn);}
     }
     if (!helper || helper.qualifier !== '__device__') this.fail(`Unsupported function '${name}'. CUDA host APIs, warp intrinsics, dynamic launches and libraries are not available.`, n);
     if (args.length !== helper.params.length) this.fail(`Wrong number of arguments for '${name}'.`, n);
+    if(helper.params.some(p=>p.pointer))helper=this.bindPointerHelper(helper,args,n);
     const caller=this.currentFunction.name,edges=this.helperCalls.get(caller)||new Set();edges.add(helper.name);this.helperCalls.set(caller,edges);
     const reaches=(from,target,seen=new Set())=>{if(from===target)return true;if(seen.has(from))return false;seen.add(from);return [...(this.helperCalls.get(from)||[])].some(next=>reaches(next,target,seen));};
     if(reaches(helper.name,caller))this.fail('Recursive helper calls are unsupported.',n);
     n.callee.name=helper.name;n.callName=helper.name;
-    const references=new Set();n.referenceArgs=helper.params.map(p=>!!p.reference);n.groupArgs=helper.params.map(p=>p.type==='thread-block');
-    const codes=args.map((a,i)=>{const p=helper.params[i];if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
+    const references=new Set();n.referenceArgs=helper.params.map(p=>!!p.reference);n.groupArgs=helper.params.map(p=>p.type==='thread-block');n.pointerArgs=helper.params.map(p=>!!p.pointer);
+    const codes=args.map((a,i)=>{const p=helper.params[i];if(p.pointer)return a.pointerCode;if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
       const node=n.args[i],s=a.rootSymbol;if(node.kind!=='id'||!s||!['local','reference'].includes(s.kind)||s.constant||isArray(a.type)||!numeric(a.type)||a.type!==p.type)this.fail('Reference arguments require a mutable named local scalar of the exact type.',node);
       if(references.has(s))this.fail('Aliased reference arguments are unsupported.',node);references.add(s);return s.kind==='reference'?s.pointerCode:`&${s.code}`;
     });
@@ -306,8 +349,8 @@ class Emitter {
       return [...offset.pre,`let ${offsetCode} = ${base.offsetCode?base.offsetCode+' + ':''}${this.convert(offset.code,offset.type,'i32',n)};`];
     }
     if (n.type === 'void') this.fail('Variables cannot have void type.', n);
-    let type = n.type;
-    const dims = n.dimensions.map(d => {if(d===null){if(!n.external||!n.shared)this.fail('Unsized arrays require extern __shared__.',n);if(this.dynamicSharedUsed)this.fail('Only one dynamic shared array is supported; CUDA declarations alias the same allocation.',n);const stride=typeStride(n.type);if(n.type==='bool'||vectorLength(n.type)===3)this.fail('Dynamic shared arrays require 32-bit scalars or two/four-component vectors.',n);if(!this.dynamicSharedBytes||this.dynamicSharedBytes%stride)this.fail('Set sharedMemoryBytes to a positive multiple of the dynamic shared element size.',n);this.dynamicSharedUsed=true;return this.dynamicSharedBytes/stride;}const value = constantValue(d); if (!Number.isSafeInteger(value) || value < 1 || value > 65536) this.fail('Invalid fixed array dimension (1..65536).', n); return value; });
+    let type = n.type;const sharedOwner=(this.currentFunction.pointerOrigin||this.currentFunction.name)+':'+n.token.offset+':'+n.name;
+    const dims = n.dimensions.map(d => {if(d===null){if(!n.external||!n.shared)this.fail('Unsized arrays require extern __shared__.',n);if(this.dynamicSharedUsed&&this.dynamicSharedOwner!==sharedOwner)this.fail('Only one dynamic shared array is supported; CUDA declarations alias the same allocation.',n);const stride=typeStride(n.type);if(n.type==='bool'||vectorLength(n.type)===3)this.fail('Dynamic shared arrays require 32-bit scalars or two/four-component vectors.',n);if(!this.dynamicSharedBytes||this.dynamicSharedBytes%stride)this.fail('Set sharedMemoryBytes to a positive multiple of the dynamic shared element size.',n);this.dynamicSharedUsed=true;this.dynamicSharedOwner=sharedOwner;return this.dynamicSharedBytes/stride;}const value = constantValue(d); if (!Number.isSafeInteger(value) || value < 1 || value > 65536) this.fail('Invalid fixed array dimension (1..65536).', n); return value; });
     for (let i = dims.length - 1; i >= 0; i--) type = arrayOf(type, dims[i]);
     if (n.shared && n.init) this.fail('__shared__ variables cannot have an initializer.', n);
     if (isArray(type) && n.init) this.fail('Array initializers are unsupported. Initialize elements explicitly.', n);
@@ -315,8 +358,10 @@ class Emitter {
     if (atomic && !['i32', 'u32'].includes(n.type)) this.fail('Shared atomics require int or unsigned int.', n);
     const init = n.init ? this.expr(n.init) : null;
     if (n.constant && !init && !n.shared) this.fail('A const local variable needs an initializer.', n);
-    const code = `${n.shared ? (this.currentFunction===this.kernel?'s':'s_'+this.currentFunction.name) : 'v'}_${n.name}`;
-    const symbol = {name: n.name, type, code, constant: n.constant, atomic, kind: n.shared ? 'shared' : 'local'};
+    const code = `${n.shared ? (this.currentFunction===this.kernel?'s':'s_'+(this.currentFunction.pointerOrigin||this.currentFunction.name)) : 'v'}_${n.name}`;
+    const symbol = {name: n.name, type, code, constant: n.constant, atomic, kind: n.shared ? 'shared' : 'local',...(n.shared?{sharedOwner}:{})};
+    const existing=n.shared&&this.shared.find(x=>x.code===code);
+    if(existing){if(existing.sharedOwner!==sharedOwner||typeName(existing.type)!==typeName(type)||existing.atomic!==atomic)this.fail('Shared declaration conflicts across helper specializations.',n);this.add(n.name,existing,n);n.symbol=existing;n.resolvedDimensions=dims;n.resolvedType=type;return [];}
     this.add(n.name, symbol, n); n.symbol = symbol; n.resolvedDimensions = dims; n.resolvedType = type;
     if (n.shared) {
       if (this.shared.some(x => x.code === code)) this.fail('Shared array names must be unique.', n);
@@ -379,8 +424,8 @@ class Emitter {
         if (atomic && !['i32', 'u32'].includes(p.type)) this.fail('Only 32-bit integer atomics are supported.', p);
         const binding = bindings.length;
         bindings.push({name: p.name, elementType: p.type, stride: typeStride(p.type), binding, readOnly, atomic});
-        const symbol = {name: p.name, type: arrayOf(p.type), code: `b_${p.name}`, constant: p.constant, atomic, kind: 'buffer'};
-        this.add(p.name, symbol, p, true); p.symbol = symbol;
+        const symbol = {name: p.name, rootBufferName:p.name, type: arrayOf(p.type), code: `b_${p.name}`, constant: p.constant, atomic, kind: 'buffer'};
+        this.add(p.name, symbol, p, true); p.symbol = symbol;this.bufferSymbols.set(p.name,symbol);
         header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type}>` : p.type}>;`);
       } else {
         if (!numeric(p.type)) this.fail('Scalar kernel parameters must be float, int or unsigned int. Put vectors in buffers.', p);
@@ -396,13 +441,14 @@ class Emitter {
     const emitHelpers=()=>{while(emittedHelpers<this.helpers.length){const helper=this.helpers[emittedHelpers++];
       this.scopes = [new Map()]; this.currentFunction = helper;
       for (const p of helper.params) {
-        if (p.pointer || p.shared || p.external || p.type === 'void') this.fail('Helper arguments must be scalar/vector values, not pointers.', p);
+        if (p.shared || p.external || p.type === 'void') this.fail('Invalid helper parameter.', p);
+        if(p.pointer){const base=this.bufferSymbols.get(p.boundBuffer);if(!base)this.fail('Helper buffer pointer was not specialized.',p);p.symbol=this.add(p.name,{...base,name:p.name,kind:'buffer-alias',constant:p.constant||p.boundConstant,offsetCode:'v_'+p.name+'_offset'},p);continue;}
         if(p.type==='thread-block'){if(p.reference)this.fail('thread_block helper parameters must be passed by value.',p);p.symbol=this.add(p.name,{name:p.name,type:p.type,kind:'thread-block',constant:true},p);continue;}
         if(p.reference&&!numeric(p.type))this.fail('Helper references require a 32-bit numeric scalar.',p);
         p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined, constant:p.constant, atomic: false, kind: p.reference?'reference':'local'}, p);
       }
       const body = this.body(helper.body);
-      helperLines.push(`fn f_${helper.name}(${[...helper.params.filter(p=>p.type!=='thread-block').map(p => `${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.reference?`ptr<function, ${p.type}>`:p.type}`),'cw_thread: vec3<u32>','cw_block: vec3<u32>','cw_grid: vec3<u32>'].join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>p.type!=='thread-block'&&!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
+      helperLines.push(`fn f_${helper.name}(${[...helper.params.filter(p=>p.type!=='thread-block').map(p => p.pointer?`v_${p.name}_offset: i32`:`${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.reference?`ptr<function, ${p.type}>`:p.type}`),'cw_thread: vec3<u32>','cw_block: vec3<u32>','cw_grid: vec3<u32>'].join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>p.type!=='thread-block'&&!p.pointer&&!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
     }};
     emitHelpers();
     this.scopes = kernelScope; this.currentFunction = this.kernel;
@@ -520,7 +566,7 @@ function instantiateHelperTemplates(ast, kernel) {
     if(definition.qualifier!=='__device__')fail('Device-side kernel launches are unsupported.',callee);
     if(definition.templateKind!=='type')fail('Integer helper templates require an explicit template argument.',callee);
     if(types.length!==definition.params.length)fail(`Wrong number of arguments for '${name}'.`,callee);
-    const matches=definition.params.flatMap((p,i)=>p.type==='template:'+definition.templateParameter&&!p.pointer?[types[i]]:[]);
+    const matches=definition.params.flatMap((p,i)=>p.type==='template:'+definition.templateParameter?[p.pointer?(isArray(types[i])?types[i].element:undefined):types[i]]:[]);
     if(!matches.length)fail('Cannot deduce helper template type from these parameters; supply an explicit argument.',callee);
     const type=matches[0];
     if(matches.some(t=>typeName(t)!==typeName(type)))fail('Conflicting deduced helper template argument types.',callee);
@@ -532,7 +578,7 @@ function instantiateHelperTemplates(ast, kernel) {
     return definitions.get(call.callee.name);
   }};
 }
-export function compile(source, options = {}) {
+export function compile(source, options = {},bufferUsage=null) {
   const ast = parse(source, options), kernels = ast.functions.filter(f => f.qualifier === '__global__');
   const specialization=options.entry?.match(/^([A-Za-z_]\w*)<\s*(\d+|[A-Za-z_]\w*)\s*>$/),entry=specialization?specialization[1]:options.entry;
   const kernel = entry ? kernels.find(k => k.name === entry) : kernels.length === 1 ? kernels[0] : null;
@@ -552,7 +598,9 @@ export function compile(source, options = {}) {
   if(specialization)walk(kernel.body,n=>{if(n.templateArgument===kernel.templateParameter)n.templateArgument=specialization[2];});
   resolveTraitTypes(kernel,ast,kernel.templateParameter,specialization?.[2]);
   const templates=instantiateHelperTemplates(ast,kernel);
-  const result=new Emitter(ast, kernel, options,templates).emit();if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};return result;
+  const emitter=new Emitter(ast,kernel,options,templates,bufferUsage),result=emitter.emit();
+  const changed=['reads','writes','atomic'].some(k=>[...emitter.usage[k]].some(name=>!emitter.initialBufferUsage[k].has(name)));
+  if(changed){if(bufferUsage)throw new CompileError('Helper buffer access analysis did not converge.');return compile(source,options,Object.fromEntries(['reads','writes','atomic'].map(k=>[k,[...emitter.usage[k]]])));}if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};return result;
 }
 export function serializableArtifact(compiled) {
   return {version: compiled.version, name: compiled.name, entryPoint: compiled.entryPoint, wgsl: compiled.wgsl, metadata: compiled.metadata};

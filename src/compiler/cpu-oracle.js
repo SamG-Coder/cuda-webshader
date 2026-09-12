@@ -79,7 +79,10 @@ class Context {
   *call(n){
     const name=n.callName;
     if(name==='__syncthreads'){yield n.token.offset;return;}
-    const args=[];for(const [i,a] of n.args.entries())args.push(n.groupArgs?.[i]?null:yield* (n.referenceArgs?.[i]?this.ref(a):this.eval(a)));
+    const args=[];for(const [i,a] of n.args.entries()){
+      if(n.pointerArgs?.[i]){const base=this.env.get(a.pointerBaseSymbol)?.value,offset=a.pointerOffset?yield* this.eval(a.pointerOffset):0;if(!(base instanceof BufferView)||!Number.isInteger(offset)||base.offset+offset<0||base.offset+offset>base.length)throw new RangeError('CPU helper pointer outside buffer.');args.push(new BufferView(base.data,base.type,base.offset+offset));}
+      else args.push(n.groupArgs?.[i]?null:yield* (n.referenceArgs?.[i]?this.ref(a):this.eval(a)));
+    }
     if(name==='__mul24')return Math.imul((args[0]<<8)>>8,(args[1]<<8)>>8);
     if(name==='__umul24')return Math.imul(args[0]&0xffffff,args[1]&0xffffff)>>>0;
     if(name==='atomicCAS'){const old=args[0].get();if(old===convert(args[1],n.type))args[0].set(convert(args[2],n.type));return old;}
@@ -98,7 +101,7 @@ class Context {
     }
     const helper=this.artifact.ast.functions.find(x=>x.name===name);
     if(!helper)throw new Error(`No CPU implementation of ${name}.`);
-    const env=new Map([...this.env].filter(([symbol])=>['constant-global','shared'].includes(symbol.kind)));helper.params.forEach((p,i)=>env.set(p.symbol,p.reference?{get value(){return args[i].get();},set value(v){args[i].set(v);}}:{value:convert(args[i],p.type)}));
+    const env=new Map([...this.env].filter(([symbol])=>['constant-global','shared'].includes(symbol.kind)));helper.params.forEach((p,i)=>env.set(p.symbol,p.reference?{get value(){return args[i].get();},set value(v){args[i].set(v);}}:{value:p.pointer?args[i]:convert(args[i],p.type)}));
     const child=new Context(this.artifact,env,this.ids,this.budget-this.steps),result=yield* child.statement(helper.body);this.steps+=child.steps;
     return convert(result?.value,helper.result);
   }

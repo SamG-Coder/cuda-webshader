@@ -19,7 +19,8 @@ Omitted values use the declaration’s numeric initializer or zero. NVIDIA’s o
 `bodyBodyInteraction` helper passes force checks at three softening values.
 Device helpers now support thread/block indices, block barriers, static shared
 arrays, one explicitly sized dynamic shared array, and by-value `thread_block`
-handles. Constant arrays, buffer-pointer helper parameters, and N-body’s
+handles. Storage-buffer pointer parameters now support nested calls, offsets and
+type deduction. Constant arrays and N-body’s
 shared-memory conversion wrapper remain unsupported. N-body has not yet been
 added as a complete working showcase.
 The helper support and NVIDIA’s original vector-trait declarations pass native
@@ -94,8 +95,8 @@ runs NVIDIA's unchanged `fwtBatch2Kernel` with separate input/output buffers and
 multiple batches. The compiler now accepts local aliases of storage buffers,
 including `float *p = input + offset` and alias chains. Offsets are captured at
 declaration; reads, writes and atomics retain the original buffer's binding and
-const rules. Pointer reassignment, pointer casts, shared/local-array pointers and
-pointer helper arguments remain unsupported. All accesses must stay within the
+const rules. Helpers now accept storage-buffer pointers and offsets. Pointer
+reassignment, pointer casts and shared/local-array pointers remain unsupported. All accesses must stay within the
 original allocation. This is one radix-4 transform pass; the shared-memory finishing kernel has its
 own preset, and full dyadic convolution is not implemented in this preview.
 See [native/WebGPU pass checks](reports/nvidia-fwt-pass.json).
@@ -217,7 +218,7 @@ This is source translation. **It does not run CUDA binaries, PTX, the CUDA drive
 
 ## Validated on an RTX 5080
 
-The project is running locally with installed, locked dependencies. **295 Node tests, 84 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
+The project is running locally with installed, locked dependencies. **303 Node tests, 85 real WebGPU tests (including Three.js rendered-pixel interop), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
 
 Open [the measured comparison](reports/performance-comparison.html) or read [the full methodology and results](reports/performance-comparison.md). All ten kernel sources are compiled by NVCC and translated to WGSL at two workload sizes. Raw GPU timestamps, CUDA event timings, ordinary CUDA launch timings, and verification logs are in `reports/`.
 
@@ -348,7 +349,7 @@ Supports `__global__ void` kernels; by-value scalar/vector `__device__` helpers;
 
 Floating constants need an `f` suffix, e.g. `0.5f`. Mixed scalar expressions are explicitly typed. Guarded ternary expressions become real branches, not an eager `select()` that could evaluate an unselected buffer access or atomic operation.
 
-**Not supported:** arbitrary host CUDA code, `<<<...>>>` in source, `cudaMalloc`/streams/events APIs, binary/PTX input, headers/includes, templates, classes, structs, C++ STL, general pointers, pointer arithmetic, pointer helper parameters, recursion, general function-like macros beyond direct forwarding, dynamic shared memory, CUDA texture/surface APIs, cooperative grid barriers, warp shuffles/votes, inline PTX, tensor cores/WMMA, half/double/64-bit arithmetic, or floating-point atomics. Float3 and bool pointer-buffer ABIs are rejected rather than guessed. General CUDA vector arithmetic is not supplied; use explicit components as the examples do.
+**Not supported:** arbitrary host CUDA code, `<<<...>>>` in source, `cudaMalloc`/streams/events APIs, binary/PTX input, headers/includes, templates, classes, structs, C++ STL, general pointers, unrestricted pointer arithmetic, shared/local-pointer helper parameters, recursion, general function-like macros beyond direct forwarding, dynamic shared memory, CUDA texture/surface APIs, cooperative grid barriers, warp shuffles/votes, inline PTX, tensor cores/WMMA, half/double/64-bit arithmetic, or floating-point atomics. Float3 and bool pointer-buffer ABIs are rejected rather than guessed. General CUDA vector arithmetic is not supplied; use explicit components as the examples do.
 
 Unsupported syntax/types fail explicitly where recognized. The browser's WGSL compiler remains the final validation gate for emitted code, including uniformity and implementation limits. Finite f32 numerical agreement is tested with tolerances; do not assume NVCC bit-for-bit equivalence, identical FMA contraction, denormal handling, NaN behavior or transcendental precision. This is an experimental compiler/runtime, not a production-hardened general CUDA replacement.
 

@@ -91,6 +91,21 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
       }
     }
   });
+  await run('Storage pointer helpers preserve nested offsets, vectors, atomics, aliases and shared storage',async()=>{
+    const source=await(await fetch('/tests/helper-pointers.cu')).text();
+    for(const threads of [32,128]){
+      const n=threads*3,input=Float32Array.from({length:n+1},(_,i)=>i*0.125),vectors=Float32Array.from({length:n*4},(_,j)=>[Math.floor(j/4)*0.25,-Math.floor(j/4)*0.5,2,1][j%4]);
+      const buffers={input:runtime.createBuffer(input),other:runtime.createBuffer(new Float32Array(n).fill(999)),vectors:runtime.createBuffer(vectors),out:runtime.createBuffer(new Float32Array(n+17).fill(-12345)),copied:runtime.createBuffer(new Float32Array((n+4)*4).fill(-12345)),counts:runtime.createBuffer(new Int32Array(1))};
+      try{
+        const kernel=await runtime.kernel(source,{workgroupSize:[threads,1,1]});runtime.batch().dispatch(kernel.bind(buffers,{}),[3]).submit();
+        const out=await runtime.read(buffers.out),copied=await runtime.read(buffers.copied),counts=await runtime.read(buffers.counts,Int32Array);
+        if(counts[0]!==n||out[n]!==4)throw Error('Pointer atomic or alias mismatch');
+        for(let i=0;i<n;i++)if(out[i]!==input[i]+input[i+1])throw Error('Pointer offset/shared reuse mismatch at '+i);
+        for(let i=0;i<vectors.length;i++)if(copied[i]!==vectors[i])throw Error('Pointer vector mismatch at '+i);
+        if(!out.slice(n+1).every(v=>v===-12345)||!copied.slice(n*4).every(v=>v===-12345))throw Error('Pointer guard changed');
+      }finally{await runtime.idle();for(const buffer of Object.values(buffers))runtime.destroyBuffer(buffer);}
+    }
+  });
   await run('GPU rejects divergent entry into a helper barrier',async()=>{
     try{await runtime.kernel('__device__ void barrier(){__syncthreads();} __global__ void k(){if(threadIdx.x==0u)barrier();}',{workgroupSize:[4,1,1]});}catch(error){if(/uniform/i.test(error.message))return;throw error;}
     throw Error('Divergent helper barrier was accepted');

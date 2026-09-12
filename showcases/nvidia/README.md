@@ -266,8 +266,8 @@ integer arguments and non-deduced trait contexts still need explicit arguments
 unless another parameter determines the type. Explicit device-function
 specializations are selected for the deduced or supplied argument. Scalar constant
 globals are supported as uniforms. Helpers support built-in indices, barriers,
-shared declarations and by-value block handles; constant arrays and buffer-pointer
-helper parameters remain unsupported. The dependent vector
+shared declarations, storage-buffer pointer parameters and by-value block handles;
+constant arrays and shared/local-array pointer parameters remain unsupported. The dependent vector
 traits now resolve through typedef-only template structs and explicit type
 specializations; unsupported value types still fail if selected.
 This does not add N-body to the verified catalog. The feature regression fixture
@@ -312,5 +312,17 @@ across three blocks. Shared objects are separate for different helper functions
 and template specializations. WebGPU rejects a divergent call into a helper
 barrier. Native results are in `reports/shared-helpers-native.txt`; build
 `tests/shared-helpers-native.cu` with the NVCC flags above.
-N-body still needs buffer-pointer helper arguments and its shared-memory
-conversion wrapper, plus integration and full numerical/visual validation.
+N-body still needs its shared-memory conversion wrapper and vector aggregate
+initializers, plus integration and full numerical/visual validation.
+
+Storage-buffer helper pointers are checked by `tests/helper-pointers.cu` in native
+CUDA and hardware WebGPU at 32 and 128 threads across three blocks. Coverage
+includes nested offsets, negative relative indices, float4 template deduction,
+writable pointers, nested atomics, aliased arguments and static shared-memory
+reuse across calls with different buffers. The compiler specializes helpers by
+buffer binding and passes offsets, preserving a single shared allocation per
+original helper. Access analysis propagates through nested helpers so storage
+bindings retain correct read/write and atomic declarations. Pointer returns,
+reassignment, casts and shared/local-array pointer arguments remain unsupported.
+Native results: `reports/helper-pointers-native.txt`; build
+`tests/helper-pointers-native.cu` with the NVCC flags above.

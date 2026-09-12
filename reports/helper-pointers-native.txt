@@ -1,0 +1,2 @@
+threads=32 groups=3 PASS nested offsets, float4 copy, atomics, aliases, shared reuse and guards
+threads=128 groups=3 PASS nested offsets, float4 copy, atomics, aliases, shared reuse and guards
