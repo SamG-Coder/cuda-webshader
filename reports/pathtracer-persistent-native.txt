@@ -1,0 +1,1 @@
+Original sphere: two create/trace/free cycles, 512 objects each, 5120 float results, all freed pointers null

@@ -1,0 +1,14 @@
+{
+  "name": "Persistent CUDA sphere objects survive separate create/trace/free submissions",
+  "pass": true,
+  "arenaIsolation": true,
+  "cycles": 2,
+  "objectsPerCycle": 512,
+  "values": 5120,
+  "nativeExact": true,
+  "separateSubmissions": true,
+  "allFreed": true,
+  "persistent": true,
+  "fullPathtracerSupported": false,
+  "wallMs": 113.1550000011921
+}

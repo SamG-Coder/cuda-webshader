@@ -46,8 +46,8 @@ On the real NVIDIA WebGPU adapter, adding dynamic array indexing exposed an
 incorrect shared value after copying a class containing an array. The emitter
 now constructs independent aggregate fields explicitly for initialization and
 assignment. Both copy cases match native CUDA; the precise backend cause has
-not been isolated. The full regression run passes 197 GPU checks with no
-software adapter requested, alongside 620 unit tests.
+not been isolated. The full regression run passes 198 GPU checks with no
+software adapter requested, alongside 621 unit tests.
 
 Writable indexing currently accepts the original `return field[index]` reference
 accessor and lowers it to an lvalue into the original receiver. It does not
@@ -161,3 +161,27 @@ native CUDA exactly. Source bodies of the original sphere remain unchanged.
 This supports the existing single, fieldless abstract base model and remains
 invocation-local. Persistent world storage, pointer arrays and cuRAND still
 block the full create_world/render/free_world pipeline and showcase.
+
+## Persistent arena stage
+
+Compile the complete kernel module with `objectHeap: 'persistent'`, create an
+arena with `runtime.createObjectArena()`, and bind each kernel with the same
+`{objectArena: arena}` third argument. Kernels share typed storage pools in
+bind group 1. Atomic slot reservation supports concurrent creation; deletion
+releases slots. Class-pointer buffer parameters (`Class**`) carry 32-bit
+compiler object tokens, not native CUDA addresses. Pointer buffers are owned by
+one arena, and incompatible arena layouts/type tags are rejected.
+
+The original sphere/ray implementations now run in a three-kernel harness:
+create 512 objects, trace in a separate submission, then delete and clear the
+pointer buffer. Two complete cycles with different positions match all 5,120
+native CUDA values exactly. All identities are distinct/non-null after creation
+and every pointer is null after freeing. This is additional to the 56,320-value
+invocation-local fixture. The CPU oracle explicitly rejects persistent arena
+execution rather than silently resetting object state between dispatches.
+
+Persistent fields currently require host-shareable values; mutable helper
+references directly into persistent objects are rejected. The full original
+world still needs its pointer-list object, camera and cuRAND integration. The
+three-kernel harness is a verification stage, not the full path tracer or a
+new showcase.

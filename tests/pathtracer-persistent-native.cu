@@ -1,0 +1,6 @@
+#include <cstdio>
+#include <vector>
+#include <helper_cuda.h>
+#include "../.local/raytracing-cuda/sphere.h"
+#include "pathtracer-persistent-kernels.cuh"
+int main(){hitable**world;float*out;checkCudaErrors(cudaMalloc(&world,512*sizeof(hitable*)));checkCudaErrors(cudaMalloc(&out,512*5*sizeof(float)));std::vector<float> values(512*5*2);for(int cycle=0;cycle<2;cycle++){float offset=cycle*3.0f;create_objects<<<8,64>>>(world,offset);checkCudaErrors(cudaDeviceSynchronize());trace_objects<<<8,64>>>(world,out,offset);checkCudaErrors(cudaDeviceSynchronize());checkCudaErrors(cudaMemcpy(values.data()+cycle*512*5,out,512*5*4,cudaMemcpyDeviceToHost));free_objects<<<8,64>>>(world);checkCudaErrors(cudaDeviceSynchronize());std::vector<hitable*> cleared(512);checkCudaErrors(cudaMemcpy(cleared.data(),world,512*sizeof(hitable*),cudaMemcpyDeviceToHost));for(auto p:cleared)if(p!=nullptr)return 2;}FILE*f=fopen("reports/pathtracer-persistent-native.bin","wb");if(!f||fwrite(values.data(),4,values.size(),f)!=values.size())return 3;fclose(f);checkCudaErrors(cudaFree(world));checkCudaErrors(cudaFree(out));printf("Original sphere: two create/trace/free cycles, 512 objects each, 5120 float results, all freed pointers null\n");}

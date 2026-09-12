@@ -92,3 +92,9 @@ test('Concrete new objects preserve identity, member access and released slot re
 test('Tagged base pointers select distinct implementations at runtime',()=>{
  const fixture=readFileSync(new URL('./pathtracer-dispatch-fixture.cuh',import.meta.url),'utf8');const c=compile(fixture+'__global__ void k(float*out){DispatchBase*a=new DispatchScale(2.0f);DispatchBase*b=new DispatchOffset(7.0f);DispatchBase*p=a;if(threadIdx.x%2)p=b;out[threadIdx.x]=p->value(3.0f);delete a;delete b;}',{workgroupSize:[4,1,1]}),out=new Float32Array(4);executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[6,10,6,10]);assert.notEqual(c.metadata.objectHeap.types[0].tag,c.metadata.objectHeap.types[1].tag);
 });
+
+test('Persistent object pointer buffers require explicit arena mode and storage layout metadata',()=>{
+ const source='class V{public:float x;__device__ V(float v):x(v){}};__global__ void create(V**out){out[0]=new V(3.0f);}';
+ assert.throws(()=>compile(source),/require objectHeap/);
+ const c=compile(source,{objectHeap:'persistent'});assert.equal(c.metadata.bindings[0].stride,4);assert.equal(c.metadata.objectHeap.persistent,true);assert.equal(c.metadata.objectHeap.types[0].byteLength,8192);assert.match(c.wgsl,/atomicCompareExchangeWeak/);assert.match(c.wgsl,/@group\(1\)/);assert.throws(()=>executeCPU(c,{out:new Uint32Array(1)},{},[1]),/no cross-dispatch arena/);
+});

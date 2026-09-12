@@ -133,8 +133,8 @@ export class Parser {
     const reference=this.match('&');
     if(pointer&&reference)this.fail('Pointer references are unsupported.');
     while (['__restrict__', '__restrict', 'restrict'].includes(this.peek().value)) this.take();
-    if (this.is('*')) this.fail('Pointer-to-pointer types are not supported.');
-    if(pointer&&(this.structs.get(tok.value)?.valueClass||this.structs.get(tok.value)?.forward)){type='cw_objectptr_'+tok.value;pointer=false;(this.objectPointerTypes??=new Set()).add(type);}
+    if(pointer&&(this.structs.get(tok.value)?.valueClass||this.structs.get(tok.value)?.forward)){type='cw_objectptr_'+tok.value;pointer=!!this.match('*');(this.objectPointerTypes??=new Set()).add(type);}
+    if(this.is('*'))this.fail('Only class pointer arrays support a second pointer level.');
     return {type, constant, shared, pointer,reference,external};
   }
   zipFunctorAhead(){
