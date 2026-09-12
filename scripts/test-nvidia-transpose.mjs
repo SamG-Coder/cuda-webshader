@@ -4,7 +4,7 @@ const browser=await chromium.launch({headless:true,executablePath:process.env.CW
 try{const page=await browser.newPage();await page.goto('http://localhost:5173/');const report=await page.evaluate(async()=>{
  const {GpuRuntime}=await import('/src/runtime/runtime.js'),runtime=await GpuRuntime.create(),results=[];
  try{const adapter=runtime.describe();if(!/nvidia/i.test(JSON.stringify(adapter)))throw Error('Real NVIDIA adapter required');
- for(const [index,entry] of [[18,'transposeCoalesced'],[19,'transposeNoBankConflicts']]){
+ for(const [index,entry] of [[18,'transposeCoalesced'],[19,'transposeNoBankConflicts'],[35,'transposeNaive']]){
   const source=await(await fetch('/showcases/nvidia/kernels/'+index+'.cu')).text(),kernel=await runtime.kernel(source,{entry,workgroupSize:[32,16,1]});
   for(const [width,height] of [[32,32],[64,96],[96,64],[128,128]]){
    const n=width*height,input=Float32Array.from({length:n+16},(_,i)=>i/8-width),initial=new Float32Array(n+16).fill(-12345),idata=runtime.createBuffer(input),odata=runtime.createBuffer(initial);

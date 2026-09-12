@@ -22,7 +22,7 @@ export function fixture(row) {
  if(row.entry.startsWith('MatrixMulCUDA<'))return matrixFixture(row.artifact.metadata.workgroupSize[0],64,64,64);
  if(row.entry==='BlackScholesGPU')return blackScholesFixture();
  if(row.entry==='scalarProdGPU')return scalarFixture({guards:0});
- const m=row.artifact.metadata,e=row.entry,two=m.workgroupSize[1]>1,transpose=e==='transposeCoalesced'||e==='transposeNoBankConflicts',w=transpose?64:32,n=two?w*w:256;
+ const m=row.artifact.metadata,e=row.entry,two=m.workgroupSize[1]>1,transpose=e==='transposeNaive'||e==='transposeCoalesced'||e==='transposeNoBankConflicts',w=transpose?64:32,n=two?w*w:256;
  const scalars=Object.fromEntries(m.scalars.map(s=>[s.name,({inc_value:5,b:7,n,N:n,vectorLength:n,count:n,inner_reps:3,base:19,width:w,height:w,time:0.375})[s.name]]));
  if(Object.values(scalars).some(v=>v===undefined))throw Error('Missing scalar fixture');
  const buffers=Object.fromEntries(m.bindings.map((b,k)=>{const Type=b.elementType==='i32'?Int32Array:Float32Array;return [b.name,Type.from({length:n*b.stride/4},(_,i)=>b.readOnly||['g_data','g_a','data'].includes(b.name)?(i%29-14)*(Type===Int32Array?1:0.125)+k:0)];}));

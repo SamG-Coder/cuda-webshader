@@ -177,6 +177,11 @@
       "entry": "simpleMPIKernel",
       "sample": "cpp/0_Introduction/simpleMPI",
       "passed": true
+    },
+    {
+      "entry": "transposeNaive",
+      "sample": "cpp/6_Performance/transpose",
+      "passed": true
     }
   ]
 }

@@ -6,6 +6,12 @@
 
 ## CUDA sandbox
 
+**[Naïve matrix transpose](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=35)**
+joins the tiled and padded transpose examples. All three original kernels pass
+exact-output checks on four square and rectangular matrix sizes in native CUDA
+and hardware WebGPU. Dimensions must be multiples of 32. This validates
+correctness; these checks do not measure their performance difference.
+
 **[Square roots · MPI compute stage](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=34)**
 runs NVIDIA’s unchanged simpleMPI kernel. The compiler now accepts the float
 overload of `sqrt`. Four launch sizes passed native CUDA and real NVIDIA WebGPU
@@ -143,7 +149,7 @@ per workgroup. See [transpose validation](reports/nvidia-transpose.json).
 
 The main showcase grid contains individual runnable samples; every card opens
 the sandbox directly. The NVIDIA audit covers 208 upstream sample directories,
-350 compiler entry probes, and 35 kernel entries/specializations checked with both native CUDA and
+350 compiler entry probes, and 36 kernel entries/specializations checked with both native CUDA and
 real NVIDIA WebGPU. See [the audit and remaining blockers](reports/nvidia-audit.md)
 and [reproduction instructions](showcases/nvidia/README.md). These kernel checks
 are separate from full native application execution and from performance tests.

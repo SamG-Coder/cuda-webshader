@@ -1,5 +1,5 @@
 {
-  "date": "2026-09-11T22:56:07.096Z",
+  "date": "2026-09-12T00:13:39.736Z",
   "adapter": {
     "vendor": "nvidia",
     "architecture": "blackwell",
@@ -84,6 +84,42 @@
     },
     {
       "entry": "transposeNoBankConflicts",
+      "width": 128,
+      "height": 128,
+      "pass": true,
+      "failures": 0,
+      "guardValues": 16,
+      "guardsPreserved": true
+    },
+    {
+      "entry": "transposeNaive",
+      "width": 32,
+      "height": 32,
+      "pass": true,
+      "failures": 0,
+      "guardValues": 16,
+      "guardsPreserved": true
+    },
+    {
+      "entry": "transposeNaive",
+      "width": 64,
+      "height": 96,
+      "pass": true,
+      "failures": 0,
+      "guardValues": 16,
+      "guardsPreserved": true
+    },
+    {
+      "entry": "transposeNaive",
+      "width": 96,
+      "height": 64,
+      "pass": true,
+      "failures": 0,
+      "guardValues": 16,
+      "guardsPreserved": true
+    },
+    {
+      "entry": "transposeNaive",
       "width": 128,
       "height": 128,
       "pass": true,

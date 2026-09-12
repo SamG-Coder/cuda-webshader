@@ -8,7 +8,7 @@ NVIDIA cuda-samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
 The audit scans direct source files for standalone global void kernels. It is
 not a complete C++ preprocessor or a claim to compile every template instance.
 
-The 35 translated entries were run separately with NVCC on RTX 5080 and with
+The 36 translated entries were run separately with NVCC on RTX 5080 and with
 WebGPU on a real NVIDIA adapter. Fixtures use 256 elements or a 32×32 grid,
 with 64×64 matrices for the two transpose kernels and 17 vectors of 1,537
 elements for the scalar-product kernel;
@@ -38,6 +38,7 @@ node scripts/prepare-nvidia-fwt-shared.mjs
 node scripts/prepare-nvidia-histogram-merge.mjs
 node scripts/prepare-nvidia-inverse-cnd.mjs
 node scripts/prepare-nvidia-mpi-sqrt.mjs
+node scripts/prepare-nvidia-transpose-naive.mjs
 node scripts/prepare-nvidia-checks.mjs
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor .local/nvidia-checks/check.cu -o .local/nvidia-checks/check.exe
 .local/nvidia-checks/check.exe
@@ -220,3 +221,9 @@ guards. Relative tolerance is 0.0000002 with no absolute floor. Every input need
 one thread: the original kernel has no bounds guard. This is the isolated compute
 stage, not the MPI host program. Reports are `reports/nvidia-mpi-sqrt.json` and
 `reports/nvidia-mpi-sqrt-native.txt`; build `mpi-sqrt-native.cu` with the flags above.
+
+The naïve transpose follow-up retains the original kernel and numeric tile
+defines. The existing transpose native and WebGPU harnesses now check all three
+variants on 32×32, 64×96, 96×64 and 128×128 matrices, with exact output and 16
+untouched guard values. No new compiler feature was needed. Input dimensions
+must be multiples of 32. These are correctness checks, not timing benchmarks.
