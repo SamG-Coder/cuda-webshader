@@ -1,0 +1,2 @@
+width=64 faces=6 values=24576 original_expected_negation=passed
+edge_probes=12 seamless_changes=12

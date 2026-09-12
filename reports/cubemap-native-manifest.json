@@ -1,0 +1,38 @@
+{
+  "revision": "5443602d89ed99aede2e4b7bf329daddeadb320e",
+  "width": 64,
+  "faces": 6,
+  "values": 24576,
+  "filter": "linear",
+  "normalizedCoords": true,
+  "originalSeamlessCubemap": false,
+  "edgeProbes": 12,
+  "edgeProbesChangedBySeamless": 12,
+  "files": {
+    "input": {
+      "file": "cubemap-input.bin",
+      "bytes": 98304,
+      "sha256": "19a7ff083b9ad3a0fab9e6e0082d5a4426525a056d974445c8642da264145dc7"
+    },
+    "native": {
+      "file": "cubemap-native.bin",
+      "bytes": 98304,
+      "sha256": "0329ec67a1a9f4851fa9e83c403cfb792e8540fb72b762298c5db040fe39404c"
+    },
+    "directions": {
+      "file": "cubemap-directions.bin",
+      "bytes": 192,
+      "sha256": "27a136755cde9790e74acffef7a2d33c60c90cad9aa726cec302afd710a5248f"
+    },
+    "edges-default": {
+      "file": "cubemap-edges-default.bin",
+      "bytes": 48,
+      "sha256": "36242ff68b02b8a69bf4e15ca6cd03863ded6f56bb48b6be60aee74101bc93e7"
+    },
+    "edges-seamless": {
+      "file": "cubemap-edges-seamless.bin",
+      "bytes": 48,
+      "sha256": "bbd4255d7f9eaf75411513e6ae577ba21aa637f7488462cb4b02dbb35903b7c9"
+    }
+  }
+}
