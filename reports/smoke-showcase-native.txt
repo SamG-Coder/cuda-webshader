@@ -1,0 +1,1 @@
+Captured original smoke Thrust integration and depth keys: frame=64, particles=16384.

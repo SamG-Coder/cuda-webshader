@@ -45,3 +45,11 @@ test('Float4 pipeline volumes reject invalid dimensions and excessive allocation
   await assert.rejects(executePipeline({plan,source:'',compiler:{},runtime:{createBuffer:data=>({data})},rootArtifact:{},resources:[],textureResources:[]}),/Float4 volume|64 MiB/);
  }
 });
+
+test('Smoke previews require bounded typed buffers and explicit sorting steps',()=>{
+ const preset=()=>JSON.parse(readFileSync('showcases/smoke/pipeline.json','utf8')).pipeline;
+ assert.ok(validatePipeline(preset())>0);
+ for(const change of [p=>p.preview.count=20000,p=>p.preview.radius=0,p=>p.preview.velocities='indices',p=>p.preview.depthStep=50,p=>p.preview.indexStep=3,p=>p.preview.indices='missing']){
+  const plan=preset();change(plan);assert.throws(()=>validatePipeline(plan),/Smoke preview/);
+ }
+});

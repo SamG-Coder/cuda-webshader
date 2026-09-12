@@ -1,0 +1,165 @@
+{
+  "pipeline": {
+    "buffers": {
+      "positions": {
+        "type": "vec4<f32>",
+        "records": 16384,
+        "fill": "zero"
+      },
+      "velocities": {
+        "type": "vec4<f32>",
+        "records": 16384,
+        "fill": "zero"
+      },
+      "oldPositions": {
+        "type": "vec4<f32>",
+        "records": 16384,
+        "fill": "binary-f32",
+        "source": "showcases/smoke/positions.bin"
+      },
+      "oldVelocities": {
+        "type": "vec4<f32>",
+        "records": 16384,
+        "fill": "binary-f32",
+        "source": "showcases/smoke/velocities.bin"
+      },
+      "depth": {
+        "type": "f32",
+        "records": 16384,
+        "fill": "zero"
+      },
+      "indices": {
+        "type": "u32",
+        "records": 16384,
+        "fill": "ramp"
+      }
+    },
+    "textures": {
+      "noise": {
+        "kind": "volume-float4",
+        "dimensions": [
+          64,
+          64,
+          64
+        ],
+        "source": "showcases/smoke/noise.bin",
+        "filter": "linear",
+        "addressMode": "repeat"
+      }
+    },
+    "steps": [
+      {
+        "entry": "integrate_functor",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          128,
+          1,
+          1
+        ],
+        "bindings": {
+          "tuple0": "positions",
+          "tuple1": "velocities",
+          "tuple2": "oldPositions",
+          "tuple3": "oldVelocities",
+          "noiseTex": "noise"
+        },
+        "scalars": {
+          "constant.cudaParams.gravity.x": 0,
+          "constant.cudaParams.gravity.y": 0,
+          "constant.cudaParams.gravity.z": 0,
+          "constant.cudaParams.globalDamping": 1,
+          "constant.cudaParams.noiseFreq": 0.1,
+          "constant.cudaParams.noiseAmp": 0.001,
+          "constant.cudaParams.noiseSpeed.x": 0,
+          "constant.cudaParams.noiseSpeed.y": 0,
+          "constant.cudaParams.noiseSpeed.z": 0,
+          "constant.cudaParams.time": {
+            "time": true
+          },
+          "count": 16384,
+          "deltaTime": 0.5
+        }
+      },
+      {
+        "entry": "calcDepth_functor",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          128,
+          1,
+          1
+        ],
+        "bindings": {
+          "tuple0": "positions",
+          "tuple1": "depth"
+        },
+        "scalars": {
+          "count": 16384,
+          "sortVector.x": 0,
+          "sortVector.y": 0,
+          "sortVector.z": 1
+        }
+      },
+      {
+        "entry": "smokeIndices",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          128,
+          1,
+          1
+        ],
+        "bindings": {
+          "indices": "indices"
+        },
+        "scalars": {
+          "count": 16384
+        }
+      },
+      {
+        "sortPairs": {
+          "keys": "depth",
+          "values": "indices",
+          "count": 16384,
+          "keyType": "f32"
+        }
+      },
+      {
+        "copyBuffer": {
+          "source": "positions",
+          "target": "oldPositions",
+          "records": 16384
+        }
+      },
+      {
+        "copyBuffer": {
+          "source": "velocities",
+          "target": "oldVelocities",
+          "records": 16384
+        }
+      }
+    ],
+    "animate": true,
+    "preview": {
+      "kind": "smoke",
+      "positions": "positions",
+      "velocities": "velocities",
+      "indices": "indices",
+      "depth": "depth",
+      "depthStep": 1,
+      "indexStep": 2,
+      "count": 16384,
+      "radius": 0.06
+    }
+  }
+}

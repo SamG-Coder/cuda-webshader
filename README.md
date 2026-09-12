@@ -543,3 +543,7 @@ initial conditions and rendering. See [validation and support boundaries](report
 ### NVIDIA pre-integrated volume
 
 [Open the coloured 3D volume in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=volume-preintegrated). The original NVIDIA integration, layered colour/opacity tables and ray marcher run with unchanged device function bodies. Both original 1024² transfer layers stay on the GPU; the final 256² image matches native CUDA within one 8-bit channel level. The two differently coloured halves are selected by the original kernel. Camera, density and rendering mode are editable in the launch settings. See [source, controls and validation](showcases/volume-preintegrated/README.md).
+
+### NVIDIA smoke particles
+
+[Run the smoke showcase in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=smoke): 16,384 particles, original CUDA integration/depth functions, GPU depth sorting and a WebGPU adaptation of NVIDIA's 32-slice shadow renderer. See [the smoke notes](showcases/smoke/README.md) for validation and presentation differences.
