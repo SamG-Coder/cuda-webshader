@@ -1,0 +1,29 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "result": {
+    "name": "Original Parameters pass by value through queued child launches",
+    "pass": true,
+    "childLaunches": 32,
+    "checkedFields": 160,
+    "parentMutationIsolated": true,
+    "originalParameters": true,
+    "wallMs": 55.28999999165535
+  }
+}

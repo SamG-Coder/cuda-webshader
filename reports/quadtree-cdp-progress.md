@@ -151,3 +151,23 @@ values after a child barrier. The full suite passes 656 unit tests and 214 NVIDI
 GPU tests. Bezier and path-tracer sandbox regressions pass. The original quadtree
 source now reaches unsupported child record/pointer arguments. Recursive queue
 execution is still pending; this is not a runnable quadtree showcase yet.
+
+## Record launch arguments
+
+Kernel arguments now accept scalar-only records, including nested records and
+const fields. Host launch inputs use dotted scalar field names, and each GPU
+invocation reconstructs its own local value. The CPU oracle similarly copies
+record parameters per invocation and validates component ranges.
+
+Queued child arguments snapshot the record expression once and store its fields
+in the queue. Child kernels reconstruct their own record from that snapshot.
+Pointer-bearing and array fields are not supported by this value ABI. A real GPU
+test executes NVIDIA's unchanged Parameters constructor in 32 parent lanes,
+launches 32 children, and checks 160 fields. Subsequent parent mutations do not
+change child values. All 659 unit and 215 real NVIDIA GPU tests pass; Bezier and
+path-tracer sandbox regressions also pass.
+
+The full-source probe now explicitly binds nodes and points as class value
+buffers, matching the native host allocations. It stops at the offset child-node
+pointer, &children[child_offset]. Offset pointers, storage references, and full
+recursive execution remain before this can be a runnable quadtree showcase.

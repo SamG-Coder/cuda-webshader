@@ -5,7 +5,7 @@
   "results": [
     {
       "compiled": false,
-      "error": "Child queue scalar arguments require 32-bit integer or float values. (267:39)\n__global__ void build_quadtree_kernel(Quadtree_node *nodes, Points *points, Parameters params)\r\n                                      ^"
+      "error": "Child buffer arguments must be matching named parent buffers. (547:21)\n                    &children[child_offset], points, Parameters(params, true));\r\n                    ^"
     }
   ]
 }

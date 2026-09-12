@@ -1,3 +1,4 @@
+import {recordLeaves,recordConstructor} from './record-parameters.js';
 import {addBufferImports,bufferReferenceArgument,bufferReferenceIndex} from './buffer-references.js';
 import {launchQueues,launchQueueDeclarations,emitLaunch} from './device-launch.js';
 import {deviceHeaps,deviceHeapDeclarations,deviceHeapCall,deviceHeapIndex} from './device-heap.js';
@@ -964,6 +965,7 @@ class Emitter {
     const textures=[],surfaces=[],bufferCount=this.kernel.params.filter(p=>p.pointer&&!Object.hasOwn(this.bufferAliases,p.name)&&!this.objectImports.some(i=>i.name===p.name)).length+this.deviceParams.length;
     if(this.launchConsumer&&this.dynamicSharedBytes!==this.launchConsumer.sharedMemoryBytes)this.fail('Queue consumer shared bytes must match the original child launch.',this.kernel);
     if(this.launchConsumer&&this.workgroupSize.some((v,i)=>v!==this.launchConsumer.block[i]))this.fail('Queue consumer block size must match the original child launch.',this.kernel);
+    const recordParameterLines=[];
     const bindings = [], scalars = this.launchConsumer?[{name:'cw_launch_slot',type:'u32',offset:0}]:[], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
     for(const {type} of this.ast.bufferReferenceTypes||[])header.push(`alias ${type} = u32;`);
     for(const type of this.ast.objectListTypes||[])header.push(`alias ${type} = u32;`);
@@ -975,6 +977,16 @@ class Emitter {
     for (const p of [...this.kernel.params,...this.deviceParams]) {
       const imported=this.objectImports.find(i=>i.name===p.name);if(imported&&p.pointer){const symbol={name:p.name,rootBufferName:p.name,type:arrayOf(p.type),code:'cw_import_'+imported.id,constant:p.constant,atomic:false,kind:'buffer',objectImport:imported};this.add(p.name,symbol,p,true);p.symbol=symbol;this.bufferSymbols.set(p.name,symbol);continue;}
       if (p.shared || p.reference || p.external || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
+      if(!p.pointer&&this.structs.has(p.type)){
+        const leaves=recordLeaves(this,p.type,p),codes=new Map();
+        for(const leaf of leaves){const name=p.name+'.'+leaf.path.join('.'),queued=this.launchConsumer?.scalars.find(s=>s.name===name);let code;
+          if(queued){const word=`${this.launchConsumer.variable}.words[cw_params.p_cw_launch_slot*${this.launchConsumer.stride}u+${queued.word}u]`;code=leaf.type==='u32'?word:leaf.type==='bool'?`(${word} != 0u)`:`bitcast<${leaf.type}>(${word})`;}
+          else {const field='cw_record_'+scalars.length;scalars.push({name,type:leaf.type==='bool'?'u32':leaf.type,...(leaf.type==='bool'?{sourceType:'bool'}:{}),field,offset:scalars.length*4});code='cw_params.'+field;if(leaf.type==='bool')code=`(${code} != 0u)`;}
+          codes.set(leaf.path.join('.'),code);
+        }
+        const code='v_'+p.name,symbol={name:p.name,type:p.type,code,constant:p.constant,atomic:false,kind:'local',recordFields:leaves};this.add(p.name,symbol,p,true);p.symbol=symbol;
+        recordParameterLines.push(`var ${code}: ${p.type} = ${recordConstructor(this,p.type,path=>codes.get(path.join('.')))};`);continue;
+      }
       if(p.type==='cw_size64'){
         if(p.pointer)this.fail('size_t supports value parameters, not storage buffers.',p);
         this.extentUsed=true;scalars.push({name:p.name,type:'u32',sourceType:'size_t',offset:scalars.length*4});
@@ -1049,7 +1061,7 @@ class Emitter {
     }};
     emitHelpers();
     this.scopes = kernelScope; this.currentFunction = this.kernel;
-    const main = [...this.kernel.params.filter(p=>p.pointer&&p.symbol.offsetCode).map(p=>`var ${p.symbol.offsetCode}: i32 = 0i;`),...this.body(this.kernel.body)];
+    const main = [...recordParameterLines,...this.kernel.params.filter(p=>p.pointer&&p.symbol.offsetCode).map(p=>`var ${p.symbol.offsetCode}: i32 = 0i;`),...this.body(this.kernel.body)];
     emitHelpers();this.scopes=kernelScope;this.currentFunction=this.kernel;
     for(const surface of surfaces)header.push(`@group(0) @binding(${surface.binding}) var cw_surface_${surface.name}: texture_storage_${surface.dimension.replace('-','_')}<${surface.format}, write>;`);
     for(const scalar of this.constantScalars)scalars.push({...scalar,offset:scalars.length*4});
