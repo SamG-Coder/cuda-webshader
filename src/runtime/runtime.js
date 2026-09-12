@@ -39,7 +39,7 @@ export class GpuRuntime {
     if (!globalThis.navigator?.gpu && !options.device) throw new Error('WebGPU is required. Open this project on localhost or HTTPS in a WebGPU-capable browser. WebGL cannot run these kernels.');
     const adapter = options.adapter || (!options.device ? await navigator.gpu.requestAdapter({powerPreference:'high-performance'}) : null);
     if (!adapter && !options.device) throw new Error('No WebGPU adapter is available. Check the browser GPU settings and graphics driver.');
-    const features = ['timestamp-query','core-features-and-limits'].filter(f => adapter?.features.has(f));
+    const features = ['timestamp-query','core-features-and-limits','float32-filterable'].filter(f => adapter?.features.has(f));
     const requiredLimits = adapter ? {
       maxComputeInvocationsPerWorkgroup: Math.min(adapter.limits.maxComputeInvocationsPerWorkgroup, 1024),
       maxComputeWorkgroupSizeX: Math.min(adapter.limits.maxComputeWorkgroupSizeX,1024),
@@ -66,6 +66,9 @@ export class GpuRuntime {
   describe() {
     const info=this.adapter?.info;
     return {vendor:info?.vendor || 'not exposed',architecture:info?.architecture || '',device:info?.device || '',description:info?.description || '',features:[...this.device.features],timestampQuery:this.device.features.has('timestamp-query'),limits:{maxComputeInvocationsPerWorkgroup:this.device.limits.maxComputeInvocationsPerWorkgroup,maxComputeWorkgroupStorageSize:this.device.limits.maxComputeWorkgroupStorageSize,maxStorageBufferBindingSize:this.device.limits.maxStorageBufferBindingSize}};
+  }
+  createTexture1D(data,{filter='linear',addressMode='clamp-to-edge',label='CUDA float4 transfer texture'}={}){
+    this.assertAlive();if(!(data instanceof Float32Array)||!data.length||data.length%4||data.length/4>this.device.limits.maxTextureDimension2D||data.some(v=>!Number.isFinite(v)))throw new RangeError('1D texture requires finite float4 records within device width limits.');if(!this.device.features.has('float32-filterable'))throw Error('Float4 transfer textures require float32-filterable on this device.');if(!['linear','nearest'].includes(filter)||!['repeat','clamp-to-edge','mirror-repeat'].includes(addressMode))throw Error('Unsupported texture sampler settings.');const width=data.length/4,gpuTexture=this.device.createTexture({label,size:[width,1,1],dimension:'2d',format:'rgba32float',usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST});this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width*16,rowsPerImage:1},[width,1,1]);const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:'clamp-to-edge',addressModeW:'clamp-to-edge'}),format:'rgba32float',dimension:'2d',width,height:1,depth:1};this.textures.add(resource);this.stats.dataBytesUploaded+=data.byteLength;return resource;
   }
   createTexture3D(data,{width,height,depth,filter='linear',addressMode='repeat',label='CUDA 3D texture'}={}){
     this.assertAlive();if(!(data instanceof Uint8Array)||![width,height,depth].every(n=>Number.isInteger(n)&&n>0&&n<=this.device.limits.maxTextureDimension3D)||data.length!==width*height*depth)throw new RangeError('3D texture requires matching byte data and valid dimensions.');if(!['linear','nearest'].includes(filter)||!['repeat','clamp-to-edge','mirror-repeat'].includes(addressMode))throw new Error('Unsupported texture sampler settings.');
@@ -117,7 +120,7 @@ export class GpuRuntime {
         const errors=info.messages.filter(m=>m.type==='error');
         if(errors.length)throw new Error(`${artifact.name}: WGSL validation failed\n`+errors.map(m=>`${m.lineNum}:${m.linePos} ${m.message}`).join('\n'));
         const entries=artifact.metadata.bindings.map(b=>({binding:b.binding,visibility:GPUShaderStage.COMPUTE,buffer:{type:b.readOnly?'read-only-storage':'storage',minBindingSize:b.stride}}));
-        for(const t of artifact.metadata.textures||[])entries.push({binding:t.binding,visibility:GPUShaderStage.COMPUTE,texture:{sampleType:'float',viewDimension:'3d',multisampled:false}},{binding:t.samplerBinding,visibility:GPUShaderStage.COMPUTE,sampler:{type:'filtering'}});
+        for(const t of artifact.metadata.textures||[])entries.push({binding:t.binding,visibility:GPUShaderStage.COMPUTE,texture:{sampleType:'float',viewDimension:t.dimension,multisampled:false}},{binding:t.samplerBinding,visibility:GPUShaderStage.COMPUTE,sampler:{type:'filtering'}});
         if(artifact.metadata.uniformSize)entries.push({binding:artifact.metadata.uniformBinding,visibility:GPUShaderStage.COMPUTE,buffer:{type:'uniform',hasDynamicOffset:true,minBindingSize:artifact.metadata.uniformSize}});
         const layout=this.device.createBindGroupLayout({label:artifact.name,entries});
         const pipeline=await this.device.createComputePipelineAsync({label:artifact.name,layout:this.device.createPipelineLayout({bindGroupLayouts:[layout]}),compute:{module,entryPoint:artifact.entryPoint || 'main'}});
@@ -151,7 +154,7 @@ export class Invocation {
       if(seen.has(resource.gpuBuffer)&&(!b.readOnly||!seen.get(resource.gpuBuffer)))throw new Error('Writable buffer aliasing across bindings is rejected; use separate buffers or a single in-place parameter.');
       seen.set(resource.gpuBuffer,b.readOnly);entries.push({binding:b.binding,resource:{buffer:resource.gpuBuffer,offset:0,size:resource.size}});
     }
-    for(const t of meta.textures||[]){const r=buffers[t.name];this.runtime.checkResource(r);if(!r.gpuTexture||r.dimension!==t.dimension||r.format!==t.format)throw Error('Texture '+t.name+' requires a matching 3D r8unorm resource.');entries.push({binding:t.binding,resource:r.view},{binding:t.samplerBinding,resource:r.sampler});}
+    for(const t of meta.textures||[]){const r=buffers[t.name];this.runtime.checkResource(r);if(!r.gpuTexture||r.dimension!==t.dimension||r.format!==t.format)throw Error('Texture '+t.name+' requires a matching '+t.dimension+' '+t.format+' resource.');entries.push({binding:t.binding,resource:r.view},{binding:t.samplerBinding,resource:r.sampler});}
     if(meta.uniformSize)entries.push({binding:meta.uniformBinding,resource:{buffer:this.runtime.uniformBuffer,offset:0,size:meta.uniformSize}});
     this.bindGroup=this.runtime.device.createBindGroup({label:`${kernel.artifact.name}: persistent bindings`,layout:kernel.layout,entries});this.runtime.stats.bindGroupsCreated++;
     this.setScalars(scalars);

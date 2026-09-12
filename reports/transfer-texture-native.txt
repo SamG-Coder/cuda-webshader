@@ -1,0 +1,4 @@
+nearest shift=0 PASS native paired textures; max error 0
+nearest shift=0.25 PASS native paired textures; max error 0
+linear shift=0 PASS native paired textures; max error 0.000468730927
+linear shift=0.25 PASS native paired textures; max error 0.0019454658

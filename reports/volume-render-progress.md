@@ -46,13 +46,37 @@ helper return-by-value, original ray preservation, local matrix mutation and
 unchanged constant contents. See `reports/local-structs-native.txt`,
 `tests/local-structs.test.mjs` and the local-structs GPU regression entry.
 
+## Verified prerequisite: float4 transfer textures
+
+The compiler accepts `tex1D<float4>` for a by-value texture parameter, alongside
+`tex3D<float>` in the same kernel. A 1D transfer table uses a one-row 2D
+`rgba32float` WebGPU texture with normalized coordinates and level-zero
+sampling. The runtime requests `float32-filterable` when available and reports
+a clear error if a supplied device lacks it; the implementation does not reduce
+the table to half precision. Nearest and linear filtering are supported. A
+single handle cannot mix 1D and 3D sampling.
+
+Sandbox transfer settings use `dimensions: [width]`, a flat `values` array
+with four finite numbers per record, plus `filter` and `addressMode`. Texture
+lifetimes and data uploads are managed by the runtime. Helper texture parameters
+and additional-pass texture bindings remain unsupported.
+
+Native CUDA and hardware WebGPU probes combine both texture dimensions in one
+kernel and compare both filtering modes, clamped coordinates and shifted lookup
+positions against an independent interpolation reference. The absolute tolerance
+is 0.005 per float component, allowing CUDA texture interpolation quantization.
+The native observed maximum was approximately 0.0019455; nearest cases matched
+exactly. The built sandbox also loads both resource types and verifies its output.
+See `reports/transfer-texture-native.txt`,
+`reports/transfer-texture-sandbox-check.json` and the paired-texture GPU check.
+
 ## Remaining work for the complete candidate
 
 The current full-source importer/compiler probe fails at:
 
 ```
-Expected ')', found ','. (169:47)
-float4 col = tex1D<float4>(transferTex, (sample - transferOffset) * transferScale);
+Duplicate function 'mul'. (96:1)
+__device__ float4 mul(const float3x4 &M, const float4 &v)
 ```
 
 Source inspection also identifies these required capabilities:
@@ -60,8 +84,6 @@ Source inspection also identifies these required capabilities:
 - Resolve the two overloaded `mul` helpers and their const struct/vector
   references.
 - Pass addresses of local `tnear`/`tfar` values into `intersectBox`.
-- Bind and sample the `tex1D<float4>` colour-transfer texture alongside the
-  existing `tex3D<float>` volume texture.
 - Configure the original camera matrix and transfer table, validate complete
   native and WebGPU ray-marched images, then expose the verified renderer as its
   own sandbox-linked showcase.
