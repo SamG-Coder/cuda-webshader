@@ -131,3 +131,14 @@ that BSD-3-Clause license. Image captures derive from those sources and data.
 
 `tests/sobel-shared-kernel.cuh` and `showcases/sobel/kernel.cu` additionally retain
 the original NVIDIA `SobelShared` function and its BSD-3-Clause notice.
+
+### NVIDIA imageDenoising
+
+`showcases/denoising/kernel.cu` and `tests/denoising-kernel.cuh` retain device
+functions, configuration expressions and BSD-3-Clause notices from CUDA Samples
+commit `5443602d89ed99aede2e4b7bf329daddeadb320e`,
+`cpp/2_Concepts_and_Techniques/imageDenoising/imageDenoising.cu`,
+`imageDenoising.h` and the copy/knn/nlm/nlm2 kernel headers.
+`showcases/denoising/portrait_noise.bmp` is the unchanged original sample asset
+under the same NVIDIA license. The native captures derive from this source and
+image. Host test harnesses and compiler support are original MIT project code.

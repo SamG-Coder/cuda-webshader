@@ -11,5 +11,5 @@ test('Vector aggregate initializers resolve dependent trait types in helpers',()
  const out=new Float32Array(1);executeCPU(c,{out},{},[1]);assert.equal(out[0],9);
 });
 test('Vector aggregate initializers reject excess elements, implicit conversions and unsupported aggregates',()=>{
- for(const declaration of ['float2 a={1.0f,2.0f,3.0f};','float2 a={1,2};','int2 a={1.0f};','float a={1.0f};','float a[2]={1.0f,2.0f};','__shared__ float2 a={};'])assert.throws(()=>compile('__global__ void k(){'+declaration+'}'),/initializer|initializers/i);
+ for(const declaration of ['float2 a={1.0f,2.0f,3.0f};','float2 a={16777217,2};','int2 a={1.0f};','float a={1.0f};','float a[2]={1.0f,2.0f};','__shared__ float2 a={};'])assert.throws(()=>compile('__global__ void k(){'+declaration+'}'),/initializer|initializers/i);
 });

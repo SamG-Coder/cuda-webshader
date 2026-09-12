@@ -30,7 +30,7 @@ export function tokenize(source, defines = {}) {
     return [k, String(v)];
   }));
   const conditionals=[];let enabled=true;
-  const tokens = [],forwarders=new Map(),expressions=new Map();let numericMacroSnapshot=null; let i = 0, line = 1, column = 1;
+  const tokens = [],forwarders=new Map(),expressions=new Map(),objectExpressions=new Map();let numericMacroSnapshot=null; let i = 0, line = 1, column = 1;
   const advance = str => { for (const c of str) { if (c === '\n') { line++; column = 1; } else column++; } i += str.length; };
   while (i < source.length) {
     const rest = source.slice(i), token = {line, column, offset: i};
@@ -41,21 +41,30 @@ export function tokenize(source, defines = {}) {
       const directive = rest.split('\n')[0];
       const conditional=directive.trimEnd().match(/^#\s*(ifdef|ifndef|if|else|endif)\b(.*)$/);
       if(conditional){const [,kind,tail]=conditional,expression=kind==='if'?unwrapCondition(tail.replace(/\/\/.*$/,'').trim()):tail.replace(/\/\/.*$/,'').trim();
-        if(kind==='ifdef'||kind==='ifndef'){if(!/^[A-Za-z_]\w*$/.test(expression))throw new CompileError('Conditional definition test requires one macro name.',token,source);const defined=macros.has(expression)||forwarders.has(expression)||expressions.has(expression),selected=kind==='ifdef'?defined:!defined;conditionals.push({parent:enabled,selected,otherwise:false});enabled=enabled&&selected;}
-        else if(kind==='if'){const match=expression.match(/^(!)?\s*([A-Za-z_]\w*|[0-9]+)$/);if(!match)throw new CompileError('Conditional preprocessing supports an integer literal or numeric macro with optional !.',token,source);const raw=/^[0-9]+$/.test(match[2])?match[2]:macros.get(match[2])??'0',number=Number(raw.replace(/[uU]$/,''));if(!Number.isSafeInteger(number))throw new CompileError('Conditional macro must be an integer.',token,source);const selected=match[1]?!number:!!number;conditionals.push({parent:enabled,selected,otherwise:false});enabled=enabled&&selected;}
+        if(kind==='ifdef'||kind==='ifndef'){if(!/^[A-Za-z_]\w*$/.test(expression))throw new CompileError('Conditional definition test requires one macro name.',token,source);const defined=macros.has(expression)||forwarders.has(expression)||expressions.has(expression)||objectExpressions.has(expression),selected=kind==='ifdef'?defined:!defined;conditionals.push({parent:enabled,selected,otherwise:false});enabled=enabled&&selected;}
+        else if(kind==='if'){const match=expression.match(/^(!)?\s*([A-Za-z_]\w*|[0-9]+)$/);if(!match)throw new CompileError('Conditional preprocessing supports an integer literal or numeric macro with optional !.',token,source);if(objectExpressions.has(match[2]))throw new CompileError('Conditional macro must be an integer.',token,source);const raw=/^[0-9]+$/.test(match[2])?match[2]:macros.get(match[2])??'0',number=Number(raw.replace(/[uU]$/,''));if(!Number.isSafeInteger(number))throw new CompileError('Conditional macro must be an integer.',token,source);const selected=match[1]?!number:!!number;conditionals.push({parent:enabled,selected,otherwise:false});enabled=enabled&&selected;}
         else{const frame=conditionals.at(-1);if(!frame||expression)throw new CompileError('Unmatched or malformed conditional directive.',token,source);if(kind==='else'){if(frame.otherwise)throw new CompileError('Duplicate #else.',token,source);frame.otherwise=true;enabled=frame.parent&&!frame.selected;}else{conditionals.pop();enabled=frame.parent;}}
         advance(directive);continue;
       }
       if(/^#\s*(elif)\b/.test(directive))throw new CompileError('Unsupported conditional directive; preprocess it first.',token,source);
       if(!enabled){advance(directive);continue;}
       if(/^#\s*pragma\s+unroll(?:\s+[1-9]\d*)?\s*(?:\/\/.*)?$/.test(directive.trimEnd())){advance(directive);continue;}
-      const expression=expressionMacro(directive.trimEnd());if(expression){if(macros.has(expression.name)||forwarders.has(expression.name)||expressions.has(expression.name))throw new CompileError('Macro redefinition is unsupported.',token,source);expressions.set(expression.name,expression);advance(directive);continue;}
+      const expression=expressionMacro(directive.trimEnd());if(expression){if(macros.has(expression.name)||forwarders.has(expression.name)||expressions.has(expression.name)||objectExpressions.has(expression.name))throw new CompileError('Macro redefinition is unsupported.',token,source);expressions.set(expression.name,expression);advance(directive);continue;}
       const forward=forwardingMacro(directive.trimEnd());
-      if(forward){if(macros.has(forward.name)||forwarders.has(forward.name)||expressions.has(forward.name))throw new CompileError('Macro redefinition is unsupported.',token,source);forwarders.set(forward.name,forward);advance(directive);continue;}
+      if(forward){if(macros.has(forward.name)||forwarders.has(forward.name)||expressions.has(forward.name)||objectExpressions.has(forward.name))throw new CompileError('Macro redefinition is unsupported.',token,source);forwarders.set(forward.name,forward);advance(directive);continue;}
       const m = directive.trimEnd().match(/^#\s*define\s+([A-Za-z_]\w*)\s+([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFuU]?)\s*(?:\/\/.*)?$/);
-      if(!m){const object=directive.trimEnd().match(/^#\s*define\s+([A-Za-z_]\w*)\s+(.+?)\s*(?:\/\/.*)?$/);if(object){try{const value=integerExpression(object[2].replace(/[A-Za-z_]\w*/g,name=>macros.has(name)?'('+macros.get(name)+')':name));if(forwarders.has(object[1])||expressions.has(object[1]))throw Error('Macro redefinition is unsupported.');if(!macros.has(object[1])){macros.set(object[1],String(value));numericMacroSnapshot=null;}advance(directive);continue;}catch(error){throw new CompileError(error.message,token,source);}}}
+      if(!m){const object=directive.trimEnd().match(/^#\s*define\s+([A-Za-z_]\w*)\s+(.+?)\s*(?:\/\/.*)?$/);if(object){try{const value=integerExpression(object[2].replace(/[A-Za-z_]\w*/g,name=>macros.has(name)?'('+macros.get(name)+')':name));if(forwarders.has(object[1])||expressions.has(object[1])||objectExpressions.has(object[1]))throw Error('Macro redefinition is unsupported.');if(!macros.has(object[1])){macros.set(object[1],String(value));numericMacroSnapshot=null;}advance(directive);continue;}catch(error){
+          const body=object[2].trim();if(body.length>1024||!body.startsWith('(')||!body.endsWith(')'))throw new CompileError(error.message,token,source);
+          if(objectExpressions.has(object[1])||forwarders.has(object[1])||expressions.has(object[1]))throw new CompileError('Macro redefinition is unsupported.',token,source);
+          if(macros.has(object[1])){advance(directive);continue;}
+          const expanded=body.replace(/0[xX][\da-fA-F]+[uU]?|(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFuU]?|[A-Za-z_]\w*/g,name=>/^[A-Za-z_]\w*$/.test(name)?(objectExpressions.has(name)?objectExpressions.get(name).map(t=>t.value).join(' '):macros.has(name)?macros.get(name):name):name);
+          if(expanded.length>8192||objectExpressions.size>=128)throw new CompileError('Object macro expansion limit exceeded.',token,source);
+          let parts;try{parts=tokenize(expanded).filter(t=>t.kind!=='eof');}catch{throw new CompileError(error.message,token,source);}
+          if(parts.length>256||parts.some(t=>t.kind==='word'&&!['float','int','uint','unsigned','short'].includes(t.value)||t.kind==='symbol'&&!'()+-*/%<>&|^~'.includes(t.value)))throw new CompileError('Object expressions require bounded constant arithmetic and numeric casts.',token,source);
+          objectExpressions.set(object[1],parts);advance(directive);continue;
+        }}}
       if (!m) throw new CompileError('Only numeric object-like #define directives and direct function-forwarding macros are supported; preprocess other directives first.', token, source);
-      if(forwarders.has(m[1])||expressions.has(m[1]))throw new CompileError('Macro redefinition is unsupported.',token,source);
+      if(forwarders.has(m[1])||expressions.has(m[1])||objectExpressions.has(m[1]))throw new CompileError('Macro redefinition is unsupported.',token,source);
       if (!macros.has(m[1])){macros.set(m[1], m[2]);numericMacroSnapshot=null;} advance(directive); continue;
     }
     if(!enabled){advance(rest.split('\n')[0]);continue;}
@@ -65,7 +74,8 @@ export function tokenize(source, defines = {}) {
     const word = rest.match(WORD);
     if (word) {
       const value = word[0], expanded = macros.get(value);
-      if (expanded !== undefined) {
+      if(objectExpressions.has(value)){if(tokens.length+objectExpressions.get(value).length>200000)throw new CompileError('Object macro token budget exceeded.',token,source);for(const part of objectExpressions.get(value))tokens.push({...part,...token});}
+      else if (expanded !== undefined) {
         let body = expanded;
         if (body.startsWith('-') || body.startsWith('+')) { tokens.push({...token, kind: 'symbol', value: body[0]}); body = body.slice(1); }
         tokens.push({...token, kind: 'number', value: body});

@@ -1,0 +1,7 @@
+PASS Copy native launch 32x24 and guards.
+PASS KNN native launch 32x24 and guards.
+PASS KNNdiag native launch 32x24 and guards.
+PASS NLM native launch 32x24 and guards.
+PASS NLMdiag native launch 32x24 and guards.
+PASS NLM2 native launch 32x24 and guards.
+PASS NLM2diag native launch 32x24 and guards.

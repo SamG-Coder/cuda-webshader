@@ -493,3 +493,7 @@ Original NVIDIA kernels classify a 16³ field, compact voxels and generate 2,080
 [Find teapot edges in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=sobel). The unchanged NVIDIA texture kernel processes its original 1024² grayscale image, with editable edge intensity and CUDA/WGSL comparison. Eight image captures across edge detection and copy kernels match native CUDA exactly. [Setup, validation and remaining shared-memory path](showcases/sobel/README.md).
 
 [Run the shared-memory Sobel version](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=sobel-shared). NVIDIA's unchanged shared-tile kernel now has its own showcase, with four exact native image comparisons, original byte storage and checked packed-output pitch alignment.
+
+### NVIDIA image denoising
+
+Run [KNN](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=denoise-knn), [non-local means](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=denoise-nlm), or [shared non-local means](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=denoise-nlm2) on NVIDIA's original noisy portrait. All seven filter/copy/diagnostic kernels run in the sandbox with their original function bodies. Fourteen image captures match native CUDA exactly or within one colour level. [Settings and verification](showcases/denoising/README.md).

@@ -1,3 +1,4 @@
+import {checkDenoising} from './denoising-gpu.js';
 import {checkSobelShared} from './sobel-shared-gpu.js';
 import {checkSobelImages} from './sobel-image-gpu.js';
 import {checkShortValues} from './short-values-gpu.js';
@@ -194,6 +195,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Complete implicit marching-cubes GPU pipeline matches native CUDA',()=>checkMarchingPipeline(runtime));
   await run('Hierarchical exclusive scan matches native CUDA',()=>checkExclusiveScan(runtime));
   await run('Original shared marching-cubes triangle generation matches native CUDA',()=>checkMarchingTriangles(runtime));
+  await run('All original NVIDIA imageDenoising kernels match native portrait captures',()=>checkDenoising(runtime));
   await run('Original NVIDIA SobelShared matches native CUDA',()=>checkSobelShared(runtime));
   await run('Original NVIDIA Sobel image kernels match native CUDA',()=>checkSobelImages(runtime));
   await run('Short narrowing, promotion and launch values match native CUDA',()=>checkShortValues(runtime));

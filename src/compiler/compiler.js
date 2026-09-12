@@ -157,8 +157,8 @@ class Emitter {
         const width=vectorLength(n.target),element=vectorElement(n.target);
         if(!width||n.items.length>width)this.fail('Vector initializers require at most one scalar per component.',n);
         const values=n.items.map(item=>this.expr(item));
-        if(values.some(v=>v.type!==element))this.fail('Vector initializer components must match the element type; use explicit casts for conversions.',n);
-        const codes=values.map(v=>v.code);while(codes.length<width)codes.push(`${element}(0)`);
+        if(values.some((v,i)=>{if(v.type===element)return false;if(element==='f32'&&['i32','u32'].includes(v.type)){try{const value=constantValue(n.items[i]);return !Number.isInteger(value)||Math.fround(value)!==value;}catch{}}return true;}))this.fail('Vector initializer components must match the element type; use explicit casts for conversions.',n);
+        const codes=values.map(v=>this.convert(v.code,v.type,element,n));while(codes.length<width)codes.push(`${element}(0)`);
         return this.result(n,n.target,`${n.target}(${codes.join(', ')})`,values.flatMap(v=>v.pre));
       }
       case 'sizeof': {const size=cudaValueSize(n.target);if(size===null)this.fail('sizeof requires a supported built-in value type.',n);this.extentUsed=true;n.numericValue=size;return this.result(n,'cw_size64',`vec2<u32>(${size}u, 0u)`);}

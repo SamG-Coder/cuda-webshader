@@ -1,0 +1,11 @@
+Loading showcases/denoising/portrait_noise.bmp...
+BMP width: 320
+BMP height: 408
+BMP file loaded successfully!
+PASS Copy native launch 320x408 and guards.
+PASS KNN native launch 320x408 and guards.
+PASS KNNdiag native launch 320x408 and guards.
+PASS NLM native launch 320x408 and guards.
+PASS NLMdiag native launch 320x408 and guards.
+PASS NLM2 native launch 320x408 and guards.
+PASS NLM2diag native launch 320x408 and guards.

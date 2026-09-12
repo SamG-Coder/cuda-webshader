@@ -14,7 +14,7 @@ test('Zero whole-block count leaves buffers unchanged',()=>{
 test('Whole-block lowering is opt-in and rejects unrecognized guard shapes',()=>{
  assert.equal(compile(source,{workgroupSize:[4]}).metadata.scalarConstraints,undefined);
  for(const modified of [source.replace('i>=n','i>n'),source.replace('threadIdx.x','threadIdx.x+1u'),source.replace('if(i>=n)return;','if(i>=n){out[0]=0.0f;return;}'),source.replace('unsigned int n','int n')])assert.throws(()=>compile(modified,options),/Full-workgroup|supported linear/);
- assert.throws(()=>compile(source,{...options,workgroupSize:[2,2,1]}),/one-dimensional/);
+ assert.throws(()=>compile(source,{...options,workgroupSize:[2,2,1]}),/rectangular guard/);
 });
 test('Whole-block lowering rejects bound mutation, shadowing and reference escape',()=>{
  for(const prefix of ['n=4u;','n++;','{unsigned int n=4u;}'])assert.throws(()=>compile(source.replace('int i=',prefix+'int i='),options),/unchanged/);

@@ -1,0 +1,66 @@
+{
+  "passed": true,
+  "staticBuild": true,
+  "softwareAdapterRequested": false,
+  "results": [
+    {
+      "entry": "Copy",
+      "pixels": 130560,
+      "nativeExact": true,
+      "maxChannelError": 0,
+      "canvasMatchesGPU": true,
+      "controlReadbackBytes": 0
+    },
+    {
+      "entry": "KNN",
+      "pixels": 130560,
+      "nativeExact": false,
+      "maxChannelError": 1,
+      "canvasMatchesGPU": true,
+      "controlReadbackBytes": 0
+    },
+    {
+      "entry": "KNNdiag",
+      "pixels": 130560,
+      "nativeExact": true,
+      "maxChannelError": 0,
+      "canvasMatchesGPU": true,
+      "controlReadbackBytes": 0
+    },
+    {
+      "entry": "NLM",
+      "pixels": 130560,
+      "nativeExact": true,
+      "maxChannelError": 0,
+      "canvasMatchesGPU": true,
+      "controlReadbackBytes": 0
+    },
+    {
+      "entry": "NLMdiag",
+      "pixels": 130560,
+      "nativeExact": true,
+      "maxChannelError": 0,
+      "canvasMatchesGPU": true,
+      "controlReadbackBytes": 0
+    },
+    {
+      "entry": "NLM2",
+      "pixels": 130560,
+      "nativeExact": true,
+      "maxChannelError": 0,
+      "canvasMatchesGPU": true,
+      "controlReadbackBytes": 0
+    },
+    {
+      "entry": "NLM2diag",
+      "pixels": 130560,
+      "nativeExact": true,
+      "maxChannelError": 0,
+      "canvasMatchesGPU": true,
+      "controlReadbackBytes": 0
+    }
+  ],
+  "sourceUnchanged": true,
+  "partialBlockRejected": true,
+  "mobileOverflow": false
+}

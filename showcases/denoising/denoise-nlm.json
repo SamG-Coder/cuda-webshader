@@ -1,0 +1,59 @@
+{
+  "pipeline": {
+    "buffers": {
+      "output": {
+        "type": "u32",
+        "records": 130560,
+        "fill": "zero"
+      }
+    },
+    "textures": {
+      "image": {
+        "kind": "image-rgba",
+        "encoding": "bmp",
+        "dimensions": [
+          320,
+          408
+        ],
+        "source": "showcases/denoising/portrait_noise.bmp",
+        "filter": "linear",
+        "addressMode": "clamp-to-edge",
+        "normalizedCoords": false
+      }
+    },
+    "steps": [
+      {
+        "entry": "NLM",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          40,
+          51,
+          1
+        ],
+        "bindings": {
+          "dst": "output",
+          "texImage": "image"
+        },
+        "scalars": {
+          "imageW": 320,
+          "imageH": 408,
+          "Noise": 0.4756242036819458,
+          "lerpC": 0.2
+        }
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "output",
+      "width": 320,
+      "height": 408,
+      "format": "rgba8",
+      "alpha": "opaque",
+      "flipY": true
+    }
+  }
+}
