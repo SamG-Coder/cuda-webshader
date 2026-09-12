@@ -1,0 +1,32 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "subgroup-size-control",
+      "float32-filterable",
+      "subgroups",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "date": "2026-09-12T23:38:02.042Z",
+  "name": "Chrono 64-bit counters and double launch times match native CUDA",
+  "pass": true,
+  "originalCounterFields": 22,
+  "nativeCounterBytes": 176,
+  "cases": 12,
+  "compared": 1152,
+  "nativeExact": true,
+  "counterHighWordsPreserved": true,
+  "doubleTimePreserved": true,
+  "wallMs": 300.52999997138977
+}

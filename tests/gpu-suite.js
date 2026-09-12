@@ -1,3 +1,4 @@
+import {checkChronoCounterTime} from './chrono-counter-time-gpu.js';
 import {checkCapturedPoints} from './captured-points-gpu.js';
 import {checkChronoNeighbors} from './chrono-neighbors-gpu.js';
 import {checkChronoTypes} from './chrono-types-gpu.js';
@@ -342,6 +343,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Original Chrono neighbour cells and particle mapping support partial blocks',()=>checkChronoNeighbors(runtime));
   await run('Original Chrono scoped enums and boolean parameter records match native CUDA',()=>checkChronoTypes(runtime));
   await run('Original Chrono grid hashing matches native dam-break inputs and boundary cases',()=>checkChronoHash(runtime));
+  await run('Chrono 64-bit counters and double launch times match native CUDA',()=>checkChronoCounterTime(runtime));
   await run('Original Chrono neighbour lists match native CUDA for fluid and boundary markers',()=>checkChronoSearch(runtime));
   await run('Original NVIDIA recursive quadtree matches every native node and output point',()=>checkQuadtreeRoot(runtime,{recursive:true}));
   await run('Recursive GPU queues reject overflow and unfinished generations',async()=>{

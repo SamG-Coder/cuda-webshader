@@ -239,6 +239,9 @@ The quadtree showcase and `tests/quadtree-cdp-device.cuh` retain NVIDIA's origin
 
 ## Project Chrono kernels and type declarations
 
+`tests/chrono-counter-time.cu` retains the original `Counters` declaration
+(Copyright (c) 2014 projectchrono.org) from `SphDataManager.cuh` at the same
+pinned revision below. Its validation probe and native harness are MIT code.
 `tests/chrono-search.cu` retains the original distance helpers, selected vector
 constructors/operators, cell-range kernel and neighbour-search kernels from
 `SphGeneral.cuh`, `SphCustomMath.cuh` and `SphCollisionSystem.cu`.

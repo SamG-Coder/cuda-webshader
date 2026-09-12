@@ -8,5 +8,5 @@ test('size_t parameters retain wide expression arithmetic with bounded launch va
  for(const pitch of [-1,1.5,4294967296,NaN])assert.throws(()=>packScalars(a.metadata,{pitch,row:1}));
 });
 test('Unsupported size_t memory layouts and arithmetic fail explicitly',()=>{
- for(const s of ['__global__ void k(size_t* p){}','struct S{size_t x;};__global__ void k(unsigned*out){S s;}','__global__ void k(unsigned*out){size_t local[2];}','__global__ void k(unsigned*out){__shared__ size_t v;}','__global__ void k(unsigned*out,size_t pitch){out[0]=(unsigned)(pitch/3);}'])assert.throws(()=>compile(s));
+ for(const s of ['__global__ void k(size_t* p){}','struct S{size_t x;};__global__ void k(S* out){out[0].x=1;}','__global__ void k(unsigned*out){size_t local[2];}','__global__ void k(unsigned*out){__shared__ size_t v;}','__global__ void k(unsigned*out,size_t pitch){out[0]=(unsigned)(pitch/3);}'])assert.throws(()=>compile(s));
 });

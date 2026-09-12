@@ -195,3 +195,34 @@ Then, in a Visual Studio developer shell:
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-search-native.cu -o .local/chrono-search-native.exe
 .local/chrono-search-native.exe
 ```
+
+
+## Activity-selection prerequisites: exact counters and launch time
+
+The original `Counters` declaration (22 native `size_t` fields, 176 bytes) now
+compiles as a constant record without narrowing its values. Each field is bound
+as low/high unsigned words. An explicit by-value `double time` kernel parameter
+uses the same exact two-word representation and the existing binary64 expression
+implementation. No native fp64 WebGPU feature is assumed.
+
+`tests/chrono-counter-time.cu` retains the upstream declaration unchanged and
+adds an MIT validation probe. The native harness supplies 12 controlled cases,
+including values above 2^32 and 2^53, the unsigned 64-bit maximum, times 2^-40
+above/below 0.5, signed zero, infinities, and NaN. These are type/ABI probes, not
+captured activity-selection outputs or simulated water frames. The independent
+CPU oracle also reconstructs exact integer and binary64 values from word pairs.
+
+The next blocker remains native-layout `ActiveDomain` buffers (a one-byte bool
+followed by four Real3 values). Full original `UpdateActivityD` execution,
+active-list compaction, pressure/force evaluation and time integration are still
+pending. No new water showcase is added at this stage.
+
+Reproduce the native counter/time reference in a Visual Studio developer shell:
+
+```text
+nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-counter-time-native.cu -o .local/chrono-counter-time-native.exe
+.local/chrono-counter-time-native.exe > reports/chrono-counter-time-native.json
+```
+
+Validation for this stage: 696 unit tests, 229 real NVIDIA GPU tests, and all
+1,152 counter/time probe values match native CUDA exactly. Compile checks pass.
