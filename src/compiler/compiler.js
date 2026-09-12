@@ -334,6 +334,7 @@ class Emitter {
       this.writable(target, n.args[0].value);
       return this.result(n, target.type, `${atomics[name]}(&${target.code}, ${this.convert(value.code, value.type, target.type, n)})`, [...target.pre, ...value.pre]);
     }
+    const aliasType=n.aliasType;if(aliasType&&['f32','i32','u32','bool','cw_uchar'].includes(aliasType)){if(n.args.length!==1)this.fail('Scalar type aliases require one constructor argument.',n);const value=n.args[0];delete n.args;delete n.callee;Object.assign(n,{kind:'cast',target:aliasType,value});return this.expr(n);}
     const casts = {uchar:'cw_uchar',float: 'f32', int: 'i32', uint: 'u32', bool: 'bool'};
     if(name==='float'&&n.args.length===1){const value=this.expr({kind:'cast',target:'f32',value:n.args[0],token:n.token});return this.result(n,'f32',value.code,value.pre);}
     const args = n.args.map(a => this.argument(a)), pre = args.flatMap(a => a.pre);
@@ -705,7 +706,7 @@ function instantiateHelperTemplates(ast, kernel) {
 export function compile(source, options = {},bufferUsage=null) {
   const ast = parse(source, options), kernels = ast.functions.filter(f => f.qualifier === '__global__');
   walk(ast,n=>{if(n.kind==='unary'&&n.op==='*'){const base=n.value;delete n.value;delete n.op;Object.assign(n,{kind:'index',base,index:{kind:'literal',value:'0',token:n.token},dereference:true});}});
-  const specialization=options.entry?.match(/^([A-Za-z_]\w*)<\s*(\d+|[A-Za-z_]\w*)\s*>$/),entry=specialization?specialization[1]:options.entry;
+  const specialization=options.entry?.match(/^([A-Za-z_]\w*)<\s*(\d+|[A-Za-z_]\w*)\s*>$/),entry=specialization?specialization[1]:options.entry;if(specialization&&ast.typeAliases?.[specialization[2]])specialization[2]=['float','int','uint','bool','uchar','uchar4',...['float','int','uint'].flatMap(p=>[2,3,4].map(n=>p+n))].find(n=>builtinType(n)===ast.typeAliases[specialization[2]]);
   const kernel = entry ? kernels.find(k => k.name === entry) : kernels.length === 1 ? kernels[0] : null;
   if (!kernel) throw new CompileError(options.entry ? `Kernel '${options.entry}' was not found.` : 'Multiple kernels found; specify options.entry.');
   if(!!kernel.templateParameter!==!!specialization)throw new CompileError(kernel.templateParameter?'Specify a template entry, for example '+kernel.name+(kernel.templateKind==='type'?'<float>.':'<16>.'):'This kernel does not have a template parameter.',kernel.token,source);

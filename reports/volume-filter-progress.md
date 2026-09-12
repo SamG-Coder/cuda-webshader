@@ -11,7 +11,7 @@ The runtime can allocate or upload r32float 3D storage textures. Existing r8unor
 An MIT probe executes the same CUDA function on native NVIDIA CUDA and hardware WebGPU: all 256 float voxels agree across eight workgroups. Hardware checks also reject oversized X, Y and Z dispatches. Native build: `nvcc -O3 -std=c++17 -arch=native tests/surface3d-native.cu -o .local/nvidia-checks/surface3d.exe`. Native result: `surface3d-native.txt`. GPU result: `nvidia-regression-gpu.json`.
 
 ## Remaining original-sample requirements
-- Import required device declarations without bringing in unrelated host-only Volume/cudaArray structures.
+- Preserve template structs with static device conversion methods. Import no longer retains the unrelated host-only Volume/cudaArray structure; the next observed failure is the empty primary VolumeTypeInfo template, whose enclosing template wrapper needs retention and compiler support.
 - Support the cudaExtent launch argument with explicit checked host transport and appropriate size_t semantics.
 - Compile VolumeTypeInfo<unsigned char>::convert, including its original literal/cast arithmetic.
 - Support sizeof(VolumeType) with correct CUDA type semantics.
@@ -19,3 +19,8 @@ An MIT probe executes the same CUDA function on native NVIDIA CUDA and hardware 
 - Compare original filtering passes and final preview with native CUDA before adding a standalone sandbox showcase.
 
 The float probe verifies a compiler/runtime prerequisite. It is not evidence that the original byte filter or complete desktop application works.
+
+## Device declaration dependencies and value aliases
+The importer now retains plain structs and scalar/vector typedef declarations only when referenced by extracted device declarations, following transitive dependencies and preserving source positions. Required unsupported structures remain visible and reject; they are not silently removed. The compiler supports unqualified built-in value aliases, chained aliases, scalar alias constructors/casts and aliases in explicit helper/kernel template arguments. Alias state is local to a parse and value-name shadowing rejects. Pointer/const aliases and class-method templates remain unsupported.
+
+Native CUDA, the CPU oracle and real NVIDIA WebGPU agree on byte truncation, scalar conversion, helper template evaluation and packed component access. 433 unit tests and 126 NVIDIA hardware checks pass; compile-all and static build pass. No original volumeFiltering function body was changed, and the sample remains pending.

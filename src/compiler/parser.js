@@ -84,7 +84,7 @@ export function tokenize(source, defines = {}) {
 }
 const PRECEDENCE = {'=': 1, '+=': 1, '-=': 1, '*=': 1, '/=': 1, '%=': 1, '&=': 1, '|=': 1, '^=': 1, '<<=': 1, '>>=': 1, '||': 3, '&&': 4, '|': 5, '^': 6, '&': 7, '==': 8, '!=': 8, '<': 9, '>': 9, '<=': 9, '>=': 9, '<<': 10, '>>': 10, '+': 11, '-': 11, '*': 12, '/': 12, '%': 12};
 export class Parser {
-  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); this.functionNames=new Set(['tex3D','tex1D','tex2D','tex2Dgather']); this.typeTraits=new Map();this.structs=new Map(); this.sharedWrappers=new Map();this.expandedMacroNodes=0; }
+  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); this.functionNames=new Set(['tex3D','tex1D','tex2D','tex2Dgather']); this.typeAliases=new Map();this.typeTraits=new Map();this.structs=new Map(); this.sharedWrappers=new Map();this.expandedMacroNodes=0; }
   peek(offset = 0) { return this.tokens[this.i + offset] || this.tokens.at(-1); }
   is(value) { return this.peek().value === value; }
   take(value) { if (value && !this.is(value)) this.fail(`Expected '${value}', found '${this.peek().value}'.`); return this.tokens[this.i++]; }
@@ -98,7 +98,7 @@ export class Parser {
     return 'cooperative_groups::'+this.name();
   }
   deferredType(name){return this.deferUnsupportedTypes&&/^double[234]?$/.test(name);}
-  startsType() { return this.structs.has(this.peek().value)||TYPES.has(this.peek().value) || this.deferredType(this.peek().value) || this.peek().value==='typename' || this.typeTraits.has(this.peek().value) || this.templateTypeNames?.has(this.peek().value) || QUALIFIERS.has(this.peek().value); }
+  startsType() { return this.typeAliases.has(this.peek().value)||this.structs.has(this.peek().value)||TYPES.has(this.peek().value) || this.deferredType(this.peek().value) || this.peek().value==='typename' || this.typeTraits.has(this.peek().value) || this.templateTypeNames?.has(this.peek().value) || QUALIFIERS.has(this.peek().value); }
   type() {
     let constant = false, shared = false,external=false;
     while (QUALIFIERS.has(this.peek().value)) { const q = this.take().value; constant ||= q === 'const'; shared ||= q === '__shared__';external ||= q==='extern'; }
@@ -109,7 +109,7 @@ export class Parser {
       if(!this.typeTraits.has(name))this.fail(`Unknown type trait '${name}'.`,tok);
       this.take('<');const argument=this.name();this.take('>');this.take('::');const member=this.name();
       type={kind:'trait-type',name,argument,member};
-    }else if (tok.value === 'unsigned') { if(this.match('char'))type='cw_uchar';else{this.match('int'); type = 'u32';} } else type = this.structs.has(tok.value)?this.structs.get(tok.value).type:this.templateTypeNames?.has(tok.value)?'template:'+tok.value:builtinType(tok.value);
+    }else if (tok.value === 'unsigned') { if(this.match('char'))type='cw_uchar';else{this.match('int'); type = 'u32';} } else type = this.structs.has(tok.value)?this.structs.get(tok.value).type:this.templateTypeNames?.has(tok.value)?'template:'+tok.value:(this.typeAliases.get(tok.value)||builtinType(tok.value));
     if(!type&&this.deferredType(tok.value))type='unsupported:'+tok.value;
     if (!type) this.fail(`Unsupported type '${tok.value}'. Use float, int, unsigned int, bool or float2/3/4.`, tok);
     if (this.match('const')) constant = true;
@@ -128,7 +128,13 @@ export class Parser {
       if(this.is('typedef')&&this.peek(1).value==='struct'||this.is('struct')&&this.peek(2).value==='{'){
         const alias=this.match('typedef');this.take('struct');let name=this.is('{')?null:this.name();this.take('{');const fields=[];
         while(!this.is('}')){const fieldToken=this.peek(),spec=this.type(),fieldName=this.name(),dimensions=[];if(spec.pointer||spec.reference||spec.shared||spec.external||spec.constant||(['void','texture3d','surface2d','thread-block'].includes(spec.type)||spec.type.startsWith('cw_struct_')))this.fail('Struct fields require plain scalar/vector value types.',fieldToken);while(this.match('[')){dimensions.push(this.expression(2));this.take(']');}this.take(';');if(dimensions.length>1||fields.length>=64)this.fail('Structs support at most 64 fields and one-dimensional field arrays.',fieldToken);if(fields.some(f=>f.name===fieldName))this.fail('Duplicate struct field.',fieldToken);fields.push({name:fieldName,type:spec.type,dimensions,token:fieldToken});}
-        this.take('}');if(alias){const aliasName=this.name();if(name&&name!==aliasName)this.fail('Distinct struct tag/typedef aliases are unsupported.',token);name=aliasName;}this.take(';');if(!name||!fields.length||this.structs.has(name)||TYPES.has(name)||this.typeTraits.has(name))this.fail('Structs require a distinct name and at least one field.',token);if(this.structs.size>=64)this.fail('At most 64 plain structs are supported.',token);this.structs.set(name,{name,type:'cw_struct_'+name,fields,token});continue;
+        this.take('}');if(alias){const aliasName=this.name();if(name&&name!==aliasName)this.fail('Distinct struct tag/typedef aliases are unsupported.',token);name=aliasName;}this.take(';');if(!name||!fields.length||this.structs.has(name)||this.typeAliases.has(name)||TYPES.has(name)||this.typeTraits.has(name))this.fail('Structs require a distinct name and at least one field.',token);if(this.structs.size>=64)this.fail('At most 64 plain structs are supported.',token);this.structs.set(name,{name,type:'cw_struct_'+name,fields,token});continue;
+      }
+      if(this.is('typedef')&&this.peek(1).value!=='struct'){
+        this.take('typedef');const spec=this.type(),name=this.name();this.take(';');
+        if(spec.pointer||spec.reference||spec.constant||spec.shared||spec.external||!Object.values(MAP).includes(spec.type)||['void','texture3d','surface2d'].includes(spec.type))this.fail('Typedef aliases require unqualified built-in scalar or vector value types.',token);
+        if(this.structs.has(name)||this.typeTraits.has(name)||this.typeAliases.has(name)||TYPES.has(name)&&(!['uint','uchar'].includes(name)||builtinType(name)!==spec.type))this.fail('Duplicate or conflicting type alias.',token);
+        if(this.typeAliases.size>=128)this.fail('At most 128 type aliases are supported.',token);this.typeAliases.set(name,spec.type);continue;
       }
       if(this.match('__constant__')){
         this.deferUnsupportedTypes=true;const valueType=this.type(),name=this.name();
@@ -192,11 +198,11 @@ export class Parser {
       const result = this.type();
       if (result.pointer || result.shared || result.reference || result.external) this.fail('Function return pointers/references/shared/extern qualifiers are unsupported.');
       if(this.peek().forward||this.peek().expressionMacro)this.fail('Function-like macros are supported at call sites, not in function declarations.');
-      const name = this.name();this.functionNames.add(name);let specializationArgument;
+      const name = this.name();if(this.typeAliases.has(name))this.fail('Functions cannot shadow a type alias.',token);this.functionNames.add(name);let specializationArgument;
       if(templateKind==='specialization')specializationArgument=this.templateArgument();
       this.take('('); const params = [];
       if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(),defaultValue=this.match('=')?this.expression(2):undefined;
-        if(defaultValue!==undefined){const literal=defaultValue.kind==='unary'&&['+','-'].includes(defaultValue.op)?defaultValue.value:defaultValue;if(qualifier!=='__device__'||templateKind==='specialization')this.fail('Default arguments belong on primary device helper definitions only.',token);if(type.pointer||type.reference||(!['f32','i32','u32','bool','cw_uchar'].includes(type.type)&&!String(type.type).startsWith('template:')))this.fail('Default arguments require scalar value parameters.',token);if(literal.kind!=='literal'&&!(literal===defaultValue&&literal.kind==='id'&&['true','false'].includes(literal.name)))this.fail('Default arguments support numeric or boolean literals with an optional numeric sign.',defaultValue.token);}
+        if(this.typeAliases.has(name))this.fail('Parameters cannot shadow a type alias.',token);if(defaultValue!==undefined){const literal=defaultValue.kind==='unary'&&['+','-'].includes(defaultValue.op)?defaultValue.value:defaultValue;if(qualifier!=='__device__'||templateKind==='specialization')this.fail('Default arguments belong on primary device helper definitions only.',token);if(type.pointer||type.reference||(!['f32','i32','u32','bool','cw_uchar'].includes(type.type)&&!String(type.type).startsWith('template:')))this.fail('Default arguments require scalar value parameters.',token);if(literal.kind!=='literal'&&!(literal===defaultValue&&literal.kind==='id'&&['true','false'].includes(literal.name)))this.fail('Default arguments support numeric or boolean literals with an optional numeric sign.',defaultValue.token);}
         else if(params.some(p=>p.defaultValue!==undefined))this.fail('Parameters after a default argument must also have defaults.',token);
         params.push({kind: 'param', token, name, ...type,...(defaultValue!==undefined?{defaultValue}:{})});
       } while (this.match(','));
@@ -204,7 +210,7 @@ export class Parser {
       functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads,templateParameter,templateParameters,templateKind,...(specializationArgument!==undefined?{specializationArgument}:{})});
     }
     if (!functions.some(f => f.qualifier === '__global__')) this.fail('No __global__ kernel was found.');
-    return {kind: 'module', functions, constantGlobals,structs:[...this.structs.values()],typeTraits:[...this.typeTraits.values()], source: this.source};
+    return {kind: 'module', functions, constantGlobals,typeAliases:Object.fromEntries(this.typeAliases),structs:[...this.structs.values()],typeTraits:[...this.typeTraits.values()], source: this.source};
   }
   block() { const token = this.take('{'), body = []; while (!this.is('}')) { if (this.peek().kind === 'eof') this.fail('Unclosed block.'); body.push(this.statement()); } this.take('}'); return {kind: 'block', token, body}; }
   initializer(){
@@ -220,7 +226,7 @@ export class Parser {
   }
   declaration(semicolon = true) {
     const token = this.peek(), d = this.type(),declarations=[];
-    do {const name=this.name(),dimensions=[];while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.initializer():null;declarations.push({kind:'decl',token,name,...d,dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
+    do {const name=this.name(),dimensions=[];if(this.typeAliases.has(name))this.fail('Value declarations cannot shadow a type alias.',token);while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.initializer():null;declarations.push({kind:'decl',token,name,...d,dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
     if (semicolon) this.take(';');return declarations.length===1?declarations[0]:{kind:'decls',token,declarations};
   }
   statement() {
@@ -259,12 +265,12 @@ export class Parser {
     const copy=(node,substitute)=>{if(!node||typeof node!=='object')return node;if(node.kind&&++this.expandedMacroNodes>65536)this.fail('Expression macro expansion exceeds 65,536 AST nodes.',token);if(substitute&&node.kind==='id'&&macro.params.includes(node.name))return copy(args[macro.params.indexOf(node.name)],false);if(Array.isArray(node))return node.map(n=>copy(n,substitute));return Object.fromEntries(Object.entries(node).map(([key,value])=>[key,key==='token'?(substitute?token:value):copy(value,substitute)]));};return copy(expression,true);
   }
   templateCallAhead(){for(let offset=1;offset<=65;offset++){const token=this.peek(offset);if(token.value==='>')return this.peek(offset+1).value==='(';if(!['word','number'].includes(token.kind)&&!['+','-','*','/','%','(',')',','].includes(token.value))return false;}return false;}
-  templateArgument(){this.take('<');const parts=[];while(!this.is('>')){const token=this.peek();if(parts.length>=64||(!['word','number'].includes(token.kind)&&!['+','-','*','/','%','(',')',','].includes(token.value)))this.fail('Template arguments support type lists or bounded integer arithmetic.',token);parts.push(this.take().value);}this.take('>');if(!parts.length)this.fail('Missing template argument.');return parts.join(' ');}
+  templateArgument(){this.take('<');const parts=[];while(!this.is('>')){const token=this.peek();if(parts.length>=64||(!['word','number'].includes(token.kind)&&!['+','-','*','/','%','(',')',','].includes(token.value)))this.fail('Template arguments support type lists or bounded integer arithmetic.',token);const word=this.take().value;parts.push(this.typeAliases.has(word)?Object.keys(MAP).find(k=>MAP[k]===this.typeAliases.get(word)):word);}this.take('>');if(!parts.length)this.fail('Missing template argument.');return parts.join(' ');}
   unary() {
     const token = this.peek();
     if(this.match('static_cast')){this.take('<');const type=this.type();if(type.pointer||type.reference||type.shared||type.external)this.fail('static_cast supports value types only.',token);this.take('>');this.take('(');const value=this.expression();this.take(')');return {kind:'cast',token,target:type.type,value};}
     if (['+', '-', '!', '~', '&', '++', '--', '*'].includes(token.value)) { this.take(); return {kind: 'unary', token, op: token.value, value: this.unary(), prefix: true}; }
-    if (this.is('(') && this.peek(2).value!=='(' && (TYPES.has(this.peek(1).value) || this.deferredType(this.peek(1).value) || this.peek(1).value==='typename' || this.typeTraits.has(this.peek(1).value) || this.templateTypeNames?.has(this.peek(1).value) || this.peek(1).value === 'const')) { this.take('('); const type = this.type(); if (type.pointer||type.reference) this.fail('Pointer/reference casts are unsupported.'); this.take(')'); return {kind: 'cast', token, target: type.type, value: this.unary()}; }
+    if (this.is('(') && this.peek(2).value!=='(' && (this.typeAliases.has(this.peek(1).value)||TYPES.has(this.peek(1).value) || this.deferredType(this.peek(1).value) || this.peek(1).value==='typename' || this.typeTraits.has(this.peek(1).value) || this.templateTypeNames?.has(this.peek(1).value) || this.peek(1).value === 'const')) { this.take('('); const type = this.type(); if (type.pointer||type.reference) this.fail('Pointer/reference casts are unsupported.'); this.take(')'); return {kind: 'cast', token, target: type.type, value: this.unary()}; }
     let value;
     if (token.kind === 'number') { this.take(); value = {kind: 'literal', token, value: token.value}; }
     else if (this.match('(')) { value = this.expression(); this.take(')'); }
@@ -276,7 +282,7 @@ export class Parser {
       else if (this.match('.')) { value = {kind: 'member', token, base: value, member: this.name()}; }
       else if (this.match('(')) { const args = []; if (!this.is(')')) do { args.push(this.expression(2)); } while (this.match(',')); this.take(')');
         if(value.kind==='id'&&value.token.forward){const f=value.token.forward;if(f.tooDeep)this.fail('Forwarding macro chains are limited to 32 calls.',value.token);if(f.recursive||f.numericTarget)this.fail('Recursive or non-function forwarding macro target is unsupported.',value.token);if(f.chain.some(m=>m.arity!==args.length))this.fail(`Wrong argument count for forwarding macro '${value.name}'.`,value.token);value={...value,name:f.target};}
-        value = value.kind==='id'&&value.token.expressionMacro?this.expandExpressionMacro(value.token.expressionMacro,args,value.token):{kind: 'call', token, callee: value, args}; }
+        value = value.kind==='id'&&value.token.expressionMacro?this.expandExpressionMacro(value.token.expressionMacro,args,value.token):{kind: 'call', token, callee: value, args,...(value.kind==='id'&&this.typeAliases.has(value.name)?{aliasType:this.typeAliases.get(value.name)}:{})}; }
       else if (this.is('++') || this.is('--')) { value = {kind: 'unary', token, op: this.take().value, value, prefix: false}; }
       else break;
     }
