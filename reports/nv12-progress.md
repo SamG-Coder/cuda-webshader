@@ -42,8 +42,19 @@ output or replace the full batch with a single-frame test.
 - Fixed acceptance of `static` after `__device__` and `__global__`, including
   the original `__forceinline__ __device__ static` ordering. A regression test
   checks that these legal orderings generate identical WGSL.
-- Conversion currently stops at reinterpretation between packed byte/vector
-  pointers and `uint32_t` pointers.
+- Conversion now compiles unchanged. The compiler supports 32-bit loads from
+  byte storage, word views of local `uchar4` values, and two/four-component
+  vector views of matching scalar storage. Offsets are evaluated once, local
+  word views retain their bits, and const protections remain enforced.
+  `tests/nv12-convert-native.cu` runs the original full-resolution conversion
+  with all 24 frames in one native launch and checks all frames before saving
+  a deduplicated reference. `tests/nv12-convert-gpu.js` processes all 24 frames
+  at 1920 x 1080 with the unchanged kernel, streaming one frame per dispatch
+  to stay below WebGPU's binding limit. All 149,299,200 output values passed
+  comparison: maximum error 0.0000152587890625, tolerance 0.0001 on the 0..255
+  colour scale. Conversion reads only its own frame, so this streaming does
+  not introduce texture-tile boundary changes. The focused conversion capture
+  is separate from the invalid resize-first pipeline captures above.
 - NV12 resize requires `uchar2`, packed pair stores and byte-pair texture reads.
 - BGR resize now compiles unchanged. Deferred pointers initialized to `NULL`
   or literal zero are lowered only when every use follows an assignment and

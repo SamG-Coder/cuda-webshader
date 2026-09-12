@@ -151,8 +151,8 @@
   "compilerProbes": [
     {
       "entry": "nv12ToBGRplanarBatchKernel",
-      "compiled": false,
-      "error": "Unsupported expression 'pointer-cast'. (27:10)\n        *(uint32_t *)&luma2x01 = *(uint32_t *)pSrc;\n         ^"
+      "compiled": true,
+      "wgslLines": 137
     },
     {
       "entry": "resizeNV12BatchKernel",

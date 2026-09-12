@@ -1,0 +1,1 @@
+Original NV12 conversion: 1920x1080, 24 batches, 149299200 output values checked, all frames bitwise identical

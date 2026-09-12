@@ -64,7 +64,9 @@ function analyse(functions, params) {
       n.args.slice(1).forEach(a => scan(a)); return;
     }
     if (n.kind === 'index') {
-      const name = resolve(rootName(n)); if (bufferNames.has(name)) { if (mode !== 'write') reads.add(name); if (mode !== 'read') writes.add(name); }
+      const castParts=n.base.kind==='pointer-cast'?pointerParts(n.base.value):null;
+      const name = resolve(castParts?.base?.name||rootName(n)); if (bufferNames.has(name)) { if (mode !== 'write') reads.add(name); if (mode !== 'read') writes.add(name); }
+      if(castParts?.offset)scan(castParts.offset);
       scan(n.index); if (n.base.kind === 'index') scan(n.base, mode); return;
     }
     if (n.kind === 'member') {const name=resolve(rootName(n.base));if(mode!=='read'&&n.base.kind==='index'&&params.some(p=>p.pointer&&p.name===name&&p.type==='cw_uchar4')){atomic.add(name);atomicBindings.add(name);reads.add(name);}scan(n.base, mode); return; }
@@ -223,6 +225,36 @@ class Emitter {
         const atomic=s.atomic&&!isArray(s.type);return this.result(n, s.type, atomic&&!raw?(s.volatileShared&&s.type==='f32'?`bitcast<f32>(atomicLoad(&${s.code}))`:`atomicLoad(&${s.code})`):s.code, [], {rootSymbol: s, atomicRoot: s.atomic,atomic});
       }
       case 'index': {
+        if(n.base.kind==='pointer-cast'&&[2,4].includes(vectorLength(n.base.target))) {
+          const cast=n.base,pointer=this.argument(cast.value),index=this.expr(n.index),element=vectorElement(cast.target),count=vectorLength(cast.target);
+          if(!['f32','i32','u32'].includes(element)||pointer.type?.element!==element||!pointer.rootSymbol?.rootBufferName||!['i32','u32'].includes(index.type))this.fail('Vector pointer views require matching 32-bit scalar storage and an integer index.',n);
+          if(raw&&(cast.constant||pointer.rootSymbol.constant))this.fail('Cannot modify a const vector pointer view.',n);
+          const offset='cw_vector_offset_'+this.temp++,pre=[...pointer.pre,...index.pre,`let ${offset} = ${pointer.pointerCode} + i32(${index.code}) * ${count}i;`];
+          const components=Array.from({length:count},(_,i)=>`${pointer.code}[${offset} + ${i}i]`);
+          if(pointer.rootSymbol.atomic)this.fail('Vector pointer views of atomic storage are unsupported.',n);
+          n.scalarVectorView=cast.value;n.scalarVectorCount=count;
+          return this.result(n,cast.target,`${cast.target}(${components.join(', ')})`,pre,{rootSymbol:pointer.rootSymbol,scalarVectorComponents:components});
+        }
+        if(n.base.kind==='pointer-cast'&&n.base.target==='u32') {
+          const cast=n.base,address=cast.value;
+          if(address.kind==='unary'&&address.op==='&'&&address.value.kind==='id') {
+            const value=this.expr(address.value,true);
+            if(value.type!=='cw_uchar4'||value.rootSymbol?.kind!=='local'||constantValue(n.index)!==0)this.fail('Packed word local views require one named uchar4 and index zero.',n);
+            if(raw&&cast.constant)this.fail('Cannot modify a const packed word view.',n);
+            n.packedWordLocal=address.value;
+            return this.result(n,'u32',value.code,value.pre,{rootSymbol:value.rootSymbol});
+          }
+          if(raw)this.fail('Packed word stores to byte buffers are not yet supported.',n);
+          const pointer=this.argument(address),index=this.expr(n.index);
+          if(pointer.type?.element!=='cw_uchar'||!pointer.rootSymbol?.rootBufferName||!['i32','u32'].includes(index.type))this.fail('Packed word loads require byte storage and an integer word index.',n);
+          const offset='cw_word_byte_'+this.temp++;
+          const bytes=Array.from({length:4},(_,i)=>{
+            const at=`(${offset} + ${i}u)`,word=`${pointer.code}[${at} >> 2u]`,read=pointer.rootSymbol.atomic?`atomicLoad(&${word})`:word;
+            return `(((${read} >> ((${at} & 3u) * 8u)) & 255u) << ${i*8}u)`;
+          });
+          n.packedWordBytes=address;
+          return this.result(n,'u32',`(${bytes.join(' | ')})`,[...pointer.pre,...index.pre,`let ${offset} = u32(${pointer.pointerCode}) + u32(${index.code}) * 4u;`],{rootSymbol:pointer.rootSymbol});
+        }
         if(n.pointerTarget&&this.lookup(n.base.name,n).type.element!==n.pointerTarget)this.fail('Byte pointer dereference must retain its pointee type.',n);if(raw&&n.pointerConstant)this.fail('Cannot modify a const byte pointer.',n);
         const base = this.expr(n.base, true), index = this.expr(n.index);
         if(base.rootSymbol?.kind==='pointer-array'){
@@ -253,6 +285,7 @@ class Emitter {
         if(base.type==='cw_uchar4'){if(n.member.length!==1||!'xyzw'.includes(n.member))this.fail('uchar4 has x, y, z and w byte components.',n);const shift='xyzw'.indexOf(n.member)*8,read=base.atomic&&raw?`atomicLoad(&${base.code})`:base.code;return this.result(n,'cw_uchar',`((${read} >> ${shift}u) & 255u)`,base.pre,{rootSymbol:base.rootSymbol,packedBase:base.code,packedShift:shift,packedAtomic:!!base.atomic});}
         if(this.structs.has(base.type)){const field=this.structs.get(base.type).fields.find(f=>f.name===n.member);if(!field)this.fail('Unknown struct field '+n.member,n);return this.result(n,field.resolvedType,`${base.code}.cw_field_${n.member}`,base.pre,{rootSymbol:base.rootSymbol});}
         if (!size || n.member.length !== 1 || 'xyzw'.indexOf(n.member) < 0 || 'xyzw'.indexOf(n.member) >= size) this.fail('Only valid single vector components (.x/.y/.z/.w) are supported.', n);
+        if(raw&&base.scalarVectorComponents)return this.result(n,vectorElement(base.type),base.scalarVectorComponents['xyzw'.indexOf(n.member)],base.pre,{rootSymbol:base.rootSymbol});
         return this.result(n, vectorElement(base.type), `${base.code}.${n.member}`, base.pre, {rootSymbol: base.rootSymbol});
       }
       case 'ptx-sad4': {
@@ -623,6 +656,11 @@ class Emitter {
         return [...left.pre,...index.pre,...offset.pre,`${slots.code}[${index.code}] = ${this.convert(offset.code,offset.type,'i32',n)};`];
       }
       const target = this.expr(n.left, true); this.writable(target, n.left); let value = this.expr(n.right);let packedPre;if(target.packedAtomic){n.packedAtomicAssignment=true;const tmp='cw_byte_value_'+this.temp++;packedPre=[...value.pre,`let ${tmp}: ${typeName(value.type)} = ${value.code};`,...target.pre];value={...value,code:tmp,pre:[]};}
+      if(target.scalarVectorComponents){
+        if(n.op!=='='||value.type!==target.type)this.fail('Vector pointer stores require a matching vector assignment.',n);
+        const temp='cw_vector_store_'+this.temp++;n.type=target.type;
+        return [...target.pre,...value.pre,`let ${temp} = ${value.code};`,...target.scalarVectorComponents.map((code,i)=>`${code} = ${temp}.${'xyzw'[i]};`)];
+      }
       if(n.op!=='='&&vectorLength(target.type)){const op=n.op.slice(0,-1);if(n.left.kind!=='id'||vectorElement(target.type)!=='f32'||!['+','-','*','/'].includes(op)||![target.type,'f32'].includes(value.type))this.fail('Vector compound assignments require a named float vector and matching vector or float scalar.',n);const rhs=value.type===target.type?value.code:`${target.type}(${value.code})`;n.operandType=target.type;n.type=target.type;return [...target.pre,...value.pre,`${target.code} = ${target.code} ${op} ${rhs};`];}
       if(target.type==='cw_uchar4'&&n.op!=='=')this.fail('uchar4 compound arithmetic requires explicit byte components.',n);
       let code = this.convert(value.code, value.type, target.type, n);

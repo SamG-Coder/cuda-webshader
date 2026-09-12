@@ -42,6 +42,8 @@ class Context {
   constructor(artifact,env,ids,budget){this.artifact=artifact;this.env=env;this.ids=ids;this.budget=budget;this.steps=0;}
   tick(){if(++this.steps>this.budget)throw new Error('CPU oracle instruction budget exceeded; possible nonterminating kernel.');}
   *ref(n){
+    if(n.scalarVectorView){const p=n.scalarVectorView,base=this.env.get(p.pointerBaseSymbol)?.value,offset=(p.pointerOffset?yield* this.eval(p.pointerOffset):0)+n.scalarVectorCount*(yield* this.eval(n.index));return {get:()=>Array.from({length:n.scalarVectorCount},(_,i)=>base.get(offset+i)),set:value=>{for(let i=0;i<n.scalarVectorCount;i++)base.set(offset+i,value[i]);}};}
+    if(n.packedWordLocal)return yield* this.ref(n.packedWordLocal);
     if(n.kind==='id'){const cell=this.env.get(n.symbol);if(!cell)throw new Error(`Uninitialized symbol ${n.name}`);return {get:()=>cell.value,set:v=>{cell.value=convert(v,n.type);}};}
     if(n.kind==='index'){
       const base=yield* this.eval(n.base),i=yield* this.eval(n.index);
@@ -58,6 +60,8 @@ class Context {
     throw new Error(`Expression ${n.kind} is not an lvalue.`);
   }
   *eval(n){
+    if(n.packedWordLocal)return (yield* this.ref(n.packedWordLocal)).get()>>>0;
+    if(n.packedWordBytes){const p=n.packedWordBytes,base=this.env.get(p.pointerBaseSymbol)?.value,offset=(p.pointerOffset?yield* this.eval(p.pointerOffset):0)+4*(yield* this.eval(n.index));let word=0;for(let i=0;i<4;i++)word|=base.get(offset+i)<<(i*8);return word>>>0;}
     if(n.kind==='sequence'){let result;for(const expression of n.expressions)result=yield* this.eval(expression);return result;}
     this.tick();
     switch(n.kind){
