@@ -10,7 +10,7 @@ export const typeName = t => isArray(t) ? `array<${typeName(t.element)}${t.lengt
 export const vectorLength = t => typeof t === 'string' && /^vec[234]</.test(t) ? Number(t[3]) : 0;
 export const vectorElement = t => vectorLength(t)?t.slice(5,-1):t;
 export const typeStride = t => isArray(t) ? typeStride(t.element) * t.length : vectorLength(t) === 3 ? 16 : (vectorLength(t) || 1) * 4;
-const numeric = t => ['f32', 'i32', 'u32'].includes(t);
+const numeric = t => ['f32', 'i32', 'u32','cw_uchar'].includes(t);
 const indent = lines => lines.map(l => `  ${l}`);
 const rootName = n => n?.kind === 'id' ? n.name : ['index', 'member'].includes(n?.kind) ? rootName(n.base) : null;
 const shiftedPointers=fn=>{const names=new Set();walk(fn.body,n=>{if(n.kind==='assign'&&['+=','-='].includes(n.op)&&n.left.kind==='id')names.add(n.left.name);});return names;};
@@ -135,6 +135,8 @@ class Emitter {
   convert(code, from, to, n) {
     if(to==='bool'&&isArray(from)&&from.length===null&&n){return 'true';} // All runtime storage bindings are required and non-null.
     if (typeName(from) === typeName(to) && !isArray(to)) return code;
+    if(to==='cw_uchar'){if(from==='bool')return `select(0u,1u,${code})`;if(numeric(from))return `(${from==='f32'?`u32(i32(${code}))`:`u32(${code})`} & 255u)`;}
+    if(from==='cw_uchar'){if(to==='bool')return `(${code} != 0u)`;if(numeric(to))return `${to}(${code})`;}
     if (numeric(from) && numeric(to)) return `${to}(${code})`;
     if (to === 'bool' && numeric(from)) return `(${code} != ${from === 'f32' ? '0.0f' : from === 'u32' ? '0u' : '0i'})`;
     if (from === 'bool' && numeric(to)) return `select(${to}(0), ${to}(1), ${code})`;
@@ -186,6 +188,7 @@ class Emitter {
           return this.result(n, 'u32', `${code}.${n.member}`);
         }
         const base = this.expr(n.base, raw), size = vectorLength(base.type);
+        if(base.type==='cw_uchar4'){if(n.member.length!==1||!'xyzw'.includes(n.member))this.fail('uchar4 has x, y, z and w byte components.',n);const shift='xyzw'.indexOf(n.member)*8;return this.result(n,'cw_uchar',`((${base.code} >> ${shift}u) & 255u)`,base.pre,{rootSymbol:base.rootSymbol,packedBase:base.code,packedShift:shift});}
         if(this.structs.has(base.type)){const field=this.structs.get(base.type).fields.find(f=>f.name===n.member);if(!field)this.fail('Unknown struct field '+n.member,n);return this.result(n,field.resolvedType,`${base.code}.cw_field_${n.member}`,base.pre,{rootSymbol:base.rootSymbol});}
         if (!size || n.member.length !== 1 || 'xyzw'.indexOf(n.member) < 0 || 'xyzw'.indexOf(n.member) >= size) this.fail('Only valid single vector components (.x/.y/.z/.w) are supported.', n);
         return this.result(n, vectorElement(base.type), `${base.code}.${n.member}`, base.pre, {rootSymbol: base.rootSymbol});
@@ -194,14 +197,14 @@ class Emitter {
       case 'unary': {
         if (['++', '--'].includes(n.op)) this.fail('Increment/decrement are supported as statements and for-loop updates, not inside expressions.', n);
         if (n.op === '&' || n.op === '*') this.fail('Pointers are supported only as kernel buffer parameters and &buffer[index] atomic targets.', n);
-        const value = this.expr(n.value);
+        let value = this.expr(n.value);if(value.type==='cw_uchar')value={...value,type:'i32',code:`i32(${value.code})`};
         if (n.op === '!') return this.result(n, 'bool', `(!${this.convert(value.code, value.type, 'bool', n)})`, value.pre);
         if (!numeric(value.type) || (n.op === '~' && value.type === 'f32')) this.fail('Invalid unary operator/type.', n);
         if (n.op === '-' && value.type === 'u32') return this.result(n, 'u32', `(0u - ${value.code})`, value.pre);
         return this.result(n, value.type, n.op === '+' ? value.code : `(${n.op}${value.code})`, value.pre);
       }
       case 'binary': {
-        const a = this.expr(n.left), b = this.expr(n.right);
+        let a = this.expr(n.left), b = this.expr(n.right);if(a.type==='cw_uchar')a={...a,type:'i32',code:`i32(${a.code})`};if(b.type==='cw_uchar')b={...b,type:'i32',code:`i32(${b.code})`};
         if (['&&', '||'].includes(n.op)) {
           const ac = this.convert(a.code, a.type, 'bool', n), bc = this.convert(b.code, b.type, 'bool', n);
           if (!b.pre.length) return this.result(n, 'bool', `(${ac} ${n.op} ${bc})`, [...a.pre]);
@@ -209,6 +212,7 @@ class Emitter {
           const pre = [...a.pre, `var ${tmp}: bool = ${ac};`, `if (${n.op === '&&' ? tmp : `!${tmp}`}) {`, ...indent([...b.pre, `${tmp} = ${bc};`]), '}'];
           return this.result(n, 'bool', tmp, pre);
         }
+        if(a.type==='cw_uchar4'||b.type==='cw_uchar4')this.fail('uchar4 arithmetic requires explicit byte components.',n);
         if(vectorLength(a.type)||vectorLength(b.type)){const type=vectorLength(a.type)?a.type:b.type;if(vectorElement(type)!=='f32'||!['+','-','*','/'].includes(n.op)||![type,'f32'].includes(a.type)||![type,'f32'].includes(b.type))this.fail('Vector arithmetic supports matching float vectors and float scalars with +, -, *, /.',n);const code=v=>v.type===type?v.code:`${type}(${v.code})`;n.operandType=type;return this.result(n,type,`(${code(a)} ${n.op} ${code(b)})`,[...a.pre,...b.pre]);}
         let common = ['<<', '>>'].includes(n.op) ? a.type : this.common(a.type, b.type, n);
         if (vectorLength(common)) this.fail('CUDA vector arithmetic requires explicit components; operator overloads are outside this subset.', n);
@@ -323,7 +327,7 @@ class Emitter {
       this.writable(target, n.args[0].value);
       return this.result(n, target.type, `${atomics[name]}(&${target.code}, ${this.convert(value.code, value.type, target.type, n)})`, [...target.pre, ...value.pre]);
     }
-    const casts = {float: 'f32', int: 'i32', uint: 'u32', bool: 'bool'};
+    const casts = {uchar:'cw_uchar',float: 'f32', int: 'i32', uint: 'u32', bool: 'bool'};
     const args = n.args.map(a => this.argument(a)), pre = args.flatMap(a => a.pre);
     if(name==='__mul24'||name==='__umul24'){
       if(args.length!==2||args.some(a=>!['i32','u32'].includes(a.type)))this.fail(`${name} requires two 32-bit integer arguments.`,n);
@@ -331,6 +335,7 @@ class Emitter {
       this.integerIntrinsics.add(name);
       return this.result(n,type,`cw_${signed?'mul24':'umul24'}(${args.map(a=>this.convert(a.code,a.type,type,n)).join(', ')})`,pre);
     }
+    if(name==='make_uchar4'){if(args.length!==4||args.some(a=>!numeric(a.type)&&a.type!=='bool'))this.fail('make_uchar4 requires four scalar components.',n);const components=args.map((a,i)=>{const value=a.type==='f32'?`u32(i32(${a.code}))`:this.convert(a.code,a.type,'u32',n);return `((${value} & 255u) << ${i*8}u)`;});return this.result(n,'cw_uchar4',`(${components.join(' | ')})`,pre);}
     if (casts[name]) { if (args.length !== 1) this.fail('Scalar casts require one argument.', n); return this.result(n, casts[name], this.convert(args[0].code, args[0].type, casts[name], n), pre); }
     if (/^make_(float|uint|int)[234]$/.test(name)) {
       if(name==='make_float3'&&args.length===1&&args[0].type==='vec4<f32>')return this.result(n,'vec3<f32>',`${args[0].code}.xyz`,pre);
@@ -354,7 +359,7 @@ class Emitter {
     }
     if (['min', 'max'].includes(name)) {
       if (args.length !== 2) this.fail(`${name} needs two arguments.`, n);
-      const type = this.common(args[0].type, args[1].type, n);
+      const type = this.common(args[0].type==='cw_uchar'?'i32':args[0].type, args[1].type==='cw_uchar'?'i32':args[1].type, n);
       if (!numeric(type)) this.fail('min/max accept scalars.', n);
       return this.result(n, type, `${name}(${args.map(a => this.convert(a.code, a.type, type, n)).join(', ')})`, pre);
     }
@@ -366,7 +371,7 @@ class Emitter {
     }
     if (!helper || helper.qualifier !== '__device__') this.fail(`Unsupported function '${name}'. CUDA host APIs, warp intrinsics, dynamic launches and libraries are not available.`, n);
     if(args.length>helper.params.length||helper.params.slice(args.length).some(p=>p.defaultValue===undefined))this.fail(`Wrong number of arguments for '${name}'.`,n);
-    for(const param of helper.params)if(param.defaultValue!==undefined&&!['f32','i32','u32','bool'].includes(param.type))this.fail('Default arguments require scalar value parameters.',param);
+    for(const param of helper.params)if(param.defaultValue!==undefined&&!['f32','i32','u32','bool','cw_uchar'].includes(param.type))this.fail('Default arguments require scalar value parameters.',param);
     while(args.length<helper.params.length){const value=structuredClone(helper.params[args.length].defaultValue);n.args.push(value);const argument=this.argument(value);args.push(argument);pre.push(...argument.pre);}
     if(helper.params.some(p=>p.pointer))helper=this.bindPointerHelper(helper,args,n);
     const caller=this.currentFunction.name,edges=this.helperCalls.get(caller)||new Set();edges.add(helper.name);this.helperCalls.set(caller,edges);
@@ -376,7 +381,7 @@ class Emitter {
     const references=new Set();n.constRefTemporaries=[];n.localPointerArgs=helper.params.map(p=>!!p.localPointer);n.referenceArgs=helper.params.map(p=>!!p.reference);n.groupArgs=helper.params.map(p=>p.type==='thread-block');n.pointerArgs=helper.params.map(p=>!!p.pointer);
     const codes=args.map((a,i)=>{const p=helper.params[i];if(p.type==='texture3d'){const shape=textureShape(p.textureSampling),symbol=a.rootSymbol;if(symbol?.kind!=='texture'||symbol.dimension!==shape.dimension||symbol.format!==shape.format)this.fail('Texture helper argument requires the same inferred sampling format.',n.args[i]);return symbol.code+', '+symbol.sampler+(shape.format==='r32float'?', '+symbol.coordinateScale:'');}if(p.localPointer){if(references.has(a.rootSymbol))this.fail('Aliased local pointer/reference arguments are unsupported.',n.args[i]);references.add(a.rootSymbol);return a.pointerCode;}if(p.pointer)return a.pointerCode;if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
       const node=n.args[i],s=a.rootSymbol;
-      if(p.constant){if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.add(s);if(s?.kind==='reference')return s.pointerCode;if(s?.kind==='local'&&!s.constant&&['id','member'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
+      if(p.constant){if(node.kind==='member'&&node.base.type==='cw_uchar4'&&p.type==='cw_uchar'){const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: cw_uchar = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.add(s);if(s?.kind==='reference')return s.pointerCode;if(s?.kind==='local'&&!s.constant&&['id','member'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
       if(node.kind!=='id'||!s||!['local','reference'].includes(s.kind)||s.constant||isArray(a.type)||!numeric(a.type)||a.type!==p.type)this.fail('Reference arguments require a mutable named local scalar of the exact type.',node);
       if(references.has(s))this.fail('Aliased reference arguments are unsupported.',node);references.add(s);return s.kind==='reference'?s.pointerCode:`&${s.code}`;
     });
@@ -384,6 +389,7 @@ class Emitter {
   }
   writable(target, n) {
     const s = target.rootSymbol;
+    if(target.packedBase&&(n.base?.kind!=='id'||s?.kind!=='local'||s.type!=='cw_uchar4'))this.fail('Byte component writes require a named local uchar4; write complete uchar4 records to storage or shared memory.',n);
     if (!s || !['id', 'index', 'member'].includes(n.kind) || isArray(target.type)) this.fail('Assignment requires a scalar/vector variable or array element.', n);
     if (s.constant) this.fail(`Cannot write through const '${s.name}'.`, n);
     if (s.kind === 'uniform') this.fail('Scalar kernel parameters are read-only in this subset. Copy the parameter to a local variable first.', n);
@@ -402,20 +408,22 @@ class Emitter {
       }
       const target = this.expr(n.left, true); this.writable(target, n.left); const value = this.expr(n.right);
       if(n.op!=='='&&vectorLength(target.type)){const op=n.op.slice(0,-1);if(n.left.kind!=='id'||vectorElement(target.type)!=='f32'||!['+','-','*','/'].includes(op)||![target.type,'f32'].includes(value.type))this.fail('Vector compound assignments require a named float vector and matching vector or float scalar.',n);const rhs=value.type===target.type?value.code:`${target.type}(${value.code})`;n.operandType=target.type;n.type=target.type;return [...target.pre,...value.pre,`${target.code} = ${target.code} ${op} ${rhs};`];}
+      if(target.type==='cw_uchar4'&&n.op!=='=')this.fail('uchar4 compound arithmetic requires explicit byte components.',n);
       let code = this.convert(value.code, value.type, target.type, n);
       if (n.op !== '=') {
         const op = n.op.slice(0, -1); if (target.atomic) this.fail('Use explicit atomicAdd/Min/Max/Exch rather than compound assignments to atomic arrays.', n);
-        const type = ['<<', '>>'].includes(op) ? target.type : this.common(target.type, value.type, n), rhsType = ['<<', '>>'].includes(op) ? 'u32' : type;
+        const type = ['<<', '>>'].includes(op) ? (target.type==='cw_uchar'?'i32':target.type) : this.common(target.type==='cw_uchar'?'i32':target.type, value.type==='cw_uchar'?'i32':value.type, n), rhsType = ['<<', '>>'].includes(op) ? 'u32' : type;
         if (['<<', '>>', '%', '&', '|', '^'].includes(op) && !['i32', 'u32'].includes(type)) this.fail('Integer operator requires integer operands.', n);
         code = this.convert(`(${this.convert(target.code, target.type, type, n)} ${op} ${this.convert(value.code, value.type, rhsType, n)})`, type, target.type, n);
         n.operandType = type;
       }
       n.type = target.type;
+      if(target.packedBase)return [...target.pre,...value.pre,`${target.packedBase} = (${target.packedBase} & ${(~(255<<target.packedShift))>>>0}u) | ((u32(${code}) & 255u) << ${target.packedShift}u);`];
       return [...target.pre, ...value.pre, target.atomic ? `atomicStore(&${target.code}, ${code});` : `${target.code} = ${code};`];
     }
     if (n.kind === 'unary' && ['++', '--'].includes(n.op)) {
       const target = this.expr(n.value, true); this.writable(target, n.value); if (target.atomic || !numeric(target.type)) this.fail('Increment/decrement require a non-atomic scalar.', n);
-      n.type = target.type; return [...target.pre, `${target.code} ${n.op === '++' ? '+=' : '-='} ${target.type}(1);`];
+      n.type = target.type;if(target.type==='cw_uchar'&&!target.packedBase)return [...target.pre,`${target.code} = (${target.code} ${n.op==='++'?'+':'-'} 1u) & 255u;`];if(target.packedBase)return [...target.pre,`${target.packedBase} = (${target.packedBase} & ${(~(255<<target.packedShift))>>>0}u) | ((u32(i32(${target.code}) ${n.op==='++'?'+':'-'} 1i) & 255u) << ${target.packedShift}u);`]; return [...target.pre, `${target.code} ${n.op === '++' ? '+=' : '-='} ${target.type}(1);`];
     }
     const value = this.expr(n);
     if (n.kind !== 'call') this.fail('Only assignments, increments and function calls may stand alone as statements.', n);
@@ -445,7 +453,7 @@ class Emitter {
     if(this.structs.has(n.type)&&(n.shared||n.dimensions.length))this.fail('Structs currently support local values only, not shared memory or arrays of structs.',n);
     if (n.type === 'void') this.fail('Variables cannot have void type.', n);
     let type = n.type;const sharedOwner=(this.currentFunction.pointerOrigin||this.currentFunction.name)+':'+n.token.offset+':'+n.name;
-    const dims = n.dimensions.map(d => {if(d===null){if(!n.external||!n.shared)this.fail('Unsized arrays require extern __shared__.',n);if(this.dynamicSharedUsed&&this.dynamicSharedOwner!==sharedOwner)this.fail('Only one dynamic shared array is supported; CUDA declarations alias the same allocation.',n);const stride=typeStride(n.type);if(n.type==='bool'||vectorLength(n.type)===3)this.fail('Dynamic shared arrays require 32-bit scalars or two/four-component vectors.',n);if(!this.dynamicSharedBytes||this.dynamicSharedBytes%stride)this.fail('Set sharedMemoryBytes to a positive multiple of the dynamic shared element size.',n);this.dynamicSharedUsed=true;this.dynamicSharedOwner=sharedOwner;return this.dynamicSharedBytes/stride;}const value = constantValue(d); if (!Number.isSafeInteger(value) || value < 1 || value > 65536) this.fail('Invalid fixed array dimension (1..65536).', n); return value; });
+    const dims = n.dimensions.map(d => {if(d===null){if(!n.external||!n.shared)this.fail('Unsized arrays require extern __shared__.',n);if(this.dynamicSharedUsed&&this.dynamicSharedOwner!==sharedOwner)this.fail('Only one dynamic shared array is supported; CUDA declarations alias the same allocation.',n);const stride=typeStride(n.type);if(n.type==='bool'||n.type==='cw_uchar'||vectorLength(n.type)===3)this.fail('Dynamic shared arrays require 32-bit scalars or two/four-component vectors.',n);if(!this.dynamicSharedBytes||this.dynamicSharedBytes%stride)this.fail('Set sharedMemoryBytes to a positive multiple of the dynamic shared element size.',n);this.dynamicSharedUsed=true;this.dynamicSharedOwner=sharedOwner;return this.dynamicSharedBytes/stride;}const value = constantValue(d); if (!Number.isSafeInteger(value) || value < 1 || value > 65536) this.fail('Invalid fixed array dimension (1..65536).', n); return value; });
     for (let i = dims.length - 1; i >= 0; i--) type = arrayOf(type, dims[i]);
     if (n.shared && n.init) this.fail('__shared__ variables cannot have an initializer.', n);
     if (isArray(type) && n.init) this.fail('Array initializers are unsupported. Initialize elements explicitly.', n);
@@ -518,6 +526,7 @@ class Emitter {
       if(p.type==='surface2d'){if(p.pointer)this.fail('Surface objects must be passed by value.',p);const binding=bufferCount+this.kernel.params.filter(p=>p.type==='texture3d').length*2+surfaces.length,symbol={name:p.name,type:p.type,code:'cw_surface_'+p.name,kind:'surface',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;surfaces.push({name:p.name,binding,dimension:'2d',format:'r32float',access:'write-only',coordinates:'global-xy'});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_storage_2d<r32float, write>;`);continue;}
       if(p.type==='texture3d'){if(p.pointer)this.fail('Texture objects must be passed by value.',p);const binding=bufferCount+textures.length*2,samplerBinding=binding+1,sampling=p.textureSampling||'tex3D',{dimension,format}=textureShape(sampling);const symbol={name:p.name,type:p.type,code:'t_'+p.name,sampler:'s_'+p.name,coordinateScale:`vec2<f32>(cw_params.cw_tex_${p.name}_sx, cw_params.cw_tex_${p.name}_sy)`,dimension,format,kind:'texture',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;textures.push({name:p.name,binding,samplerBinding,dimension,format});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_${dimension}<f32>;`,`@group(0) @binding(${samplerBinding}) var ${symbol.sampler}: sampler;`);continue;}
       if (p.pointer) {
+        if(p.type==='cw_uchar')this.fail('Byte pointers need a packed byte-buffer ABI; use uchar4 records for storage.',p);
         if(this.structs.has(p.type))this.fail('Struct buffer layout is not supported; use local struct values.',p);
         if (p.type === 'bool' || vectorLength(p.type)===3) this.fail('bool* and three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
         const atomic = this.usage.atomic.has(p.name), readOnly = p.constant || !this.usage.writes.has(p.name);
@@ -529,7 +538,7 @@ class Emitter {
         this.add(p.name, symbol, p, true); p.symbol = symbol;this.bufferSymbols.set(p.name,symbol);
         header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type}>` : p.type}>;`);
       } else {
-        if (!numeric(p.type)) this.fail('Scalar kernel parameters must be float, int or unsigned int. Put vectors in buffers.', p);
+        if (!numeric(p.type)||p.type==='cw_uchar') this.fail('Scalar kernel parameters must be float, int or unsigned int. Put vectors in buffers.', p);
         scalars.push({name: p.name, type: p.type, offset: scalars.length * 4});
         const symbol = {name: p.name, type: p.type, code: `cw_params.p_${p.name}`, constant: false, atomic: false, kind: 'uniform'};
         this.add(p.name, symbol, p, true); p.symbol = symbol;
@@ -572,6 +581,7 @@ class Emitter {
     if(this.integerIntrinsics.has('__umul24'))helperLines.unshift('fn cw_umul24(a: u32, b: u32) -> u32 { return (a & 16777215u) * (b & 16777215u); }');
     for (const s of this.shared) header.push(`var<workgroup> ${s.code}: ${s.atomic ? sharedAtomicType(s.type) : typeName(s.type)};`);
     const storageSize = this.shared.reduce((n, s) => n + Math.ceil(typeStride(s.type) / 16) * 16, 0);
+    let usesPackedBytes=(this.ast.structs||[]).some(s=>s.fields.some(f=>['cw_uchar','cw_uchar4'].includes(f.type)));walk(this.ast,n=>{if(['cw_uchar','cw_uchar4'].includes(n.type)||['cw_uchar','cw_uchar4'].includes(n.result))usesPackedBytes=true;});if(usesPackedBytes)header.unshift('alias cw_uchar = u32;','alias cw_uchar4 = u32;');
     const wgsl = [...header, '', ...helperLines, '', `@compute @workgroup_size(${this.workgroupSize.join(', ')})`, 'fn main(', '  @builtin(local_invocation_id) cw_thread: vec3<u32>,', '  @builtin(workgroup_id) cw_block: vec3<u32>,', '  @builtin(num_workgroups) cw_grid: vec3<u32>', ') {', ...indent(main), '}', ''].join('\n');
     return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {workgroupSize: this.workgroupSize, bindings, scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2+surfaces.length : null,...(textures.length?{textures}:{}),...(textureScales.length?{textureScales}:{}),...(surfaces.length?{surfaces}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
   }
@@ -669,7 +679,7 @@ function instantiateHelperTemplates(ast, kernel) {
     if(!matches.length)fail('Cannot deduce helper template type from these parameters; supply an explicit argument.',callee);
     const type=matches[0];
     if(matches.some(t=>typeName(t)!==typeName(type)))fail('Conflicting deduced helper template argument types.',callee);
-    const names=['float','int','uint','bool',...['float','int','uint'].flatMap(p=>[2,3,4].map(n=>p+n))],argument=names.find(n=>builtinType(n)===type);
+    const names=['float','int','uint','bool','uchar','uchar4',...['float','int','uint'].flatMap(p=>[2,3,4].map(n=>p+n))],argument=names.find(n=>builtinType(n)===type);
     if(!argument)fail('Deduced helper template argument must be a supported built-in value type.',callee);
     const call={kind:'call',token:callee.token,callee:{...callee,templateArgument:argument},args:[]};
     process({kind:'function',name:'deduction',token:callee.token,result:'void',params:[],body:{kind:'block',body:[call]}});

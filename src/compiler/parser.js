@@ -14,6 +14,8 @@ const OPERATORS = ['<<=', '>>=', '::', '++', '--', '+=', '-=', '*=', '/=', '%=',
 const TYPES = new Set(['float', 'int', 'uint', 'unsigned', 'bool', 'void', 'float2', 'float3', 'float4']);
 const QUALIFIERS = new Set(['const', '__shared__', '__restrict__', '__restrict', 'restrict','extern']);
 const MAP = { float: 'f32', int: 'i32', uint: 'u32', bool: 'bool', void: 'void', float2: 'vec2<f32>', float3: 'vec3<f32>', float4: 'vec4<f32>' };
+TYPES.add('uchar');MAP.uchar='cw_uchar';
+TYPES.add('uchar4');MAP.uchar4='cw_uchar4';
 TYPES.add('cudaTextureObject_t');MAP.cudaTextureObject_t='texture3d';
 TYPES.add('cudaSurfaceObject_t');MAP.cudaSurfaceObject_t='surface2d';
 for(const [prefix,type] of [['uint','u32'],['int','i32']])for(const size of [2,3,4]){TYPES.add(prefix+size);MAP[prefix+size]=`vec${size}<${type}>`;}
@@ -106,7 +108,7 @@ export class Parser {
       if(!this.typeTraits.has(name))this.fail(`Unknown type trait '${name}'.`,tok);
       this.take('<');const argument=this.name();this.take('>');this.take('::');const member=this.name();
       type={kind:'trait-type',name,argument,member};
-    }else if (tok.value === 'unsigned') { this.match('int'); type = 'u32'; } else type = this.structs.has(tok.value)?this.structs.get(tok.value).type:this.templateTypeNames?.has(tok.value)?'template:'+tok.value:builtinType(tok.value);
+    }else if (tok.value === 'unsigned') { if(this.match('char'))type='cw_uchar';else{this.match('int'); type = 'u32';} } else type = this.structs.has(tok.value)?this.structs.get(tok.value).type:this.templateTypeNames?.has(tok.value)?'template:'+tok.value:builtinType(tok.value);
     if(!type&&this.deferredType(tok.value))type='unsupported:'+tok.value;
     if (!type) this.fail(`Unsupported type '${tok.value}'. Use float, int, unsigned int, bool or float2/3/4.`, tok);
     if (this.match('const')) constant = true;
@@ -193,7 +195,7 @@ export class Parser {
       if(templateKind==='specialization')specializationArgument=this.templateArgument();
       this.take('('); const params = [];
       if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(),defaultValue=this.match('=')?this.expression(2):undefined;
-        if(defaultValue!==undefined){const literal=defaultValue.kind==='unary'&&['+','-'].includes(defaultValue.op)?defaultValue.value:defaultValue;if(qualifier!=='__device__'||templateKind==='specialization')this.fail('Default arguments belong on primary device helper definitions only.',token);if(type.pointer||type.reference||(!['f32','i32','u32','bool'].includes(type.type)&&!String(type.type).startsWith('template:')))this.fail('Default arguments require scalar value parameters.',token);if(literal.kind!=='literal'&&!(literal===defaultValue&&literal.kind==='id'&&['true','false'].includes(literal.name)))this.fail('Default arguments support numeric or boolean literals with an optional numeric sign.',defaultValue.token);}
+        if(defaultValue!==undefined){const literal=defaultValue.kind==='unary'&&['+','-'].includes(defaultValue.op)?defaultValue.value:defaultValue;if(qualifier!=='__device__'||templateKind==='specialization')this.fail('Default arguments belong on primary device helper definitions only.',token);if(type.pointer||type.reference||(!['f32','i32','u32','bool','cw_uchar'].includes(type.type)&&!String(type.type).startsWith('template:')))this.fail('Default arguments require scalar value parameters.',token);if(literal.kind!=='literal'&&!(literal===defaultValue&&literal.kind==='id'&&['true','false'].includes(literal.name)))this.fail('Default arguments support numeric or boolean literals with an optional numeric sign.',defaultValue.token);}
         else if(params.some(p=>p.defaultValue!==undefined))this.fail('Parameters after a default argument must also have defaults.',token);
         params.push({kind: 'param', token, name, ...type,...(defaultValue!==undefined?{defaultValue}:{})});
       } while (this.match(','));

@@ -20,8 +20,20 @@ Native CUDA and NVIDIA WebGPU both produce exactly 2, 4.5, 12.5, 6.5, -2, 2, 5, 
 
 The parser also recognizes tex2Dgather template-call syntax in an unused helper. This does not implement gather execution: a selected gather call is still rejected. The original header now parses past its unused gather helper and stops at the packed uchar4 output parameter.
 
+## Verified prerequisite: packed uchar4 output
+
+The compiler now represents uchar4 as one packed 32-bit word with x, y, z and w in successive low-to-high bytes, preserving CUDA's four-byte storage record. Whole records can be copied through buffers, locals and device helpers. make_uchar4 accepts four scalar components. The uchar and unsigned char scalar spellings are supported for local values and helpers; byte reads preserve their type for overload selection and template deduction, promote to int for arithmetic, and narrow back to eight bits on assignment.
+
+Byte component updates require a named local uchar4. Direct storage/shared component updates are rejected because implementing a byte store as a whole-word read-modify-write could lose another lane's update. Store the complete record instead. Standalone byte buffer pointers and byte scalar kernel uniforms remain unsupported. Static local/shared byte values use 32-bit WGSL storage internally; dynamic shared byte arrays are rejected. Aggregate byte-vector initializers and whole-vector arithmetic are unsupported. Floating-point conversion validation uses values whose truncated integer lies in 0..255; out-of-range or non-finite floating-to-byte conversion is not a portable CUDA contract.
+
+The packed-uchar4 probe validates 257 lanes, 514 four-byte records and 16 output guard records. Native CUDA, the typed CPU reference interpreter, and NVIDIA WebGPU agree exactly on packing, signed/unsigned integer narrowing, finite fractional float truncation, byte wraparound, integer promotion, overload selection, references and a deduced packed helper. See reports/packed-uchar4-native.txt and the packed-byte GPU regression entry.
+
+The built sandbox also passes a pasted uchar4 kernel through compile, dispatch and preview, with all 128 RGBA bytes in its 32-pixel image matching exactly. See reports/packed-image-sandbox-check.json.
+
+All four original bicubic render entries now compile and pass NVIDIA hardware GPU shader validation using tests/bicubic-texture-kernel.cuh. The fixture preserves the upstream CUDA function bodies and BSD notice; desktop declarations and include guards are excluded by the generic device extractor. This check is explicitly shader-compilation-only, not image-result validation.
+
 ## Remaining work
 
-Compiling the original extracted header currently stops at the uchar4 output parameter. The sample needs packed uchar4 output and make_uchar4 conversion, the uchar template argument, and matching byte-image texture semantics. The gather helper is not called by the five upstream render paths; its unused template now parses without rewriting the user's CUDA source.
+Validate the byte-image sampling and complete packed output for all five upstream modes: nearest, bilinear, bicubic, fast bicubic and Catmull-Rom. The current float texture upload can represent normalized byte pixels, but matching native filter behaviour still requires full-image comparisons. The unused gather template parses; gather execution remains unsupported and is not called by these five render paths.
 
 After those compiler/runtime requirements, validate every original render mode against native CUDA and an independent reference, including fractional coordinates, edges and partial blocks. Add the sandbox input/settings/preview and its own card only after full output validation. This report and probe do not claim that the bicubic sample already runs.

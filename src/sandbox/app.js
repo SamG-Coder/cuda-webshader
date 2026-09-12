@@ -54,7 +54,7 @@ async function run(){
   log(`Allocated ${(bytes/1048576).toFixed(2)} MiB. Dispatch ${config.groups.join(' × ')} blocks × ${block.join(' × ')} threads.`);state('Running on GPU…');
   const start=performance.now();dispatchPreview(active);await runtime.idle();const elapsed=performance.now()-start;
   log(`Dispatch completed in ${elapsed.toFixed(2)} ms (CPU submit-to-completion wall time).`,'success');
-  const Type=selected.elementType.includes('u32')?Uint32Array:selected.elementType.includes('i32')?Int32Array:Float32Array;
+  const Type=(selected.elementType==='cw_uchar4'||selected.elementType.includes('u32'))?Uint32Array:selected.elementType.includes('i32')?Int32Array:Float32Array;
   const data=await runtime.read(buffers[config.output],Type);window.sandbox.lastOutput=Array.from(data.subarray(0,128));window.sandbox.lastConfig=config;
   let nonFinite=0;for(const value of data)if(!Number.isFinite(value))nonFinite++;
   log(`Read ${config.output}: ${data.length.toLocaleString()} components${nonFinite?`, ${nonFinite} non-finite values`:`, all finite`}. This is output inspection, not an algorithm correctness test.`,nonFinite?'error':'info');

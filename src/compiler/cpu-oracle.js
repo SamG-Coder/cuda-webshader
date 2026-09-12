@@ -7,6 +7,8 @@ import {isArray, vectorLength, vectorElement, walk} from './compiler.js';
 const f = Math.fround;
 function convert(value,type){
   if(typeof type==='string'&&type.startsWith('cw_struct_'))return structuredClone(value);
+  if(type==='cw_uchar')return Number(value)&255;
+  if(type==='cw_uchar4')return Number(value)>>>0;
   if(type==='f32')return f(value);if(type==='u32')return Number(value)>>>0;if(type==='i32')return Number(value)|0;if(type==='bool')return !!value;
   const size=vectorLength(type);if(size){if(!Array.isArray(value)||value.length!==size)throw new Error('Invalid vector value.');return value.map(v=>convert(v,vectorElement(type)));}return value;
 }
@@ -44,6 +46,7 @@ class Context {
     }
     if(n.kind==='member'){
       const reference=yield* this.ref(n.base),structure=typeof n.base.type==='string'&&n.base.type.startsWith('cw_struct_'),i=structure?n.member:'xyzw'.indexOf(n.member);
+      if(n.base.type==='cw_uchar4'){const shift=i*8;return {get:()=>(reference.get()>>>shift)&255,set:v=>reference.set(((reference.get()&~(255<<shift))|((Number(v)&255)<<shift))>>>0)};}
       if(structure)return {get:()=>reference.get()[i],set:v=>{const copy=structuredClone(reference.get());copy[i]=convert(v,n.type);reference.set(copy);}};
       return {get:()=>reference.get()[i],set:v=>{const copy=[...reference.get()];copy[i]=convert(v,n.type);reference.set(copy);}};
     }
@@ -59,7 +62,7 @@ class Context {
       case 'index':return (yield* this.ref(n)).get();
       case 'member':{
         if(n.base.kind==='id'&&this.ids[n.base.name])return this.ids[n.base.name]['xyz'.indexOf(n.member)];
-        const base=yield* this.eval(n.base);return base[typeof n.base.type==='string'&&n.base.type.startsWith('cw_struct_')?n.member:'xyzw'.indexOf(n.member)];
+        const base=yield* this.eval(n.base);if(n.base.type==='cw_uchar4')return(base>>>('xyzw'.indexOf(n.member)*8))&255;return base[typeof n.base.type==='string'&&n.base.type.startsWith('cw_struct_')?n.member:'xyzw'.indexOf(n.member)];
       }
       case 'cast':return convert(yield* this.eval(n.value),n.target);
       case 'unary':{
@@ -96,7 +99,8 @@ class Context {
     if(['atomicAdd','atomicMin','atomicMax','atomicExch'].includes(name)){
       const old=args[0].get(),value=name==='atomicAdd'?old+args[1]:name==='atomicMin'?Math.min(old,args[1]):name==='atomicMax'?Math.max(old,args[1]):args[1];args[0].set(value);return old;
     }
-    if(['float','int','uint','bool'].includes(name))return convert(args[0],n.type);
+    if(name==='make_uchar4')return args.reduce((packed,v,i)=>packed|((Number(v)&255)<<(i*8)),0)>>>0;
+    if(['float','int','uint','bool','uchar'].includes(name))return convert(args[0],n.type);
     if(name==='make_float3'&&Array.isArray(args[0]))return args[0].slice(0,3);
     if(name==='make_float4'&&Array.isArray(args[0]))return [...args[0],args[1]];
     if(name==='dot'||name==='normalize'){const sum=args[0].reduce((sum,a,i)=>f(sum+f(a*(name==='dot'?args[1][i]:a))),0);return name==='dot'?sum:args[0].map(a=>f(a/Math.sqrt(sum)));}

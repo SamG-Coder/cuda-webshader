@@ -1,0 +1,8 @@
+// MIT validation host. One uint32 word per CUDA uchar4 record.
+#include <cuda_runtime.h>
+#include <cstdio>
+#include <vector>
+typedef unsigned char uchar;
+#include "packed-uchar4.cu"
+#define CHECK(x) do{auto e=(x);if(e!=cudaSuccess){printf("CUDA ERROR %s\n",cudaGetErrorString(e));return 2;}}while(0)
+int main(){static_assert(sizeof(uchar4)==4);const unsigned n=257;std::vector<float> values(n);std::vector<unsigned> actual(n*2+16,0xdeadbeef);std::vector<int> checks(n);for(unsigned i=0;i<n;i++)values[i]=(i*37)%256+.75f;float* input;uchar4* output;int* diagnostic;CHECK(cudaMalloc(&input,n*4));CHECK(cudaMalloc(&output,actual.size()*4));CHECK(cudaMalloc(&diagnostic,n*4));CHECK(cudaMemcpy(input,values.data(),n*4,cudaMemcpyHostToDevice));CHECK(cudaMemcpy(output,actual.data(),actual.size()*4,cudaMemcpyHostToDevice));packedBytes<<<5,64>>>(input,output,diagnostic,n);CHECK(cudaGetLastError());CHECK(cudaDeviceSynchronize());CHECK(cudaMemcpy(actual.data(),output,actual.size()*4,cudaMemcpyDeviceToHost));CHECK(cudaMemcpy(checks.data(),diagnostic,n*4,cudaMemcpyDeviceToHost));for(unsigned i=0;i<n;i++){unsigned x=(unsigned)values[i],y=(i-130)&255,z=(i*17)&255,p=x|(y<<8)|(z<<16)|(255u<<24),q=((x+250)&255)|(((y-1)&255)<<8)|(((z+1)&255)<<16);if(actual[i*2]!=p||actual[i*2+1]!=q||checks[i]!=-1700+(int)x+4){printf("FAIL pixel=%u\n",i);return 1;}}for(unsigned i=n*2;i<actual.size();i++)if(actual[i]!=0xdeadbeef)return 1;CHECK(cudaFree(input));CHECK(cudaFree(output));CHECK(cudaFree(diagnostic));printf("PASS native uchar4: 257 lanes, 514 packed four-byte records, byte promotions, wrapping, overloads, references and 16 guard records\n");return 0;}

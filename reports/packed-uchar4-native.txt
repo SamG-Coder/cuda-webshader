@@ -1,0 +1,1 @@
+PASS native uchar4: 257 lanes, 514 packed four-byte records, byte promotions, wrapping, overloads, references and 16 guard records
