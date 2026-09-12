@@ -23,6 +23,12 @@ export function kernelSource(source){
  while((match=plainStructs.exec(masked)))spans.push([match.index,match.index+match[0].length]);
  const constants=/\b__constant__\b[^;]*;/g;
  while((match=constants.exec(masked)))spans.push([match.index,match.index+match[0].length]);
+ // Keep conditional regions that contain extracted declarations. Without their
+ // directives, mutually exclusive device implementations become simultaneous.
+ const conditionalStack=[],conditionalGroups=[],directives=/^[ \t]*#[ \t]*(if|ifdef|ifndef|elif|else|endif)\b[^\n]*/gm;
+ while((match=directives.exec(masked))){const kind=match[1],range=[match.index,match.index+match[0].length];if(['if','ifdef','ifndef'].includes(kind))conditionalStack.push({start:match.index,directives:[range]});else{const frame=conditionalStack.at(-1);if(!frame)throw Error('Unmatched conditional directive in CUDA source.');frame.directives.push(range);if(kind==='endif'){conditionalStack.pop();conditionalGroups.push({...frame,end:range[1]});}}}
+ if(conditionalStack.length)throw Error('Unclosed conditional directive in CUDA source.');
+ for(const group of conditionalGroups)if(spans.some(([a,b])=>a<group.end&&b>group.start))spans.push(...group.directives);
  const chars=source.replace(/[^\n]/g,' ').split('');for(const [start,end]of spans)for(let i=start;i<end;i++)chars[i]=source[i];
  // Retain single-function C linkage when extracting a desktop translation unit.
  for(const [start] of spans){const linkage=/\bextern\s+"[^"]*"\s*$/.exec(source.slice(0,start));if(linkage)for(let i=linkage.index;i<start;i++)chars[i]=source[i];}
