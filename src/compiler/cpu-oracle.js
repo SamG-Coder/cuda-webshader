@@ -89,6 +89,7 @@ class Context {
     if(['float','int','uint','bool'].includes(name))return convert(args[0],n.type);
     if(/^make_(float|uint|int)[234]$/.test(name))return args.map(v=>convert(v,vectorElement(n.type)));
     if(name==='__fdividef')return f(args[0]/args[1]);
+    if(name==='sqrt')return f(Math.sqrt(args[0]));
     const unary={sinf:Math.sin,cosf:Math.cos,tanf:Math.tan,sqrtf:Math.sqrt,rsqrtf:x=>1/Math.sqrt(x),expf:Math.exp,__expf:Math.exp,exp2f:x=>2**x,logf:Math.log,__logf:Math.log,log2f:Math.log2,fabsf:Math.abs,floorf:Math.floor,ceilf:Math.ceil,truncf:Math.trunc};
     if(unary[name])return f(unary[name](args[0]));
     if(['fminf','fmaxf','min','max','powf','atan2f','fmaf'].includes(name)){

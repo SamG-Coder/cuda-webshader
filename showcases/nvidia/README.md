@@ -8,12 +8,12 @@ NVIDIA cuda-samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
 The audit scans direct source files for standalone global void kernels. It is
 not a complete C++ preprocessor or a claim to compile every template instance.
 
-The 34 translated entries were run separately with NVCC on RTX 5080 and with
+The 35 translated entries were run separately with NVCC on RTX 5080 and with
 WebGPU on a real NVIDIA adapter. Fixtures use 256 elements or a 32×32 grid,
 with 64×64 matrices for the two transpose kernels and 17 vectors of 1,537
 elements for the scalar-product kernel;
 every output component is compared with an independent CPU reference (absolute
-tolerance 0.000003, except Black–Scholes and inverse-normal below). These are small correctness checks, not performance results
+tolerance 0.000003, except Black–Scholes inverse-normal and square roots below). These are small correctness checks, not performance results
 or exhaustive numerical validation. The browser records its actual adapter.
 
 These are **isolated kernel stages**. Passing the ocean heightmap stage does
@@ -37,6 +37,7 @@ node scripts/prepare-nvidia-fwt-pass.mjs
 node scripts/prepare-nvidia-fwt-shared.mjs
 node scripts/prepare-nvidia-histogram-merge.mjs
 node scripts/prepare-nvidia-inverse-cnd.mjs
+node scripts/prepare-nvidia-mpi-sqrt.mjs
 node scripts/prepare-nvidia-checks.mjs
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor .local/nvidia-checks/check.cu -o .local/nvidia-checks/check.exe
 .local/nvidia-checks/check.exe
@@ -52,6 +53,7 @@ node scripts/test-nvidia-fwt-pass.mjs
 node scripts/test-nvidia-fwt-shared.mjs
 node scripts/test-nvidia-histogram-merge.mjs
 node scripts/test-nvidia-inverse-cnd.mjs
+node scripts/test-nvidia-mpi-sqrt.mjs
 ```
 
 Run the server first (`npm start`) for browser checks. The browser script uses
@@ -210,3 +212,11 @@ bisection; browser reference inversion uses normal-tail quadrature and bisection
 independently of NVIDIA's Moro polynomial. Absolute tolerance is 0.00002.
 Reports are `reports/nvidia-inverse-cnd-native.txt` and
 `reports/nvidia-inverse-cnd.json`; native build flags are the same as above.
+
+The simpleMPI follow-up preserves its square-root kernel and adds the float-only
+`sqrt` overload. Native CUDA and hardware WebGPU checks cover 1, 32, 256 and
+768 inputs, including zero and the normal finite float extremes, plus 16 output
+guards. Relative tolerance is 0.0000002 with no absolute floor. Every input needs
+one thread: the original kernel has no bounds guard. This is the isolated compute
+stage, not the MPI host program. Reports are `reports/nvidia-mpi-sqrt.json` and
+`reports/nvidia-mpi-sqrt-native.txt`; build `mpi-sqrt-native.cu` with the flags above.

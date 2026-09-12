@@ -1,0 +1,4 @@
+n=1 output + guards: PASS maxRelativeError=0
+n=32 output + guards: PASS maxRelativeError=4.875983e-08
+n=256 output + guards: PASS maxRelativeError=5.25151918e-08
+n=768 output + guards: PASS maxRelativeError=5.73925101e-08

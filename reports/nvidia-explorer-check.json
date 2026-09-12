@@ -172,6 +172,11 @@
       "entry": "inverseCNDKernel",
       "sample": "cpp/5_Domain_Specific/quasirandomGenerator",
       "passed": true
+    },
+    {
+      "entry": "simpleMPIKernel",
+      "sample": "cpp/0_Introduction/simpleMPI",
+      "passed": true
     }
   ]
 }

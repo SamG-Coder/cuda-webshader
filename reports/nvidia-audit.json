@@ -1038,8 +1038,25 @@
         "reason": "-- MPI not found - will not build sample 'simpleMPI'"
       },
       "browser": {
-        "status": "translation-rejected",
-        "reason": "Unsupported function 'sqrt'. CUDA host APIs, warp intrinsics, dynamic launches and libraries are not available. (57:19)\n    output[tid] = sqrt(input[tid]);\r\n                  ^"
+        "status": "kernel-verified",
+        "reason": "Isolated kernels checked against CPU reference on a real NVIDIA WebGPU adapter. Full host program is not executed.",
+        "checks": [
+          {
+            "sample": "cpp/0_Introduction/simpleMPI",
+            "entry": "simpleMPIKernel",
+            "pass": true,
+            "values": 256,
+            "maxError": 549755805696,
+            "failures": 0,
+            "outputs": {
+              "output": {
+                "values": 256,
+                "maxError": 549755805696,
+                "failures": 0
+              }
+            }
+          }
+        ]
       }
     },
     {
@@ -9622,11 +9639,11 @@
       }
     }
   ],
-  "executionUpdated": "2026-09-12T00:04:33.792Z",
+  "executionUpdated": "2026-09-12T00:12:23.563Z",
   "counts": {
     "samples": 208,
     "compilerProbes": 350,
-    "webgpuPassed": 34,
+    "webgpuPassed": 35,
     "nativeProgramsAttempted": 149,
     "nativeStatuses": {
       "exited-zero": 142,

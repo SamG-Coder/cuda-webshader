@@ -1,0 +1,59 @@
+{
+  "date": "2026-09-12T00:11:55.262Z",
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "sourceCompiled": true,
+  "absoluteTolerance": 0,
+  "relativeTolerance": 2e-7,
+  "scope": "Isolated square-root kernel; no MPI communication",
+  "results": [
+    {
+      "groups": 1,
+      "threads": 1,
+      "n": 1,
+      "maxRelativeError": 0,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "groups": 1,
+      "threads": 32,
+      "n": 32,
+      "maxRelativeError": 6.765549197129977e-8,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "groups": 2,
+      "threads": 128,
+      "n": 256,
+      "maxRelativeError": 9.194182412163308e-8,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "groups": 3,
+      "threads": 256,
+      "n": 768,
+      "maxRelativeError": 9.194182412163308e-8,
+      "guardsPreserved": true,
+      "pass": true
+    }
+  ],
+  "passed": true
+}
