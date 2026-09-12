@@ -4,8 +4,7 @@
   "originalDeviceBodies": true,
   "results": [
     {
-      "compiled": false,
-      "error": "Use explicit atomicAdd/Min/Max/Exch rather than compound assignments to atomic arrays. (405:54)\n                s_num_pts[row][tile32.thread_rank()] += sum;\r\n                                                     ^"
+      "compiled": true
     }
   ]
 }

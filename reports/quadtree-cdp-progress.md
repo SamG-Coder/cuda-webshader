@@ -272,3 +272,29 @@ assignment (`s_num_pts[row][tile32.thread_rank()] += sum`). This is the next
 unsupported operation. The full quadtree still needs compilation and recursive
 execution before it can become a showcase; these phase tests do not establish
 full-sample support.
+
+## Full source compilation; GPU uniformity remains
+
+The imported original quadtree device code now compiles with its separate setup
+harness. Volatile shared compound assignments preserve CUDA's separate read and
+write semantics using atomicLoad/atomicStore on the WebGPU shared representation.
+They do not become atomic read-modify-write operations. The destination address
+is captured once. Integer pointer slots and float shared arrays are covered;
+ordinary atomic storage still requires explicit atomic operations.
+
+Class pointers initialized from explicit value buffers now retain typed storage
+offsets, including chained aliases. The child-node pointer in NVIDIA's source
+therefore remains a pointer into the node buffer instead of a heap-object handle.
+Const protections remain enforced. A 32-node test verifies 384 values across
+mutations through aliases and subsequent independent dispatches.
+
+All 676 unit tests and 221 real NVIDIA GPU tests pass. The volatile update test
+checks 96 integer/float values, with a native CUDA comparison reporting zero
+mismatches. Bezier and path-tracer sandbox regressions also pass.
+
+`node scripts/probe-quadtree-gpu.mjs` now records full-kernel shader validation in
+`reports/quadtree-gpu-probe.json`. The NVIDIA Blackwell adapter rejects the later
+storageBarrier because the early-return condition depends on a node point count
+loaded from storage, which WGSL treats as potentially non-uniform. There is no
+diagnostic suppression for this. A correct workgroup-uniform storage snapshot
+and recursive launch execution remain required. No quadtree showcase is claimed.

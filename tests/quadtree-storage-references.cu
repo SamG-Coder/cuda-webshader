@@ -141,3 +141,16 @@ __global__ void read_nodes(Quadtree_node *nodes,float *out){
  out[threadIdx.x*3+1]=node.bounding_box().get_max().y;
  out[threadIdx.x*3+2]=node.num_points();
 }
+
+__global__ void write_alias_nodes(Quadtree_node *nodes,float *out){
+ unsigned offset=threadIdx.x;
+ Quadtree_node *base=&nodes[offset];
+ Quadtree_node *alias=base+0;
+ offset=0;
+ Quadtree_node &node=alias[0];
+ node.set_range(threadIdx.x*2,threadIdx.x*2+7);
+ node.set_bounding_box(0.f,0.f,float(threadIdx.x)+2.f,float(threadIdx.x)+3.f);
+ out[threadIdx.x*3]=node.bounding_box().get_max().x;
+ out[threadIdx.x*3+1]=node.bounding_box().get_max().y;
+ out[threadIdx.x*3+2]=node.num_points();
+}

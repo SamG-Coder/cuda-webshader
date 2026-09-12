@@ -847,10 +847,15 @@ class Emitter {
       if(['cw_uchar2','cw_uchar4'].includes(target.type)&&n.op!=='=')this.fail('uchar4 compound arithmetic requires explicit byte components.',n);
       let code = this.convert(value.code, value.type, target.type, n);
       if (n.op !== '=') {
-        const op = n.op.slice(0, -1); if (target.atomic) this.fail('Use explicit atomicAdd/Min/Max/Exch rather than compound assignments to atomic arrays.', n);
+        const op = n.op.slice(0, -1); if (target.atomic&&!target.rootSymbol?.volatileShared) this.fail('Use explicit atomicAdd/Min/Max/Exch rather than compound assignments to atomic arrays.', n);
+        // CUDA volatile compound updates are a load followed by a store, not
+        // an atomic read-modify-write. Capture the destination address once.
+        let current=target.code;
+        if(target.atomic){const address='cw_volatile_address_'+this.temp++;target.pre.push(`let ${address} = &${target.code};`);target.code=`(*${address})`;current=target.type==='f32'?`bitcast<f32>(atomicLoad(${address}))`:`atomicLoad(${address})`;}
+
         const type = ['<<', '>>'].includes(op) ? (narrow(target.type)?'i32':target.type) : this.common(narrow(target.type)?'i32':target.type, value.type==='cw_uchar'?'i32':value.type, n), rhsType = ['<<', '>>'].includes(op) ? 'u32' : type;
         if (['<<', '>>', '%', '&', '|', '^'].includes(op) && !['i32', 'u32'].includes(type)) this.fail('Integer operator requires integer operands.', n);
-        if(type==='cw_f64'){const fn={'+':'cw_d_add','-':'cw_d_sub','*':'cw_d_mul','/':'cw_d_div'}[op];if(!fn)this.fail('Unsupported double compound operator.',n);this.float64Used=true;code=this.convert(`${fn}(${this.convert(target.code,target.type,type,n)}, ${this.convert(value.code,value.type,type,n)})`,type,target.type,n);}else if(op==='/'&&type==='f32'){this.compensatedDivisionUsed=true;code=this.convert(`cw_divide_f32(${this.convert(target.code,target.type,type,n)}, ${this.convert(value.code,value.type,rhsType,n)})`,type,target.type,n);}else code = this.convert(`(${this.convert(target.code, target.type, type, n)} ${op} ${this.convert(value.code, value.type, rhsType, n)})`, type, target.type, n);
+        if(type==='cw_f64'){const fn={'+':'cw_d_add','-':'cw_d_sub','*':'cw_d_mul','/':'cw_d_div'}[op];if(!fn)this.fail('Unsupported double compound operator.',n);this.float64Used=true;code=this.convert(`${fn}(${this.convert(current,target.type,type,n)}, ${this.convert(value.code,value.type,type,n)})`,type,target.type,n);}else if(op==='/'&&type==='f32'){this.compensatedDivisionUsed=true;code=this.convert(`cw_divide_f32(${this.convert(current,target.type,type,n)}, ${this.convert(value.code,value.type,rhsType,n)})`,type,target.type,n);}else code = this.convert(`(${this.convert(current, target.type, type, n)} ${op} ${this.convert(value.code, value.type, rhsType, n)})`, type, target.type, n);
         n.operandType = type;
       }
       n.type = target.type;
@@ -871,6 +876,12 @@ class Emitter {
     return [...value.pre, value.type === 'void' ? `${value.code};` : `_ = ${value.code};`];
   }
   declare(n) {
+    // Class pointers normally denote heap handles. A pointer into an explicit
+    // value buffer instead retains that buffer's element type and offset.
+    if(!n.pointer&&!n.reference&&!n.dimensions.length&&String(n.type).startsWith('cw_objectptr_')){
+      const parts=pointerParts(n.init),record=this.ast.structs.find(r=>'cw_objectptr_'+r.name===n.type);
+      if(parts&&record?.valueClass){const base=this.lookup(parts.base.name,parts.base);if(['buffer','buffer-alias'].includes(base.kind)&&base.type.element===record.type){n.type=record.type;n.pointer=true;}}
+    }
     if(n.type==='cw_size64'){this.extentUsed=true;if(n.pointer||n.shared||n.dimensions.length)this.fail('size_t locals support scalar values only.',n);}
     if(n.type==='cw_extent')this.fail('cudaExtent supports read-only by-value kernel parameters only.',n);
     if(['texture3d','surface2d'].includes(n.type))this.fail('Texture and surface handles require kernel or supported helper parameters, not local aliases.',n);
@@ -924,7 +935,7 @@ class Emitter {
     if(!init&&this.structs.get(type)?.fields.some(f=>f.constant)&&!(this.currentFunction.classConstructor&&n.name==='cw_object_'+this.currentFunction.classOwner))this.fail('Const fields require constructor initialization.',n);
     if (n.constant && !init && !n.shared) this.fail('A const local variable needs an initializer.', n);
     const code = `${n.shared ? (this.currentFunction===this.kernel?'s':'s_'+(this.currentFunction.pointerOrigin||this.currentFunction.name)) : 'v'}_${n.name}`;
-    const symbol = {name: n.name, type, code, constant: n.constant, atomic, kind: n.shared ? 'shared' : 'local',...(n.shared?{sharedOwner,volatileShared:!!n.volatileShared}:{})};
+    const symbol = {name: n.name, type, code, constant: n.constant, atomic, kind: n.shared ? 'shared' : 'local',...(n.shared?{sharedOwner,volatileShared:!!n.volatileShared||volatileAliased}:{})};
     const existing=n.shared&&this.shared.find(x=>x.code===code);
     if(existing){if(existing.sharedOwner!==sharedOwner||typeName(existing.type)!==typeName(type)||existing.atomic!==atomic)this.fail('Shared declaration conflicts across helper specializations.',n);this.add(n.name,existing,n);n.symbol=existing;n.resolvedDimensions=dims;n.resolvedType=type;return [];}
     this.add(n.name, symbol, n); n.symbol = symbol; n.resolvedDimensions = dims; n.resolvedType = type;
