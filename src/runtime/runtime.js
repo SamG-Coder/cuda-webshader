@@ -1,4 +1,5 @@
 import {ObjectArena} from './object-arena.js';
+import {runRecursiveLaunches} from './recursive-launches.js';
 import {SORT_SOURCE,SORT_FLOAT_SOURCE} from './sort-kernels.js';
 import {FFT_SOURCE,FORWARD_FFT_SOURCE,REAL_FFT_SOURCE} from './fft-kernels.js';
 import {SCAN_SOURCE} from './scan-kernels.js';
@@ -267,6 +268,7 @@ export class Kernel {
   bind(buffers,scalars={},options={}) {return new Invocation(this,buffers,scalars,options);}
   async runQueued(buffers,scalars,workgroups,{objectArena}={}) {
     const children=this.artifact.children;if(!children?.length)throw Error('Compile with scheduleDeviceLaunches: true before running queued children.');
+    if(this.artifact.metadata.deviceLaunchQueue?.queues.some(q=>q.caller===this.artifact.name&&q.frontier))return runRecursiveLaunches(this,buffers,scalars,workgroups,objectArena);
     const runtime=this.runtime,prepared=[];
     for(const child of children)prepared.push({queue:this.artifact.metadata.deviceLaunchQueue.queues.find(q=>q.id===child.queueId),kernel:await runtime.kernel(child.artifact)});
     const parent=this.bind(buffers,scalars,{objectArena,queueOnly:true}),types=this.artifact.metadata.objectHeap.types,scratch=[];

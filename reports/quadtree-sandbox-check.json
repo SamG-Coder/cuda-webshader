@@ -1,0 +1,34 @@
+{
+  "passed": true,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "subgroup-size-control",
+      "float32-filterable",
+      "timestamp-query",
+      "subgroups"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "points": 1024,
+  "nodes": 193,
+  "nativeOutputExact": true,
+  "geometryReadbackBytes": 0,
+  "controlReadbackBytes": 72,
+  "softwareAdapterRequested": false,
+  "passes": [
+    "1. build_quadtree_kernel",
+    "2. build_quadtree_kernel"
+  ],
+  "sourceUnchanged": true,
+  "zoomWithoutCompute": true
+}

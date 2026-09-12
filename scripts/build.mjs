@@ -18,3 +18,5 @@ for(const file of ['bezier-sandbox-check.json','bezier-sandbox.png','bezier-cdp-
 }
 await versionBuildAssets(fileURLToPath(out));
 console.log(`Static build created at ${fileURLToPath(out)}. Serve with: node scripts/serve.mjs dist`);
+
+for(const file of ['quadtree-input.bin','quadtree-output.bin','quadtree-nodes.json','quadtree-cdp-native.json','quadtree-cdp-progress.md','quadtree-recursive-progress.json','quadtree-sandbox-check.json','quadtree-sandbox.png','quadtree-explorer.png'])await copyFile(new URL('reports/'+file,root),new URL('reports/'+file,out));

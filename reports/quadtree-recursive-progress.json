@@ -1,0 +1,51 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "subgroup-size-control",
+      "float32-filterable",
+      "timestamp-query",
+      "subgroups"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "result": {
+    "name": "Original NVIDIA recursive quadtree matches every native node and output point",
+    "pass": true,
+    "originalKernel": true,
+    "points": 1024,
+    "nodesCompared": 193,
+    "fieldsCompared": 1351,
+    "pointPermutationExact": true,
+    "nativeOutputExact": true,
+    "untouchedUnusedNodes": true,
+    "recursiveExecution": true,
+    "scheduling": {
+      "maxGenerations": 8,
+      "launchCounts": [
+        1,
+        4,
+        16,
+        27,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "controlReadbackBytes": 72,
+      "gpuScheduled": true
+    },
+    "wallMs": 657.2099999785423
+  }
+}

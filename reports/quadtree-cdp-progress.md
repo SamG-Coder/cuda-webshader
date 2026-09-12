@@ -323,3 +323,35 @@ and Bezier/path-tracer sandbox regressions pass. Evidence is saved in
 quadtree-gpu-probe.json and quadtree-root-progress.json.
 
 WGSL reference: https://www.w3.org/TR/WGSL/#workgroupUniformLoad-builtin
+
+## Complete recursion and sandbox showcase
+
+The original kernel now executes the complete default 1024-point workload.
+Every one of the native capture's 193 nodes (1351 fields) and every final output
+point matches exactly. All unused node records remain zero. The native reference
+has 145 leaves, containing all 1024 points, with deepest occupied level 4.
+
+`deviceLaunchQueue.maxGenerations` enables bounded scheduling for one self-launch
+site retaining the same named buffer allocations. Its consumers read a separate
+immutable frontier, publishing each argument record with workgroupUniformLoad.
+They append their own launches to the output queue. Between generations the
+runtime copies the output to the frontier and indirect-dispatch buffer, then
+clears the output. Counts never drive CPU scheduling. Completion reads only the
+saved headers, detects overflow in any generation, and rejects pending children
+after the configured limit. Tests cover arena reuse, overflow, and truncation.
+
+The full quadtree's launch counts are 1, 4, 16, 27, 0, 0, 0, 0, 0. Eight bounded
+child generations read 72 diagnostic bytes after completion. The sandbox displays
+both generated shaders and renders points and boxes directly from GPU buffers;
+the preview performs no geometry readback. Zooming does not rerun CUDA. The
+original NVIDIA bodies and notices are unchanged, and native outputs are not
+loaded as showcase inputs.
+
+The individual explorer card links to `sandbox.html?example=quadtree`. All 683
+unit tests and 224 real NVIDIA GPU tests pass, along with exact sandbox/native
+comparison, explorer search/filter/mobile checks, and Bezier/path-tracer
+regressions. See quadtree-recursive-progress.json and quadtree-sandbox-check.json.
+
+Next candidate: investigate Project Chrono's professional SPH fluid examples,
+starting with a manageable dam-break case before its wave tank. No Chrono solver
+support is claimed by this quadtree release.

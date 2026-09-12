@@ -1,8 +1,9 @@
 {
   "passed": true,
-  "cards": 3,
+  "cards": 86,
   "filters": true,
   "search": true,
-  "links": true,
+  "quadtreeThumbnail": true,
+  "sandboxOnlyLaunches": true,
   "mobileOverflow": false
 }

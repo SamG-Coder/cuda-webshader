@@ -22,7 +22,8 @@ function launchConstants(fn,constantValue){
 // Queue production alone does not execute the queued child work.
 export function launchQueues(e,walk,constantValue,pointerParts){
  const options=e.options.deviceLaunchQueue;if(options===undefined)return [];
- if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(k=>k!=='maxLaunches')||!Number.isInteger(options.maxLaunches)||options.maxLaunches<1||options.maxLaunches>65535)e.fail('deviceLaunchQueue requires maxLaunches in 1..65535.',e.kernel);
+ if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(k=>!['maxLaunches','maxGenerations'].includes(k))||!Number.isInteger(options.maxLaunches)||options.maxLaunches<1||options.maxLaunches>65535)e.fail('deviceLaunchQueue requires maxLaunches in 1..65535.',e.kernel);
+ if(options.maxGenerations!==undefined&&(!Number.isInteger(options.maxGenerations)||options.maxGenerations<1||options.maxGenerations>64))e.fail('Recursive queues require maxGenerations in 1..64.',e.kernel);
  if(!e.persistentObjects)e.fail('Device launch queues require objectHeap: persistent.',e.kernel);
  const queues=[];
  for(const caller of e.ast.functions){const constants=launchConstants(caller,constantValue),aliases=new Map();walk(caller.body,n=>{if(n.kind==='decl'){if(aliases.has(n.name))aliases.set(n.name,null);else aliases.set(n.name,pointerParts(n.init)?.base?.name||null);}});
@@ -44,11 +45,18 @@ export function launchQueues(e,walk,constantValue,pointerParts){
   const id=queues.length,stride=3+scalars.length+buffers.length,queue={id,name:'launch_queue_'+id,caller:caller.name,child:child.name,childEntry,capacity:options.maxLaunches,block:[block,1,1],sharedMemoryBytes,stride,scalars,buffers,binding:e.objectHeaps.size+e.objectImports.length+e.deviceHeaps.size+id,byteLength:16+options.maxLaunches*stride*4,variable:'cw_launch_queue_'+id};
   queue.recordLayout=JSON.stringify({caller:queue.caller,child:queue.child,childEntry,capacity:queue.capacity,stride,scalars,buffers,block:queue.block,sharedMemoryBytes});n.queueId=id;queues.push(queue);
  });}
+ if(options.maxGenerations!==undefined){
+  if(queues.length!==1||queues[0].caller!==queues[0].child||queues[0].buffers.some(b=>b.name!==b.parent))e.fail('Recursive queues require one self-launch site retaining named buffer allocations.',e.kernel);
+  const q=queues[0];q.maxGenerations=options.maxGenerations;
+  q.frontier={name:q.name+'_frontier',capacity:q.capacity,binding:q.binding+1,byteLength:q.byteLength,recordLayout:q.recordLayout,variable:q.variable+'_frontier'};
+ }
  return queues;
 }
+export function launchQueueStorageTypes(queues){return queues.flatMap(q=>[{name:q.name,capacity:q.capacity,binding:q.binding,byteLength:q.byteLength,recordLayout:q.recordLayout},...(q.frontier?[(({variable,...type})=>type)(q.frontier)]:[])]);}
 export function launchQueueDeclarations(queues){return queues.flatMap(q=>[
  `struct CWLaunchQueue_${q.id} { count: atomic<u32>, overflow: atomic<u32>, pad0: u32, pad1: u32, words: array<u32, ${q.capacity*q.stride}>, }`,
- `@group(1) @binding(${q.binding}) var<storage,read_write> ${q.variable}: CWLaunchQueue_${q.id};`
+ `@group(1) @binding(${q.binding}) var<storage,read_write> ${q.variable}: CWLaunchQueue_${q.id};`,
+ ...(q.frontier?[`@group(1) @binding(${q.frontier.binding}) var<storage,read_write> ${q.frontier.variable}: CWLaunchQueue_${q.id};`]:[])
 ]);}
 export function emitLaunch(e,n){
  const q=e.launchQueues.find(q=>q.id===n.queueId);if(!q)e.fail('Device child-kernel launches require GPU scheduling support.',n);

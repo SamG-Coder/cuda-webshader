@@ -1,0 +1,104 @@
+{
+  "pipeline": {
+    "compilerOptions": {
+      "objectHeap": "persistent",
+      "valueBuffers": [
+        "nodes",
+        "points"
+      ],
+      "deviceHeap": {
+        "maxAllocations": 1024,
+        "maxElements": 1024
+      },
+      "deviceLaunchQueue": {
+        "maxLaunches": 1024,
+        "maxGenerations": 8
+      }
+    },
+    "buffers": {
+      "nodes": {
+        "type": "u32",
+        "records": 174760,
+        "recordType": "cw_struct_Quadtree_node",
+        "fill": "binary-u32",
+        "source": "showcases/quadtree/nodes.bin"
+      },
+      "points": {
+        "type": "u32",
+        "records": 4,
+        "recordType": "cw_struct_Points",
+        "fill": "binary-u32",
+        "source": "showcases/quadtree/points.bin"
+      },
+      "x0": {
+        "type": "f32",
+        "records": 1024,
+        "fill": "binary-f32",
+        "source": "showcases/quadtree/x0.bin"
+      },
+      "y0": {
+        "type": "f32",
+        "records": 1024,
+        "fill": "binary-f32",
+        "source": "showcases/quadtree/y0.bin"
+      },
+      "x1": {
+        "type": "f32",
+        "records": 1024,
+        "fill": "zero"
+      },
+      "y1": {
+        "type": "f32",
+        "records": 1024,
+        "fill": "zero"
+      }
+    },
+    "steps": [
+      {
+        "entry": "build_quadtree_kernel<128>",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          1,
+          1,
+          1
+        ],
+        "sharedMemoryBytes": 64,
+        "scalars": {
+          "params.point_selector": 0,
+          "params.num_nodes_at_this_level": 1,
+          "params.depth": 0,
+          "params.max_depth": 8,
+          "params.min_points_per_node": 16
+        },
+        "scheduleDeviceLaunches": true
+      }
+    ],
+    "preview": {
+      "kind": "spatial2d",
+      "x": "x0",
+      "y": "y0",
+      "count": 1024,
+      "boxes": "nodes",
+      "boxCount": 21845,
+      "recordWords": 8,
+      "boundsWords": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "beginWord": 6,
+      "endWord": 7,
+      "bounds": [
+        -0.04,
+        -0.04,
+        1.04,
+        1.04
+      ]
+    }
+  }
+}
