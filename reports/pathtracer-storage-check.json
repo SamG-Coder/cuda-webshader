@@ -1,0 +1,14 @@
+{
+  "name": "Original CUDA RNG buffers and downcast cleanup match native",
+  "pass": true,
+  "floatValues": 4608,
+  "randomWords": 1536,
+  "nativeExact": true,
+  "wideSeeds": true,
+  "recordStride": 24,
+  "framebufferStride": 12,
+  "freedSphereMaterialPairs": 512,
+  "allPoolsEmpty": true,
+  "fullPathtracerSupported": false,
+  "wallMs": 176.19499999284744
+}

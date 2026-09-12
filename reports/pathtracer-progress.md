@@ -259,3 +259,33 @@ the complete rendered scene. Combining all original device functions currently
 stops at the explicit sphere* downcast in free_world. Persistent camera access,
 class-value output buffers, shared parameter naming and RNG buffer initialization
 also still need full-module integration. No new showcase card is claimed here.
+
+
+## Record buffers, wide seeds and cleanup integration
+
+Explicit casts from a fieldless base pointer back to its related concrete class
+now preserve object identity. The original free_world body parses and compiles.
+A separate native/WebGPU harness allocates 512 original sphere/lambertian pairs,
+uses the original downcast-and-delete expression, and checks that every pointer
+is cleared and all persistent allocation slots are free.
+
+Host-shareable record buffers expose their WGSL-aligned record stride. An
+explicit `valueBuffers: ['fb']` option interprets the original vec3* framebuffer
+parameter as a value buffer; it does not reinterpret arbitrary object tokens.
+The path tracer's compiler-owned XORWOW records occupy 24 bytes, and its vec3
+records occupy 12 bytes. These are explicit WebGPU layouts, not a claim that all
+CUDA C++ structs share the same ABI. The GPU test exposed and fixed an offset
+being incorrectly applied both to the record and to its nested fixed array.
+
+XORWOW initialization now accepts 64-bit integer seeds, including signed integer
+conversion, while retaining the compile-time zero subsequence/offset restriction.
+The original render_init kernel runs unchanged. Three passes over 512 state
+records verify both persistent RNG advancement and seeds with nonzero high words
+or negative signed inputs. All 4,608 float framebuffer components and 1,536
+integer draws match native CUDA exactly. Both storage-buffer helper writes and
+class-value output stores are exercised on the real NVIDIA adapter.
+
+The complete device-module probe now compiles rand_init, render_init and
+free_world. create_world next stops at increment inside an assignment destination;
+render stops at the non-const camera method on a persistent object. These are
+integration blockers still to resolve before the full scene and sandbox card.

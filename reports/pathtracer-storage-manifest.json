@@ -1,0 +1,12 @@
+{
+  "revision": "ab140b12d4923b75270831baabab5e4d4209f305",
+  "nativeLibrary": "CUDA 13.3 cuRAND",
+  "sha256": {
+    "tests/pathtracer-storage-class.cuh": "7e4553d6b272d9702805af43f76cf4db27f9857276e4d566940e937051400537",
+    "tests/pathtracer-storage-kernels.cuh": "529cea9a572377687cd3973c9800dbc0904b84eda27fece568c45286f52edc99",
+    "tests/pathtracer-storage-native.cu": "60ae83a8237770e3353fb37f9afaf3bb5c29dbb45a87064b6299b600e0cabc6c",
+    "reports/pathtracer-storage-native.bin": "e7ab0665f001b72201fa21f341bcfbc41fda05694792781b3b46f40bae71e168",
+    "reports/pathtracer-storage-native-bits.bin": "43728b2195919bfdf15aadfe852c88210a8813ca67b8d84e69cc813f1e0b28a9",
+    "src/compiler/curand-xorwow.js": "b6b3c433bb0c24cb7937774284e361b5f679493e4ed1ae53d38de577823d2f14"
+  }
+}

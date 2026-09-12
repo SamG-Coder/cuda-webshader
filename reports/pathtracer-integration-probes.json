@@ -1,0 +1,24 @@
+[
+  {
+    "entry": "rand_init",
+    "compiled": true
+  },
+  {
+    "entry": "render_init",
+    "compiled": true
+  },
+  {
+    "entry": "create_world",
+    "compiled": false,
+    "error": "Increment/decrement inside assignment destinations are unsupported. (441:28)\n                    d_list[i++] = new sphere(center, 0.2,\r\n                           ^"
+  },
+  {
+    "entry": "render",
+    "compiled": false,
+    "error": "Mutable helper references into persistent objects are not yet supported. (417:17)\n        ray r = (*cam)->get_ray(u, v, &local_rand_state);\r\n                ^"
+  },
+  {
+    "entry": "free_world",
+    "compiled": true
+  }
+]

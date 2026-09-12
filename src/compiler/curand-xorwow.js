@@ -1,12 +1,12 @@
 // MIT compatibility implementation of the XORWOW integer recurrence and
-// cuRAND uniform mapping. Scope: uint32 seeds, zero subsequence/offset,
+// cuRAND uniform mapping. Scope: 64-bit integer seeds, zero subsequence/offset,
 // curand and curand_uniform only. State layout is compiler-owned, not CUDA ABI.
 // Reference: installed CUDA 13.3 curand_kernel.h and curand_uniform.h.
 export const CURAND_XORWOW_SOURCE = `
 struct curandState { unsigned int d; unsigned int v[5]; };
-__device__ void curand_init(unsigned int seed,unsigned int subsequence,unsigned int offset,curandState *state) {
- unsigned int low=(seed^2865916745u)*1099087573u;
- unsigned int high=4158451677u*2591861531u;
+__device__ void curand_init(size_t seed,unsigned int subsequence,unsigned int offset,curandState *state) {
+ unsigned int low=(uint(seed)^2865916745u)*1099087573u;
+ unsigned int high=(uint(seed>>32u)^4158451677u)*2591861531u;
  state->v[0]=123456789u+low;
  state->v[1]=362436069u^low;
  state->v[2]=521288629u+high;

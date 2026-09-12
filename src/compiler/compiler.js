@@ -18,7 +18,7 @@ const numeric = t => ['f32', 'i32', 'u32','cw_uchar','cw_short','cw_ushort'].inc
 const uniformScalar=t=>['cw_short','cw_ushort'].includes(t)?{type:t==='cw_short'?'i32':'u32',sourceType:t}:{type:t};
 const narrow = t => ['cw_uchar','cw_short','cw_ushort'].includes(t);
 const indent = lines => lines.map(l => `  ${l}`);
-const rootName = n => n?.kind === 'id' ? n.name : ['index', 'member'].includes(n?.kind) ? rootName(n.base) : null;
+const rootName = n => n?.kind === 'id' ? n.name : ['index', 'member'].includes(n?.kind) ? rootName(n.base) : n?.kind==='object-deref'?rootName(n.value):null;
 // Separate a named pointer root from left-associated element offsets.
 const pointerParts=n=>{
   if(n?.kind==='id')return {base:n,offset:null};
@@ -63,6 +63,7 @@ function analyse(functions, params) {
       if (target?.kind === 'unary' && target.op === '&') { const name = rootName(target.value); if (name){atomic.add(resolve(name)??name);if(bufferNames.has(resolve(name)))atomicBindings.add(resolve(name));} scan(target.value, 'both'); }
       n.args.slice(1).forEach(a => scan(a)); return;
     }
+    if(n.kind==='object-deref'){const name=resolve(rootName(n.value));if(bufferNames.has(name)){if(mode!=='write')reads.add(name);if(mode!=='read')writes.add(name);}scan(n.value);return;}
     if (n.kind === 'index') {
       const castParts=n.base.kind==='pointer-cast'?pointerParts(n.base.value):null;
       const name = resolve(castParts?.base?.name||rootName(n)); if (bufferNames.has(name)) { if (mode !== 'write') reads.add(name); if (mode !== 'read') writes.add(name); }
@@ -96,6 +97,7 @@ class Emitter {
       }
     }
     const storageLayout=type=>{if(isArray(type)){const e=storageLayout(type.element),stride=Math.ceil(e.size/e.align)*e.align;return {align:e.align,size:stride*type.length};}if(this.structs.has(type)){let size=0,align=4;for(const f of this.structs.get(type).fields){const v=storageLayout(f.resolvedType);align=Math.max(align,v.align);size=Math.ceil(size/v.align)*v.align+v.size;}return {align,size:Math.ceil(size/align)*align};}const width=vectorLength(type);if(width)return {align:width===2?8:16,size:width*4};if(['f32','i32','u32','cw_uchar','cw_uchar2','cw_uchar4','cw_short','cw_ushort'].includes(type)||(String(type).startsWith('cw_objectptr_')||String(type).startsWith('cw_objectlist_')))return {align:4,size:4};this.fail('Persistent object fields require host-shareable scalar, vector or record values.',kernel);};
+    this.storageLayout=storageLayout;
     for(const heap of this.objectHeaps.values()){heap.aliveCode=heap.code+'_alive';if(this.persistentObjects){const layout=storageLayout(heap.type);heap.binding=this.objectHeaps.size?heap.tag-1:0;heap.byteLength=Math.ceil((heap.capacity*4)/layout.align)*layout.align+layout.size*heap.capacity;heap.recordLayout=JSON.stringify([...this.structs.values()].map(s=>({type:s.type,fields:s.fields.map(f=>({name:f.name,type:f.resolvedType}))})));heap.variable=heap.code+'_storage';heap.code=heap.variable+'.objects';heap.aliveCode=heap.variable+'.alive';}}
     this.overloads=new Map();for(const f of ast.functions)if(f.overloadName){const list=this.overloads.get(f.overloadName)||[];list.push(f);this.overloads.set(f.overloadName,list);}
     this.functions = new Map(); this.shared = [];this.pointerConstraints=[]; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
@@ -305,7 +307,7 @@ class Emitter {
         }
         if(n.dereference&&!['buffer','buffer-alias'].includes(base.rootSymbol?.kind))this.fail('Dereference requires a storage-buffer pointer.',n);
         if (!isArray(base.type) || !['i32', 'u32'].includes(index.type)) this.fail('Indexing requires an array and a 32-bit integer index.', n);
-        const offset=base.rootSymbol?.offsetCode;let indexCode=offset?`(${offset} + ${this.convert(index.code,index.type,'i32',n)})`:index.code;
+        const offset=base.code===base.rootSymbol?.code?base.rootSymbol.offsetCode:undefined;let indexCode=offset?`(${offset} + ${this.convert(index.code,index.type,'i32',n)})`:index.code;
         const capturePre=[];if(captureIndex&&['local','shared'].includes(base.rootSymbol?.kind)){const temp='cw_argument_index_'+this.temp++;capturePre.push(`let ${temp} = ${indexCode};`);indexCode=temp;}
         let code = `${base.code}[${indexCode}]`;const type = base.type.element;
         if(type==='cw_uchar'&&base.rootSymbol?.rootBufferName){const temp='cw_byte_index_'+this.temp++,word=`${base.code}[${temp} >> 2u]`,shift=`((${temp} & 3u) * 8u)`,read=base.atomicRoot?`atomicLoad(&${word})`:word;return this.result(n,type,`((${read} >> ${shift}) & 255u)`,[...base.pre,...index.pre,`let ${temp} = u32(${indexCode});`],{rootSymbol:base.rootSymbol,...(raw&&base.atomicRoot?{packedBase:word,packedShiftCode:shift,packedAtomic:true}:{})});}
@@ -335,6 +337,8 @@ class Emitter {
         return this.result(n,'u32',`(${c} + ${terms.join(' + ')})`,pre);
       }
       case 'cast': {
+        if(String(n.target).startsWith('cw_objectptr_')){const value=this.expr(n.value),target=this.structs.get('cw_struct_'+n.target.slice(13));if(String(value.type).startsWith('cw_objectptr_')&&target?.base===value.type.slice(13))return this.result(n,n.target,value.code,value.pre);return this.result(n,n.target,this.convert(value.code,value.type,n.target,n),value.pre);}
+
         if(n.target==='cw_uchar'&&n.value.kind==='binary'&&n.value.op==='*'){
           const doubleInteger=a=>a.kind==='literal'&&/[.eE]/.test(a.value)&&!/^0[xX]/.test(a.value)&&!/[fFuU]$/.test(a.value)&&Number.isInteger(Number(a.value))&&Number(a.value)>=1&&Number(a.value)<=65535;
           const literal=doubleInteger(n.value.right)?n.value.right:doubleInteger(n.value.left)?n.value.left:null;
@@ -366,6 +370,7 @@ class Emitter {
         return this.result(n,n.pointerType,`select(0u, ${heap.tag*1048576}u + ${slot} + 1u, ${slot} < ${heap.capacity}u)`,pre);
       }
       case 'object-deref': {
+        if(!n.virtualHandleCode){const value=this.expr(n.value);if(isArray(value.type)&&this.structs.has(value.type.element)&&['buffer','buffer-alias'].includes(value.rootSymbol?.kind)){const base=n.value;delete n.value;Object.assign(n,{kind:'index',base,index:{kind:'literal',value:'0',token:n.token},dereference:true});return this.expr(n,raw);}}
         const value=n.virtualHandleCode?{type:'cw_objectptr_'+n.concreteHeap,code:n.virtualHandleCode,pre:[]}:this.expr(n.value),name=String(value.type).replace('cw_objectptr_',''),heap=this.objectHeaps.get(name);if(!String(value.type).startsWith('cw_objectptr_')||!heap)this.fail('Object dereference requires a concrete allocated class.',n);
         n.heapName=name;return this.result(n,heap.type,`${heap.code}[(${value.code} & 1048575u) - 1u]`,value.pre,{rootSymbol:(heap.symbol??={kind:'local',name:heap.code,code:heap.code,type:heap.type,constant:false,referenceSpace:this.persistentObjects?'storage':'private'})});
       }
@@ -392,6 +397,7 @@ class Emitter {
           return this.result(n, 'bool', tmp, pre);
         }
         if(a.type==='cw_size64'||b.type==='cw_size64'){
+          if(['<<','>>'].includes(n.op)&&a.type==='cw_size64'){let shift;try{shift=constantValue(n.right);}catch{}if(!Number.isInteger(shift)||shift<0||shift>63)this.fail('Wide shifts require a constant count in 0..63.',n);this.float64Used=true;this.extentUsed=true;n.operandType='cw_size64';return this.result(n,'cw_size64',`${n.op==='<<'?'cw_d_shl':'cw_d_shr'}(${a.code}, ${shift}u)`,[...a.pre,...b.pre]);}
           if(!['==','!=','<','>','<=','>=','*','+','-'].includes(n.op)||![a.type,b.type].every(t=>['cw_size64','i32','u32','bool'].includes(t)))this.fail('Size values support integer comparisons and multiplication only.',n);
           const left='cw_size_left_'+this.temp++,right='cw_size_right_'+this.temp++,promote=(v,code)=>v.type==='cw_size64'?code:v.type==='bool'?`vec2<u32>(select(0u, 1u, ${code}), 0u)`:v.type==='i32'?`vec2<u32>(u32(${code}), select(0u, 4294967295u, ${code} < 0i))`:`vec2<u32>(u32(${code}), 0u)`;
           const pre=[...a.pre,`let ${left} = ${a.code};`,...b.pre,`let ${right} = ${b.code};`],ac=promote(a,left),bc=promote(b,right);this.extentUsed=true;n.operandType='cw_size64';
@@ -695,10 +701,10 @@ class Emitter {
     }
     if(name==='curand_init'&&this.options.libraries?.includes('curand-xorwow')){
       let zeroPosition=false;try{zeroPosition=args.length===4&&constantValue(n.args[1])===0&&constantValue(n.args[2])===0;}catch{}if(!zeroPosition)this.fail('XORWOW currently requires compile-time zero subsequence and offset.',n);
-      let seed;try{seed=constantValue(n.args[0]);}catch{}if(args[0].type!=='u32'&&!(Number.isInteger(seed)&&seed>=0&&seed<=4294967295))this.fail('XORWOW currently requires a uint32 seed or a nonnegative uint32 constant.',n);
+      if(!['i32','u32','cw_size64'].includes(args[0].type))this.fail('XORWOW requires an integer seed.',n);
     }
     let helper = this.functions.get(name);
-    if(this.overloads.has(name)){const matches=this.overloads.get(name).filter(f=>args.length<=f.params.length&&f.params.every((p,i)=>i>=args.length?p.defaultValue!==undefined:(typeName(p.pointer?(isArray(args[i].type)?args[i].type.element:null):args[i].type)===typeName(p.type)||String(p.type).startsWith('cw_objectptr_')&&['0i','0u'].includes(args[i].code)||String(p.type).startsWith('cw_objectlist_')&&args[i].rootSymbol?.objectImport?.type===p.type.replace('cw_objectlist_','cw_objectptr_'))));if(!matches.length){const convertible=this.overloads.get(name).filter(f=>f.classConstructor&&args.length===f.params.length&&f.params.every((p,i)=>typeName(args[i].type)===typeName(p.type)||!p.pointer&&!p.reference&&(numeric(args[i].type)||args[i].type==='cw_f64')&&(numeric(p.type)||p.type==='cw_f64')));if(convertible.length===1)matches.push(convertible[0]);}if(matches.length!==1)this.fail('Overload '+name+' requires one exact parameter-type match or an unambiguous scalar constructor conversion.',n);helper=matches[0];}
+    if(this.overloads.has(name)){const matches=this.overloads.get(name).filter(f=>args.length<=f.params.length&&f.params.every((p,i)=>i>=args.length?p.defaultValue!==undefined:(typeName(p.pointer?(isArray(args[i].type)?args[i].type.element:null):args[i].type)===typeName(p.type)||String(p.type).startsWith('cw_objectptr_')&&['0i','0u'].includes(args[i].code)||String(p.type).startsWith('cw_objectlist_')&&args[i].rootSymbol?.objectImport?.type===p.type.replace('cw_objectlist_','cw_objectptr_'))));if(!matches.length){const convertible=this.overloads.get(name).filter(f=>f.classConstructor&&args.length===f.params.length&&f.params.every((p,i)=>typeName(args[i].type)===typeName(p.type)||String(args[i].type).startsWith('cw_objectptr_')&&this.structs.get('cw_struct_'+args[i].type.slice(13))?.base===String(p.type).slice(13)||!p.pointer&&!p.reference&&(numeric(args[i].type)||args[i].type==='cw_f64')&&(numeric(p.type)||p.type==='cw_f64')));if(convertible.length===1)matches.push(convertible[0]);}if(matches.length!==1)this.fail('Overload '+name+' requires one exact parameter-type match or an unambiguous scalar constructor conversion.',n);helper=matches[0];}
     if(!helper&&this.templates){
       helper=this.templates.deduce(name,args.map(a=>a.type),n.callee);
       if(helper)for(const fn of this.ast.functions)if(fn.qualifier==='__device__'&&!this.functions.has(fn.name)){this.functions.set(fn.name,fn);if(!fn.params.some(p=>p.pointer))this.helpers.push(fn);}
@@ -941,7 +947,7 @@ class Emitter {
       if (p.pointer) {
         if(['cw_short','cw_ushort'].includes(p.type))this.fail('Short storage pointers need a packed 16-bit ABI; only short values are supported.',p);
         if(String(p.type).startsWith('cw_objectptr_')&&!this.persistentObjects)this.fail('Object pointer buffers require objectHeap: persistent.',p);
-        if(this.structs.has(p.type)&&p.origin!=='constant-struct-storage')this.fail('Struct buffer layout is not supported; use local struct values.',p);
+        if(this.structs.has(p.type)&&p.origin!=='constant-struct-storage'){const layout=this.storageLayout(p.type);p.storageStride=Math.ceil(layout.size/layout.align)*layout.align;}
         if(p.type==='cw_uchar2')this.fail('Use byte storage with uchar2 pointer views; direct uchar2 buffer parameters are unsupported.',p);
         if (p.type === 'bool' || vectorLength(p.type)===3) this.fail('bool* and three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
         const canonical=Object.hasOwn(this.bufferAliases,p.name)?this.bufferAliases[p.name]:p.name,atomic=this.usage.atomic.has(canonical),readOnly=!this.usage.writes.has(canonical);
@@ -1159,6 +1165,11 @@ function instantiateHelperTemplates(ast, kernel) {
 }
 export function compile(source, options = {},bufferUsage=null) {
   const ast = parse(source, options), kernels = ast.functions.filter(f => f.qualifier === '__global__');
+  if(options.valueBuffers!==undefined){
+    if(!Array.isArray(options.valueBuffers)||new Set(options.valueBuffers).size!==options.valueBuffers.length)throw new CompileError('valueBuffers requires unique kernel parameter names.');
+    for(const name of options.valueBuffers){const params=kernels.flatMap(f=>f.params.filter(p=>p.name===name));if(!params.length)throw new CompileError('Unknown value buffer '+name);for(const p of params){const record=ast.structs.find(r=>'cw_objectptr_'+r.name===p.type);if(p.pointer||!record?.valueClass)throw new CompileError('Value buffers require a concrete class pointer parameter.',p.token,source);p.type=record.type;p.pointer=true;}}
+  }
+
   // Lower same-allocation byte-address round trips while retaining typed offsets.
   const bytePointer=node=>{
     if(node?.kind==='binary'&&['+','-'].includes(node.op)){const p=bytePointer(node.left);if(p)return {...p,index:{...node,left:p.index}};return null;}
@@ -1196,7 +1207,7 @@ export function compile(source, options = {},bufferUsage=null) {
   const scalarConstraints=uniformBlockGuards(kernel,options,walk,message=>{throw new CompileError(message,kernel.token,source);});
   const overloadGroups=new Map();for(const f of ast.functions)if(f.specializationArgument===undefined){const group=overloadGroups.get(f.name)||[];group.push(f);overloadGroups.set(f.name,group);}let overloadIndex=0;const occupied=new Set(ast.functions.map(f=>f.name));for(const [name,group]of overloadGroups)if(group.length>1){if(group.some(f=>f.qualifier!=='__device__'||f.templateParameter))throw new CompileError('Overloads support non-template device helpers only.',group[0].token,source);const signatures=new Set();for(const f of group){const signature=JSON.stringify(f.params.map(p=>[p.type,p.pointer,p.reference,(p.pointer||p.reference)&&p.constant]));if(signatures.has(signature))throw new CompileError('Duplicate function signature '+name,f.token,source);signatures.add(signature);let unique='cw_overload_'+overloadIndex+++'_'+name;while(occupied.has(unique))unique+='_';occupied.add(unique);f.overloadName=name;f.name=unique;}}
   const templates=instantiateHelperTemplates(ast,kernel);
-  const emitter=new Emitter(ast,kernel,options,templates,bufferUsage),result=emitter.emit();if(options.libraries?.length)result.metadata.libraries=options.libraries.map(name=>({name,seedBits:32,subsequence:0,offset:0,stateLayout:'compiler-owned',operations:['curand_init','curand','curand_uniform']}));
+  const emitter=new Emitter(ast,kernel,options,templates,bufferUsage),result=emitter.emit();if(options.libraries?.length)result.metadata.libraries=options.libraries.map(name=>({name,seedBits:64,subsequence:0,offset:0,stateLayout:'compiler-owned',operations:['curand_init','curand','curand_uniform']}));
   emitter.checkRecursion(); // Class calls have now resolved to concrete helpers.
   if(tiledGroups)result.metadata.tiledGroups='predicated-first-tile';
   if(scalarConstraints.length||emitter.pointerConstraints.length)result.metadata.scalarConstraints=[...scalarConstraints,...emitter.pointerConstraints];

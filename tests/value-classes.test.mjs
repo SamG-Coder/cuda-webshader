@@ -124,9 +124,9 @@ test('Local record pointers preserve state through class methods and forwarded h
 test('XORWOW compatibility is explicit and rejects unsupported initialization modes',()=>{
  const s='__global__ void k(unsigned int*out){curandState state;curand_init(1984u,0,0,&state);out[0]=curand(&state);}';
  const options={libraries:['curand-xorwow'],workgroupSize:[1,1,1]};
- const a=compile(s,options);assert.equal(a.metadata.libraries[0].seedBits,32);
+ const a=compile(s,options);assert.equal(a.metadata.libraries[0].seedBits,64);
  assert.throws(()=>compile(s));
- for(const replacement of ['1984u,1,0','1984u,0,1','1984u,threadIdx.x,0','-1,0,0'])assert.throws(()=>compile(s.replace('1984u,0,0',replacement),options),/XORWOW/);
+ for(const replacement of ['1984u,1,0','1984u,0,1','1984u,threadIdx.x,0','1.5f,0,0'])assert.throws(()=>compile(s.replace('1984u,0,0',replacement),options),/XORWOW/);
  assert.throws(()=>compile(s,{libraries:['unknown']}),/Supported libraries/);
  const camera=['value-class','camera-class','camera-kernels'].map(n=>readFileSync(new URL('./pathtracer-'+n+'.cuh',import.meta.url),'utf8')).join('\n');assert.ok(compile(camera,{...options,entry:'check_camera'}).wgsl.includes('tan('));
 });
@@ -142,4 +142,24 @@ test('Original material methods compile with call macros, float pow and double c
  const source=['class','kernels'].map(n=>readFileSync(new URL('./pathtracer-material-'+n+'.cuh',import.meta.url),'utf8')).join('\n');
  const a=compile(source,{entry:'check_material',libraries:['curand-xorwow'],workgroupSize:[1,1,1],objectHeap:'persistent'});assert.equal(a.metadata.objectHeap.types.length,3);assert.ok(a.wgsl.includes('pow('));
  const c=compile('class V{public:float x;__device__ V(){x=0.0f;}__device__ V(float a){x=a;}};__global__ void k(float*out){V a(0.7);out[0]=a.x;out[1]=pow(0.5f,3.0f);}',{workgroupSize:[1,1,1]}),out=new Float32Array(2);executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[Math.fround(0.7),0.125]);
+});
+
+
+test('Explicit related class downcasts retain allocation identity and concrete fields',()=>{
+ const source='class B{public:__device__ virtual int get() const=0;};class D:public B{public:int x;__device__ D(){x=42;}__device__ int get()const{return x;}};__global__ void k(int*out){B*b=new D();D*d=(D*)b;out[0]=d->x;out[1]=d->get();delete b;}';
+ const a=compile(source,{workgroupSize:[1,1,1]}),out=new Int32Array(2);executeCPU(a,{out},{},[1]);assert.deepEqual([...out],[42,42]);
+ assert.throws(()=>compile(source.replace('D*d=(D*)b','D*d=b')),/Cannot convert/);
+ assert.throws(()=>compile('class X;__global__ void k(){X*p=new X();}'),/complete concrete/);
+});
+
+test('Record buffers expose aligned storage strides and reject non-shareable fields',()=>{
+ const a=compile('struct R{unsigned int d;unsigned int v[5];};__global__ void k(R*out){out[0].v[4]=9u;}');assert.equal(a.metadata.bindings[0].stride,24);
+ const b=compile('class V{public:float e[3];};__global__ void k(V*out){out[0].e[2]=1.0f;}',{valueBuffers:['out']});assert.equal(b.metadata.bindings[0].stride,12);
+ assert.throws(()=>compile('struct R{bool flag;};__global__ void k(R*out){out[0].flag=true;}'),/host-shareable/);
+ assert.throws(()=>compile('class V{public:float x;};__global__ void k(V*out){}',{valueBuffers:['missing']}),/Unknown value buffer/);
+});
+
+test('Wide integer seed shifts preserve both words and signed conversion',()=>{
+ const a=compile('__global__ void k(unsigned int*out){size_t n=(size_t)(-1);out[0]=(unsigned int)(n>>32u);out[1]=(unsigned int)(n<<32u);}',{workgroupSize:[1,1,1]}),out=new Uint32Array(2);executeCPU(a,{out},{},[1]);assert.deepEqual([...out],[4294967295,0]);
+ assert.throws(()=>compile('__global__ void k(unsigned int*out){size_t n=(size_t)1;out[0]=(unsigned int)(n>>64u);}'),/0..63/);
 });
