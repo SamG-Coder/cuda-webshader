@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "animationFrames": 6,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "triangles": 130050,
+  "nativeHeightMaxError": 2.384185791015625e-7,
+  "meshMatchesComputedHeights": true,
+  "normalizedNormals": true,
+  "changesWithTime": true,
+  "controlReadbackBytes": 0,
+  "animationReadbackBytes": 0,
+  "passes": [
+    "1. generateSpectrumKernel",
+    "2. inverseFftAxis",
+    "3. updateHeightmapKernel",
+    "4. calculateSlopeKernel",
+    "5. oceanMesh"
+  ],
+  "sourceUnchanged": true,
+  "softwareAdapterRequested": false,
+  "mobileOverflow": false
+}

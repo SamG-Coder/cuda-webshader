@@ -1,0 +1,145 @@
+{
+  "pipeline": {
+    "animate": true,
+    "buffers": {
+      "h0": {
+        "type": "vec2<f32>",
+        "records": 66820,
+        "fill": "binary-f32",
+        "source": "showcases/ocean/h0.bin"
+      },
+      "ht": {
+        "type": "vec2<f32>",
+        "records": 65536,
+        "fill": "zero"
+      },
+      "height": {
+        "type": "f32",
+        "records": 65536,
+        "fill": "zero"
+      },
+      "slope": {
+        "type": "vec2<f32>",
+        "records": 65536,
+        "fill": "zero"
+      },
+      "positions": {
+        "type": "vec4<f32>",
+        "records": 390150,
+        "fill": "zero"
+      },
+      "normals": {
+        "type": "vec4<f32>",
+        "records": 390150,
+        "fill": "zero"
+      }
+    },
+    "steps": [
+      {
+        "entry": "generateSpectrumKernel",
+        "bindings": {
+          "h0": "h0",
+          "ht": "ht"
+        },
+        "scalars": {
+          "in_width": 260,
+          "out_width": 256,
+          "out_height": 256,
+          "t": {
+            "time": true
+          },
+          "patchSize": 100
+        },
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          32,
+          32,
+          1
+        ]
+      },
+      {
+        "inverseFFT": {
+          "source": "ht",
+          "target": "ht",
+          "width": 256,
+          "height": 256
+        }
+      },
+      {
+        "entry": "updateHeightmapKernel",
+        "bindings": {
+          "heightMap": "height",
+          "ht": "ht"
+        },
+        "scalars": {
+          "width": 256
+        },
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          32,
+          32,
+          1
+        ]
+      },
+      {
+        "entry": "calculateSlopeKernel",
+        "bindings": {
+          "h": "height",
+          "slopeOut": "slope"
+        },
+        "scalars": {
+          "width": 256,
+          "height": 256
+        },
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          32,
+          32,
+          1
+        ]
+      },
+      {
+        "entry": "oceanMesh",
+        "bindings": {
+          "height": "height",
+          "slope": "slope",
+          "positions": "positions",
+          "normals": "normals"
+        },
+        "scalars": {
+          "width": 256,
+          "heightCount": 256
+        },
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          3049,
+          1,
+          1
+        ]
+      }
+    ],
+    "preview": {
+      "kind": "triangles",
+      "positions": "positions",
+      "normals": "normals",
+      "count": 390150,
+      "color": 2390943
+    }
+  }
+}

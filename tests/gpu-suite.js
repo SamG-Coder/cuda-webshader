@@ -1,3 +1,5 @@
+import {checkFFT} from './fft-gpu.js';
+import {checkOcean} from './ocean-gpu.js';
 import {checkDctOptimized} from './dct-optimized-gpu.js';
 import {checkDctFloat} from './dct-float-gpu.js';
 import {checkDenoising} from './denoising-gpu.js';
@@ -197,6 +199,8 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Complete implicit marching-cubes GPU pipeline matches native CUDA',()=>checkMarchingPipeline(runtime));
   await run('Hierarchical exclusive scan matches native CUDA',()=>checkExclusiveScan(runtime));
   await run('Original shared marching-cubes triangle generation matches native CUDA',()=>checkMarchingTriangles(runtime));
+  await run('GPU inverse FFT matches independent DFT and preserves guards',()=>checkFFT(runtime));
+  await run('Original NVIDIA ocean stages match native cuFFT pipeline',()=>checkOcean(runtime));
   await run('Original NVIDIA optimized DCT matches native on padded and full images',()=>checkDctOptimized(runtime));
   await run('Original NVIDIA floating DCT stages and rounding match native CUDA',()=>checkDctFloat(runtime));
   await run('All original NVIDIA imageDenoising kernels match native portrait captures',()=>checkDenoising(runtime));

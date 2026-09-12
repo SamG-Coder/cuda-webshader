@@ -1,0 +1,119 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "intermediateReadbacks": "Validation only; no readback supplies later stage input",
+  "results": [
+    {
+      "case": 0,
+      "stage": "spectrum",
+      "components": 131072,
+      "maxError": 0,
+      "maxMagnitude": 0.04570027068257332,
+      "rmsError": 0
+    },
+    {
+      "case": 0,
+      "stage": "spatial",
+      "components": 131072,
+      "maxError": 1.4901161193847656e-7,
+      "maxMagnitude": 0.3127635419368744,
+      "rmsError": 2.6687740871884984e-8
+    },
+    {
+      "case": 0,
+      "stage": "height",
+      "components": 65536,
+      "maxError": 1.4901161193847656e-7,
+      "maxMagnitude": 0.3127635419368744,
+      "rmsError": 2.695704911299274e-8
+    },
+    {
+      "case": 0,
+      "stage": "slope",
+      "components": 131072,
+      "maxError": 1.1920928955078125e-7,
+      "maxMagnitude": 0.04664577171206474,
+      "rmsError": 2.142432733403093e-8
+    },
+    {
+      "case": 1,
+      "stage": "spectrum",
+      "components": 131072,
+      "maxError": 2.2351741790771484e-8,
+      "maxMagnitude": 0.06382914632558823,
+      "rmsError": 9.533293400577595e-11
+    },
+    {
+      "case": 1,
+      "stage": "spatial",
+      "components": 131072,
+      "maxError": 2.384185791015625e-7,
+      "maxMagnitude": 0.3423202931880951,
+      "rmsError": 4.609084808971669e-8
+    },
+    {
+      "case": 1,
+      "stage": "height",
+      "components": 65536,
+      "maxError": 2.384185791015625e-7,
+      "maxMagnitude": 0.3423202931880951,
+      "rmsError": 5.739505861586215e-8
+    },
+    {
+      "case": 1,
+      "stage": "slope",
+      "components": 131072,
+      "maxError": 1.6391277313232422e-7,
+      "maxMagnitude": 0.044252462685108185,
+      "rmsError": 2.8070193244219528e-8
+    },
+    {
+      "case": 2,
+      "stage": "spectrum",
+      "components": 131072,
+      "maxError": 2.9453076422214508e-8,
+      "maxMagnitude": 0.026072535663843155,
+      "rmsError": 2.2336716754469505e-10
+    },
+    {
+      "case": 2,
+      "stage": "spatial",
+      "components": 131072,
+      "maxError": 3.166496753692627e-7,
+      "maxMagnitude": 0.2669287919998169,
+      "rmsError": 6.361419692804876e-8
+    },
+    {
+      "case": 2,
+      "stage": "height",
+      "components": 65536,
+      "maxError": 3.166496753692627e-7,
+      "maxMagnitude": 0.2669287919998169,
+      "rmsError": 8.655283279682324e-8
+    },
+    {
+      "case": 2,
+      "stage": "slope",
+      "components": 131072,
+      "maxError": 1.7881393432617188e-7,
+      "maxMagnitude": 0.05265261232852936,
+      "rmsError": 3.3409243739437965e-8
+    }
+  ]
+}

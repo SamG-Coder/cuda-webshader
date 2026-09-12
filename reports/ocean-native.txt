@@ -1,0 +1,3 @@
+PASS native ocean at t=0: original spectrum, cuFFT inverse, real heights and slopes.
+PASS native ocean at t=1.25: original spectrum, cuFFT inverse, real heights and slopes.
+PASS native ocean at t=7.5: original spectrum, cuFFT inverse, real heights and slopes.

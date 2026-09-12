@@ -513,3 +513,16 @@ See [validation and remaining DCT paths](reports/dct-progress.md). The packed-sh
 shared-memory DCT/IDCT helper functions now run unchanged, with all three stages
 matching native CUDA exactly for a padded 64 × 32 image and the full 512 × 512
 teapot. This establishes correctness; no speedup over the first path is claimed.
+
+### Animated NVIDIA FFT ocean
+
+[Run the ocean in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=ocean)
+(or [locally](http://localhost:5173/sandbox.html?example=ocean)). This runs the
+original spectrum, height and slope CUDA kernels around a project GPU inverse
+FFT, producing an animated 256 × 256 ocean with 130,050 triangles. Drag to orbit;
+use Animate GPU steps or Stop to control the simulation. Compare generated WGSL
+for the original kernels, runtime FFT and labelled CUDA mesh adapter.
+
+All numerical stages were compared with native CUDA/cuFFT at three animation
+times; maximum absolute error was 3.17e-7. The preview uses project rendering,
+and no cuFFT performance parity is claimed. See [validation details](reports/ocean-progress.md).
