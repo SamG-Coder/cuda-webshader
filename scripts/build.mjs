@@ -1,4 +1,5 @@
 import {mkdir,cp,copyFile,rm,access,readdir} from 'node:fs/promises';import {fileURLToPath} from 'node:url';
+import {versionBuildAssets} from './version-build-assets.mjs';
 const root=new URL('../',import.meta.url),out=new URL('../dist/',import.meta.url);
 try{await access(new URL('node_modules/three/build/three.webgpu.js',root));}catch{throw new Error('Run npm install first. Three.js is not installed in this checkout.');}
 await rm(out,{recursive:true,force:true});await mkdir(out,{recursive:true});
@@ -15,4 +16,5 @@ for(const file of ['particle-simulation-check.json','particle-simulation-native.
   try{await access(new URL(`reports/${file}`,root));}catch{continue;}
   await copyFile(new URL(`reports/${file}`,root),new URL(`reports/${file}`,out));
 }
+await versionBuildAssets(fileURLToPath(out));
 console.log(`Static build created at ${fileURLToPath(out)}. Serve with: node scripts/serve.mjs dist`);
