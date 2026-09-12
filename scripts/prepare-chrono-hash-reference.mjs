@@ -1,0 +1,11 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {compile} from '../src/compiler/compiler.js';
+const input=readFileSync('.local/chrono-initial-positions.bin');
+if(input.length!==16731*12)throw Error('Expected the original dam-break particle count.');
+const params=JSON.parse(readFileSync('.local/chrono-params.json'));
+const metadata=compile(readFileSync('tests/chrono-hash.cu','utf8'),{entry:'hashProbe',workgroupSize:[128]}).metadata;
+for(const p of metadata.scalars)if(p.origin==='constant'&&!Object.hasOwn(params,p.name))throw Error('Missing native parameter '+p.name);
+const edges=new Float32Array([-7,-.55,-16,7,.55,16,-100,-100,-100,100,100,100,0,0,0,-7.000001,-.5500001,-16.000002,6.999999,.5499999,15.999999,7.000001,.5500001,16.000002]);
+writeFileSync('reports/chrono-hash-input.bin',Buffer.concat([input,Buffer.from(edges.buffer)]));
+writeFileSync('reports/chrono-params.json',JSON.stringify(params,null,2));
+console.log('Prepared 16,731 native particle positions plus 8 explicit boundary cases.');

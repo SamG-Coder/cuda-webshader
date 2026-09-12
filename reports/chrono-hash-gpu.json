@@ -1,0 +1,10 @@
+{
+  "nativeParticles": 16731,
+  "edgePoints": 8,
+  "boundaryConfigurations": 9,
+  "compared": 602604,
+  "nativeExact": true,
+  "fullParameterRecord": true,
+  "real3Stride": 12,
+  "doubleFieldPreserved": true
+}

@@ -117,7 +117,7 @@ export class Parser {
   }
   deferredType(name){return this.deferUnsupportedTypes&&/^double[234]?$/.test(name);}
   startsType() { return this.peek().value==='volatile'||this.typeAliases.has(this.peek().value)||this.structs.has(this.peek().value)||TYPES.has(this.peek().value) || this.deferredType(this.peek().value) || this.peek().value==='typename' || this.typeTraits.has(this.peek().value) || this.templateTypeNames?.has(this.peek().value) || QUALIFIERS.has(this.peek().value); }
-  type() {
+  type({recordField=false}={}) {
     let constant = false, shared = false,external=false;
     while (QUALIFIERS.has(this.peek().value)) { const q = this.take().value; constant ||= q === 'const'; shared ||= q === '__shared__';external ||= q==='extern'; }
     const tok = this.take(); let type;
@@ -127,7 +127,7 @@ export class Parser {
       if(!this.typeTraits.has(name))this.fail(`Unknown type trait '${name}'.`,tok);
       this.take('<');const argument=this.name();this.take('>');this.take('::');const member=this.name();
       type={kind:'trait-type',name,argument,member};
-    }else if (tok.value === 'unsigned') { if(this.match('char'))type='cw_uchar';else if(this.match('short')){this.match('int');type='cw_ushort';}else{this.match('int'); type = 'u32';} } else type = this.structs.has(tok.value)?this.structs.get(tok.value).type:this.templateTypeNames?.has(tok.value)?'template:'+tok.value:(this.typeAliases.get(tok.value)||builtinType(tok.value));
+    }else if (tok.value === 'unsigned') { if(this.match('char'))type='cw_uchar';else if(this.match('short')){this.match('int');type='cw_ushort';}else{this.match('int'); type = 'u32';} } else type = this.structs.has(tok.value)?this.structs.get(tok.value).type:this.templateTypeNames?.has(tok.value)?'template:'+tok.value:(recordField&&tok.value==='double'?'cw_f64':this.typeAliases.get(tok.value)||builtinType(tok.value));
     if(tok.value==='short')this.match('int');
     if(!type&&this.deferredType(tok.value))type='unsupported:'+tok.value;
     if (!type) this.fail(`Unsupported type '${tok.value}'. Use float, int, unsigned int, bool or float2/3/4.`, tok);
@@ -189,7 +189,7 @@ export class Parser {
       }
       if(this.is('typedef')&&this.peek(1).value==='struct'||this.is('struct')&&this.peek(2).value==='{'){
         const alias=this.match('typedef');this.take('struct');let name=this.is('{')?null:this.name();this.take('{');const fields=[];
-        while(!this.is('}')){const fieldToken=this.peek(),spec=this.type(),fieldName=this.name(),dimensions=[];if(spec.pointer){if(!['f32','i32','u32','vec2<f32>','vec3<f32>','vec4<f32>'].includes(spec.type))this.fail('Pointer fields require 32-bit scalar or float-vector elements.',fieldToken);spec.pointerElement=spec.type;spec.type='cw_deviceptr_'+spec.type.replace(/[<>]/g,'_');(this.devicePointerTypes??=new Set()).add(spec.type);}if(spec.reference||spec.shared||spec.external||spec.constant||(['void','texture3d','surface2d','thread-block','cw_extent','cw_size64'].includes(spec.type)))this.fail('Struct fields require plain scalar/vector value types.',fieldToken);while(this.match('[')){dimensions.push(this.expression(2));this.take(']');}this.take(';');if(dimensions.length>1||fields.length>=256)this.fail('Structs support at most 256 fields and one-dimensional field arrays.',fieldToken);if(fields.some(f=>f.name===fieldName))this.fail('Duplicate struct field.',fieldToken);if(spec.pointer&&dimensions.length)this.fail('Arrays of pointer fields are unsupported.',fieldToken);fields.push({name:fieldName,type:spec.type,...(spec.pointer?{pointerElement:spec.pointerElement}:{}),dimensions,token:fieldToken});}
+        while(!this.is('}')){const fieldToken=this.peek(),spec=this.type({recordField:true}),fieldName=this.name(),dimensions=[];if(spec.pointer){if(!['f32','i32','u32','vec2<f32>','vec3<f32>','vec4<f32>'].includes(spec.type))this.fail('Pointer fields require 32-bit scalar or float-vector elements.',fieldToken);spec.pointerElement=spec.type;spec.type='cw_deviceptr_'+spec.type.replace(/[<>]/g,'_');(this.devicePointerTypes??=new Set()).add(spec.type);}if(spec.reference||spec.shared||spec.external||spec.constant||(['void','texture3d','surface2d','thread-block','cw_extent','cw_size64'].includes(spec.type)))this.fail('Struct fields require plain scalar/vector value types.',fieldToken);while(this.match('[')){dimensions.push(this.expression(2));this.take(']');}this.take(';');if(dimensions.length>1||fields.length>=256)this.fail('Structs support at most 256 fields and one-dimensional field arrays.',fieldToken);if(fields.some(f=>f.name===fieldName))this.fail('Duplicate struct field.',fieldToken);if(spec.pointer&&dimensions.length)this.fail('Arrays of pointer fields are unsupported.',fieldToken);fields.push({name:fieldName,type:spec.type,...(spec.pointer?{pointerElement:spec.pointerElement}:{}),dimensions,token:fieldToken});}
         this.take('}');if(alias){const aliasName=this.name();if(name&&name!==aliasName)this.fail('Distinct struct tag/typedef aliases are unsupported.',token);name=aliasName;}this.take(';');if(!name||!fields.length||this.structs.has(name)||this.typeAliases.has(name)||TYPES.has(name)||this.typeTraits.has(name))this.fail('Structs require a distinct name and at least one field.',token);if(this.structs.size>=64)this.fail('At most 64 plain structs are supported.',token);this.structs.set(name,{name,type:'cw_struct_'+name,fields,token,complete:true});continue;
       }
       if(this.is('typedef')&&this.peek(1).value!=='struct'){
@@ -203,7 +203,7 @@ export class Parser {
         if(sharedGlobals.some(g=>g.name===declaration.name))this.fail('Duplicate module shared declaration.',token);sharedGlobals.push(declaration);continue;
       }
       if(this.match('__constant__')){
-        this.deferUnsupportedTypes=true;const valueType=this.type(),name=this.name();
+        this.match('static');this.deferUnsupportedTypes=true;const valueType=this.type(),name=this.name();
         if(valueType.pointer||valueType.reference||valueType.shared||valueType.external)this.fail('Constant globals support scalar values and fixed scalar arrays only.',token);
         const dimensions=[];while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}if(dimensions.length>2||dimensions.length===2&&dimensions.includes(null))this.fail('Constant arrays support at most two fixed dimensions.',token);
         const init=this.match('=')?this.initializer():null;this.take(';');

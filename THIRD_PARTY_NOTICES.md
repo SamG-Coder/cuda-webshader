@@ -239,6 +239,10 @@ The quadtree showcase and `tests/quadtree-cdp-device.cuh` retain NVIDIA's origin
 
 ## Project Chrono kernels and type declarations
 
+`tests/chrono-hash.cu` also retains the full parameter record, Real3/Real4
+declarations (Copyright (c) 2025 projectchrono.org), and original grid helpers
+from the same revision. `tests/chrono-params-native.cpp` retains the original
+dam-break initialization followed by an MIT host capture harness.
 `tests/chrono-enums.cu` retains the original scoped enum declarations from
 `src/chrono_fsi/sph/ChFsiDefinitionsSPH.h` at the same revision.
 `tests/chrono-neighbors.cu` contains unchanged kernels extracted from

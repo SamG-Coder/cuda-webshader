@@ -65,8 +65,8 @@ The GPU suite includes the native-reference comparison.
 
 ## Remaining for the water showcase
 
-Handle Chrono's namespaces and the double field in its constant parameter structure, compile the
-actual position hashing and neighbour-list kernels, connect sort/scan stages,
+Handle namespace-aware header ingestion and compile the actual neighbour-list
+kernels, connect the verified position hashing with sort/scan stages,
 then add ADAMI boundary forces, WCSPH pressure/viscosity and RK2 integration.
 Compare intermediate buffers and evolved particle states against native CUDA.
 Only then wire the full solver to a sandbox preview and add its showcase card.
@@ -88,11 +88,10 @@ checks first/last field access and boolean branch selection. There are 218
 comparisons in this stage (216 native-backed enum/flag values and two large-record
 checks). The full local suite passes 688 unit tests and 226 NVIDIA GPU tests.
 
-The complete `ChFsiParamsSPH` is not yet accepted: it includes a host initialization
-`double pressure_height` field even in single-precision builds, and its headers
-use namespaces. Those declarations have not been replaced with float fields or
-removed from the original solver. The position-hashing stage still needs that
-type support before it can run.
+The next stage below adds the full `ChFsiParamsSPH`, including its
+`double pressure_height` field. General namespace/header ingestion remains
+unsupported; these fixtures extract the original declarations and helpers into
+one device translation unit without changing their bodies.
 
 Native enum reference regeneration, from the Visual Studio developer shell:
 
@@ -100,3 +99,49 @@ Native enum reference regeneration, from the Visual Studio developer shell:
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-enums-native.cu -o .local/chrono-enums-native.exe
 .local/chrono-enums-native.exe > reports/chrono-enums-native.json
 ```
+
+## Original grid-position and grid-hashing stage
+
+The full original parameter record now compiles, including its binary64 field.
+Double fields in plain records are represented by two exact u32 uniform words
+(`.lo` and `.hi`) and use the existing integer-based binary64 expression code.
+They are not demoted to float32. Standalone double locals, double buffers and
+record storage ABIs containing doubles remain explicitly unsupported.
+The original `__constant__ static` spelling and CUDA `floor(float)` overload
+are also accepted. The latter was checked with a native compile-time type assertion.
+
+`tests/chrono-params-native.cpp` executes the unchanged dam-break setup through
+`sysFSI.Initialize()`, then captures `GetParams()` and the actual initial
+particle positions. It reuses the upstream demo compiler flags, including
+Eigen/AVX2 alignment settings. The native parameter ABI is 608 bytes; the
+browser receives 157 named 32-bit parameter words instead of a raw struct copy.
+
+The original `calcGridPos`, `reduceGridIndex`, and `calcGridHash` helpers match
+native CUDA for all 16,731 initial particles plus eight boundary/far-outside
+positions. Nine runs cover the actual dam-break periodic flags followed by all
+eight combinations of periodic/clamped axes. Every grid-coordinate component
+and final hash agrees exactly: 602,604 integer comparisons. Real3 input stride
+is checked as 12 bytes. A precision test sets the double field to 1+2^-40 and
+verifies that subtracting 1 retains 2^-40.
+
+This is position hashing, not complete neighbour search or fluid integration.
+No water showcase has been added. Current local validation: 690 unit tests and
+227 real NVIDIA WebGPU tests passed.
+
+Regenerate from the configured pinned native build:
+
+```text
+node scripts/build-chrono-capture.mjs
+.local/chrono-build/bin/chrono-params-capture.exe --quiet --no_vis
+node scripts/prepare-chrono-hash-reference.mjs
+```
+
+Then, from a Visual Studio developer shell:
+
+```text
+nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-hash-native.cu -o .local/chrono-hash-native.exe
+.local/chrono-hash-native.exe
+```
+
+The native harness writes `reports/chrono-hash-native.bin`; the GPU suite
+checks it using the captured `reports/chrono-params.json` and particle inputs.
