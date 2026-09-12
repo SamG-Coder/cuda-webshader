@@ -1,0 +1,2 @@
+Rendering a 1200x800 image with 10 samples per pixel in 8x8 blocks.
+took 0.635 seconds.

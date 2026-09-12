@@ -1,0 +1,32 @@
+{
+  "repository": "https://github.com/rogerallen/raytracinginoneweekendincuda",
+  "revision": "ab140b12d4923b75270831baabab5e4d4209f305",
+  "sourceUnchanged": true,
+  "sourceSha256LF": {
+    "main.cu": "c99682a23733c55014f2ff5760a0b6f19b7033675bf5450b878eb08264b7e379",
+    "vec3.h": "03750ee2c5e501d97641933edd92c9db2e508cbc34325dfd9da100e66e51153f",
+    "ray.h": "92d510715edcec2e11cf9adabe3184123259e2841c9c805bfa789fb1099fd8a7",
+    "hitable.h": "8c068b25010ca839a25c1177558c22255762b52174c24f99836bd21fcbde34f5",
+    "hitable_list.h": "462a0fd7fcea954072d16c88a197b7507e03d130ccb7c7b960521925c8bbfd78",
+    "sphere.h": "f2d2b6e19dcca5c8192787df0b4aba548aceec847bd3359795838630b7636b5c",
+    "camera.h": "b3868b950e99e93ae9916c586d40e56a0d4475c56224c4e0bdaa8cbf4bf189fd",
+    "material.h": "e0fbb1ec0ed2b608572bbe76fd72b5ce6da6f20214794c3bafcff71747eb180a"
+  },
+  "width": 1200,
+  "height": 800,
+  "samplesPerPixel": 10,
+  "maximumBounces": 50,
+  "spheres": 488,
+  "nativeReportedSeconds": 0.635,
+  "timingScope": "Original timer: per-pixel RNG initialization and render, including synchronization; excludes world construction and PPM output.",
+  "buildFlags": [
+    "-O3",
+    "-std=c++17",
+    "-arch=native"
+  ],
+  "rgbSha256": "45afbde8cda53e5946f958aef17f408281bcb6d58f30b532e40a4dbfdfd02f17",
+  "ppmSha256": "2e4e4c609d664d51fd8d10a47ad167a16cb1157673b26557c176635826423a19",
+  "pngSha256": "80aff71de8a25d3288893effaea09b347e71bf0bf5ba5836a65037c9ca8d3e05",
+  "validatedPixels": 960000,
+  "webgpuVerified": false
+}
