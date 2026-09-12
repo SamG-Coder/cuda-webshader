@@ -235,7 +235,7 @@ class Emitter {
           return this.result(n,'bool',code,pre);
         }
         if(a.type==='cw_uchar4'||b.type==='cw_uchar4')this.fail('uchar4 arithmetic requires explicit byte components.',n);
-        if(vectorLength(a.type)||vectorLength(b.type)){const type=vectorLength(a.type)?a.type:b.type;if(vectorElement(type)!=='f32'||!['+','-','*','/'].includes(n.op)||![type,'f32'].includes(a.type)||![type,'f32'].includes(b.type))this.fail('Vector arithmetic supports matching float vectors and float scalars with +, -, *, /.',n);const code=v=>v.type===type?v.code:`${type}(${v.code})`;n.operandType=type;return this.result(n,type,`(${code(a)} ${n.op} ${code(b)})`,[...a.pre,...b.pre]);}
+        if(vectorLength(a.type)||vectorLength(b.type)){const type=vectorLength(a.type)?a.type:b.type;const element=vectorElement(type),ops=element==='f32'?['+','-','*','/']:['+','-','*'];if(!ops.includes(n.op)||![type,element].includes(a.type)||![type,element].includes(b.type))this.fail('Vector arithmetic requires matching vector/scalar element types; integer vectors support +, -, * only.',n);const code=v=>v.type===type?v.code:`${type}(${v.code})`;n.operandType=type;return this.result(n,type,`(${code(a)} ${n.op} ${code(b)})`,[...a.pre,...b.pre]);}
         let common = ['<<', '>>'].includes(n.op) ? a.type : this.common(a.type, b.type, n);
         if (vectorLength(common)) this.fail('CUDA vector arithmetic requires explicit components; operator overloads are outside this subset.', n);
         if (['&', '|', '^', '<<', '>>', '%'].includes(n.op) && !['i32', 'u32'].includes(common)) this.fail('Bitwise, shift and remainder operators require integers.', n);

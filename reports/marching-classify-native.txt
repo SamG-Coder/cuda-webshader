@@ -1,0 +1,5 @@
+Native RTX 5080; nvcc -O3 --fmad=false -std=c++17 -arch=native -I.local/nvidia-audit/Common tests/marching-classify-native.cu
+Original classifyVoxel, original Bucky data and original numVertsTable; grid 16x16 blocks, 128 threads per block.
+iso=0.200000003 voxels=32768 active=7164 vertices=43524
+iso=0.5 voxels=32768 active=5545 vertices=33378
+iso=0.800000012 voxels=32768 active=2288 vertices=11214

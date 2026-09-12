@@ -47,3 +47,21 @@ NVIDIA's original vertexInterp2 and original scalar/vector lerp bodies are retai
 Original-source probes now reveal two distinct remaining blockers: classifyVoxel/generateTriangles2 use unsigned-vector addition for neighbouring grid positions, while generateTriangles's USE_SHARED branch passes shared-array elements as vector reference outputs. Shared-memory references require appropriate address-space handling; they have not been replaced with CPU work or silently switched to the local-memory branch.
 
 Validation for this step: 468 unit tests, 135 hardware GPU checks, compile-all and static build pass. Native interpolation captures use multiply-add fusion disabled.
+
+## Original voxel classification verified
+
+Matching signed/unsigned integer vectors now support componentwise addition, subtraction and multiplication, including matching scalar operands on either side. Unsigned arithmetic wraps to 32 bits. Mixed element types, mismatched vector sizes, vector comparisons, integer-vector division/remainder and shifts remain rejected. This enables the original `gridPos + make_uint3(...)` neighbour calculations.
+
+The original classifyVoxel runs with SAMPLE_VOLUME=1 on NVIDIA's original 32³ Bucky volume and original numVertsTable. Three native/WebGPU comparisons verify every vertex-count and occupancy entry: 196,608 exact unsigned integer results. The two-dimensional launch uses 16x16 blocks of 128 threads, exercising the original flattened block-index arithmetic.
+
+| Iso value | Active voxels | Total vertices |
+| --- | ---: | ---: |
+| 0.2 (float32) | 7,164 | 43,524 |
+| 0.5 | 5,545 | 33,378 |
+| 0.8 (float32) | 2,288 | 11,214 |
+
+The native and browser checks use the same extracted original device source, retaining NVIDIA's notices. Native includes the original helper_math definitions; the browser compiles the original lerp helpers alongside it. Original source/data/tables are retained as test fixtures. The classifier's output is a count/occupancy field, not the rendered mesh, so no marching-cubes showcase is advertised yet.
+
+The next original-source failures are: generateTriangles's shared-array vector references, and generateTriangles2's local `float3 *v[3]` pointer array referencing selected shared vertices. Prefix-scan/compaction integration and mesh output verification also remain outstanding.
+
+Validation for classification: 470 unit tests, 136 hardware GPU checks, compile-all and static build pass.
