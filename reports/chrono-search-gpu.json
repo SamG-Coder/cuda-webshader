@@ -1,0 +1,10 @@
+{
+  "markers": 30327,
+  "fluidMarkers": 16731,
+  "boundaryMarkers": 13596,
+  "neighborEntries": 794643,
+  "compared": 1027953,
+  "nativeExact": true,
+  "intermediateReadbackBytes": 4,
+  "cpuPhysics": false
+}

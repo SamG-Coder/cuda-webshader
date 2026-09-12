@@ -1,3 +1,4 @@
+#include <cuda_runtime.h>
 #include <fstream>
 #include <iomanip>
 #include <cstring>
@@ -343,5 +344,12 @@ json << ",\"constant.paramsD.zombieMax.z\":" << p.zombieMax.z;
 json << ",\"constant.paramsD.free_flow_duration\":" << p.free_flow_duration;
 json << ",\"constant.paramsD.num_proximity_search_steps\":" << p.num_proximity_search_steps;
 json << ",\"constant.paramsD.use_variable_time_step\":" << p.use_variable_time_step;
-json << "}";json.close();std::cout << "Captured params: " << sizeof(p) << " bytes\n";std::ofstream positions(".local/chrono-initial-positions.bin",std::ios::binary);for(const auto& point:points){float xyz[3]={(float)point.x(),(float)point.y(),(float)point.z()};positions.write((const char*)xyz,sizeof(xyz));}positions.close();return 0;
+json << "}";json.close();std::cout << "Captured params: " << sizeof(p) << " bytes\n";std::ofstream positions(".local/chrono-initial-positions.bin",std::ios::binary);for(const auto& point:points){float xyz[3]={(float)point.x(),(float)point.y(),(float)point.z()};positions.write((const char*)xyz,sizeof(xyz));}positions.close();
+const auto allPositions=sysSPH.GetPositions();const auto view=sysSPH.GetMarkerDeviceView();
+std::vector<Real4> markers(allPositions.size());
+if(cudaMemcpy(markers.data(),view.pos_rad,markers.size()*sizeof(Real4),cudaMemcpyDeviceToHost)!=cudaSuccess)return 1;
+std::ofstream markerFile(".local/chrono-marker-posrad.bin",std::ios::binary);markerFile.write((const char*)markers.data(),markers.size()*sizeof(Real4));markerFile.close();
+std::ofstream markerInfo(".local/chrono-marker-info.json");markerInfo << "{\"markers\":" << markers.size() << ",\"fluid\":" << view.num_fluid_markers << "}";markerInfo.close();
+std::cout << "Captured " << markers.size() << " markers, including " << view.num_fluid_markers << " fluid markers\n";
+return 0;
 }

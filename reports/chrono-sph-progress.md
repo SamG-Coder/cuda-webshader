@@ -65,9 +65,9 @@ The GPU suite includes the native-reference comparison.
 
 ## Remaining for the water showcase
 
-Handle namespace-aware header ingestion and compile the actual neighbour-list
-kernels, connect the verified position hashing with sort/scan stages,
-then add ADAMI boundary forces, WCSPH pressure/viscosity and RK2 integration.
+Handle namespace-aware header ingestion and the solver's active/extended marker
+selection, gather all required particle properties, then add ADAMI boundary
+forces, WCSPH pressure/viscosity and RK2 integration.
 Compare intermediate buffers and evolved particle states against native CUDA.
 Only then wire the full solver to a sandbox preview and add its showcase card.
 The native CSV sequence must not stand in for browser computation.
@@ -145,3 +145,53 @@ nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-hash-n
 
 The native harness writes `reports/chrono-hash-native.bin`; the GPU suite
 checks it using the captured `reports/chrono-params.json` and particle inputs.
+
+## Original neighbour-list construction
+
+The native capture now copies the initialized marker position/radius buffer,
+including all 30,327 markers: 16,731 fluid and 13,596 BCE boundary markers.
+`GetPositions()` establishes the buffer length; `GetMarkerDeviceView()` exposes
+the same underlying device storage. The host capture reuses the original setup
+and compiler flags and links the configured CUDA runtime for this copy.
+
+`tests/chrono-search.cu` retains `neighborSearchNum`, `neighborSearchID`,
+`Distance`, `Modify_Local_PosB`, `MinimumImageShift`,
+`MinimumImageShiftMultiPeriod` and the required original constructors/operators.
+Only the hashing/index-initialization and position-permutation wrappers are MIT
+harness code. The density argument is unused by both original search kernels
+and is backed by an unused one-record allocation in both harnesses.
+
+The browser performs hashing, stable key/index sorting, position gathering,
+cell-range construction, neighbour counting, exclusive scanning and neighbour-ID
+generation on the GPU. It reads back only the four-byte count used to allocate
+the neighbour buffer, matching the native host allocation dependency. Reference
+arrays are read afterward for validation, not used to calculate neighbour IDs.
+
+All hashes, sorted indices, cell ranges, counts, offsets and neighbour IDs match
+the native CUDA/Thrust pipeline exactly: 1,027,953 values, including 794,643
+neighbour entries. This test runs the complete search pipeline on all initialized
+markers. It does not yet reproduce the full solver's active/extended-marker
+selection or advance pressure, velocity or position. No water showcase is added.
+
+Compiler additions: bounded identifier macro aliases, including late binding and
+forwarded calls; acceptance of the original `__declspec(noinline)` annotation
+(WGSL controls inlining); the float-only CUDA `rint` overload; and unambiguous
+scalar conversions for overloaded helpers. Ambiguous overloads, alias cycles
+and unsupported annotation kinds are rejected. Identifier aliases inside the
+separate object-expression macro facility explicitly require preprocessing.
+
+Current local validation: 693 unit tests and 228 real NVIDIA GPU tests passed.
+Regenerate after building the pinned Chrono dependency:
+
+```text
+node scripts/build-chrono-capture.mjs
+.local/chrono-build/bin/chrono-params-capture.exe --quiet --no_vis
+node scripts/prepare-chrono-search-reference.mjs
+```
+
+Then, in a Visual Studio developer shell:
+
+```text
+nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-search-native.cu -o .local/chrono-search-native.exe
+.local/chrono-search-native.exe
+```

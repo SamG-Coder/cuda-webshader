@@ -239,6 +239,9 @@ The quadtree showcase and `tests/quadtree-cdp-device.cuh` retain NVIDIA's origin
 
 ## Project Chrono kernels and type declarations
 
+`tests/chrono-search.cu` retains the original distance helpers, selected vector
+constructors/operators, cell-range kernel and neighbour-search kernels from
+`SphGeneral.cuh`, `SphCustomMath.cuh` and `SphCollisionSystem.cu`.
 `tests/chrono-hash.cu` also retains the full parameter record, Real3/Real4
 declarations (Copyright (c) 2025 projectchrono.org), and original grid helpers
 from the same revision. `tests/chrono-params-native.cpp` retains the original
