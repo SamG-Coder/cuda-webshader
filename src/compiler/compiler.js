@@ -87,6 +87,19 @@ class Emitter {
     if(global){
       if(!numeric(global.type))this.fail('Referenced constant globals require float, int or unsigned int scalar values.',n);
       if(!this.globalSymbols.has(name)){
+        if(global.dimensions?.length){
+          const length=constantValue(global.dimensions[0]);if(!Number.isInteger(length)||length<1||length>256)this.fail('Constant arrays require 1..256 scalar elements.',global);
+          if(global.init&&(global.init.kind!=='initializer'||global.init.items.length>length))this.fail('Constant array initializers require a scalar list no longer than the array.',global);
+          const fields=[],values=[];
+          for(let i=0;i<length;i++){
+            const init=global.init?.items[i];let value=0;
+            if(init){const literal=init.kind==='unary'&&['+','-'].includes(init.op)?init.value:init;if(literal.kind!=='literal')this.fail('Constant array initializers must be numeric literals with an optional sign.',global);value=constantValue(init);}
+            if(!Number.isFinite(value)||(global.type==='f32'&&!Number.isFinite(Math.fround(value)))||(global.type==='u32'&&(!Number.isInteger(value)||value<0||value>4294967295))||(global.type==='i32'&&(!Number.isInteger(value)||value<-2147483648||value>2147483647)))this.fail('Constant array initializer is outside its scalar range.',global);
+            const field=`cw_array_${this.ast.constantGlobals.indexOf(global)}_${i}`,scalarName=`constant.${name}[${i}]`;
+            fields.push('cw_params.'+field);values.push(scalarName);this.constantScalars.push({name:scalarName,type:global.type,origin:'constant',field,defaultValue:global.type==='f32'?Math.fround(value):value});
+          }
+          const symbol={name:'constant.'+name,type:arrayOf(global.type,length),code:`array<${global.type}, ${length}>(${fields.join(', ')})`,constant:true,atomic:false,kind:'constant-global',elements:values};this.globalSymbols.set(name,symbol);global.symbol=symbol;return symbol;
+        }
         let value=0;
         if(global.init){const literal=global.init.kind==='unary'&&['+','-'].includes(global.init.op)?global.init.value:global.init;if(literal.kind!=='literal')this.fail('Constant global initializers must be numeric literals with an optional sign.',global);value=constantValue(global.init);}
         if(!Number.isFinite(value)||(global.type==='f32'&&!Number.isFinite(Math.fround(value)))||(global.type==='u32'&&(!Number.isInteger(value)||value<0||value>4294967295))||(global.type==='i32'&&(!Number.isInteger(value)||value<-2147483648||value>2147483647)))this.fail('Constant global initializer is outside its supported scalar range.',global);

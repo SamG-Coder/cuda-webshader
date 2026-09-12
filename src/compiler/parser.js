@@ -107,10 +107,11 @@ export class Parser {
       let templateParameter=null,templateKind=null;this.templateTypeName=null;this.templateParameterName=null;this.deferUnsupportedTypes=false;
       if(this.match('__constant__')){
         this.deferUnsupportedTypes=true;const valueType=this.type(),name=this.name();
-        if(valueType.pointer||valueType.reference||valueType.shared||valueType.external||this.is('['))this.fail('Constant globals currently support scalar values only.',token);
-        const init=this.match('=')?this.expression(2):null;this.take(';');
+        if(valueType.pointer||valueType.reference||valueType.shared||valueType.external)this.fail('Constant globals support scalar values and fixed scalar arrays only.',token);
+        const dimensions=[];while(this.match('[')){dimensions.push(this.expression(2));this.take(']');}if(dimensions.length>1)this.fail('Constant arrays must be one-dimensional.',token);
+        const init=this.match('=')?this.initializer():null;this.take(';');
         if(constantGlobals.some(g=>g.name===name))this.fail('Duplicate constant global.',token);
-        constantGlobals.push({kind:'constant-global',token,name,type:valueType.type,init});continue;
+        constantGlobals.push({kind:'constant-global',token,name,type:valueType.type,dimensions,init});continue;
       }
       if(this.match('extern')){const linkage=this.take();if(linkage.kind!=='string'||linkage.value!=='"C"')this.fail('Only extern "C" linkage on a single device function definition is supported.',linkage);if(!['__global__','__device__'].includes(this.peek().value))this.fail('extern "C" must precede a single __global__ or __device__ function definition; linkage blocks and templates are unsupported.');}
       if(this.match('template')){

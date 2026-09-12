@@ -1,6 +1,7 @@
 import {prepareReduction} from '../src/runtime/operations.js';import {kernelOptions} from '../src/kernels.js';
 import {makeCases,compareArrays} from './cases.js';
 import {nbodyInitial,nbodyStep} from './nbody-reference.js';
+import {fdtdInitial,fdtdStep,fdtdCoefficients} from './fdtd3d-reference.js';
 export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   const results=[],start=performance.now();
   const run=async(name,action)=>{const t=performance.now();let result;try{result={name,pass:true,...await action()};}catch(error){result={name,pass:false,error:String(error.stack||error)};}result.wallMs=performance.now()-t;results.push(result);onCase(result,results.length);};
@@ -145,6 +146,19 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
     const source='namespace cg = cooperative_groups;\n'+(await Promise.all(files.map(async f=>await(await fetch('/tests/'+f)).text()))).join('\n');
     try{await runtime.kernel(source,{entry:'integrateBodies<float>',workgroupSize:[128],sharedMemoryBytes:2048});}catch(error){if(/uniform control flow/.test(error.message))return {expectedRejection:true,reason:'Early return depends on the lane index before a shared-memory barrier.'};throw error;}
     throw Error('Expected N-body barrier uniformity rejection; review the execution contract before enabling this sample.');
+  });
+  await run('Constant integer arrays retain defaults, high bits and per-dispatch snapshots',async()=>{
+    const kernel=await runtime.kernel('__constant__ unsigned int table[2]={4294967295u,2147483648u};__device__ unsigned int value(unsigned int i){return table[i];}__global__ void k(unsigned int* out,unsigned int offset){out[offset+threadIdx.x]=value(threadIdx.x);}',{workgroupSize:[2]});const out=runtime.createBuffer(new Uint32Array(4));
+    try{const inv=kernel.bind({out},{offset:0}),batch=runtime.batch().dispatch(inv,[1]);inv.setScalars({offset:2,'constant.table[0]':7,'constant.table[1]':9});batch.dispatch(inv,[1]).submit();const actual=await runtime.read(out,Uint32Array);if(String(actual)!=='4294967295,2147483648,7,9')throw Error('Constant array values or snapshots changed');}finally{await runtime.idle();runtime.destroyBuffer(out);}
+  });
+  await run('Original NVIDIA FDTD3d stencil uses constant coefficients across three volume steps',async()=>{
+    const source=await(await fetch('/tests/fdtd3d-kernel.cuh')).text(),kernel=await runtime.kernel(source,{workgroupSize:[32,4,1]});
+    for(const [dimx,dimy,dimz]of [[32,4,3],[35,7,5],[64,8,9],[32,16,16]]){
+      let expected=fdtdInitial(dimx,dimy,dimz),input=runtime.createBuffer(expected),output=runtime.createBuffer(expected);
+      try{const scalars={dimx,dimy,dimz,...Object.fromEntries(fdtdCoefficients.map((v,i)=>[`constant.stencil[${i}]`,v]))},inv=kernel.bind({input,output},scalars);
+        for(let step=0;step<3;step++){expected=fdtdStep(expected,dimx,dimy,dimz);runtime.batch().dispatch(inv,[Math.ceil(dimx/32),Math.ceil(dimy/4),1]).copy(output,input).submit();const actual=await runtime.read(output);for(let i=0;i<actual.length;i++)if(!Number.isFinite(actual[i])||Math.abs(actual[i]-expected[i])>3e-5)throw Error(`FDTD mismatch ${dimx}x${dimy}x${dimz} step=${step} index=${i}`);}
+      }finally{await runtime.idle();runtime.destroyBuffer(input);runtime.destroyBuffer(output);}
+    }
   });
   await run('GPU rejects divergent entry into a helper barrier',async()=>{
     try{await runtime.kernel('__device__ void barrier(){__syncthreads();} __global__ void k(){if(threadIdx.x==0u)barrier();}',{workgroupSize:[4,1,1]});}catch(error){if(/uniform/i.test(error.message))return;throw error;}

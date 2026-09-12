@@ -1,0 +1,4 @@
+32x4x3 steps=3 PASS original FDTD3d, independent reference and unchanged halos
+35x7x5 steps=3 PASS original FDTD3d, independent reference and unchanged halos
+64x8x9 steps=3 PASS original FDTD3d, independent reference and unchanged halos
+32x16x16 steps=3 PASS original FDTD3d, independent reference and unchanged halos

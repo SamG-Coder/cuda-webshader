@@ -267,7 +267,8 @@ unless another parameter determines the type. Explicit device-function
 specializations are selected for the deduced or supplied argument. Scalar constant
 globals are supported as uniforms. Helpers support built-in indices, barriers,
 shared declarations, storage-buffer pointer parameters and by-value block handles;
-constant arrays and shared/local-array pointer parameters remain unsupported. The dependent vector
+one-dimensional scalar constant arrays are supported, while shared/local-array
+pointer parameters remain unsupported. The dependent vector
 traits now resolve through typedef-only template structs and explicit type
 specializations; unsupported value types still fail if selected.
 This does not add N-body to the verified catalog. The feature regression fixture

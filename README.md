@@ -10,6 +10,9 @@
 512 bodies, original force/integration kernels, and GPU position feedback.
 Native CUDA and NVIDIA WebGPU pass three-step independent reference checks.
 See [launch requirements and validation](showcases/nbody/README.md).
+[NVIDIA FDTD3d is also available as a 3D scalar-volume showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fdtd),
+with the original shared-memory stencil, editable constant coefficients and
+GPU-only field feedback. See [volume setup and validation](showcases/fdtd3d/README.md).
 Device helpers now
 support one built-in type or explicit integer template argument, including nested
 calls and arguments forwarded from a kernel template. Type-trait structs containing typedef members, including explicit type specializations
@@ -30,7 +33,8 @@ must match the element type or use explicit casts. Stateless shared-memory
 conversion wrappers now work with an explicitly sized dynamic shared allocation.
 N-body uses an explicit whole-block contract to make its early-return guard
 uniform; the runtime rejects partial-block counts. The unchecked original guard
-still fails WebGPU validation. Constant arrays remain unsupported.
+still fails WebGPU validation. One-dimensional constant arrays of up to 256
+scalar elements are supported, with dynamic indexing and per-dispatch uniforms.
 The helper support and NVIDIA’s original vector-trait declarations pass native
 CUDA and NVIDIA WebGPU tests for 1, 129 and 1,025 records. Coverage includes
 unsigned wraparound, reference mutation, vector position updates and output guards.
@@ -226,7 +230,7 @@ This is source translation. **It does not run CUDA binaries, PTX, the CUDA drive
 
 ## Validated on an RTX 5080
 
-The project is running locally with installed, locked dependencies. **317 Node tests, 89 real WebGPU checks (including Three.js rendered-pixel interop and expected validation rejections), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
+The project is running locally with installed, locked dependencies. **321 Node tests, 91 real WebGPU checks (including Three.js rendered-pixel interop and expected validation rejections), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
 
 Open [the measured comparison](reports/performance-comparison.html) or read [the full methodology and results](reports/performance-comparison.md). All ten kernel sources are compiled by NVCC and translated to WGSL at two workload sizes. Raw GPU timestamps, CUDA event timings, ordinary CUDA launch timings, and verification logs are in `reports/`.
 

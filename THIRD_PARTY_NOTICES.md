@@ -14,6 +14,7 @@ licenses; the project's MIT license does not relicense them.
 | fsevents | 2.3.2 | MIT | Optional macOS-only Playwright dependency |
 | NVIDIA CUDA Samples simpleGL kernel | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Imported, unchanged showcase kernel |
 | NVIDIA CUDA Samples N-body device code | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original integration kernel, helpers and type declarations in the N-body showcase and tests |
+| NVIDIA CUDA Samples FDTD3d kernel | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original 3D finite-difference kernel and launch constants in the volume showcase and tests |
 
 Versions and package license declarations are recorded in package-lock.json.
 Monaco's upstream LICENSE and ThirdPartyNotices.txt are included alongside its
