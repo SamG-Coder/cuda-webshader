@@ -85,3 +85,5 @@ test('Real FFT host validation rejects bad layouts before creating scratch stora
  for(const options of [{width:3,height:4},{width:8,height:4,realStride:7},{width:8,height:4,inverse:1},{width:512,height:512},{width:1024,height:2},{width:8,height:4,realStride:1.5}])await assert.rejects(runtime.realFFT2D(a,b,options));
  runtime.dispose();
 });
+
+test('Pitched float2 texture copies preserve row offsets and enforce texel alignment',()=>{const {runtime,device,events}=setup();device.features.add('float32-filterable');const source=runtime.createBuffer(new Float32Array(24)),target=runtime.createTexture2D(new Float32Array(12),{width:3,height:2,format:'rg32float'}),batch=runtime.batch();for(const bytesPerRow of [23,28,104])assert.throws(()=>batch.copyToTexture(source,target,{bytesPerRow}));assert.throws(()=>batch.copyToTexture(source,target,{sourceOffset:4}));batch.copyToTexture(source,target,{bytesPerRow:40,sourceOffset:8}).submit();const copies=events.find(e=>e.kind==='submit').commands[0].filter(c=>c.kind==='textureCopy');assert.deepEqual(copies.map(c=>c.source.offset),[8,48]);runtime.dispose();});

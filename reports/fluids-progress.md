@@ -110,3 +110,7 @@ the original kernels with the new FFT steps, then repeated velocity feedback
 and particle rendering/interaction. Multi-step solver error accumulation and a
 native/WebGPU performance comparison have not yet been established.
 No fluids showcase card has been added.
+
+### Interactive fluidsGL solver
+
+The full five-kernel solver now has a standalone sandbox preset at `sandbox.html?example=fluids`, including pitched float2 texture copies, real FFT forward/inverse passes, particle advection and drag forces. Original device bodies are unchanged. Native CUDA/cuFFT captures cover 64² padded rows and 512², each through 64 steps, with checks at 1/8/32/64. See fluids-solver-check.json and fluids-sandbox-check.json for numeric tolerances and hardware results. The preview consumes the GPU particle buffer directly; no intermediate simulation readback is needed. Deterministic cell-centred input particles and a continuous centre force are explicit host choices.

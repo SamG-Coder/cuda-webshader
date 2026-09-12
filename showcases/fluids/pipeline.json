@@ -1,0 +1,240 @@
+{
+  "pipeline": {
+    "buffers": {
+      "velocity": {
+        "type": "vec2<f32>",
+        "records": 262144,
+        "fill": "binary-f32",
+        "source": "showcases/fluids/velocity.bin"
+      },
+      "particles": {
+        "type": "vec2<f32>",
+        "records": 262144,
+        "fill": "binary-f32",
+        "source": "showcases/fluids/particles.bin"
+      },
+      "realX": {
+        "type": "f32",
+        "records": 263168,
+        "fill": "zero"
+      },
+      "realY": {
+        "type": "f32",
+        "records": 263168,
+        "fill": "zero"
+      },
+      "complexX": {
+        "type": "vec2<f32>",
+        "records": 131584,
+        "fill": "zero"
+      },
+      "complexY": {
+        "type": "vec2<f32>",
+        "records": 131584,
+        "fill": "zero"
+      }
+    },
+    "textures": {
+      "field": {
+        "kind": "vector2-f32",
+        "dimensions": [
+          512,
+          512
+        ],
+        "fill": "zero",
+        "filter": "linear",
+        "addressMode": "clamp-to-edge",
+        "normalizedCoords": false
+      }
+    },
+    "steps": [
+      {
+        "entry": "addForces_k",
+        "bindings": {
+          "v": "velocity"
+        },
+        "scalars": {
+          "dx": 512,
+          "dy": 512,
+          "spx": 252,
+          "spy": 252,
+          "fx": 0.06,
+          "fy": 0.04,
+          "r": 4,
+          "pitch": 4096
+        },
+        "groups": [
+          1,
+          1,
+          1
+        ],
+        "block": [
+          9,
+          9,
+          1
+        ]
+      },
+      {
+        "copyToTexture": {
+          "source": "velocity",
+          "target": "field",
+          "bytesPerRow": 4096
+        }
+      },
+      {
+        "entry": "advectVelocity_k",
+        "bindings": {
+          "v": "velocity",
+          "vx": "realX",
+          "vy": "realY",
+          "texObject": "field"
+        },
+        "scalars": {
+          "dx": 512,
+          "pdx": 514,
+          "dy": 512,
+          "dt": 0.09,
+          "lb": 16
+        },
+        "groups": [
+          8,
+          8,
+          1
+        ],
+        "block": [
+          64,
+          4,
+          1
+        ]
+      },
+      {
+        "realFFT": {
+          "source": "realX",
+          "target": "complexX",
+          "width": 512,
+          "height": 512,
+          "realStride": 514
+        }
+      },
+      {
+        "realFFT": {
+          "source": "realY",
+          "target": "complexY",
+          "width": 512,
+          "height": 512,
+          "realStride": 514
+        }
+      },
+      {
+        "entry": "diffuseProject_k",
+        "bindings": {
+          "vx": "complexX",
+          "vy": "complexY"
+        },
+        "scalars": {
+          "dx": 257,
+          "dy": 512,
+          "dt": 0.09,
+          "visc": 0.0025,
+          "lb": 16
+        },
+        "groups": [
+          5,
+          8,
+          1
+        ],
+        "block": [
+          64,
+          4,
+          1
+        ]
+      },
+      {
+        "realFFT": {
+          "source": "complexX",
+          "target": "realX",
+          "width": 512,
+          "height": 512,
+          "realStride": 514,
+          "inverse": true
+        }
+      },
+      {
+        "realFFT": {
+          "source": "complexY",
+          "target": "realY",
+          "width": 512,
+          "height": 512,
+          "realStride": 514,
+          "inverse": true
+        }
+      },
+      {
+        "entry": "updateVelocity_k",
+        "bindings": {
+          "v": "velocity",
+          "vx": "realX",
+          "vy": "realY"
+        },
+        "scalars": {
+          "dx": 512,
+          "pdx": 514,
+          "dy": 512,
+          "lb": 16,
+          "pitch": 4096
+        },
+        "groups": [
+          8,
+          8,
+          1
+        ],
+        "block": [
+          64,
+          4,
+          1
+        ]
+      },
+      {
+        "entry": "advectParticles_k",
+        "bindings": {
+          "part": "particles",
+          "v": "velocity"
+        },
+        "scalars": {
+          "dx": 512,
+          "dy": 512,
+          "dt": 0.09,
+          "lb": 16,
+          "pitch": 4096
+        },
+        "groups": [
+          8,
+          8,
+          1
+        ],
+        "block": [
+          64,
+          4,
+          1
+        ]
+      }
+    ],
+    "preview": {
+      "kind": "points2d",
+      "positions": "particles",
+      "count": 262144,
+      "stir": {
+        "step": 0,
+        "width": 512,
+        "height": 512,
+        "radius": 4,
+        "scale": 267.264,
+        "x": "spx",
+        "y": "spy",
+        "fx": "fx",
+        "fy": "fy"
+      }
+    },
+    "animate": true
+  }
+}

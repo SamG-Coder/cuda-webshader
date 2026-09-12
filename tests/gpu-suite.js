@@ -1,3 +1,4 @@
+import {checkFluidsSolver} from './fluids-solver-gpu.js';
 import {checkRealFFT} from './real-fft-gpu.js';
 import {checkFluidsPitched} from './fluids-pitched-gpu.js';
 import {checkSizeValues} from './size-values-gpu.js';
@@ -214,6 +215,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Complete implicit marching-cubes GPU pipeline matches native CUDA',()=>checkMarchingPipeline(runtime));
   await run('Hierarchical exclusive scan matches native CUDA',()=>checkExclusiveScan(runtime));
   await run('Original shared marching-cubes triangle generation matches native CUDA',()=>checkMarchingTriangles(runtime));
+  await run('Full fluids solver compared with native CUDA and cuFFT',()=>checkFluidsSolver(runtime));
   await run('Real FFT packed transforms match native cuFFT',()=>checkRealFFT(runtime));
   await run('Original fluids pitched kernels match native CUDA',()=>checkFluidsPitched(runtime));
   await run('size_t launch values preserve native 64-bit arithmetic',()=>checkSizeValues(runtime));

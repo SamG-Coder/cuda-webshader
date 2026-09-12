@@ -1,0 +1,8 @@
+Captured full native CUDA/cuFFT solver: 64x64, step 1.
+Captured full native CUDA/cuFFT solver: 64x64, step 8.
+Captured full native CUDA/cuFFT solver: 64x64, step 32.
+Captured full native CUDA/cuFFT solver: 64x64, step 64.
+Captured full native CUDA/cuFFT solver: 512x512, step 1.
+Captured full native CUDA/cuFFT solver: 512x512, step 8.
+Captured full native CUDA/cuFFT solver: 512x512, step 32.
+Captured full native CUDA/cuFFT solver: 512x512, step 64.

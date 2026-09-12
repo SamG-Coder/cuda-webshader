@@ -62,3 +62,5 @@ test('Real FFT pipeline validates padded real rows and packed complex spectra',(
  }
  const p=preset();Object.assign(p.steps[0].realFFT,{source:'frequency',target:'real',inverse:true});assert.ok(validatePipeline(p)>0);
 });
+
+test('Fluid preview rejects invalid particle counts, force controls and texture pitches',()=>{const fluid=()=>JSON.parse(readFileSync('showcases/fluids/pipeline.json','utf8')).pipeline;assert.ok(validatePipeline(fluid())>0);for(const change of [p=>p.preview.count=262145,p=>p.preview.positions='realX',p=>p.preview.stir.step=99,p=>p.preview.stir.radius=256,p=>p.preview.stir.scale=Infinity,p=>p.preview.stir.fx='absent',p=>p.steps[1].copyToTexture.bytesPerRow=4095,p=>p.steps[1].copyToTexture.bytesPerRow=4088,p=>p.textures.field.kind='scalar-f32']){const p=fluid();change(p);assert.throws(()=>validatePipeline(p));}});

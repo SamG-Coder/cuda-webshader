@@ -1,0 +1,53 @@
+{
+  "checks": [
+    {
+      "name": "velocity",
+      "maxError": 1.5040859580039978e-7,
+      "rms": 4.544174475554779e-9
+    },
+    {
+      "name": "particles",
+      "maxError": 0.00018739700317382812,
+      "rms": 4.668460232301538e-7
+    }
+  ],
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "count": 262144,
+  "steps": 64,
+  "intermediateReadbackBytes": 0,
+  "passed": true,
+  "passes": [
+    "1. addForces_k",
+    "2. advectVelocity_k",
+    "3. realToComplex",
+    "4. packSpectrum",
+    "5. forwardFftAxis",
+    "6. diffuseProject_k",
+    "7. unpackSpectrum",
+    "8. complexToReal",
+    "9. inverseFftAxis",
+    "10. updateVelocity_k",
+    "11. advectParticles_k"
+  ],
+  "sourceUnchanged": true,
+  "dragStir": true,
+  "presetSwitching": true,
+  "mobileOverflow": false,
+  "softwareAdapterRequested": false
+}

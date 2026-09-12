@@ -294,14 +294,15 @@ export class ComputeBatch {
     if(this.lastBindGroup!==invocation.bindGroup||this.lastOffset!==offset){pass.setBindGroup(0,invocation.bindGroup,meta.uniformSize?[offset]:[]);this.lastBindGroup=invocation.bindGroup;this.lastOffset=offset;}
     pass.dispatchWorkgroups(...groups);this.dispatchCount++;return this;
   }
-  copyToTexture(source,target,{sourceOffset=0}={}){
+  copyToTexture(source,target,{sourceOffset=0,bytesPerRow}={}){
     this.assertOpen();this.runtime.checkResource(source);this.runtime.checkResource(target);
-    if(!source.gpuBuffer||!target.gpuTexture||target.dimension!=='2d'||target.format!=='r32float')throw Error('Texture copy requires a buffer and a 2D r32float texture.');
-    const rowBytes=target.width*4,bytes=rowBytes*target.height;
-    if(!Number.isSafeInteger(sourceOffset)||sourceOffset<0||sourceOffset%4||sourceOffset+bytes>source.byteLength)throw Error('Texture copy source range must be aligned and contain the complete image.');
+    if(!source.gpuBuffer||!target.gpuTexture||target.dimension!=='2d'||!['r32float','rg32float'].includes(target.format))throw Error('Texture copy requires a buffer and a 2D r32float or rg32float texture.');
+    const texelBytes=target.format==='rg32float'?8:4,rowBytes=target.width*texelBytes,stride=bytesPerRow===undefined?rowBytes:bytesPerRow,bytes=(target.height-1)*stride+rowBytes;
+    if(!Number.isSafeInteger(stride)||stride<rowBytes||stride%texelBytes)throw Error('Texture copy row pitch must contain whole texels and fit a row.');
+    if(!Number.isSafeInteger(sourceOffset)||sourceOffset<0||sourceOffset%texelBytes||sourceOffset+bytes>source.byteLength)throw Error('Texture copy source range must be aligned and contain the complete image.');
     this.endPass();
-    if(rowBytes%256===0)this.encoder.copyBufferToTexture({buffer:source.gpuBuffer,offset:sourceOffset,bytesPerRow:rowBytes,rowsPerImage:target.height},{texture:target.gpuTexture},[target.width,target.height,1]);
-    else for(let y=0;y<target.height;y++)this.encoder.copyBufferToTexture({buffer:source.gpuBuffer,offset:sourceOffset+y*rowBytes},{texture:target.gpuTexture,origin:[0,y,0]},[target.width,1,1]);
+    if(stride%256===0)this.encoder.copyBufferToTexture({buffer:source.gpuBuffer,offset:sourceOffset,bytesPerRow:stride,rowsPerImage:target.height},{texture:target.gpuTexture},[target.width,target.height,1]);
+    else for(let y=0;y<target.height;y++)this.encoder.copyBufferToTexture({buffer:source.gpuBuffer,offset:sourceOffset+y*stride},{texture:target.gpuTexture,origin:[0,y,0]},[target.width,1,1]);
     return this;
   }
   clear(resource){this.assertOpen();this.runtime.checkResource(resource);this.endPass();this.encoder.clearBuffer(resource.gpuBuffer,0,resource.size);return this;}

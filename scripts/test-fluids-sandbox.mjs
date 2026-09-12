@@ -1,0 +1,20 @@
+import {chromium} from 'playwright';
+import {readFile,writeFile} from 'node:fs/promises';
+import {createStaticServer} from './serve.mjs';
+const server=createStaticServer(process.cwd()+'/dist');await new Promise(r=>server.listen(0,'127.0.0.1',r));
+const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+try{
+ const page=await browser.newPage({viewport:{width:1500,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(`http://127.0.0.1:${server.address().port}/sandbox.html?example=fluids`);
+ await page.waitForFunction(()=>window.sandbox?.completedRuns||window.sandbox?.lastError,{},{timeout:60000});
+ if(await page.evaluate(()=>window.sandbox.lastError))throw Error(await page.evaluate(()=>window.sandbox.lastError));
+ await page.locator('#stop').click();
+ const report=await page.evaluate(async()=>{const s=window.sandbox,r=s.pipelineResult;await r.settle();if(s.runtime.describe().vendor!=='nvidia'||r.count!==262144||r.simulationSteps>64)throw Error('Invalid device/count/frame');const before=s.runtime.stats.readbackBytes;while(r.simulationSteps<64)await r.stepFrame();if(s.runtime.stats.readbackBytes!==before||r.controlReadbackBytes)throw Error('Intermediate readback');const checks=[];for(const name of ['velocity','particles']){const actual=await s.runtime.read(r.buffers[name]),expected=new Float32Array(await(await fetch('/reports/fluids-solver-512-64-'+name+'.bin')).arrayBuffer());let maxError=0,squared=0;for(let i=0;i<actual.length;i++){if(!Number.isFinite(actual[i]))throw Error('Nonfinite output');let error=Math.abs(actual[i]-expected[i]);if(name==='particles')error=Math.min(error,Math.abs(1-error));maxError=Math.max(maxError,error);squared+=error*error;}const rms=Math.sqrt(squared/actual.length);if(maxError>(name==='velocity'?.0002:.25/512)||rms>(name==='velocity'?1e-5:.005/512))throw Error('Native mismatch');checks.push({name,maxError,rms});}return {checks,device:s.runtime.describe(),count:r.count,steps:r.simulationSteps,intermediateReadbackBytes:0};});
+ if(await page.evaluate(()=>window.sandbox.editor.getValue())!==await readFile('showcases/fluids/kernel.cu','utf8'))throw Error('Source changed');
+ await page.locator('#tab-compare').click();const passes=await page.locator('#shader-pass option').allTextContents();if(passes.length!==11)throw Error('Missing shader passes: '+passes);
+ const canvas=page.locator('#preview canvas'),box=await canvas.boundingBox();await page.mouse.move(box.x+box.width*.3,box.y+box.height*.5);await page.mouse.down();await page.mouse.move(box.x+box.width*.7,box.y+box.height*.6,{steps:12});await page.mouse.up();
+ await page.locator('#animate').uncheck();await page.locator('#animate').check();await page.waitForFunction(()=>window.sandbox.pipelineResult.interactionFrames>0);await page.locator('#stop').click();await page.evaluate(async()=>{const r=window.sandbox.pipelineResult;await r.settle();const p=await window.sandbox.runtime.read(r.buffers.particles);if(!p.every(v=>Number.isFinite(v)&&v>=0&&v<1))throw Error('Invalid stirred particles');});
+ await page.screenshot({path:'reports/fluids-sandbox.png'});await page.setViewportSize({width:390,height:844});if(!await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))throw Error('Mobile overflow');
+ const runs=await page.evaluate(()=>window.sandbox.completedRuns);await page.selectOption('#example','wave');await page.waitForFunction(n=>window.sandbox.completedRuns>n||window.sandbox.lastError,runs);if(await page.evaluate(()=>window.sandbox.lastError)||errors.length)throw Error(errors.join('\n')||'Preset switch failed');
+ await writeFile('reports/fluids-sandbox-check.json',JSON.stringify({...report,passed:true,passes,sourceUnchanged:true,dragStir:true,presetSwitching:true,mobileOverflow:false,softwareAdapterRequested:false},null,2));console.log('PASS fluids sandbox, native comparison, drag, mobile and cleanup');
+}finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

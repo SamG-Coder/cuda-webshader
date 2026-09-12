@@ -1,0 +1,137 @@
+{
+  "name": "Full fluids solver compared with native CUDA and cuFFT",
+  "pass": true,
+  "results": [
+    {
+      "width": 64,
+      "step": 1,
+      "name": "velocity",
+      "maxError": 3.725290298461914e-09,
+      "rms": 2.4833884175599323e-10,
+      "components": 8192
+    },
+    {
+      "width": 64,
+      "step": 1,
+      "name": "particles",
+      "maxError": 1.1920928955078125e-07,
+      "rms": 1.3170890159654386e-09,
+      "components": 8192
+    },
+    {
+      "width": 64,
+      "step": 8,
+      "name": "velocity",
+      "maxError": 7.450580596923828e-08,
+      "rms": 5.0026982248627976e-09,
+      "components": 8192
+    },
+    {
+      "width": 64,
+      "step": 8,
+      "name": "particles",
+      "maxError": 2.384185791015625e-07,
+      "rms": 1.0618711124166268e-08,
+      "components": 8192
+    },
+    {
+      "width": 64,
+      "step": 32,
+      "name": "velocity",
+      "maxError": 2.6766210794448853e-06,
+      "rms": 8.049306855557586e-08,
+      "components": 8192
+    },
+    {
+      "width": 64,
+      "step": 32,
+      "name": "particles",
+      "maxError": 3.814697265625e-06,
+      "rms": 1.2257422251613562e-07,
+      "components": 8192
+    },
+    {
+      "width": 64,
+      "step": 64,
+      "name": "velocity",
+      "maxError": 5.2228569984436035e-05,
+      "rms": 1.1649086374089341e-06,
+      "components": 8192
+    },
+    {
+      "width": 64,
+      "step": 64,
+      "name": "particles",
+      "maxError": 0.0004156827926635742,
+      "rms": 6.183587894173536e-06,
+      "components": 8192
+    },
+    {
+      "width": 512,
+      "step": 1,
+      "name": "velocity",
+      "maxError": 2.3283064365386963e-09,
+      "rms": 1.8576607319219162e-11,
+      "components": 524288
+    },
+    {
+      "width": 512,
+      "step": 1,
+      "name": "particles",
+      "maxError": 1.1920928955078125e-07,
+      "rms": 3.681375715146283e-10,
+      "components": 524288
+    },
+    {
+      "width": 512,
+      "step": 8,
+      "name": "velocity",
+      "maxError": 1.30385160446167e-08,
+      "rms": 2.2550420636027666e-10,
+      "components": 524288
+    },
+    {
+      "width": 512,
+      "step": 8,
+      "name": "particles",
+      "maxError": 2.384185791015625e-07,
+      "rms": 2.1779312442370816e-09,
+      "components": 524288
+    },
+    {
+      "width": 512,
+      "step": 32,
+      "name": "velocity",
+      "maxError": 8.381903171539307e-07,
+      "rms": 1.0330536317746448e-08,
+      "components": 524288
+    },
+    {
+      "width": 512,
+      "step": 32,
+      "name": "particles",
+      "maxError": 7.653236389160156e-05,
+      "rms": 1.74746494521692e-07,
+      "components": 524288
+    },
+    {
+      "width": 512,
+      "step": 64,
+      "name": "velocity",
+      "maxError": 1.5040859580039978e-07,
+      "rms": 4.544174475554779e-09,
+      "components": 524288
+    },
+    {
+      "width": 512,
+      "step": 64,
+      "name": "particles",
+      "maxError": 0.00018739700317382812,
+      "rms": 4.668460232301538e-07,
+      "components": 524288
+    }
+  ],
+  "intermediateReadbackBytes": 0,
+  "originalKernelsUnchanged": true,
+  "wallMs": 4504.735000014305
+}
