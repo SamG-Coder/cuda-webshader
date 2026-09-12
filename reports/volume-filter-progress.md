@@ -14,8 +14,8 @@ An MIT probe executes the same CUDA function on native NVIDIA CUDA and hardware 
 - Import and invoke static conversion templates: completed for explicit concrete type arguments; see validation below.
 - Support the cudaExtent launch argument: completed for read-only by-value parameters with checked u32-range dimensions and unsigned 64-bit integer comparisons.
 - Compile VolumeTypeInfo<unsigned char>::convert, including its original literal/cast arithmetic: completed and native/GPU verified.
-- Support sizeof(VolumeType) with correct CUDA type semantics.
-- Support byte-valued 3D surface writes and sampling the resulting volume without CPU round trips.
+- Support sizeof(VolumeType): completed for supported built-in value types with unsigned 64-bit multiplication and integer comparisons.
+- Support byte-valued 3D surface writes and subsequent GPU sampling: completed and native-verified.
 - Compare original filtering passes and final preview with native CUDA before adding a standalone sandbox showcase.
 
 The float probe verifies a compiler/runtime prerequisite. It is not evidence that the original byte filter or complete desktop application works.
@@ -42,3 +42,14 @@ A native/GPU probe verifies 168 comparison results across dimensions 0, 8 and UI
 Constant scalar/vector values and fixed vector arrays now use flattened uniform components. Vector arrays support 1..256 records with zero initialization and host overrides; existing struct component limits remain unchanged. The original filter’s `float4 c_filterData[125]` gets through compilation. A native/GPU probe checks all 125 float4 records (500 uploaded components) through helper reads.
 
 446 unit tests and 130 NVIDIA hardware checks pass, plus compile-all and static build. The current original sample failure is `sizeof(VolumeType)` in the surf3Dwrite byte offset. Byte-valued 3D surface output and GPU-only sampling/rendering of that output also remain to be implemented and verified before a showcase can be added.
+
+## Original filter executes; upstream coordinate behaviour identified
+The original d_filter_surface3d now compiles and executes unchanged. sizeof on supported built-in value types preserves CUDA sizes (including float3=12, uchar=1, cudaExtent=24), uses unsigned 64-bit results, and supports wrapping multiplication and integer comparisons. Pointer/expression/struct sizeof forms and general size_t arithmetic are not enabled.
+
+Byte-valued surf3Dwrite uses a rgba8unorm 3D storage texture with the CUDA byte in R, zero G/B and opaque A. Subsequent float tex3D reads sample R directly on the GPU. This physical representation uses four bytes per voxel; existing read-only r8unorm volumes remain one byte per voxel. Dispatch bounds and byte offsets are checked before execution. Mixed float/byte writes to one surface reject.
+
+Validation: 20 sizeof/multiplication results agree with native CUDA, including products exceeding 32 bits. All 256 possible byte values survive a GPU surface-write/texture-sample round trip. Four original filter passes (two configurations, each with two sequential GPU passes) match native captures exactly, with 256 voxels per pass and no intermediate CPU upload or readback. Native filter captures use -O3 --fmad=false. 449 unit tests and 132 NVIDIA hardware checks pass; compile-all and static build pass.
+
+These four native and WebGPU outputs are uniform: scenario 0 gives byte 120 on both passes; scenario 1 gives 120 then 135. The pinned upstream volume.cpp configures normalized texture coordinates and wrap addressing, while d_filter_surface3d builds base coordinates from integer voxel indices. Adding the tested offsets therefore samples equivalent wrapped positions for every voxel. This behaviour is reproduced in native CUDA; it is not a translation-only visual failure.
+
+Next: connect the filter to the generic sandbox volume preview and verify the presentation. Clearly distinguish the reproduced upstream texture settings from any configurable unnormalized-coordinate mode, preserving the original device code. No showcase card has been added yet.

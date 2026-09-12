@@ -23,7 +23,9 @@ export function walk(node, visit) {
     else if (val && typeof val === 'object') walk(val, visit);
   }
 }
+const cudaValueSize=type=>['cw_uchar','bool'].includes(type)?1:type==='cw_uchar4'?4:type==='cw_extent'?24:['f32','i32','u32'].includes(type)?4:vectorLength(type)?vectorLength(type)*4:null;
 function constantValue(n) {
+  if(n.kind==='sizeof'){const size=cudaValueSize(n.target);if(size===null)throw new CompileError('sizeof requires a supported built-in value type.',n.token);return size;}
   if (n.kind === 'literal') return Number(n.value.replace(/^0[xX]/.test(n.value) ? /[uU]$/ : /[fFuU]$/, ''));
   if (n.kind === 'unary' && ['+', '-'].includes(n.op)) return (n.op === '-' ? -1 : 1) * constantValue(n.value);
   if (n.kind === 'binary') {
@@ -137,6 +139,7 @@ class Emitter {
     if (typeName(from) === typeName(to) && !isArray(to)) return code;
     if(to==='cw_uchar'){if(from==='bool')return `select(0u,1u,${code})`;if(numeric(from))return `(${from==='f32'?`u32(i32(${code}))`:`u32(${code})`} & 255u)`;}
     if(from==='cw_uchar'){if(to==='bool')return `(${code} != 0u)`;if(numeric(to))return `${to}(${code})`;}
+    if(from==='cw_size64'&&['i32','u32'].includes(to))return `${to}((${code}).x)`;
     if (numeric(from) && numeric(to)) return `${to}(${code})`;
     if (to === 'bool' && numeric(from)) return `(${code} != ${from === 'f32' ? '0.0f' : from === 'u32' ? '0u' : '0i'})`;
     if (from === 'bool' && numeric(to)) return `select(${to}(0), ${to}(1), ${code})`;
@@ -154,6 +157,7 @@ class Emitter {
         const codes=values.map(v=>v.code);while(codes.length<width)codes.push(`${element}(0)`);
         return this.result(n,n.target,`${n.target}(${codes.join(', ')})`,values.flatMap(v=>v.pre));
       }
+      case 'sizeof': {const size=cudaValueSize(n.target);if(size===null)this.fail('sizeof requires a supported built-in value type.',n);this.extentUsed=true;n.numericValue=size;return this.result(n,'cw_size64',`vec2<u32>(${size}u, 0u)`);}
       case 'literal': {
         const isHex = /^0[xX]/.test(n.value), isFloat = !isHex && /[fF]$/.test(n.value), isUnsigned = /[uU]$/.test(n.value);
         if (!isFloat && /[.eE]/.test(n.value) && !/^0[xX]/.test(n.value)) this.fail('Double-precision literals are unsupported. Use an f suffix, for example 0.5f.', n);
@@ -221,9 +225,10 @@ class Emitter {
           return this.result(n, 'bool', tmp, pre);
         }
         if(a.type==='cw_size64'||b.type==='cw_size64'){
-          if(!['==','!=','<','>','<=','>='].includes(n.op)||![a.type,b.type].every(t=>['cw_size64','i32','u32','bool'].includes(t)))this.fail('cudaExtent size fields support integer comparisons only.',n);
+          if(!['==','!=','<','>','<=','>=','*'].includes(n.op)||![a.type,b.type].every(t=>['cw_size64','i32','u32','bool'].includes(t)))this.fail('Size values support integer comparisons and multiplication only.',n);
           const left='cw_size_left_'+this.temp++,right='cw_size_right_'+this.temp++,promote=(v,code)=>v.type==='cw_size64'?code:v.type==='bool'?`vec2<u32>(select(0u, 1u, ${code}), 0u)`:v.type==='i32'?`vec2<u32>(u32(${code}), select(0u, 4294967295u, ${code} < 0i))`:`vec2<u32>(u32(${code}), 0u)`;
           const pre=[...a.pre,`let ${left} = ${a.code};`,...b.pre,`let ${right} = ${b.code};`],ac=promote(a,left),bc=promote(b,right);this.extentUsed=true;n.operandType='cw_size64';
+          if(n.op==='*'){this.sizeMultiplyUsed=true;return this.result(n,'cw_size64',`cw_size_multiply(${ac}, ${bc})`,pre);}
           const code=n.op==='=='?`all(${ac} == ${bc})`:n.op==='!='?`any(${ac} != ${bc})`:n.op==='<'?`cw_size_less(${ac}, ${bc})`:n.op==='>'?`cw_size_less(${bc}, ${ac})`:n.op==='<='?`!cw_size_less(${bc}, ${ac})`:`!cw_size_less(${ac}, ${bc})`;
           return this.result(n,'bool',code,pre);
         }
@@ -253,11 +258,12 @@ class Emitter {
   surfaceGridCoordinate(node,axis,scale,seen=new Set()){
     // Restrict trap-mode stores to coordinates whose full range the runtime can
     // validate before submission. Never silently turn a CUDA trap into a drop.
-    const literal=(n,value)=>n?.kind==='literal'&&Number(n.value.replace(/[uUlL]+$/,''))===value;
+    const literal=(n,value)=>n?.kind==='sizeof'?cudaValueSize(n.target)===value:n?.kind==='literal'&&Number(n.value.replace(/[uUlL]+$/,''))===value;
+    if(scale===1&&node?.kind==='binary'&&node.op==='*'&&(literal(node.left,1)||literal(node.right,1)))return this.surfaceGridCoordinate(literal(node.left,1)?node.right:node.left,axis,1,seen);
     if(scale!==1)return node?.kind==='binary'&&node.op==='*'&&((literal(node.right,scale)&&this.surfaceGridCoordinate(node.left,axis,1,seen))||(literal(node.left,scale)&&this.surfaceGridCoordinate(node.right,axis,1,seen)));
     if(node?.kind==='id'){
       if(seen.has(node.name))return false;const declarations=[];let changed=false;
-      walk(this.kernel.body,n=>{if(n.kind==='decl'&&n.name===node.name)declarations.push(n);if(n.kind==='call'&&!['surf2Dwrite','surf3Dwrite'].includes(n.callee?.name))for(const arg of n.args)walk(arg,a=>{if(a.kind==='id'&&a.name===node.name)changed=true;});if((n.kind==='assign'&&n.left?.kind==='id'&&n.left.name===node.name)||(n.kind==='unary'&&['++','--'].includes(n.op)&&n.value?.name===node.name))changed=true;});
+      walk(this.kernel.body,n=>{if(n.kind==='decl'&&n.name===node.name)declarations.push(n);if(n.kind==='call'&&!['surf2Dwrite','surf3Dwrite'].includes(n.callee?.name)&&!(/^make_(?:float|int|uint)[234]$/.test(n.callee?.name||'')&&!this.ast.functions.some(f=>f.name===n.callee.name)))for(const arg of n.args)walk(arg,a=>{if(a.kind==='id'&&a.name===node.name)changed=true;});if((n.kind==='assign'&&n.left?.kind==='id'&&n.left.name===node.name)||(n.kind==='unary'&&['++','--'].includes(n.op)&&n.value?.name===node.name))changed=true;});
       if(changed||declarations.length!==1)return false;return this.surfaceGridCoordinate(declarations[0].init,axis,1,new Set([...seen,node.name]));
     }
     const member=(n,name)=>n?.kind==='member'&&n.base?.kind==='id'&&n.base.name===name&&n.member===axis;
@@ -319,10 +325,12 @@ class Emitter {
     const name = n.callee.name; n.callName = name;
     if(name==='tex1D'){if(n.callee.templateArgument!=='float4'||n.args.length!==2||n.args[0].kind!=='id')this.fail('tex1D supports a bound float4 texture and one float coordinate.',n);const texture=this.lookup(n.args[0].name,n.args[0]),coordinate=this.expr(n.args[1]);if(texture.kind!=='texture'||texture.dimension!=='2d'||coordinate.type!=='f32')this.fail('tex1D requires a matching kernel texture parameter and float coordinate.',n);return this.result(n,'vec4<f32>',`textureSampleLevel(${texture.code}, ${texture.sampler}, vec2<f32>(${coordinate.code}, 0.5f), 0.0f)`,coordinate.pre);}
     if(name==='surf3Dwrite'){
-      if(![5,6].includes(n.args.length)||n.args[1].kind!=='id'||n.args.length===6&&(n.args[5].kind!=='id'||n.args[5].name!=='cudaBoundaryModeTrap'))this.fail('surf3Dwrite supports float surfaces with checked global XYZ coordinates and default or explicit cudaBoundaryModeTrap.',n);
-      const surface=this.lookup(n.args[1].name,n.args[1]),value=this.expr(n.args[0]),coords=n.args.slice(2,5).map(a=>this.expr(a));
-      if(surface.kind!=='surface'||surface.dimension!=='3d'||value.type!=='f32'||coords.some(c=>!['i32','u32'].includes(c.type))||!['x','y','z'].every((axis,i)=>this.surfaceGridCoordinate(n.args[i+2],axis,i===0?4:1)))this.fail('Surface writes require float values, byte offset globalX * 4, row globalY and slice globalZ; other coordinates cannot be bounds-checked before dispatch.',n);
-      return this.result(n,'void',`textureStore(${surface.code}, vec3<i32>(i32(${coords[0].code}) / 4i, i32(${coords[1].code}), i32(${coords[2].code})), vec4<f32>(${value.code}, 0.0f, 0.0f, 0.0f))`,[...value.pre,...coords.flatMap(c=>c.pre)]);
+      if(![5,6].includes(n.args.length)||n.args[1].kind!=='id'||n.args.length===6&&(n.args[5].kind!=='id'||n.args[5].name!=='cudaBoundaryModeTrap'))this.fail('surf3Dwrite supports float or byte surfaces with checked global XYZ coordinates and default or explicit cudaBoundaryModeTrap.',n);
+      const surface=this.lookup(n.args[1].name,n.args[1]),value=this.expr(n.args[0]),coords=n.args.slice(2,5).map(a=>this.expr(a)),bytes=value.type==='cw_uchar'?1:4;
+      if(surface.kind!=='surface'||surface.dimension!=='3d'||!['f32','cw_uchar'].includes(value.type)||coords.some(c=>!['i32','u32','cw_size64'].includes(c.type))||!['x','y','z'].every((axis,i)=>this.surfaceGridCoordinate(n.args[i+2],axis,i===0?bytes:1)))this.fail('Surface writes require float or byte values and checked global XYZ byte offsets; other coordinates cannot be bounds-checked before dispatch.',n);
+      const format=bytes===1?'rgba8unorm':'r32float';if(surface.storeFormat&&surface.storeFormat!==format)this.fail('A surface cannot mix float and byte writes.',n);surface.storeFormat=format;surface.metadata.format=format;if(bytes===1)surface.metadata.sourceElementType='cw_uchar';
+      const code=coords.map(c=>this.convert(c.code,c.type,'i32',n)),colour=bytes===1?`vec4<f32>(f32(${value.code}) / 255.0f, 0.0f, 0.0f, 1.0f)`:`vec4<f32>(${value.code}, 0.0f, 0.0f, 0.0f)`;
+      return this.result(n,'void',`textureStore(${surface.code}, vec3<i32>(${code[0]} / ${bytes}i, ${code[1]}, ${code[2]}), ${colour})`,[...value.pre,...coords.flatMap(c=>c.pre)]);
     }
     if(name==='surf2Dwrite'){
       if(n.args.length!==5||n.args[1].kind!=='id'||n.args[4].kind!=='id'||n.args[4].name!=='cudaBoundaryModeTrap')this.fail('surf2Dwrite supports float surfaces with checked global XY coordinates and cudaBoundaryModeTrap.',n);
@@ -557,7 +565,7 @@ class Emitter {
         const symbol={name:p.name,type:p.type,code:`cw_extent(${fields.map(field=>`vec2<u32>(cw_params.cw_extent_${p.name}_${field}, 0u)`).join(', ')})`,constant:true,atomic:false,kind:'uniform'};
         this.add(p.name,symbol,p,true);p.symbol=symbol;continue;
       }
-      if(p.type==='surface2d'){if(p.pointer)this.fail('Surface objects must be passed by value.',p);const dimensions=new Set();walk(this.kernel.body,n=>{if(n.kind==='call'&&['surf2Dwrite','surf3Dwrite'].includes(n.callee?.name)&&n.args[1]?.kind==='id'&&n.args[1].name===p.name)dimensions.add(n.callee.name==='surf3Dwrite'?'3d':'2d');});if(dimensions.size>1)this.fail('A surface cannot mix 2D and 3D writes.',p);const dimension=[...dimensions][0]||'2d',binding=bufferCount+this.kernel.params.filter(p=>p.type==='texture3d').length*2+surfaces.length,symbol={name:p.name,type:p.type,code:'cw_surface_'+p.name,kind:'surface',dimension,constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;surfaces.push({name:p.name,binding,dimension,format:'r32float',access:'write-only',coordinates:dimension==='3d'?'global-xyz':'global-xy'});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_storage_${dimension}<r32float, write>;`);continue;}
+      if(p.type==='surface2d'){if(p.pointer)this.fail('Surface objects must be passed by value.',p);const dimensions=new Set();walk(this.kernel.body,n=>{if(n.kind==='call'&&['surf2Dwrite','surf3Dwrite'].includes(n.callee?.name)&&n.args[1]?.kind==='id'&&n.args[1].name===p.name)dimensions.add(n.callee.name==='surf3Dwrite'?'3d':'2d');});if(dimensions.size>1)this.fail('A surface cannot mix 2D and 3D writes.',p);const dimension=[...dimensions][0]||'2d',binding=bufferCount+this.kernel.params.filter(p=>p.type==='texture3d').length*2+surfaces.length,symbol={name:p.name,type:p.type,code:'cw_surface_'+p.name,kind:'surface',dimension,constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;const metadata={name:p.name,binding,dimension,format:'r32float',access:'write-only',coordinates:dimension==='3d'?'global-xyz':'global-xy'};symbol.metadata=metadata;surfaces.push(metadata);continue;}
       if(p.type==='texture3d'){if(p.pointer)this.fail('Texture objects must be passed by value.',p);const binding=bufferCount+textures.length*2,samplerBinding=binding+1,sampling=p.textureSampling||'tex3D',{dimension,format}=textureShape(sampling);const symbol={name:p.name,type:p.type,code:'t_'+p.name,sampler:'s_'+p.name,coordinateScale:`vec2<f32>(cw_params.cw_tex_${p.name}_sx, cw_params.cw_tex_${p.name}_sy)`,pixelPoint:`cw_params.cw_tex_${p.name}_point`,dimension,format,kind:'texture',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;textures.push({name:p.name,binding,samplerBinding,dimension,format,...(sampling==='tex2Dfloat4'?{coordinates:'2d'}:{})});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_${dimension}<f32>;`,`@group(0) @binding(${samplerBinding}) var ${symbol.sampler}: sampler;`);continue;}
       if (p.pointer) {
         if(p.type==='cw_uchar')this.fail('Byte pointers need a packed byte-buffer ABI; use uchar4 records for storage.',p);
@@ -599,6 +607,7 @@ class Emitter {
     this.scopes = kernelScope; this.currentFunction = this.kernel;
     const main = [...this.kernel.params.filter(p=>p.pointer&&p.symbol.offsetCode).map(p=>`var ${p.symbol.offsetCode}: i32 = 0i;`),...this.body(this.kernel.body)];
     emitHelpers();this.scopes=kernelScope;this.currentFunction=this.kernel;
+    for(const surface of surfaces)header.push(`@group(0) @binding(${surface.binding}) var cw_surface_${surface.name}: texture_storage_${surface.dimension}<${surface.format}, write>;`);
     for(const scalar of this.constantScalars)scalars.push({...scalar,offset:scalars.length*4});
     const textureScales=textures.filter(t=>t.format==='r32float'||t.coordinates==='2d').map((t,i)=>({name:t.name,offset:scalars.length*4+i*12,pointOffset:scalars.length*4+i*12+8})),uniformBytes=scalars.length*4+textureScales.length*12,uniformSize=uniformBytes?Math.ceil(uniformBytes/16)*16:0;
     if(uniformSize){
@@ -615,7 +624,17 @@ class Emitter {
     if(this.integerIntrinsics.has('__umul24'))helperLines.unshift('fn cw_umul24(a: u32, b: u32) -> u32 { return (a & 16777215u) * (b & 16777215u); }');
     // A float32 significand times a 16-bit integer fits exactly in 40 bits.
     // Integer limbs preserve the original double product before truncating to a byte.
-    if(this.extentUsed){header.unshift('struct cw_extent { width: vec2<u32>, height: vec2<u32>, depth: vec2<u32>, }');helperLines.unshift('fn cw_size_less(a: vec2<u32>, b: vec2<u32>) -> bool { return a.y < b.y || (a.y == b.y && a.x < b.x); }');}
+    if(this.sizeMultiplyUsed)helperLines.unshift(`fn cw_size_multiply(a: vec2<u32>, b: vec2<u32>) -> vec2<u32> {
+  let a0 = a.x & 65535u; let a1 = a.x >> 16u;
+  let b0 = b.x & 65535u; let b1 = b.x >> 16u;
+  let p0 = a0 * b0;
+  let p1 = a1 * b0 + (p0 >> 16u);
+  let p2 = a0 * b1 + (p1 & 65535u);
+  let low = (p2 << 16u) | (p0 & 65535u);
+  let high = a1 * b1 + (p1 >> 16u) + (p2 >> 16u) + a.x * b.y + a.y * b.x;
+  return vec2<u32>(low, high);
+}`);
+    if(this.extentUsed){header.unshift('alias cw_size64 = vec2<u32>;','struct cw_extent { width: vec2<u32>, height: vec2<u32>, depth: vec2<u32>, }');helperLines.unshift('fn cw_size_less(a: vec2<u32>, b: vec2<u32>) -> bool { return a.y < b.y || (a.y == b.y && a.x < b.x); }');}
     if(this.exactByteScaleUsed)helperLines.unshift(`fn cw_exact_byte_scale(value: f32, scale: u32) -> u32 {
   let bits = bitcast<u32>(value);
   let exponent = (bits >> 23u) & 255u;

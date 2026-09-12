@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: MIT
+#include <cuda_runtime.h>
+#include <helper_math.h>
+#include <cstdio>
+#include <vector>
+#include "volume-filter-kernel.cuh"
+#define CHECK(x) do{auto e=(x);if(e!=cudaSuccess){printf("CUDA ERROR %s\n",cudaGetErrorString(e));return 2;}}while(0)
+struct Resource{cudaArray_t array;cudaTextureObject_t texture;cudaSurfaceObject_t surface;};
+int main(){auto extent=make_cudaExtent(8,8,4);Resource r[3];auto desc=cudaCreateChannelDesc<unsigned char>();for(auto& v:r){CHECK(cudaMalloc3DArray(&v.array,&desc,extent,cudaArraySurfaceLoadStore));cudaResourceDesc resource={};resource.resType=cudaResourceTypeArray;resource.res.array.array=v.array;CHECK(cudaCreateSurfaceObject(&v.surface,&resource));cudaTextureDesc t={};t.normalizedCoords=1;t.filterMode=cudaFilterModeLinear;t.addressMode[0]=t.addressMode[1]=t.addressMode[2]=cudaAddressModeWrap;t.readMode=cudaReadModeNormalizedFloat;CHECK(cudaCreateTextureObject(&v.texture,&resource,&t,nullptr));}
+std::vector<unsigned char> input(256),out(256);for(int i=0;i<256;i++)input[i]=(i*37+11)&255;cudaMemcpy3DParms upload={};upload.srcPtr=make_cudaPitchedPtr(input.data(),8,8,8);upload.dstArray=r[0].array;upload.extent=extent;upload.kind=cudaMemcpyHostToDevice;CHECK(cudaMemcpy3D(&upload));
+for(int scenario=0;scenario<2;scenario++){float4 weights[125]={};int count=scenario?3:1;weights[0]=scenario?make_float4(-.125f,0,0,.25f):make_float4(0,0,0,1);weights[1]=make_float4(0,.25f,0,.5f);weights[2]=make_float4(.125f,0,.25f,.25f);CHECK(cudaMemcpyToSymbol(c_filterData,weights,sizeof(weights)));for(int pass=0;pass<2;pass++){int src=pass==0?0:1,dst=pass==0?1:2;d_filter_surface3d<<<dim3(1,1,4),dim3(8,8,1)>>>(count,scenario?.0625f:0,extent,r[src].texture,r[dst].surface);CHECK(cudaGetLastError());CHECK(cudaDeviceSynchronize());cudaMemcpy3DParms read={};read.srcArray=r[dst].array;read.dstPtr=make_cudaPitchedPtr(out.data(),8,8,8);read.extent=extent;read.kind=cudaMemcpyDeviceToHost;CHECK(cudaMemcpy3D(&read));char path[128];snprintf(path,sizeof(path),"reports/volume-filter-native-%d-%d.bin",scenario,pass);FILE* file=fopen(path,"wb");if(!file)return 2;fwrite(out.data(),1,256,file);fclose(file);int different=0;for(int i=1;i<256;i++)if(out[i]!=out[0])different++;printf("scenario=%d pass=%d 256 voxels captured, first=%u different-from-first=%d\n",scenario,pass,out[0],different);}}
+for(auto& v:r){CHECK(cudaDestroyTextureObject(v.texture));CHECK(cudaDestroySurfaceObject(v.surface));CHECK(cudaFreeArray(v.array));}return 0;}

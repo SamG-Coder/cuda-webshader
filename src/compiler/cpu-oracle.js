@@ -25,6 +25,7 @@ function binary(op,a,b,type){
   if(vectorLength(type))return Array.from({length:vectorLength(type)},(_,i)=>binary(op,Array.isArray(a)?a[i]:a,Array.isArray(b)?b[i]:b,vectorElement(type)));
   if(op==='&&')return !!a&&!!b;if(op==='||')return !!a||!!b;
   a=convert(a,type);b=convert(b,type);
+  if(type==='cw_size64'&&op==='*')return BigInt.asUintN(64,a*b);
   switch(op){
     case '+':return convert(a+b,type);case '-':return convert(a-b,type);case '*':return convert(type==='f32'?a*b:Math.imul(a,b),type);
     case '/':if(!b&&type!=='f32')throw new Error('Integer division by zero.');return convert(type==='f32'?a/b:Math.trunc(a/b),type);
@@ -59,6 +60,7 @@ class Context {
     this.tick();
     switch(n.kind){
       case 'initializer':{const values=[];for(const item of n.items)values.push(yield* this.eval(item));while(values.length<Number(n.type[3]))values.push(0);return values;}
+      case 'sizeof':return BigInt(n.numericValue);
       case 'literal':return convert(n.numericValue,n.type);
       case 'id':if(n.name==='true')return true;if(n.name==='false')return false;return this.env.get(n.symbol)?.value;
       case 'index':return (yield* this.ref(n)).get();

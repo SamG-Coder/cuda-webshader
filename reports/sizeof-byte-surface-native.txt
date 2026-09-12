@@ -1,0 +1,1 @@
+PASS 20 sizeof/multiplication results and all 256 byte surface values sampled on GPU

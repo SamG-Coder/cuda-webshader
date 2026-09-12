@@ -1,0 +1,6 @@
+Build: nvcc -O3 --fmad=false -std=c++17 -arch=native -I.local/nvidia-audit/Common
+Texture: normalized coordinates, linear filtering, wrap on XYZ, normalized unsigned-byte reads (upstream volume.cpp settings)
+scenario=0 pass=0 256 voxels captured, first=120 different-from-first=0
+scenario=0 pass=1 256 voxels captured, first=120 different-from-first=0
+scenario=1 pass=0 256 voxels captured, first=120 different-from-first=0
+scenario=1 pass=1 256 voxels captured, first=135 different-from-first=0
