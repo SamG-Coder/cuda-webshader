@@ -47,7 +47,10 @@ Device helpers now
 support up to four explicit built-in type arguments or one integer template argument, including nested
 calls and arguments forwarded from a kernel template. Single type arguments can be deduced;
 multiple types currently require explicit arguments. This is a verified prerequisite for
-the [bicubic texture candidate](reports/bicubic-texture-progress.md). Type-trait structs containing typedef members, including explicit type specializations
+the [bicubic texture candidate](reports/bicubic-texture-progress.md).
+Device helpers also accept trailing scalar literal defaults, including defaults
+inherited from primary templates; native CUDA and WebGPU verify omitted and explicit
+arguments, overloads and nested texture helpers. Type-trait structs containing typedef members, including explicit type specializations
 and dependent types such as `typename vec4<T>::Type`, now resolve to built-in
 value types. Helper type arguments can now be deduced from direct scalar/vector
 parameters, and explicit device-function specializations are selected when present.

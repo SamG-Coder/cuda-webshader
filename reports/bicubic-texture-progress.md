@@ -10,8 +10,18 @@ One type parameter can still be deduced as before. Multiple types require explic
 
 The MIT validation probe in tests/multiple-helper-types.cu exercises four types, integer/float conversion, full specialization, reversed nested arguments and pixel-coordinate texture sampling through two-type helpers. Native CUDA and hardware NVIDIA WebGPU both produce exactly 3, -30, -27, 7.5, 2, 4.5 from the same input buffers and image. See reports/multiple-helper-types-native.txt and the multiple-helper-types GPU regression entry. Unit tests additionally cover references, traits, vectors, kernel-to-helper forwarding and rejection paths.
 
+## Verified prerequisite: scalar helper default arguments
+
+Primary device helper definitions now support trailing numeric or boolean literal defaults, including an optional numeric sign and numeric macro expansion. Omitted arguments are copied into each call's AST; explicit arguments take precedence. Defaults are inherited from the primary template when a full specialization is selected. Single-type deduction uses supplied arguments only. Overload selection considers supplied argument types and rejects ambiguity when multiple defaulted signatures match.
+
+Defaults are restricted to scalar value parameters. References, pointers, vector defaults, arbitrary default expressions, defaults on kernel entries and defaults declared on explicit specializations remain unsupported. Required parameters cannot follow optional ones. These restrictions are diagnosed instead of silently binding caller variables or changing the supplied argument list.
+
+Native CUDA and NVIDIA WebGPU both produce exactly 2, 4.5, 12.5, 6.5, -2, 2, 5, -10, 9, 3 for tests/helper-defaults.cu. The probe covers omitted and explicit arguments, nested calls, template deduction, inherited specialization defaults, overloads, and texture helpers. See reports/helper-defaults-native.txt and the helper-defaults GPU regression entry.
+
+The parser also recognizes tex2Dgather template-call syntax in an unused helper. This does not implement gather execution: a selected gather call is still rejected. The original header now parses past its unused gather helper and stops at the packed uchar4 output parameter.
+
 ## Remaining work
 
-Compiling the original extracted header currently stops at the default comp = 0 parameter on tex2DBilinearGather. The sample also needs packed uchar4 output and make_uchar4 conversion, the uchar template argument, and matching byte-image texture semantics. The gather helper is not called by the five upstream render paths; its presence must be handled without rewriting the user's CUDA source.
+Compiling the original extracted header currently stops at the uchar4 output parameter. The sample needs packed uchar4 output and make_uchar4 conversion, the uchar template argument, and matching byte-image texture semantics. The gather helper is not called by the five upstream render paths; its unused template now parses without rewriting the user's CUDA source.
 
 After those compiler/runtime requirements, validate every original render mode against native CUDA and an independent reference, including fractional coordinates, edges and partial blocks. Add the sandbox input/settings/preview and its own card only after full output validation. This report and probe do not claim that the bicubic sample already runs.

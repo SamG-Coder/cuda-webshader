@@ -81,7 +81,7 @@ export function tokenize(source, defines = {}) {
 }
 const PRECEDENCE = {'=': 1, '+=': 1, '-=': 1, '*=': 1, '/=': 1, '%=': 1, '&=': 1, '|=': 1, '^=': 1, '<<=': 1, '>>=': 1, '||': 3, '&&': 4, '|': 5, '^': 6, '&': 7, '==': 8, '!=': 8, '<': 9, '>': 9, '<=': 9, '>=': 9, '<<': 10, '>>': 10, '+': 11, '-': 11, '*': 12, '/': 12, '%': 12};
 export class Parser {
-  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); this.functionNames=new Set(['tex3D','tex1D','tex2D']); this.typeTraits=new Map();this.structs=new Map(); this.sharedWrappers=new Map();this.expandedMacroNodes=0; }
+  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); this.functionNames=new Set(['tex3D','tex1D','tex2D','tex2Dgather']); this.typeTraits=new Map();this.structs=new Map(); this.sharedWrappers=new Map();this.expandedMacroNodes=0; }
   peek(offset = 0) { return this.tokens[this.i + offset] || this.tokens.at(-1); }
   is(value) { return this.peek().value === value; }
   take(value) { if (value && !this.is(value)) this.fail(`Expected '${value}', found '${this.peek().value}'.`); return this.tokens[this.i++]; }
@@ -192,7 +192,11 @@ export class Parser {
       const name = this.name();this.functionNames.add(name);let specializationArgument;
       if(templateKind==='specialization')specializationArgument=this.templateArgument();
       this.take('('); const params = [];
-      if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(); params.push({kind: 'param', token, name, ...type}); } while (this.match(','));
+      if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(),defaultValue=this.match('=')?this.expression(2):undefined;
+        if(defaultValue!==undefined){const literal=defaultValue.kind==='unary'&&['+','-'].includes(defaultValue.op)?defaultValue.value:defaultValue;if(qualifier!=='__device__'||templateKind==='specialization')this.fail('Default arguments belong on primary device helper definitions only.',token);if(type.pointer||type.reference||(!['f32','i32','u32','bool'].includes(type.type)&&!String(type.type).startsWith('template:')))this.fail('Default arguments require scalar value parameters.',token);if(literal.kind!=='literal'&&!(literal===defaultValue&&literal.kind==='id'&&['true','false'].includes(literal.name)))this.fail('Default arguments support numeric or boolean literals with an optional numeric sign.',defaultValue.token);}
+        else if(params.some(p=>p.defaultValue!==undefined))this.fail('Parameters after a default argument must also have defaults.',token);
+        params.push({kind: 'param', token, name, ...type,...(defaultValue!==undefined?{defaultValue}:{})});
+      } while (this.match(','));
       this.take(')'); const body = this.block();
       functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads,templateParameter,templateParameters,templateKind,...(specializationArgument!==undefined?{specializationArgument}:{})});
     }

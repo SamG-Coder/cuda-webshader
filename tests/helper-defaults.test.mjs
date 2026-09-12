@@ -1,0 +1,17 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {compile} from '../src/compiler/compiler.js';import {executeCPU} from '../src/compiler/cpu-oracle.js';import {kernelSource} from '../src/sandbox/import.js';
+const run=source=>{const c=compile(source,{workgroupSize:[1]}),out=new Float32Array(8);executeCPU(c,{out},{},[1]);return out;};
+test('Trailing helper defaults are substituted independently for every call',()=>{const out=run('__device__ float f(float x,float a=2.0f,int b=-3){return x*a+b;}__device__ float g(float x){return f(x);}__global__ void k(float* out){out[0]=f(2.5f);out[1]=f(2.5f,3.0f);out[2]=f(2.5f,3.0f,5);out[3]=g(-1.0f);}');assert.deepEqual([...out.slice(0,4)],[2,4.5,12.5,-5]);});
+test('Defaults use the primary template and do not participate in type deduction',()=>{const out=run('template<class T>__device__ T f(T x,T y=4){return x+y;}template<>__device__ int f<int>(int x,int y){return x-y;}__global__ void k(float* out){out[0]=f(2.5f);out[1]=f<int>(2);out[2]=f<int>(2,9);}');assert.deepEqual([...out.slice(0,3)],[6.5,-2,-7]);assert.throws(()=>compile('template<class T>__device__ T f(T x=4){return x;}__global__ void k(){f();}'),/Cannot deduce/);});
+test('Overloads use supplied argument types and reject ambiguous defaulted calls',()=>{const out=run('__device__ int f(int x,int y=7){return x+y;}__device__ float f(float x,float y=.5f){return x+y;}__global__ void k(float* out){out[0]=f(2);out[1]=f(2.5f);}');assert.deepEqual([...out.slice(0,2)],[9,3]);assert.throws(()=>compile('__device__ int f(int x=1){return x;}__device__ float f(float x=.5f){return x;}__global__ void k(){f();}'),/Overload/);});
+test('Boolean and macro literal defaults survive desktop extraction',()=>{const out=run(kernelSource('#include <cuda_runtime.h>\n#define SCALE 3.5f\n__device__ float f(float x=SCALE,bool enabled=true){return enabled?x:0.0f;}__global__ void k(float* out){out[0]=f();out[1]=f(9.0f,false);}').source);assert.deepEqual([...out.slice(0,2)],[3.5,0]);});
+test('Invalid defaults fail instead of capturing caller names or dropping arguments',()=>{for(const source of [
+ '__device__ int f(int a=1,int b){return a+b;}__global__ void k(){}',
+ '__global__ void k(int n=1){}',
+ '__device__ int f(int x,int y=x){return y;}__global__ void k(){f(2);}',
+ '__device__ int f(int x=1+2){return x;}__global__ void k(){f();}',
+ '__device__ int f(int* x=0){return 0;}__global__ void k(){}',
+ '__device__ int f(const int& x=1){return x;}__global__ void k(){}',
+ 'template<class T>__device__ T f(T x=0){return x;}__global__ void k(){f<float4>();}',
+ 'template<class T>__device__ T f(T x=0){return x;}template<>__device__ int f<int>(int x=1){return x;}__global__ void k(){}'
+ ])assert.throws(()=>compile(source),/Default|default/);assert.throws(()=>compile('__device__ int f(int x,int y=1){return x+y;}__global__ void k(){f();}'),/Wrong number/);});
+test('An unused templated gather helper parses without claiming gather execution support',()=>{const helper='template<class T,class R>__device__ float gather(cudaTextureObject_t tex,float x,float y,int comp=0){R samples=tex2Dgather<R>(tex,x,y,comp);return samples.x;}';assert.doesNotThrow(()=>compile(helper+'__global__ void k(float* out){out[0]=1.0f;}'));assert.throws(()=>compile(helper+'__global__ void k(float* out,cudaTextureObject_t tex){out[0]=gather<int,float4>(tex,.5f,.5f);}'),/templated device helper|Unsupported function/);});

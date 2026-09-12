@@ -359,13 +359,15 @@ class Emitter {
       return this.result(n, type, `${name}(${args.map(a => this.convert(a.code, a.type, type, n)).join(', ')})`, pre);
     }
     let helper = this.functions.get(name);
-    if(this.overloads.has(name)){const matches=this.overloads.get(name).filter(f=>f.params.length===args.length&&f.params.every((p,i)=>typeName(p.pointer?(isArray(args[i].type)?args[i].type.element:null):args[i].type)===typeName(p.type)));if(matches.length!==1)this.fail('Overload '+name+' requires one exact parameter-type match; implicit conversions and ambiguous calls are unsupported.',n);helper=matches[0];}
+    if(this.overloads.has(name)){const matches=this.overloads.get(name).filter(f=>args.length<=f.params.length&&f.params.every((p,i)=>i>=args.length?p.defaultValue!==undefined:typeName(p.pointer?(isArray(args[i].type)?args[i].type.element:null):args[i].type)===typeName(p.type)));if(matches.length!==1)this.fail('Overload '+name+' requires one exact parameter-type match; implicit conversions and ambiguous calls are unsupported.',n);helper=matches[0];}
     if(!helper&&this.templates){
       helper=this.templates.deduce(name,args.map(a=>a.type),n.callee);
       if(helper)for(const fn of this.ast.functions)if(fn.qualifier==='__device__'&&!this.functions.has(fn.name)){this.functions.set(fn.name,fn);if(!fn.params.some(p=>p.pointer))this.helpers.push(fn);}
     }
     if (!helper || helper.qualifier !== '__device__') this.fail(`Unsupported function '${name}'. CUDA host APIs, warp intrinsics, dynamic launches and libraries are not available.`, n);
-    if (args.length !== helper.params.length) this.fail(`Wrong number of arguments for '${name}'.`, n);
+    if(args.length>helper.params.length||helper.params.slice(args.length).some(p=>p.defaultValue===undefined))this.fail(`Wrong number of arguments for '${name}'.`,n);
+    for(const param of helper.params)if(param.defaultValue!==undefined&&!['f32','i32','u32','bool'].includes(param.type))this.fail('Default arguments require scalar value parameters.',param);
+    while(args.length<helper.params.length){const value=structuredClone(helper.params[args.length].defaultValue);n.args.push(value);const argument=this.argument(value);args.push(argument);pre.push(...argument.pre);}
     if(helper.params.some(p=>p.pointer))helper=this.bindPointerHelper(helper,args,n);
     const caller=this.currentFunction.name,edges=this.helperCalls.get(caller)||new Set();edges.add(helper.name);this.helperCalls.set(caller,edges);
     const reaches=(from,target,seen=new Set())=>{if(from===target)return true;if(seen.has(from))return false;seen.add(from);return [...(this.helperCalls.get(from)||[])].some(next=>reaches(next,target,seen));};
@@ -628,6 +630,7 @@ function instantiateHelperTemplates(ast, kernel) {
         if(instances.size>=128)fail('At most 128 device helper template specializations are supported.',callee);
         const selected=specializations.get(key);
         instance=structuredClone(selected||definition);
+        if(selected)for(let i=0;i<instance.params.length;i++)if(definition.params[i].defaultValue!==undefined)instance.params[i].defaultValue=structuredClone(definition.params[i].defaultValue);
         const names=parameters(definition),argumentsList=argument.split(','),replacements=new Map();
         for(let i=0;i<names.length;i++){const value=argumentsList[i],type=definition.templateKind==='type'?builtinType(value):null;if(definition.templateKind==='type'&&(!type||['void','texture3d','surface2d'].includes(type)))fail('Template type argument must be a supported built-in value type.',callee);if(!type&&(!Number.isSafeInteger(Number(value))||Number(value)<-2147483648||Number(value)>2147483647))fail('Template argument must be a signed 32-bit integer.',callee);replacements.set(names[i],{value,type});}
         const replaceType=type=>{if(typeof type==='string'&&type.startsWith('template:'))return replacements.get(type.slice(9))?.type??type;if(type?.kind==='trait-type')return {...type,argument:replacements.get(type.argument)?.value??type.argument};return type;};
@@ -661,8 +664,8 @@ function instantiateHelperTemplates(ast, kernel) {
     if(definition.qualifier!=='__device__')fail('Device-side kernel launches are unsupported.',callee);
     if(definition.templateKind!=='type')fail('Integer helper templates require an explicit template argument.',callee);
     if(parameters(definition).length>1)fail('Multiple helper template types require explicit template arguments.',callee);
-    if(types.length!==definition.params.length)fail(`Wrong number of arguments for '${name}'.`,callee);
-    const matches=definition.params.flatMap((p,i)=>p.type==='template:'+definition.templateParameter?[p.pointer?(isArray(types[i])?types[i].element:undefined):types[i]]:[]);
+    if(types.length>definition.params.length||definition.params.slice(types.length).some(p=>p.defaultValue===undefined))fail(`Wrong number of arguments for '${name}'.`,callee);
+    const matches=definition.params.flatMap((p,i)=>i<types.length&&p.type==='template:'+definition.templateParameter?[p.pointer?(isArray(types[i])?types[i].element:undefined):types[i]]:[]);
     if(!matches.length)fail('Cannot deduce helper template type from these parameters; supply an explicit argument.',callee);
     const type=matches[0];
     if(matches.some(t=>typeName(t)!==typeName(type)))fail('Conflicting deduced helper template argument types.',callee);

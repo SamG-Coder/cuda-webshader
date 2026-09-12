@@ -1,0 +1,1 @@
+PASS native helper defaults: 2, 4.5, 12.5, 6.5, -2, 2, 5, -10, 9, 3; omitted/explicit arguments, primary-template defaults, overloads and texture helpers
