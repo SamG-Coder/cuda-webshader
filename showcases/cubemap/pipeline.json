@@ -1,0 +1,79 @@
+{
+  "pipeline": {
+    "buffers": {
+      "g_odata": {
+        "type": "f32",
+        "records": 24576,
+        "fill": "zero"
+      },
+      "image": {
+        "type": "f32",
+        "records": 24576,
+        "fill": "zero"
+      }
+    },
+    "textures": {
+      "tex": {
+        "kind": "cubemap-f32",
+        "dimensions": [
+          64,
+          64,
+          6
+        ],
+        "source": "reports/cubemap-input.bin",
+        "filter": "linear",
+        "addressMode": "repeat",
+        "seamless": false
+      }
+    },
+    "steps": [
+      {
+        "entry": "transformKernel",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          8,
+          8,
+          1
+        ],
+        "scalars": {
+          "width": 64
+        }
+      },
+      {
+        "entry": "arrangeFaces",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          24,
+          16,
+          1
+        ],
+        "bindings": {
+          "input": "g_odata",
+          "image": "image"
+        },
+        "scalars": {
+          "width": 64
+        }
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "image",
+      "width": 192,
+      "height": 128,
+      "format": "gray-f32",
+      "range": [
+        -24575,
+        0
+      ]
+    }
+  }
+}

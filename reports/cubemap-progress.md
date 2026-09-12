@@ -10,11 +10,11 @@ Additional MIT probe code samples 12 directions near the edges of all six faces,
 
 CUDA exposes the flag explicitly in [cudaTextureDesc](https://docs.nvidia.com/cuda/archive/13.0.3/cuda-runtime-api/structcudaTextureDesc.html). Face selection is described in the [CUDA Programming Guide](https://docs.nvidia.com/cuda/archive/12.5.1/cuda-c-programming-guide/index.html#cubemap-textures).
 
-## Remaining work
+## Compiler, runtime and sandbox
 
-The original kernel currently fails parsing at `texCubemap<float>(tex, cx, cy, cz)`. The frontend needs cubemap intrinsic recognition and texture-type inference. The backend and runtime need a representation that preserves CUDA face orientation, scalar float results and the original nonseamless edge behavior. A direct cube-sampler mapping must not be assumed equivalent without the edge comparisons.
+The original `texCubemap<float>` now compiles, including texture propagation through device helpers. The runtime uploads six scalar float layers; generated WGSL selects a face and its coordinates before sampling that layer. The original wrap address mode is preserved. Native probes caught and corrected a clamp-vs-wrap difference that the original face-center lookups did not expose.
 
-After implementing it, run the unchanged full kernel against all native outputs and the explicit edge probes, then add a six-face sandbox preview and a separate main-page card. No WebGPU success or runnable showcase is claimed yet.
+All 24,576 original outputs and all 12 nonseamless edge probes match native CUDA exactly. Seamless requests are explicitly rejected. The sandbox adds a labelled MIT helper to arrange faces in a 3 by 2 atlas, and independently checks all original outputs, atlas orientation and rendered pixels. The main-page card links only to the sandbox.
 
 ## Reproduction
 
