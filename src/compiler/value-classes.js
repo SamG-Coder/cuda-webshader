@@ -1,4 +1,4 @@
-// Parse plain public value classes into storage records and device helpers.
+// Parse value classes with checked public/private access into storage records and device helpers.
 // Constructors return values; mutable methods receive a reference to the receiver.
 export function parseValueClass(p) {
   const token=p.take('class'),name=p.name();
@@ -11,7 +11,7 @@ export function parseValueClass(p) {
   const functions=[];let access='private';
   while(!p.is('}')) {
     if(['public','private','protected'].includes(p.peek().value)){access=p.take().value;p.take(':');continue;}
-    if(access!=='public')p.fail('Value classes currently require public fields and methods.');
+    if(access==='protected')p.fail('Protected class members require inheritance access support.');
     const start=p.peek();let device=false,virtual=false;
     while(['__host__','__device__','inline','__forceinline__','virtual'].includes(p.peek().value)){const qualifier=p.take().value;if(qualifier==='__device__')device=true;if(qualifier==='virtual')virtual=true;}
     const constructor=p.is(name)&&p.peek(1).value==='(';
@@ -44,10 +44,10 @@ export function parseValueClass(p) {
         if(!body)p.fail('Reference index accessors require an inline definition.',start);
         const ret=body.body[0],value=ret?.value;
         if(constant||body.body.length!==1||ret?.kind!=='return'||value?.kind!=='index'||value.base?.kind!=='id'||value.index?.kind!=='id'||value.index.name!==params[0].name||!['i32','u32'].includes(params[0].type))p.fail('Reference indexing requires exactly return field[index] with one integer index.',start);
-        record.methods.push({name:member,indexedReference:true,field:value.base.name,result:spec.type,token:start});p.match(';');continue;
+        record.methods.push({name:member,access,indexedReference:true,field:value.base.name,result:spec.type,token:start});p.match(';');continue;
       }
-      if(constructor)record.constructors.push(helper);else record.methods.push({name:member,helper,selfReference,mutableSelf});
-      functions.push({kind:'function',token:start,name:helper,qualifier:'__device__',result:spec.type,params,body,classOwner:name,classConstructor:constructor,classMethod:constructor?null:member,classSelfReference:selfReference,classMutableSelf:mutableSelf,classConstant:constant,classDeclaration:declaration,classResultSpec:spec,classInitializers:initializers});
+      if(constructor)record.constructors.push(helper);else record.methods.push({name:member,access,helper,selfReference,mutableSelf});
+      functions.push({kind:'function',token:start,name:helper,qualifier:'__device__',result:spec.type,params,body,classOwner:name,classAccess:access,classConstructor:constructor,classMethod:constructor?null:member,classSelfReference:selfReference,classMutableSelf:mutableSelf,classConstant:constant,classDeclaration:declaration,classResultSpec:spec,classInitializers:initializers});
       p.match(';');
     } else {
       if(spec.pointer&&spec.type.startsWith('cw_objectptr_')){spec.pointer=false;spec.type=spec.type.replace('cw_objectptr_','cw_objectlist_');(p.objectListTypes??=new Set()).add(spec.type);}
@@ -56,7 +56,7 @@ export function parseValueClass(p) {
         const dimensions=[];while(p.match('[')){dimensions.push(p.expression(2));p.take(']');}
         if(dimensions.length>1||record.fields.length>=64||record.fields.some(f=>f.name===member))p.fail('Invalid or duplicate value-class field.',start);
         if(spec.type.startsWith('cw_struct_')){const nested=[...p.structs.values()].find(r=>r.type===spec.type);if(!nested?.complete||dimensions.length)p.fail('Nested class fields require a previously completed class and no array dimensions.',start);}
-        record.fields.push({name:member,type:spec.type,dimensions,token:start});
+        record.fields.push({name:member,type:spec.type,access,dimensions,token:start});
         if(!p.match(','))break;
         member=p.name();
       } while(true);
@@ -91,6 +91,7 @@ export function finishValueClasses(p) {
     const rewrite=n=>{
       if(!n||typeof n!=='object')return n;
       if((fn.classSelfReference||fn.classMutableSelf)&&n.kind==='unary'&&n.op==='*'&&n.value?.name==='this')return {kind:'id',token:n.token,name:self};
+      if(n.kind==='call'&&n.callee?.kind==='id'&&record.methods.some(m=>m.name===n.callee.name)&&!locals.has(n.callee.name))n.callee={kind:'member',token:n.callee.token,base:{kind:'id',name:self,token:n.token},member:n.callee.name};
       if(n.kind==='id'&&fields.has(n.name)&&!locals.has(n.name))return {kind:'member',token:n.token,base:{kind:'id',token:n.token,name:self},member:n.name};
       if(fn.classConstructor&&n.kind==='return'){if(n.value)p.fail('Constructors cannot return an explicit value.',n.token);n.value={kind:'id',name:self,token:n.token};return n;}
       for(const [key,v]of Object.entries(n))if(key!=='token')n[key]=Array.isArray(v)?v.map(rewrite):rewrite(v);

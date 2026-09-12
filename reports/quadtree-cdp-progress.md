@@ -37,3 +37,18 @@ Bezier scheduler does not establish support for them.
 No quadtree showcase card is added until the full browser workload works and
 matches this native capture. This sample partitions 2D points; it is not a 3D
 renderer.
+
+## Checked private class members
+
+The compiler now accepts private scalar/vector/nested-record fields and private
+device methods. Access is checked against the current owning class: methods may
+read private state on another instance of the same class, but kernels and
+unrelated helpers cannot read fields or call private methods/constructors.
+Unqualified member calls retain their receiver. Public reference indexing can
+expose private array elements without granting direct field access. Protected
+members remain explicitly unsupported.
+
+The unchanged quadtree probe now passes the private-access parse gate and stops
+at `Points::m_x`, a scalar pointer field. Its buffer identities need to survive
+class methods, point-buffer swapping and recursive launches. This is the next
+required representation change; the quadtree still has no runnable browser card.

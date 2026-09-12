@@ -163,3 +163,16 @@ test('Wide integer seed shifts preserve both words and signed conversion',()=>{
  const a=compile('__global__ void k(unsigned int*out){size_t n=(size_t)(-1);out[0]=(unsigned int)(n>>32u);out[1]=(unsigned int)(n<<32u);}',{workgroupSize:[1,1,1]}),out=new Uint32Array(2);executeCPU(a,{out},{},[1]);assert.deepEqual([...out],[4294967295,0]);
  assert.throws(()=>compile('__global__ void k(unsigned int*out){size_t n=(size_t)1;out[0]=(unsigned int)(n>>64u);}'),/0..63/);
 });
+
+test('Private state remains accessible through class methods and same-class receivers',()=>{
+ const s=readFileSync('tests/private-class.cu','utf8'),a=compile(s,{entry:'private_class_values',workgroupSize:[32]}),out=new Int32Array(32);executeCPU(a,{out},{},[1]);assert.deepEqual([...out],Array.from({length:32},(_,i)=>3*i+7));
+ for(const expression of ['a.value','a.twice()'])assert.throws(()=>compile(s+'__global__ void invalid(int* out){Counter a(1);out[0]='+expression+';} ',{entry:'invalid'}),/Private/);
+ assert.throws(()=>compile('class Hidden {__device__ Hidden(){}public:int value;};__global__ void k(){Hidden h;}',{entry:'k'}),/Private/);
+});
+
+test('Public index references can expose private arrays without exposing their fields',()=>{
+ const s='class Values {float data[2];public:__device__ Values(){data[0]=1.f;data[1]=2.f;}__device__ float& operator[](int i){return data[i];}};__global__ void k(float* out){Values v;v[1]=7.f;out[0]=v[1];}';
+ const a=compile(s,{entry:'k',workgroupSize:[1]}),out=new Float32Array(1);executeCPU(a,{out},{},[1]);assert.equal(out[0],7);
+ assert.throws(()=>compile(s.replace('out[0]=v[1]','out[0]=v.data[1]'),{entry:'k'}),/Private/);
+ assert.throws(()=>compile(s.replace('public:','public:').replace('__device__ float& operator[]','private:__device__ float& operator[]'),{entry:'k'}),/Private/);
+});

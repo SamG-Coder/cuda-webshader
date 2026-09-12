@@ -304,7 +304,7 @@ class Emitter {
         }
         if(this.structs.get(base.type)?.methods?.some(m=>m.name==='operator[]')){
           const reference=this.structs.get(base.type).methods.find(m=>m.name==='operator[]'&&m.indexedReference);
-          if(reference&&(raw||!base.rootSymbol?.constant)){n.base={kind:'member',base:n.base,member:reference.field,token:n.token};return this.expr(n,raw);}
+          if(reference&&(raw||!base.rootSymbol?.constant)){if(reference.access==='private'&&this.currentFunction.classOwner!==this.structs.get(base.type).name)this.fail('Private class index accessor is inaccessible here.',n);n.base={kind:'member',base:n.base,member:reference.field,token:n.token,accessorOwner:this.structs.get(base.type).name};return this.expr(n,raw);}
           if(raw)this.fail('Read-only class indexing cannot be used as a writable reference.',n);
           const receiver=n.base,index=n.index;delete n.base;delete n.index;Object.assign(n,{kind:'call',callee:{kind:'member',base:receiver,member:'operator[]',token:n.token},args:[index]});return this.call(n);
         }
@@ -336,7 +336,7 @@ class Emitter {
         const base = this.expr(n.base, raw), size = vectorLength(base.type);
         if(base.type==='cw_extent'){if(!['width','height','depth'].includes(n.member))this.fail('cudaExtent has width, height and depth fields.',n);return this.result(n,'cw_size64',`${base.code}.${n.member}`,base.pre,{rootSymbol:base.rootSymbol});}
         if(['cw_uchar2','cw_uchar4'].includes(base.type)){if(n.member.length!==1||!(base.type==='cw_uchar2'?'xy':'xyzw').includes(n.member))this.fail('Packed byte vector has only its declared byte components.',n);const shift='xyzw'.indexOf(n.member)*8,read=base.atomic&&raw?`atomicLoad(&${base.code})`:base.code;return this.result(n,'cw_uchar',`((${read} >> ${shift}u) & 255u)`,base.pre,{rootSymbol:base.rootSymbol,packedBase:base.code,packedShift:shift,packedAtomic:!!base.atomic});}
-        if(this.structs.has(base.type)){const field=this.structs.get(base.type).fields.find(f=>f.name===n.member);if(!field)this.fail('Unknown struct field '+n.member,n);return this.result(n,field.resolvedType,`${base.code}.cw_field_${n.member}`,base.pre,{rootSymbol:base.rootSymbol,...(String(field.resolvedType).startsWith('cw_objectlist_')?{objectListOrigins:this.structs.get(base.type).listOrigins[n.member]}:{})});}
+        if(this.structs.has(base.type)){const field=this.structs.get(base.type).fields.find(f=>f.name===n.member);if(!field)this.fail('Unknown struct field '+n.member,n);if(field.access==='private'&&this.currentFunction.classOwner!==this.structs.get(base.type).name&&n.accessorOwner!==this.structs.get(base.type).name)this.fail('Private class field '+n.member+' is inaccessible here.',n);return this.result(n,field.resolvedType,`${base.code}.cw_field_${n.member}`,base.pre,{rootSymbol:base.rootSymbol,...(String(field.resolvedType).startsWith('cw_objectlist_')?{objectListOrigins:this.structs.get(base.type).listOrigins[n.member]}:{})});}
         if (!size || n.member.length !== 1 || 'xyzw'.indexOf(n.member) < 0 || 'xyzw'.indexOf(n.member) >= size) this.fail('Only valid single vector components (.x/.y/.z/.w) are supported.', n);
         if(raw&&base.scalarVectorComponents)return this.result(n,vectorElement(base.type),base.scalarVectorComponents['xyzw'.indexOf(n.member)],base.pre,{rootSymbol:base.rootSymbol});
         return this.result(n, vectorElement(base.type), `${base.code}.${n.member}`, base.pre, {rootSymbol: base.rootSymbol,...(base.devicePointerGuard?{devicePointerGuard:base.devicePointerGuard}:{})});
@@ -736,6 +736,7 @@ class Emitter {
     while(args.length<helper.params.length){const value=structuredClone(helper.params[args.length].defaultValue);n.args.push(value);const argument=this.argument(value);args.push(argument);pre.push(...argument.pre);}
     if(helper.params.some(p=>p.pointer))helper=this.bindPointerHelper(helper,args,n);
     if(helper.params.some(p=>p.reference))helper=this.bindReferenceHelper(helper,args,n);
+    if(helper.classAccess==='private'&&this.currentFunction.classOwner!==helper.classOwner)this.fail('Private class method or constructor is inaccessible here.',n);
     const caller=this.currentFunction.name,edges=this.helperCalls.get(caller)||new Set();edges.add(helper.name);this.helperCalls.set(caller,edges);
     const reaches=(from,target,seen=new Set())=>{if(from===target)return true;if(seen.has(from))return false;seen.add(from);return [...(this.helperCalls.get(from)||[])].some(next=>reaches(next,target,seen));};
     if(reaches(helper.name,caller))this.fail('Recursive helper calls are unsupported.',n);

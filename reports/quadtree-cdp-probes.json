@@ -5,7 +5,7 @@
   "results": [
     {
       "compiled": false,
-      "error": "Value classes currently require public fields and methods. (46:5)\n    float *m_x;\r\n    ^"
+      "error": "Value-class fields require plain scalar/vector values. (46:5)\n    float *m_x;\r\n    ^"
     }
   ]
 }
