@@ -21,6 +21,7 @@ export function tokenize(source, defines = {}) {
     if (!/^[A-Za-z_]\w*$/.test(k) || !Number.isFinite(v)) throw new CompileError('Defines must be named finite numbers.');
     return [k, String(v)];
   }));
+  const conditionals=[];let enabled=true;
   const tokens = [],forwarders=new Map(); let i = 0, line = 1, column = 1;
   const advance = str => { for (const c of str) { if (c === '\n') { line++; column = 1; } else column++; } i += str.length; };
   while (i < source.length) {
@@ -30,6 +31,14 @@ export function tokenize(source, defines = {}) {
     if (rest.startsWith('/*')) { const end = rest.indexOf('*/'); if (end < 0) throw new CompileError('Unclosed comment.', token, source); advance(rest.slice(0, end + 2)); continue; }
     if (rest[0] === '#') {
       const directive = rest.split('\n')[0];
+      const conditional=directive.trimEnd().match(/^#\s*(if|else|endif)\b(.*)$/);
+      if(conditional){const [,kind,tail]=conditional,expression=tail.replace(/\/\/.*$/,'').trim();
+        if(kind==='if'){const match=expression.match(/^(!)?\s*([A-Za-z_]\w*|[0-9]+)$/);if(!match)throw new CompileError('Conditional preprocessing supports an integer literal or numeric macro with optional !.',token,source);const raw=/^[0-9]+$/.test(match[2])?match[2]:macros.get(match[2])??'0',number=Number(raw.replace(/[uU]$/,''));if(!Number.isSafeInteger(number))throw new CompileError('Conditional macro must be an integer.',token,source);const selected=match[1]?!number:!!number;conditionals.push({parent:enabled,selected,otherwise:false});enabled=enabled&&selected;}
+        else{const frame=conditionals.at(-1);if(!frame||expression)throw new CompileError('Unmatched or malformed conditional directive.',token,source);if(kind==='else'){if(frame.otherwise)throw new CompileError('Duplicate #else.',token,source);frame.otherwise=true;enabled=frame.parent&&!frame.selected;}else{conditionals.pop();enabled=frame.parent;}}
+        advance(directive);continue;
+      }
+      if(/^#\s*(elif|ifdef|ifndef)\b/.test(directive))throw new CompileError('Unsupported conditional directive; preprocess it first.',token,source);
+      if(!enabled){advance(directive);continue;}
       if(/^#\s*pragma\s+unroll(?:\s+[1-9]\d*)?\s*(?:\/\/.*)?$/.test(directive.trimEnd())){advance(directive);continue;}
       const forward=forwardingMacro(directive.trimEnd());
       if(forward){if(macros.has(forward.name)||forwarders.has(forward.name))throw new CompileError('Macro redefinition is unsupported.',token,source);forwarders.set(forward.name,forward);advance(directive);continue;}
@@ -38,6 +47,7 @@ export function tokenize(source, defines = {}) {
       if(forwarders.has(m[1]))throw new CompileError('Macro redefinition is unsupported.',token,source);
       if (!macros.has(m[1])) macros.set(m[1], m[2]); advance(directive); continue;
     }
+    if(!enabled){advance(rest.split('\n')[0]);continue;}
     if(rest[0]==='"') {const literal=rest.match(/^"[^"\n\r\\]*"/);if(!literal)throw new CompileError('Unsupported or unterminated string literal.',token,source);tokens.push({...token,kind:'string',value:literal[0]});advance(literal[0]);continue;}
     const number = rest.match(NUM);
     if (number) { tokens.push({...token, kind: 'number', value: number[0].replace(/(?:[uU][lL]|[lL][uU])$/,'u')}); advance(number[0]); continue; }
@@ -60,6 +70,7 @@ export function tokenize(source, defines = {}) {
     if ('{}[]();,.?:+-*/%<>=!~&|^'.includes(rest[0])) { tokens.push({...token, kind: 'symbol', value: rest[0]}); advance(rest[0]); continue; }
     throw new CompileError(`Unsupported character ${JSON.stringify(rest[0])}.`, token, source);
   }
+  if(conditionals.length)throw new CompileError('Unclosed #if directive.',{line,column},source);
   tokens.push({kind: 'eof', value: '<eof>', line, column, offset: i}); return tokens;
 }
 const PRECEDENCE = {'=': 1, '+=': 1, '-=': 1, '*=': 1, '/=': 1, '%=': 1, '&=': 1, '|=': 1, '^=': 1, '<<=': 1, '>>=': 1, '||': 3, '&&': 4, '|': 5, '^': 6, '&': 7, '==': 8, '!=': 8, '<': 9, '>': 9, '<=': 9, '>=': 9, '<<': 10, '>>': 10, '+': 11, '-': 11, '*': 12, '/': 12, '%': 12};
@@ -224,7 +235,7 @@ export class Parser {
     const token = this.peek();
     if(this.match('static_cast')){this.take('<');const type=this.type();if(type.pointer||type.reference||type.shared||type.external)this.fail('static_cast supports value types only.',token);this.take('>');this.take('(');const value=this.expression();this.take(')');return {kind:'cast',token,target:type.type,value};}
     if (['+', '-', '!', '~', '&', '++', '--', '*'].includes(token.value)) { this.take(); return {kind: 'unary', token, op: token.value, value: this.unary(), prefix: true}; }
-    if (this.is('(') && (TYPES.has(this.peek(1).value) || this.deferredType(this.peek(1).value) || this.peek(1).value==='typename' || this.typeTraits.has(this.peek(1).value) || this.peek(1).value===this.templateTypeName || this.peek(1).value === 'const')) { this.take('('); const type = this.type(); if (type.pointer||type.reference) this.fail('Pointer/reference casts are unsupported.'); this.take(')'); return {kind: 'cast', token, target: type.type, value: this.unary()}; }
+    if (this.is('(') && this.peek(2).value!=='(' && (TYPES.has(this.peek(1).value) || this.deferredType(this.peek(1).value) || this.peek(1).value==='typename' || this.typeTraits.has(this.peek(1).value) || this.peek(1).value===this.templateTypeName || this.peek(1).value === 'const')) { this.take('('); const type = this.type(); if (type.pointer||type.reference) this.fail('Pointer/reference casts are unsupported.'); this.take(')'); return {kind: 'cast', token, target: type.type, value: this.unary()}; }
     let value;
     if (token.kind === 'number') { this.take(); value = {kind: 'literal', token, value: token.value}; }
     else if (this.match('(')) { value = this.expression(); this.take(')'); }

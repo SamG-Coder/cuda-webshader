@@ -160,6 +160,7 @@ class Emitter {
       }
       case 'index': {
         const base = this.expr(n.base, true), index = this.expr(n.index);
+        if(n.dereference&&!['buffer','buffer-alias'].includes(base.rootSymbol?.kind))this.fail('Dereference requires a storage-buffer pointer.',n);
         if (!isArray(base.type) || !['i32', 'u32'].includes(index.type)) this.fail('Indexing requires an array and a 32-bit integer index.', n);
         const offset=base.rootSymbol?.offsetCode,indexCode=offset?`(${offset} + ${this.convert(index.code,index.type,'i32',n)})`:index.code;
         const code = `${base.code}[${indexCode}]`, type = base.type.element;
@@ -195,6 +196,7 @@ class Emitter {
           const pre = [...a.pre, `var ${tmp}: bool = ${ac};`, `if (${n.op === '&&' ? tmp : `!${tmp}`}) {`, ...indent([...b.pre, `${tmp} = ${bc};`]), '}'];
           return this.result(n, 'bool', tmp, pre);
         }
+        if(vectorLength(a.type)||vectorLength(b.type)){const type=vectorLength(a.type)?a.type:b.type;if(vectorElement(type)!=='f32'||!['+','-','*','/'].includes(n.op)||![type,'f32'].includes(a.type)||![type,'f32'].includes(b.type))this.fail('Vector arithmetic supports matching float vectors and float scalars with +, -, *, /.',n);const code=v=>v.type===type?v.code:`${type}(${v.code})`;n.operandType=type;return this.result(n,type,`(${code(a)} ${n.op} ${code(b)})`,[...a.pre,...b.pre]);}
         let common = ['<<', '>>'].includes(n.op) ? a.type : this.common(a.type, b.type, n);
         if (vectorLength(common)) this.fail('CUDA vector arithmetic requires explicit components; operator overloads are outside this subset.', n);
         if (['&', '|', '^', '<<', '>>', '%'].includes(n.op) && !['i32', 'u32'].includes(common)) this.fail('Bitwise, shift and remainder operators require integers.', n);
@@ -290,12 +292,13 @@ class Emitter {
     }
     if (casts[name]) { if (args.length !== 1) this.fail('Scalar casts require one argument.', n); return this.result(n, casts[name], this.convert(args[0].code, args[0].type, casts[name], n), pre); }
     if (/^make_(float|uint|int)[234]$/.test(name)) {
-      const count = Number(name.at(-1)); if (args.length !== count) this.fail(`${name} needs ${count} arguments.`, n);
+      const count = Number(name.at(-1)); if (args.length !== count && args.length !== 1) this.fail(`${name} needs ${count} arguments.`, n);
       const element=name.startsWith('make_uint')?'u32':name.startsWith('make_int')?'i32':'f32';
       return this.result(n, `vec${count}<${element}>`, `vec${count}<${element}>(${args.map(a => this.convert(a.code, a.type, element, n)).join(', ')})`, pre);
     }
     if(name==='__fdividef'){if(args.length!==2)this.fail('__fdividef requires two arguments.',n);return this.result(n,'f32',`(${args.map(a=>this.convert(a.code,a.type,'f32',n)).join(' / ')})`,pre);}
     if(name==='sqrt'){if(args.length!==1||args[0].type!=='f32')this.fail('sqrt supports the single float overload only; double/integer overloads are unavailable.',n);return this.result(n,'f32',`sqrt(${args[0].code})`,pre);}
+    if(name==='__saturatef'){if(n.args.length!==1)this.fail('__saturatef requires one float argument.',n);const a=args[0];if(a.type!=='f32')this.fail('__saturatef requires a float argument.',n);return this.result(n,'f32',`clamp(${a.code}, 0.0f, 1.0f)`,a.pre);}
     const unary = {sinf: 'sin', cosf: 'cos', tanf: 'tan', sqrtf: 'sqrt', rsqrtf: 'inverseSqrt', expf: 'exp', __expf:'exp', exp2f: 'exp2', logf: 'log', __logf:'log', log2f: 'log2', fabsf: 'abs', floorf: 'floor', ceilf: 'ceil', truncf: 'trunc'};
     const binary = {fminf: 'min', fmaxf: 'max', powf: 'pow', atan2f: 'atan2'};
     if (unary[name] || binary[name] || name === 'fmaf') {
@@ -338,6 +341,7 @@ class Emitter {
   effect(n) {
     if(n.kind==='sequence')return n.expressions.flatMap(e=>this.effect(e));
     if (n.kind === 'assign') {
+      if(n.op==='='&&n.right.kind==='assign'){let current=n;while(current.kind==='assign'){if(current.op!=='='||current.left.kind!=='id'||this.lookup(current.left.name,current.left).kind!=='local')this.fail('Chained assignment requires named local variables and =.',current);current=current.right;}const inner=this.effect(n.right),target=this.expr(n.left,true);this.writable(target,n.left);const value=this.expr(n.right.left);n.type=target.type;return [...inner,`${target.code} = ${this.convert(value.code,value.type,target.type,n)};`];}
       if(n.left.kind==='id'&&['+=','-='].includes(n.op)){
         const symbol=this.lookup(n.left.name,n.left);
         if(['buffer','buffer-alias'].includes(symbol.kind)){
@@ -619,6 +623,7 @@ function instantiateHelperTemplates(ast, kernel) {
 }
 export function compile(source, options = {},bufferUsage=null) {
   const ast = parse(source, options), kernels = ast.functions.filter(f => f.qualifier === '__global__');
+  walk(ast,n=>{if(n.kind==='unary'&&n.op==='*'){const base=n.value;delete n.value;delete n.op;Object.assign(n,{kind:'index',base,index:{kind:'literal',value:'0',token:n.token},dereference:true});}});
   const specialization=options.entry?.match(/^([A-Za-z_]\w*)<\s*(\d+|[A-Za-z_]\w*)\s*>$/),entry=specialization?specialization[1]:options.entry;
   const kernel = entry ? kernels.find(k => k.name === entry) : kernels.length === 1 ? kernels[0] : null;
   if (!kernel) throw new CompileError(options.entry ? `Kernel '${options.entry}' was not found.` : 'Multiple kernels found; specify options.entry.');

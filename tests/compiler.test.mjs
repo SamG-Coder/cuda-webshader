@@ -34,7 +34,7 @@ const bad=[
  ['unknown identifier',wrap('output[0]=missing;'),/Unknown identifier/],
  ['recursion','__device__ float f(float x){return f(x);} __global__ void k(float* x){x[0]=f(x[0]);}',/Recursive/],
  ['helper capture','__device__ float f(float a){return output[0];} __global__ void k(float* output){output[0]=f(1.0f);}',/Unknown identifier/],
- ['unsupported vector scalar arithmetic',wrap('float4 p=make_float4(1.0f,2.0f,3.0f,4.0f);p=p+1.0f;'),/Incompatible/],
+ ['unsupported vector remainder',wrap('float4 p=make_float4(1.0f,2.0f,3.0f,4.0f);p=p%1.0f;'),/Vector arithmetic/],
  ['invalid break',wrap('break;'),/only valid/],
  ['void local',wrap('void x;'),/void type/],
  ['scalar parameter mutation',wrap('n=3u;'),/read-only/],

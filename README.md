@@ -13,6 +13,9 @@ See [launch requirements and validation](showcases/nbody/README.md).
 [NVIDIA FDTD3d is also available as a 3D scalar-volume showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fdtd),
 with the original shared-memory stencil, editable constant coefficients and
 GPU-only field feedback. See [volume setup and validation](showcases/fdtd3d/README.md).
+[NVIDIA recursive Gaussian](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=gaussian)
+runs the original four-pass colour-image filter with an RGBA preview.
+See [Gaussian setup and validation](showcases/recursive-gaussian/README.md).
 [NVIDIA Haar wavelet](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=haar)
 runs a complete 4,096-value transform with two kernel launches and GPU coefficient copies.
 See [Haar setup and validation](showcases/haar/README.md).

@@ -17,6 +17,7 @@ class BufferView {
   set(i,v){this.check(i);i+=this.offset;if(this.width===1)this.data[i]=convert(v,this.type);else this.data.set(convert(v,this.type),i*this.width);}
 }
 function binary(op,a,b,type){
+  if(vectorLength(type))return Array.from({length:vectorLength(type)},(_,i)=>binary(op,Array.isArray(a)?a[i]:a,Array.isArray(b)?b[i]:b,vectorElement(type)));
   if(op==='&&')return !!a&&!!b;if(op==='||')return !!a||!!b;
   a=convert(a,type);b=convert(b,type);
   switch(op){
@@ -92,8 +93,9 @@ class Context {
       const old=args[0].get(),value=name==='atomicAdd'?old+args[1]:name==='atomicMin'?Math.min(old,args[1]):name==='atomicMax'?Math.max(old,args[1]):args[1];args[0].set(value);return old;
     }
     if(['float','int','uint','bool'].includes(name))return convert(args[0],n.type);
-    if(/^make_(float|uint|int)[234]$/.test(name))return args.map(v=>convert(v,vectorElement(n.type)));
+    if(/^make_(float|uint|int)[234]$/.test(name))return (args.length===1?Array(vectorLength(n.type)).fill(args[0]):args).map(v=>convert(v,vectorElement(n.type)));
     if(name==='__fdividef')return f(args[0]/args[1]);
+    if(name==='__saturatef')return f(Number.isNaN(args[0])?0:Math.max(0,Math.min(1,args[0])));
     if(name==='sqrt')return f(Math.sqrt(args[0]));
     const unary={sinf:Math.sin,cosf:Math.cos,tanf:Math.tan,sqrtf:Math.sqrt,rsqrtf:x=>1/Math.sqrt(x),expf:Math.exp,__expf:Math.exp,exp2f:x=>2**x,logf:Math.log,__logf:Math.log,log2f:Math.log2,fabsf:Math.abs,floorf:Math.floor,ceilf:Math.ceil,truncf:Math.trunc};
     if(unary[name])return f(unary[name](args[0]));
