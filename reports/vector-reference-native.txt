@@ -1,0 +1,2 @@
+Native RTX 5080; nvcc -O3 --fmad=false -std=c++17 -arch=native -I.local/nvidia-audit/Common tests/vector-reference-native.cu
+Captured 259 vertex and gradient vectors using original NVIDIA vertexInterp2 and lerp.

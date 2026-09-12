@@ -37,3 +37,13 @@ NVIDIA helper_math lerp definitions expose `inline __device__ __host__` qualifie
 The original marching-cubes source plus the original helper_math lerp functions now reaches `vertexInterp2`'s `float3&` output parameters. These require vector references to local values/array elements; that is the next compiler blocker. The complete mesh pipeline is still unverified and has no showcase card yet.
 
 Validation: 464 unit tests, 134 NVIDIA hardware GPU checks, native captures, compile-all and static build pass. No software WebGPU checks were used.
+
+## Local vector-reference outputs verified
+
+Mutable helper references now accept exact-type numeric vectors and local array elements. Reference forwarding uses function pointers in WGSL; indexed arguments capture their index during argument evaluation. The CPU oracle preserves the selected element when another reference changes the index variable. Root-level alias rejection remains conservative: two references into the same array are rejected even when their indices differ. Storage, shared-memory, temporary and const output arguments remain rejected.
+
+NVIDIA's original vertexInterp2 and original scalar/vector lerp bodies are retained in test fixtures with their notices. Native CUDA and hardware WebGPU agree exactly on 2,072 components (259 positions and 259 gradient vectors), including forwarded vector references and dynamic local-array slots. This validates the interpolation helper, not the entire mesh pipeline.
+
+Original-source probes now reveal two distinct remaining blockers: classifyVoxel/generateTriangles2 use unsigned-vector addition for neighbouring grid positions, while generateTriangles's USE_SHARED branch passes shared-array elements as vector reference outputs. Shared-memory references require appropriate address-space handling; they have not been replaced with CPU work or silently switched to the local-memory branch.
+
+Validation for this step: 468 unit tests, 135 hardware GPU checks, compile-all and static build pass. Native interpolation captures use multiply-add fusion disabled.

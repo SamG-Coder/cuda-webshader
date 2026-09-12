@@ -146,7 +146,7 @@ class Emitter {
     this.fail(`Cannot convert ${typeName(from)} to ${typeName(to)}.`, n);
   }
   result(n, type, code, pre = [], extra = {}) { n.type = type; return {type, code, pre, ...extra}; }
-  expr(n, raw = false) {
+  expr(n, raw = false, captureIndex = false) {
     if (!n) this.fail('Missing expression.', this.kernel);
     switch (n.kind) {
       case 'initializer': {
@@ -180,12 +180,13 @@ class Emitter {
         const base = this.expr(n.base, true), index = this.expr(n.index);
         if(n.dereference&&!['buffer','buffer-alias'].includes(base.rootSymbol?.kind))this.fail('Dereference requires a storage-buffer pointer.',n);
         if (!isArray(base.type) || !['i32', 'u32'].includes(index.type)) this.fail('Indexing requires an array and a 32-bit integer index.', n);
-        const offset=base.rootSymbol?.offsetCode,indexCode=offset?`(${offset} + ${this.convert(index.code,index.type,'i32',n)})`:index.code;
+        const offset=base.rootSymbol?.offsetCode;let indexCode=offset?`(${offset} + ${this.convert(index.code,index.type,'i32',n)})`:index.code;
+        const capturePre=[];if(captureIndex&&base.rootSymbol?.kind==='local'){const temp='cw_argument_index_'+this.temp++;capturePre.push(`let ${temp} = ${indexCode};`);indexCode=temp;}
         let code = `${base.code}[${indexCode}]`;const type = base.type.element;
         if(type==='cw_uchar'&&base.rootSymbol?.rootBufferName){const temp='cw_byte_index_'+this.temp++;return this.result(n,type,`((${base.code}[${temp} >> 2u] >> ((${temp} & 3u) * 8u)) & 255u)`,[...base.pre,...index.pre,`let ${temp} = u32(${indexCode});`],{rootSymbol:base.rootSymbol});}
         const atomic = base.atomicRoot && !isArray(type);
         const addressPre=[];if(atomic&&raw&&type==='cw_uchar4'){const temp='cw_pixel_index_'+this.temp++;addressPre.push(`let ${temp} = ${indexCode};`);code=`${base.code}[${temp}]`;}
-        return this.result(n, type, atomic && !raw ? `atomicLoad(&${code})` : code, [...base.pre, ...index.pre,...addressPre], {rootSymbol: base.rootSymbol, atomicRoot: base.atomicRoot, atomic});
+        return this.result(n, type, atomic && !raw ? `atomicLoad(&${code})` : code, [...base.pre, ...index.pre,...capturePre,...addressPre], {rootSymbol: base.rootSymbol, atomicRoot: base.atomicRoot, atomic});
       }
       case 'member': {
         if (n.base.kind === 'id' && ['threadIdx', 'blockIdx', 'blockDim', 'gridDim'].includes(n.base.name)) {
@@ -286,7 +287,7 @@ class Emitter {
         return this.result(n,symbol.type,symbol.code,offset.pre,{rootSymbol:symbol,pointerCode});
       }
     }
-    return this.expr(n);
+    return this.expr(n,false,n.kind==='index');
   }
   bindPointerHelper(helper,args,n){
     const uses=analyse([helper],helper.params),roots=[];
@@ -420,8 +421,8 @@ class Emitter {
     const codes=args.map((a,i)=>{const p=helper.params[i];if(p.type==='texture3d'){const shape=textureShape(p.textureSampling),symbol=a.rootSymbol;if(symbol?.kind!=='texture'||symbol.dimension!==shape.dimension||symbol.format!==shape.format)this.fail('Texture helper argument requires the same inferred sampling format.',n.args[i]);return symbol.code+', '+symbol.sampler+(symbol.linearFetch?', '+symbol.lengthCode:'')+(['tex2D','tex2Dfloat4','tex3D'].includes(p.textureSampling)?', '+symbol.coordinateScale+', '+symbol.pixelPoint:'');}if(p.localPointer){if(references.has(a.rootSymbol))this.fail('Aliased local pointer/reference arguments are unsupported.',n.args[i]);references.add(a.rootSymbol);return a.pointerCode;}if(p.pointer)return a.pointerCode;if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
       const node=n.args[i],s=a.rootSymbol;
       if(p.constant){if(node.kind==='member'&&node.base.type==='cw_uchar4'&&p.type==='cw_uchar'){const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: cw_uchar = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||p.type==='cw_uchar4'||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.add(s);if(s?.kind==='reference')return s.pointerCode;if(s?.kind==='local'&&!s.constant&&['id','member'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
-      if(node.kind!=='id'||!s||!['local','reference'].includes(s.kind)||s.constant||isArray(a.type)||!numeric(a.type)||a.type!==p.type)this.fail('Reference arguments require a mutable named local scalar of the exact type.',node);
-      if(references.has(s))this.fail('Aliased reference arguments are unsupported.',node);references.add(s);return s.kind==='reference'?s.pointerCode:`&${s.code}`;
+      if(!['id','index'].includes(node.kind)||!s||!['local','reference'].includes(s.kind)||s.constant||isArray(a.type)||!(numeric(a.type)||vectorLength(a.type))||a.type!==p.type)this.fail('Reference arguments require a mutable local scalar/vector or local array element of the exact type.',node);
+      if(references.has(s))this.fail('Aliased reference arguments are unsupported.',node);references.add(s);return s.kind==='reference'?s.pointerCode:`&${a.code}`;
     });
     return this.result(n, helper.result, `f_${helper.name}(${[...codes.filter(c=>c!==null),'cw_thread','cw_block','cw_grid'].join(', ')})`, pre);
   }
@@ -608,7 +609,7 @@ class Emitter {
         if(p.type==='texture3d'){if(p.pointer||p.reference)this.fail('Texture helper parameters must be passed by value.',p);const {dimension,format}=textureShape(p.textureSampling);p.symbol=this.add(p.name,{name:p.name,type:p.type,code:'cw_texture_'+p.name,sampler:'cw_sampler_'+p.name,coordinateScale:'cw_scale_'+p.name,pixelPoint:'cw_point_'+p.name,...(p.textureSampling.startsWith('fetch_')?{linearFetch:p.textureSampling.slice(6),lengthCode:'cw_length_'+p.name}:{}),dimension,format,kind:'texture',constant:true},p);continue;}
         if(p.pointer){const base=this.bufferSymbols.get(p.boundBuffer);if(!base)this.fail('Helper buffer pointer was not specialized.',p);p.symbol=this.add(p.name,{...base,name:p.name,kind:'buffer-alias',constant:p.constant||p.boundConstant,offsetCode:'cw_buffer_offset_'+helper.params.indexOf(p)},p);continue;}
         if(p.type==='thread-block'){if(p.reference)this.fail('thread_block helper parameters must be passed by value.',p);p.symbol=this.add(p.name,{name:p.name,type:p.type,kind:'thread-block',constant:true},p);continue;}
-        if(p.reference&&!numeric(p.type)&&!(p.constant&&(p.type==='cw_uchar4'||vectorLength(p.type)||this.structs.has(p.type))))this.fail('Helper references require a 32-bit numeric scalar.',p);
+        if(p.reference&&!numeric(p.type)&&!vectorLength(p.type)&&!(p.constant&&(p.type==='cw_uchar4'||vectorLength(p.type)||this.structs.has(p.type))))this.fail('Helper references require numeric scalars or vectors.',p);
         p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined, constant:p.constant, atomic: false, kind: p.reference?'reference':'local'}, p);
       }
       const body = this.body(helper.body);
