@@ -23,8 +23,8 @@
   "controlReadbackBytes": 0,
   "softwareAdapterRequested": false,
   "passes": [
-    "1. oddEvenMergeSortShared",
-    "2. initializeSortValues",
+    "1. initializeSortValues",
+    "2. oddEvenMergeSortShared",
     "3. oddEvenMergeGlobal",
     "4. previewSort"
   ],

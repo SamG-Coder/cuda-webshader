@@ -1,0 +1,24 @@
+{
+  "revision": "5443602d89ed99aede2e4b7bf329daddeadb320e",
+  "values": 8388608,
+  "kernelValues": 128,
+  "seed": 2007,
+  "host": "Windows MSVC rand",
+  "files": {
+    "input": {
+      "file": "walsh-full-input.bin",
+      "bytes": 33554432,
+      "sha256": "f580b662dd4209749bb8dd2244ed1c382654cb0f4698bac7dfc4f220a7bb59ca"
+    },
+    "kernel": {
+      "file": "walsh-full-kernel.bin",
+      "bytes": 512,
+      "sha256": "4f14b96395f1ec35d2d287ff47feb7e9d880ebc067916128bf830130c4272a7a"
+    },
+    "native": {
+      "file": "walsh-full-native.bin",
+      "bytes": 33554432,
+      "sha256": "9f1f44dfbaebba3310f1628e3717cce6f7fcae9dd10969eea4cc96e062808225"
+    }
+  }
+}

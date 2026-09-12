@@ -1,0 +1,1 @@
+values=8388608 kernel=128 native_vs_original_cpu_l2=1.56783294e-07 max_absolute_error=2.67028809e-05 passed

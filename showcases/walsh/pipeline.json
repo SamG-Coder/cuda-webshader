@@ -1,0 +1,528 @@
+{
+  "pipeline": {
+    "buffers": {
+      "data": {
+        "type": "f32",
+        "records": 8388608,
+        "fill": "binary-f32",
+        "source": "reports/walsh-full-input.bin"
+      },
+      "kernelInput": {
+        "type": "f32",
+        "records": 128,
+        "fill": "binary-f32",
+        "source": "reports/walsh-full-kernel.bin"
+      },
+      "filter": {
+        "type": "f32",
+        "records": 8388608,
+        "fill": "zero"
+      }
+    },
+    "steps": [
+      {
+        "copyBuffer": {
+          "source": "kernelInput",
+          "target": "filter",
+          "records": 128
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "stride": 2097152
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "stride": 524288
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "stride": 131072
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "stride": 32768
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "stride": 8192
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "stride": 2048
+        }
+      },
+      {
+        "entry": "fwtBatch1Kernel",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          4096,
+          1,
+          1
+        ],
+        "sharedMemoryBytes": 8192,
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "log2N": 11
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "filter"
+        },
+        "scalars": {
+          "stride": 2097152
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "filter"
+        },
+        "scalars": {
+          "stride": 524288
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "filter"
+        },
+        "scalars": {
+          "stride": 131072
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "filter"
+        },
+        "scalars": {
+          "stride": 32768
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "filter"
+        },
+        "scalars": {
+          "stride": 8192
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "filter"
+        },
+        "scalars": {
+          "stride": 2048
+        }
+      },
+      {
+        "entry": "fwtBatch1Kernel",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          4096,
+          1,
+          1
+        ],
+        "sharedMemoryBytes": 8192,
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "filter"
+        },
+        "scalars": {
+          "log2N": 11
+        }
+      },
+      {
+        "entry": "modulateKernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          128,
+          1,
+          1
+        ],
+        "bindings": {
+          "d_A": "data",
+          "d_B": "filter"
+        },
+        "scalars": {
+          "N": 8388608
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "stride": 2097152
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "stride": 524288
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "stride": 131072
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "stride": 32768
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "stride": 8192
+        }
+      },
+      {
+        "entry": "fwtBatch2Kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "stride": 2048
+        }
+      },
+      {
+        "entry": "fwtBatch1Kernel",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          4096,
+          1,
+          1
+        ],
+        "sharedMemoryBytes": 8192,
+        "bufferAliases": {
+          "d_Input": "d_Output"
+        },
+        "bindings": {
+          "d_Output": "data"
+        },
+        "scalars": {
+          "log2N": 11
+        }
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "data",
+      "width": 4096,
+      "height": 2048,
+      "format": "gray-f32",
+      "range": [
+        20,
+        45
+      ]
+    }
+  }
+}

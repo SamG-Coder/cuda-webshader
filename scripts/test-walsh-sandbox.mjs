@@ -1,0 +1,14 @@
+import {chromium} from 'playwright';
+import {writeFile,readFile} from 'node:fs/promises';
+import {createStaticServer} from './serve.mjs';
+const server=createStaticServer(process.cwd()+'/dist');await new Promise(r=>server.listen(0,'127.0.0.1',r));
+const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+try{
+ const page=await browser.newPage({viewport:{width:1500,height:1100}});
+ await page.goto((process.env.CW_BASE_URL||`http://127.0.0.1:${server.address().port}`)+'/sandbox.html?example=walsh');
+ await page.waitForFunction(()=>window.sandbox?.completedRuns||window.sandbox?.lastError,{},{timeout:60000});
+ const report=await page.evaluate(async()=>{const s=window.sandbox;if(s.lastError)throw Error(s.lastError);if(s.runtime.describe().vendor!=='nvidia')throw Error('Real NVIDIA required');const r=s.pipelineResult,actual=await s.runtime.read(r.buffers.data,Uint32Array),manifest=await(await fetch('reports/walsh-full-native-manifest.json')).json(),hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',actual.buffer)),b=>b.toString(16).padStart(2,'0')).join('');if(actual.length!==8388608||hash!==manifest.files.native.sha256)throw Error('Native output hash mismatch');const canvas=document.querySelector('#preview .image-output canvas');if(!canvas||canvas.width!==4096||canvas.height!==2048)throw Error('Missing full heatmap');const pixels=canvas.getContext('2d').getImageData(0,0,4096,2048).data,floats=new Float32Array(actual.buffer);for(let i=0;i<actual.length;i++){const shade=Math.round(Math.max(0,Math.min(1,(floats[i]-20)/25))*255);for(let c=0;c<4;c++)if(pixels[i*4+c]!== (c===3?255:shade))throw Error('Preview pixel mismatch '+i);}return {passed:true,device:s.runtime.describe(),values:8388608,nativeBitExact:true,previewPixelsVerified:8388608,controlReadbackBytes:r.controlReadbackBytes,softwareAdapterRequested:false};});
+ if((await page.evaluate(()=>window.sandbox.editor.getValue())).replace(/\r\n/g,'\n')!==(await readFile('showcases/walsh/kernel.cu','utf8')).replace(/\r\n/g,'\n'))throw Error('Source changed');
+ await page.locator('#tab-compare').click();const passes=await page.locator('#shader-pass option').allTextContents();if(passes.length!==3)throw Error('Missing shader comparison');const shader=await page.evaluate(()=>monaco.editor.getModels().find(m=>m.getLanguageId()==='wgsl').getValue());if(shader.includes('b_d_Input')||!shader.includes('b_d_Output'))throw Error('Comparison must show actual in-place shader');
+ await page.screenshot({path:'reports/walsh-sandbox.png'});await writeFile('reports/walsh-sandbox-check.json',JSON.stringify({...report,passes,sourceUnchanged:true},null,2));console.log(JSON.stringify(report,null,2));
+}finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
