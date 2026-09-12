@@ -1,4 +1,5 @@
 import {checkCapturedPoints} from './captured-points-gpu.js';
+import {checkChronoNeighbors} from './chrono-neighbors-gpu.js';
 import {checkQuadtreeRoot} from './quadtree-root-gpu.js';
 import {checkBezierScheduled} from './bezier-scheduled-gpu.js';
 import {checkBezierParent} from './bezier-parent-gpu.js';
@@ -335,6 +336,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
     try{runtime.batch().dispatch(kernel.bind({out}),[1]).submit();const values=await runtime.read(out,Int32Array);for(let i=0;i<32;i++)if(values.slice(i*10,i*10+10).join(',')!==[i,i+1,i+2,0,i+3,i+3,0,0,9,32].join(','))throw Error('Local array initializer mismatch '+i);return {lanes:32,checkedValues:320,nestedZeroFill:true,leftToRight:true};}finally{runtime.destroyBuffer(out);}
   });
   await run('Original NVIDIA quadtree root partitions all 1024 native points',()=>checkQuadtreeRoot(runtime));
+  await run('Original Chrono neighbour cells and particle mapping support partial blocks',()=>checkChronoNeighbors(runtime));
   await run('Original NVIDIA recursive quadtree matches every native node and output point',()=>checkQuadtreeRoot(runtime,{recursive:true}));
   await run('Recursive GPU queues reject overflow and unfinished generations',async()=>{
     const source=await(await fetch('/tests/recursive-launches.cu')).text(),kernel=await runtime.kernel(source,{workgroupSize:[32],objectHeap:'persistent',deviceLaunchQueue:{maxLaunches:1,maxGenerations:4},scheduleDeviceLaunches:true}),out=runtime.createBuffer(768),arena=runtime.createObjectArena();

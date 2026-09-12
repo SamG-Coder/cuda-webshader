@@ -1,4 +1,5 @@
 import {lowerNativeTiles,emitNativeTile} from './native-tiles.js';
+import {lowerReturnPhases} from './return-phases.js';
 import {markUniformRecordSnapshots} from './uniform-records.js';
 import {recordLeaves,recordConstructor} from './record-parameters.js';
 import {addBufferImports,bufferReferenceArgument,bufferReferenceIndex} from './buffer-references.js';
@@ -1319,11 +1320,13 @@ export function compile(source, options = {},bufferUsage=null) {
   lowerNativeTiles(ast,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});
   const tiledGroups=lowerTiledGroups(ast,options,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});
   const scalarConstraints=uniformBlockGuards(kernel,options,walk,message=>{throw new CompileError(message,kernel.token,source);});
+  const returnPhases=lowerReturnPhases(kernel,options,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});
   const overloadGroups=new Map();for(const f of ast.functions)if(f.specializationArgument===undefined){const group=overloadGroups.get(f.name)||[];group.push(f);overloadGroups.set(f.name,group);}let overloadIndex=0;const occupied=new Set(ast.functions.map(f=>f.name));for(const [name,group]of overloadGroups)if(group.length>1){if(group.some(f=>f.qualifier!=='__device__'||f.templateParameter))throw new CompileError('Overloads support non-template device helpers only.',group[0].token,source);const signatures=new Set();for(const f of group){const signature=JSON.stringify(f.params.map(p=>[p.type,p.pointer,p.reference,(p.pointer||p.reference)&&p.constant]));if(signatures.has(signature))throw new CompileError('Duplicate function signature '+name,f.token,source);signatures.add(signature);let unique='cw_overload_'+overloadIndex+++'_'+name;while(occupied.has(unique))unique+='_';occupied.add(unique);f.overloadName=name;f.name=unique;}}
   const templates=instantiateHelperTemplates(ast,kernel);
   const emitter=new Emitter(ast,kernel,options,templates,bufferUsage),result=emitter.emit();if(options.libraries?.length)result.metadata.libraries=options.libraries.map(name=>({name,seedBits:64,subsequence:0,offset:0,stateLayout:'compiler-owned',operations:['curand_init','curand','curand_uniform']}));
   emitter.checkRecursion(); // Class calls have now resolved to concrete helpers.
   if(tiledGroups)result.metadata.tiledGroups='predicated-first-tile';
+  if(returnPhases)result.metadata.predicatedReturns=true;
   if(scalarConstraints.length||emitter.pointerConstraints.length)result.metadata.scalarConstraints=[...scalarConstraints,...emitter.pointerConstraints];
   const changed=['reads','writes','atomic'].some(k=>[...emitter.usage[k]].some(name=>!emitter.initialBufferUsage[k].has(name)));
   if(changed){if(bufferUsage)throw new CompileError('Helper buffer access analysis did not converge.');return compile(source,options,Object.fromEntries(['reads','writes','atomic'].map(k=>[k,[...emitter.usage[k]]])));}if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};if(options.scheduleDeviceLaunches){

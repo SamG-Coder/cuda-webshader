@@ -1,0 +1,19 @@
+{
+  "sizes": [
+    0,
+    1,
+    31,
+    127,
+    128,
+    129,
+    255,
+    256,
+    257,
+    1027
+  ],
+  "compared": 2936,
+  "nativeExact": true,
+  "partialBlocks": true,
+  "inactiveWrites": false,
+  "originalKernelBodies": true
+}
