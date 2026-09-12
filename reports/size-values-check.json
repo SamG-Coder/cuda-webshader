@@ -1,0 +1,32 @@
+{
+  "name": "size_t launch values preserve native 64-bit arithmetic",
+  "pass": true,
+  "cases": [
+    [
+      192,
+      7
+    ],
+    [
+      4294967295,
+      2
+    ],
+    [
+      12345,
+      -1
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      4294967295,
+      2147483647
+    ]
+  ],
+  "components": 35,
+  "nativeExact": true,
+  "launchValueBits": 32,
+  "arithmeticBits": 64,
+  "wallMs": 78.04499998688698,
+  "softwareAdapterRequested": false
+}

@@ -33,7 +33,7 @@ export function walk(node, visit) {
     else if (val && typeof val === 'object') walk(val, visit);
   }
 }
-const cudaValueSize=type=>['cw_short','cw_ushort'].includes(type)?2:['cw_uchar','bool'].includes(type)?1:type==='cw_uchar4'?4:type==='cw_extent'?24:['f32','i32','u32'].includes(type)?4:vectorLength(type)?vectorLength(type)*4:null;
+const cudaValueSize=type=>['cw_short','cw_ushort'].includes(type)?2:['cw_uchar','bool'].includes(type)?1:type==='cw_uchar4'?4:type==='cw_extent'?24:type==='cw_size64'?8:['f32','i32','u32'].includes(type)?4:vectorLength(type)?vectorLength(type)*4:null;
 function constantValue(n) {
   if(n.kind==='sizeof'){const size=cudaValueSize(n.target);if(size===null)throw new CompileError('sizeof requires a supported built-in value type.',n.token);return size;}
   if (n.kind === 'literal') return Number(n.value.replace(/^0[xX]/.test(n.value) ? /[uU]$/ : /[fFuU]$/, ''));
@@ -150,6 +150,8 @@ class Emitter {
   }
   convert(code, from, to, n) {
     if(to==='bool'&&isArray(from)&&from.length===null&&n){return 'true';} // All runtime storage bindings are required and non-null.
+    if(from==='cw_size64'||to==='cw_size64')this.extentUsed=true;
+    if(to==='cw_size64'&&['i32','u32','bool'].includes(from))return from==='i32'?`vec2<u32>(u32(${code}), select(0u, 4294967295u, ${code} < 0i))`:from==='bool'?`vec2<u32>(select(0u,1u,${code}),0u)`:`vec2<u32>(${code},0u)`;
     if (typeName(from) === typeName(to) && !isArray(to)) return code;
     if(to==='cw_f64'&&(numeric(from)||from==='bool')){this.float64Used=true;return from==='bool'?`cw_d_from_u32(select(0u,1u,${code}))`:from==='f32'?`cw_d_from_f32(${code})`:['i32','cw_short'].includes(from)?`cw_d_from_i32(i32(${code}))`:`cw_d_from_u32(u32(${code}))`;}
     if(from==='cw_f64'&&to==='f32'){this.float64Used=true;return `cw_d_to_f32(${code})`;}
@@ -584,6 +586,7 @@ class Emitter {
     return [...value.pre, value.type === 'void' ? `${value.code};` : `_ = ${value.code};`];
   }
   declare(n) {
+    if(n.type==='cw_size64'){this.extentUsed=true;if(n.pointer||n.shared||n.dimensions.length)this.fail('size_t locals support scalar values only.',n);}
     if(n.type==='cw_extent')this.fail('cudaExtent supports read-only by-value kernel parameters only.',n);
     if(['texture3d','surface2d'].includes(n.type))this.fail('Texture and surface handles require kernel or supported helper parameters, not local aliases.',n);
     if(n.init?.kind==='shared-conversion'){
@@ -694,6 +697,11 @@ class Emitter {
     const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t}>`;
     for (const p of this.kernel.params) {
       if (p.shared || p.reference || p.external || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
+      if(p.type==='cw_size64'){
+        if(p.pointer)this.fail('size_t supports value parameters, not storage buffers.',p);
+        this.extentUsed=true;scalars.push({name:p.name,type:'u32',sourceType:'size_t',offset:scalars.length*4});
+        const symbol={name:p.name,type:p.type,code:`vec2<u32>(cw_params.p_${p.name},0u)`,constant:true,atomic:false,kind:'uniform'};this.add(p.name,symbol,p,true);p.symbol=symbol;continue;
+      }
       if(p.type==='cw_extent'){
         if(p.pointer)this.fail('cudaExtent supports read-only by-value kernel parameters only.',p);
         this.extentUsed=true;const fields=['width','height','depth'];for(const field of fields)scalars.push({name:p.name+'.'+field,type:'u32',sourceType:'cudaExtent-component',field:'cw_extent_'+p.name+'_'+field,offset:scalars.length*4});

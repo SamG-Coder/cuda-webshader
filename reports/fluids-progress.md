@@ -47,9 +47,23 @@ and static build passed. No software GPU tests ran.
 
 ## Remaining blockers
 
-The full file still fails at size_t pitch parameters. addForces_k,
-updateVelocity_k and advectParticles_k additionally need typed pitched byte
-pointer access. The host pipeline requires forward real-to-complex and inverse
+size_t pitch parameters now parse and use a bounded launch ABI: host values must
+be integers from 0 through 0xffffffff. The runtime rejects larger values rather
+than truncating them. Expressions retain emulated 64-bit unsigned arithmetic,
+including signed-operand conversion, multiplication, addition, comparisons,
+explicit 32-bit casts and float conversion. Scalar locals are supported;
+size_t storage buffers, arrays and struct fields are explicitly rejected.
+General size division is still unsupported.
+
+All 35 probe outputs match native CUDA, including products above 32 bits,
+negative signed operands and sizeof(size_t) = 8. See size-values-check.json and
+size-values-native.txt. Validation: 543 unit tests, 166 real NVIDIA GPU checks,
+compilation and static build pass.
+
+The three remaining original kernels now reach their pointer expressions:
+addForces_k and updateVelocity_k fail on local aliases combining a byte-address
+cast with a trailing element offset. advectParticles_k fails on an inline
+dereference of that cast. These require typed pitched byte-pointer lowering. The host pipeline requires forward real-to-complex and inverse
 complex-to-real FFT layouts, float2 buffer-to-texture updates, repeated velocity
 feedback and particle rendering/interaction. Current FFT support only provides
 a complex inverse transform.

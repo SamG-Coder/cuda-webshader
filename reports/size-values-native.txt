@@ -1,0 +1,5 @@
+Captured size_t: pitch=192 row=7
+Captured size_t: pitch=4294967295 row=2
+Captured size_t: pitch=12345 row=-1
+Captured size_t: pitch=0 row=0
+Captured size_t: pitch=4294967295 row=2147483647
