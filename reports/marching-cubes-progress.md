@@ -115,3 +115,41 @@ not claim to execute the complete desktop host application.
 Validation: 477 unit tests, 140 real NVIDIA hardware GPU checks, compile-all,
 static build, the marching mesh browser check, and all 26 built-in presets plus
 38 imported NVIDIA sandbox entries pass. No software adapter was requested.
+
+## Sampled-volume shared pointers and Bucky mesh
+
+The compiler now supports typed shared-array pointer arguments and local arrays
+of 1–256 pointer slots bound to a single shared allocation. Slots store evaluated
+integer offsets; dereferences and helper calls access the original shared
+storage. Helpers specialize by allocation and accept aliased arguments without
+turning them into conflicting WGSL pointer parameters. Offset updates, nested
+forwarding, mutable writes and const protections are preserved. Atomic shared
+arrays, incompatible types, local-array pointees and switching a slot array to a
+different allocation are rejected. CPU-oracle views preserve shared references
+rather than copying pointed-to vectors.
+
+The original `generateTriangles2` now compiles with 6,144 workgroup bytes. The
+original `calcNormal` and `helper_math.h` cross-product helper are retained.
+A native fixture checks 1,152 components for normals, aliased updates, pointer
+slots, reassignment, offsets and forwarding; hardware WebGPU agrees exactly.
+
+The full sampled-volume sequence is verified on the original 32³ Bucky data at
+three isovalues: 0.2 gives 7,164 active voxels / 43,524 vertices; 0.5 gives 5,545 /
+33,378; 0.8 gives 2,288 / 11,214. Scan and compaction match native exactly. Every
+position and normal is finite and matches native within 1e-6. Native captures
+are expected results only; browser scans and all intermediate arrays remain on
+the GPU, with 8 bytes of control readback. The original final-triangle guard
+requires maxVerts to include three spare records; the native fixture allocates
+those records, while the sandbox uses the full per-voxel capacity.
+
+The Bucky mesh is a separate showcase card linking directly to the sandbox. Its
+native flat normals and disconnected surfaces are retained. The built browser
+check covers every default mesh component, orbiting without compute/data
+transfer, shader comparison, source preservation, empty output and mobile
+layout. The existing implicit profile remains available. USE_SHARED=0 local
+pointer arrays and the desktop CUDA/OpenGL host application are outside the
+currently supported profiles.
+
+Validation: 482 unit tests, 142 hardware GPU checks, native captures, compile-all,
+static build, both marching-cubes browser checks, and all 27 built-in presets
+plus 38 imported NVIDIA sandbox entries pass. No software adapter was used.

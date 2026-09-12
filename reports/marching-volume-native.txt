@@ -1,0 +1,3 @@
+Bucky iso=0.200000003 active=7164 vertices=43524 shared generateTriangles2; native host scans prepare fixture.
+Bucky iso=0.5 active=5545 vertices=33378 shared generateTriangles2; native host scans prepare fixture.
+Bucky iso=0.800000012 active=2288 vertices=11214 shared generateTriangles2; native host scans prepare fixture.

@@ -1,0 +1,1 @@
+PASS 1152 components: original calcNormal, aliased shared writes, pointer increments and forwarding.

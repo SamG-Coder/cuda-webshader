@@ -16,9 +16,9 @@ function convert(value,type){
 }
 function zero(type,structs=[]){const spec=structs.find(s=>s.type===type);if(spec)return Object.fromEntries(spec.fields.map(f=>[f.name,zero(f.resolvedType,structs)]));if(isArray(type))return Array.from({length:type.length},()=>zero(type.element,structs));const n=vectorLength(type);return n?Array(n).fill(0):type==='bool'?false:0;}
 class BufferView {
-  constructor(data,type,offset=0){this.data=data;this.type=type;this.offset=offset;this.width=vectorLength(type)||1;this.length=data.length/this.width;if(!Number.isInteger(this.length))throw new Error('Buffer record count is not integral.');}
+  constructor(data,type,offset=0){this.data=data;this.type=type;this.offset=offset;this.records=Array.isArray(data);this.width=this.records?1:vectorLength(type)||1;this.length=data.length/this.width;if(!Number.isInteger(this.length))throw new Error('Buffer record count is not integral.');}
   check(i){if(!Number.isInteger(i)||i+this.offset<0||i+this.offset>=this.length)throw new RangeError(`CPU oracle detected out-of-bounds access at ${i}, length ${this.length}.`);}
-  get(i){this.check(i);i+=this.offset;return this.width===1?this.data[i]:Array.from(this.data.subarray(i*this.width,(i+1)*this.width));}
+  get(i){this.check(i);i+=this.offset;return this.records?structuredClone(this.data[i]):this.width===1?this.data[i]:Array.from(this.data.subarray(i*this.width,(i+1)*this.width));}
   set(i,v){this.check(i);i+=this.offset;if(this.width===1)this.data[i]=convert(v,this.type);else this.data.set(convert(v,this.type),i*this.width);}
 }
 function binary(op,a,b,type){
@@ -63,7 +63,7 @@ class Context {
       case 'sizeof':return BigInt(n.numericValue);
       case 'literal':return convert(n.numericValue,n.type);
       case 'id':if(n.name==='true')return true;if(n.name==='false')return false;return this.env.get(n.symbol)?.value;
-      case 'index':return (yield* this.ref(n)).get();
+      case 'index':if(n.pointerArrayElement){const slots=yield* this.eval(n.base),index=yield* this.eval(n.index);if(!Number.isInteger(index)||index<0||index>=slots.length)throw Error('Pointer slot out of bounds.');return new BufferView(this.env.get(n.pointerBaseSymbol).value,n.pointerBaseSymbol.type.element,slots[index]);}return (yield* this.ref(n)).get();
       case 'member':{
         if(n.base.type==='cw_extent')return (yield* this.eval(n.base))[n.member];
         if(n.base.kind==='id'&&this.ids[n.base.name])return this.ids[n.base.name]['xyz'.indexOf(n.member)];
@@ -81,6 +81,7 @@ class Context {
       }
       case 'conditional':return convert(yield* this.eval((yield* this.eval(n.condition))?n.yes:n.no),n.type);
       case 'assign':{
+        if(n.pointerArrayAssignment){const target=yield* this.ref(n.left),offset=yield* this.eval(n.right.value.index);target.set(convert(offset,'i32'));return offset;}
         if(n.pointerShift){const cell=this.env.get(n.left.symbol),base=cell.value,delta=yield* this.eval(n.right);if(!(base instanceof BufferView))throw Error('Expected a storage pointer.');const offset=binary(n.op==='+='?'+':'-',base.offset,convert(delta,'i32'),'i32');cell.value=new BufferView(base.data,base.type,offset);return cell.value;}
         let target,value;if(n.packedAtomicAssignment){value=yield* this.eval(n.right);target=yield* this.ref(n.left);}else{target=yield* this.ref(n.left);value=yield* this.eval(n.right);}
         target.set(n.op==='='?value:binary(n.op.slice(0,-1),target.get(),value,n.operandType||n.type));return target.get();
@@ -94,7 +95,8 @@ class Context {
     if(name==='__syncthreads'){yield n.token.offset;return;}
     const args=[];for(const [i,a] of n.args.entries()){
       if(n.localPointerArgs?.[i])args.push(yield* this.ref(a.value));
-      else if(n.pointerArgs?.[i]){const base=this.env.get(a.pointerBaseSymbol)?.value,offset=a.pointerOffset?yield* this.eval(a.pointerOffset):0;if(!(base instanceof BufferView)||!Number.isInteger(offset) )throw new RangeError('CPU helper pointer needs an integer offset.');args.push(new BufferView(base.data,base.type,convert(base.offset+convert(offset,'i32'),'i32')));}
+      else if(n.pointerArgs?.[i]&&a.pointerArrayElement)args.push(yield* this.eval(a));
+      else if(n.pointerArgs?.[i]){let base=this.env.get(a.pointerBaseSymbol)?.value;const offset=a.pointerOffset?yield* this.eval(a.pointerOffset):0;if(Array.isArray(base))base=new BufferView(base,a.pointerBaseSymbol.type.element);if(!(base instanceof BufferView)||!Number.isInteger(offset) )throw new RangeError('CPU helper pointer needs an integer offset.');args.push(new BufferView(base.data,base.type,convert(base.offset+convert(offset,'i32'),'i32')));}
       else if(n.constRefTemporaries?.[i]){let value=yield* this.eval(a);args.push({get:()=>value,set:v=>{value=v;}});}
       else args.push(n.groupArgs?.[i]?null:yield* (n.referenceArgs?.[i]?this.ref(a):this.eval(a)));
     }

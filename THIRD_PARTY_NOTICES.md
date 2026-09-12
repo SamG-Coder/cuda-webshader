@@ -97,3 +97,10 @@ by that same notice (also retained in `tests/marching-cubes-tables.cuh`).
 The JSON launch configuration, generic sandbox pipeline, scan kernels and mesh
 renderer are original MIT project code. Neither the MIT license nor the
 translation into WGSL changes the NVIDIA source's BSD-3-Clause license.
+
+`tests/marching-cross.cuh` and the added `cross` helper in the marching-cubes
+showcase retain the original `Common/helper_math.h` NVIDIA code and notice.
+`tests/shared-pointer.cu` retains the original NVIDIA `calcNormal` function and
+notice; its other functions are MIT test code. `showcases/marching-cubes/Bucky.raw`
+is the unmodified NVIDIA marchingCubes sample data, licensed under the same
+BSD-3-Clause notice. The native volume captures derive from those assets.

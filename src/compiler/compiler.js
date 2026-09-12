@@ -178,6 +178,13 @@ class Emitter {
       }
       case 'index': {
         const base = this.expr(n.base, true), index = this.expr(n.index);
+        if(base.rootSymbol?.kind==='pointer-array'){
+          const slots=base.rootSymbol,root=slots.pointerRoot;if(!root)this.fail('Pointer array must be assigned a shared-array address before use.',n);
+          if(!['i32','u32'].includes(index.type))this.fail('Pointer array indices must be 32-bit integers.',n);
+          const temp='cw_shared_pointer_'+this.temp++;n.pointerArrayElement=true;n.pointerBaseSymbol=root;
+          const pointerCode=temp,symbol={...root,kind:'buffer-alias',constant:slots.constant||root.constant,sharedPointer:root.code,offsetCode:pointerCode};
+          return this.result(n,arrayOf(slots.elementType),root.code,[...base.pre,...index.pre,`let ${temp}: i32 = ${slots.code}[${index.code}];`],{rootSymbol:symbol,pointerCode});
+        }
         if(n.dereference&&!['buffer','buffer-alias'].includes(base.rootSymbol?.kind))this.fail('Dereference requires a storage-buffer pointer.',n);
         if (!isArray(base.type) || !['i32', 'u32'].includes(index.type)) this.fail('Indexing requires an array and a 32-bit integer index.', n);
         const offset=base.rootSymbol?.offsetCode;let indexCode=offset?`(${offset} + ${this.convert(index.code,index.type,'i32',n)})`:index.code;
@@ -279,6 +286,13 @@ class Emitter {
     if(base?.kind==='id'&&!['true','false'].includes(base.name)){
       const symbol=this.lookup(base.name,base);
       if(symbol.kind==='thread-block'&&n.kind==='id'){n.symbol=symbol;return {type:'thread-block',code:'',pre:[],rootSymbol:symbol};}
+      if(symbol.kind==='shared'&&isArray(symbol.type)&&!isArray(symbol.type.element)){
+        if(symbol.atomic)this.fail('Shared helper pointers do not support atomic arrays.',n);
+        const node=address?address.index:n.kind==='binary'?n.right:null,offset=node?this.expr(node):{type:'i32',code:'0i',pre:[]};
+        if(!['i32','u32'].includes(offset.type))this.fail('Shared helper offsets must be 32-bit integers.',n);
+        n.pointerBaseSymbol=symbol;n.pointerOffset=node;
+        return this.result(n,symbol.type,symbol.code,offset.pre,{rootSymbol:{...symbol,sharedPointer:symbol.code},pointerCode:this.convert(offset.code,offset.type,'i32',n)});
+      }
       if(['buffer','buffer-alias'].includes(symbol.kind)){
         const node=address?address.index:n.kind==='binary'?n.right:null,offset=node?this.expr(node):{type:'i32',code:'0i',pre:[]};
         if(!['i32','u32'].includes(offset.type))this.fail('Helper buffer offsets must be 32-bit integers.',n);
@@ -294,6 +308,7 @@ class Emitter {
     for(const [i,p]of helper.params.entries())if(p.pointer){
       const a=args[i],symbol=a?.rootSymbol,root=symbol?.rootBufferName;
       if(a?.localPointer){if(a.type.element!==p.type)this.fail('Local pointer type must exactly match the helper parameter.',n.args[i]);roots.push([i,'@local',false]);continue;}
+      if(symbol?.sharedPointer){if(!isArray(a.type)||a.type.element!==p.type)this.fail('Shared pointer type must exactly match the helper parameter.',n.args[i]);if(symbol.constant&&!p.constant)this.fail('Cannot discard const through a shared helper pointer.',n.args[i]);roots.push([i,'@shared:'+symbol.sharedPointer,!!symbol.constant]);continue;}
       if(!root||!isArray(a.type)||a.type.element!==p.type)this.fail('Helper pointers require a same-type storage buffer or buffer offset.',n.args[i]);
       if(symbol.constant&&!p.constant)this.fail('Cannot discard const through a helper pointer argument.',n.args[i]);
       roots.push([i,root,!!symbol.constant]);
@@ -310,7 +325,7 @@ class Emitter {
       const localNames=new Set(roots.filter(([,root])=>root==='@local').map(([i])=>clone.params[i].name));
       const inspect=(node,parent)=>{if(!node||typeof node!=='object')return;if(node.kind==='decl'&&localNames.has(node.name))this.fail('Shadowed local pointer parameters are unsupported.',node);if(node.kind==='id'&&localNames.has(node.name)&&!(parent?.kind==='index'&&parent.base===node&&parent.index.kind==='literal'&&Number(parent.index.value.replace(/[uU]$/,''))===0))this.fail('Local pointers support only dereference or index zero; arithmetic and escapes are unsupported.',node);for(const [key,value]of Object.entries(node))if(!['token','type'].includes(key)){if(Array.isArray(value))value.forEach(v=>inspect(v,node));else if(value&&typeof value==='object')inspect(value,node);}};inspect(clone.body,null);
       walk(clone.body,node=>{if(node.kind==='index'&&node.base.kind==='id'&&localNames.has(node.base.name)){const name=node.base.name;delete node.base;delete node.index;delete node.dereference;node.kind='id';node.name=name;}});
-      for(const [i,root,constant]of roots){if(root==='@local'){clone.params[i].pointer=false;clone.params[i].reference=true;clone.params[i].localPointer=true;}else{clone.params[i].boundBuffer=root;clone.params[i].boundConstant=constant;}}
+      for(const [i,root,constant]of roots){if(root==='@local'){clone.params[i].pointer=false;clone.params[i].reference=true;clone.params[i].localPointer=true;}else{if(root.startsWith('@shared:'))clone.params[i].boundShared=root.slice(8);else clone.params[i].boundBuffer=root;clone.params[i].boundConstant=constant;}}
       this.pointerHelpers.set(key,clone);this.functions.set(name,clone);this.helpers.push(clone);this.ast.functions.push(clone);
     }
     return this.pointerHelpers.get(key);
@@ -460,6 +475,16 @@ class Emitter {
           return [...value.pre,`${symbol.offsetCode} ${n.op} ${this.convert(value.code,value.type,'i32',n)};`];
         }
       }
+      if(n.left.kind==='index'&&n.left.base.kind==='id'&&this.lookup(n.left.base.name,n.left).kind==='pointer-array'){
+        const slots=this.lookup(n.left.base.name,n.left),address=n.right.kind==='unary'&&n.right.op==='&'?n.right.value:null;
+        if(n.op!=='='||address?.kind!=='index'||address.base.kind!=='id')this.fail('Pointer array assignments require a shared-array element address.',n);
+        const root=this.lookup(address.base.name,address);if(root.kind!=='shared'||root.atomic||!isArray(root.type)||root.type.element!==slots.elementType)this.fail('Pointer arrays require a matching non-atomic shared array.',n);
+        if(root.constant&&!slots.constant)this.fail('Cannot discard const in a pointer array.',n);
+        if(slots.pointerRoot&&slots.pointerRoot!==root)this.fail('A pointer array must refer to one shared allocation.',n);
+        slots.pointerRoot=root;const left=this.expr(n.left.base),index=this.expr(n.left.index),offset=this.expr(address.index);if(!['i32','u32'].includes(index.type)||!['i32','u32'].includes(offset.type))this.fail('Pointer array offsets must be 32-bit integers.',n);
+        n.pointerArrayAssignment=true;n.left.type='i32';n.type='i32';
+        return [...left.pre,...index.pre,...offset.pre,`${slots.code}[${index.code}] = ${this.convert(offset.code,offset.type,'i32',n)};`];
+      }
       const target = this.expr(n.left, true); this.writable(target, n.left); let value = this.expr(n.right);let packedPre;if(target.packedAtomic){n.packedAtomicAssignment=true;const tmp='cw_byte_value_'+this.temp++;packedPre=[...value.pre,`let ${tmp}: ${typeName(value.type)} = ${value.code};`,...target.pre];value={...value,code:tmp,pre:[]};}
       if(n.op!=='='&&vectorLength(target.type)){const op=n.op.slice(0,-1);if(n.left.kind!=='id'||vectorElement(target.type)!=='f32'||!['+','-','*','/'].includes(op)||![target.type,'f32'].includes(value.type))this.fail('Vector compound assignments require a named float vector and matching vector or float scalar.',n);const rhs=value.type===target.type?value.code:`${target.type}(${value.code})`;n.operandType=target.type;n.type=target.type;return [...target.pre,...value.pre,`${target.code} = ${target.code} ${op} ${rhs};`];}
       if(target.type==='cw_uchar4'&&n.op!=='=')this.fail('uchar4 compound arithmetic requires explicit byte components.',n);
@@ -497,6 +522,12 @@ class Emitter {
     }
     if(n.external&&(!n.shared||n.pointer||n.reference||n.constant||n.init||n.dimensions.length!==1||n.dimensions[0]!==null))this.fail('extern is supported only as extern __shared__ T name[].',n);
     if(n.reference)this.fail('References are supported only as helper parameters, not local declarations.',n);
+    if(n.pointer&&n.dimensions.length){
+      const length=n.dimensions.length===1?constantValue(n.dimensions[0]):null;
+      if(n.shared||n.external||n.init||!Number.isInteger(length)||length<1||length>256||!(numeric(n.type)||vectorLength(n.type)))this.fail('Pointer arrays require 1..256 local slots and scalar/vector shared pointees.',n);
+      const code='v_'+n.name,symbol={name:n.name,kind:'pointer-array',type:arrayOf(arrayOf(n.type),length),elementType:n.type,code,constant:n.constant};this.add(n.name,symbol,n);n.symbol=symbol;n.resolvedDimensions=[length];n.resolvedType=arrayOf('i32',length);
+      return [`var ${code}: array<i32, ${length}>;`];
+    }
     if(n.pointer){
       const baseNode=n.init?.kind==='id'?n.init:n.init?.kind==='binary'&&n.init.op==='+'?n.init.left:null,offsetNode=n.init?.kind==='binary'?n.init.right:null;
       if(n.shared||n.dimensions.length||baseNode?.kind!=='id')this.fail('Local pointers require a buffer alias with an optional integer offset.',n);
@@ -621,7 +652,7 @@ class Emitter {
       for (const p of helper.params) {
         if (p.shared || p.external || p.type === 'void'||p.type==='surface2d'||p.type==='cw_extent') this.fail('Invalid helper parameter.', p);
         if(p.type==='texture3d'){if(p.pointer||p.reference)this.fail('Texture helper parameters must be passed by value.',p);const {dimension,format}=textureShape(p.textureSampling);p.symbol=this.add(p.name,{name:p.name,type:p.type,code:'cw_texture_'+p.name,sampler:'cw_sampler_'+p.name,coordinateScale:'cw_scale_'+p.name,pixelPoint:'cw_point_'+p.name,...(p.textureSampling.startsWith('fetch_')?{linearFetch:p.textureSampling.slice(6),lengthCode:'cw_length_'+p.name}:{}),dimension,format,kind:'texture',constant:true},p);continue;}
-        if(p.pointer){const base=this.bufferSymbols.get(p.boundBuffer);if(!base)this.fail('Helper buffer pointer was not specialized.',p);p.symbol=this.add(p.name,{...base,name:p.name,kind:'buffer-alias',constant:p.constant||p.boundConstant,offsetCode:'cw_buffer_offset_'+helper.params.indexOf(p)},p);continue;}
+        if(p.pointer){const base=p.boundShared?this.shared.find(s=>s.code===p.boundShared):this.bufferSymbols.get(p.boundBuffer);if(!base)this.fail('Helper buffer pointer was not specialized.',p);p.symbol=this.add(p.name,{...base,...(p.boundShared?{sharedPointer:p.boundShared}:{}),name:p.name,kind:'buffer-alias',constant:p.constant||p.boundConstant,offsetCode:'cw_buffer_offset_'+helper.params.indexOf(p)},p);continue;}
         if(p.type==='thread-block'){if(p.reference)this.fail('thread_block helper parameters must be passed by value.',p);p.symbol=this.add(p.name,{name:p.name,type:p.type,kind:'thread-block',constant:true},p);continue;}
         if(p.reference&&!numeric(p.type)&&!vectorLength(p.type)&&!(p.constant&&(p.type==='cw_uchar4'||vectorLength(p.type)||this.structs.has(p.type))))this.fail('Helper references require numeric scalars or vectors.',p);
         p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined,...(p.reference?{referenceSpace:p.referenceSpace||'function'}:{}), constant:p.constant, atomic: false, kind: p.reference?'reference':'local'}, p);
