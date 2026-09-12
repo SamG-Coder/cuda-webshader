@@ -1,0 +1,22 @@
+{
+  "upstreamRevision": "5443602d89ed99aede2e4b7bf329daddeadb320e",
+  "sourceSha256": "cc0ca0ca5363335668ea2f1050999b633e80ec4ede24f8c7a331184a7ab6ada9",
+  "originalDeviceBodies": true,
+  "results": [
+    {
+      "entry": "computeBezierLinePositions",
+      "compiled": false,
+      "error": "Struct fields require plain scalar/vector value types. (63:5)\n    float2 *vertexPos;\r\n    ^"
+    },
+    {
+      "entry": "computeBezierLinesCDP",
+      "compiled": false,
+      "error": "Struct fields require plain scalar/vector value types. (63:5)\n    float2 *vertexPos;\r\n    ^"
+    },
+    {
+      "entry": "freeVertexMem",
+      "compiled": false,
+      "error": "Struct fields require plain scalar/vector value types. (63:5)\n    float2 *vertexPos;\r\n    ^"
+    }
+  ]
+}

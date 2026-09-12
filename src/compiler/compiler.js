@@ -384,8 +384,10 @@ class Emitter {
           if(!['==','!='].includes(n.op))this.fail('Object references support only identity equality; allocation and dereference are not yet supported.',n);
           const type=String(a.type).startsWith('cw_objectptr_')?a.type:b.type,ac=this.convert(a.code,a.type,type,n),bc=this.convert(b.code,b.type,type,n);n.operandType=type;return this.result(n,'bool',`(${ac} ${n.op} ${bc})`,[...a.pre,...b.pre]);
         }
-        if(this.structs.has(a.type)||this.structs.has(b.type)){
-          const name='cw_binary_'+{'+':'add','-':'subtract','*':'multiply','/':'divide'}[n.op];
+        const operatorName='cw_binary_'+{'+':'add','-':'subtract','*':'multiply','/':'divide'}[n.op],operatorCandidates=this.overloads.get(operatorName)||[this.functions.get(operatorName)].filter(Boolean);
+        const vectorOperator=[a.type,b.type].some(t=>vectorLength(t))&&operatorCandidates.some(f=>f.freeOperator===n.op&&f.params.length===2&&f.params[0].type===a.type&&f.params[1].type===b.type);
+        if(this.structs.has(a.type)||this.structs.has(b.type)||vectorOperator){
+          const name=operatorName;
           if(!this.functions.has(name)&&!this.overloads.has(name))this.fail('No supported free class operator is declared for '+n.op,n);
           const left=n.left,right=n.right;delete n.left;delete n.right;delete n.op;Object.assign(n,{kind:'call',callee:{kind:'id',name,token:n.token},args:[left,right]});return this.call(n);
         }

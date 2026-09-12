@@ -278,7 +278,7 @@ export class Parser {
         params.push({kind: 'param', token, name, ...type,...(defaultValue!==undefined?{defaultValue}:{})});
       } while (this.match(','));
       this.take(')');
-      if(freeOperator&&(params.length!==2||!params.some(p=>String(p.type).startsWith('cw_struct_'))||params.some(p=>p.pointer||p.reference&&!p.constant)))this.fail('Free binary operators require two value or const-reference parameters, including a class value.',token);
+      if(freeOperator&&(params.length!==2||!params.some(p=>String(p.type).startsWith('cw_struct_')||/^vec[234]</.test(p.type))||params.some(p=>p.pointer||p.reference&&!p.constant)))this.fail('Free binary operators require two value or const-reference parameters, including a class or vector value.',token);
       const body = this.block();
       functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,freeOperator,launchThreads,templateParameter,templateParameters,templateKind,...(specializationArgument!==undefined?{specializationArgument}:{})});
     }
