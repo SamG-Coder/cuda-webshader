@@ -17,15 +17,34 @@ at commit `5443602d89ed99aede2e4b7bf329daddeadb320e`.
   buffer-to-texture copy. Stage readbacks verify results; none supplies input to
   a later stage. See `dct-candidate.json` and native captures.
 
-The test input is a deterministic byte-range plane centered around zero. These
-results do not yet establish the original full-image showcase or other DCT paths.
+## Verified full-image showcase
+
+The sandbox's `example=dct` runs NVIDIA's original 512 × 512 `teapot512.ppm`
+through grayscale preparation, DCT, quantization, IDCT and display conversion.
+Every intermediate float and final display pixel matches the native capture
+exactly on NVIDIA Blackwell. The final canvas matches the GPU output. GPU
+buffer-to-texture copies supply subsequent stages; control readback is zero.
+See `dct-teapot-stages.json` and `dct-sandbox-check.json`.
+
+The original three NVIDIA kernel functions are unchanged. Two labelled MIT CUDA
+adapter kernels implement the sample host's integer grayscale formula, centering,
+and rounded/clamped display conversion. All five passes are visible in the
+sandbox's CUDA/WGSL comparison. This validates the kernels and adapted pipeline,
+not the complete upstream desktop executable.
+
+The accompanying PPM is used deliberately: the bundled BMP has a 138-byte pixel
+offset, while the upstream BMP loader begins reading after 54 bytes. The PPM
+avoids that loader/header mismatch without changing transform kernels.
+
+Three quantized coefficients initially differed because approximate WGSL division
+crossed a rounding boundary. Scalar float `/` and `/=` now correct the quotient
+with a fused residual. A native bit comparison covers the three observed cases,
+signed zero, signs, and small/large normal values. This is a finite precision
+improvement, not a complete software IEEE divider; vector and `__fdividef`
+operations retain their existing behavior.
 
 ## Remaining candidate work
 
-1. Run the original teapot image through the complete first floating-point path,
-   including original grayscale/centering and display conversion conventions.
-2. Add the GPU pipeline to the sandbox and validate its rendered output against
-   native before adding a showcase card.
 3. Test the optimized floating-point `CUDAkernel2DCT` / `CUDAkernel2IDCT` path.
 4. Implement and test the short-integer transform and quantization path. It uses
    packed short storage and pointer reinterpretations between shorts and words;

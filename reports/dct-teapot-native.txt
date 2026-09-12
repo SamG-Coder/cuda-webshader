@@ -1,0 +1,3 @@
+PASS native DCT/quantize/IDCT stage 0, 262144 finite outputs and guards.
+PASS native DCT/quantize/IDCT stage 1, 262144 finite outputs and guards.
+PASS native DCT/quantize/IDCT stage 2, 262144 finite outputs and guards.

@@ -15,3 +15,5 @@ test('pipeline invalidates GPU control totals after a write and rejects overflow
 });
 
 test('Image pipeline rejects oversized dimensions, wrong formats and insufficient storage',()=>{const plan=JSON.parse(readFileSync('showcases/box-filter/pipeline.json','utf8')).pipeline;assert.ok(validatePipeline(plan)>0);for(const change of [p=>p.preview.width=4097,p=>p.preview.height=0,p=>p.preview.format='gray-f32',p=>p.buffers.output.records=10,p=>p.buffers.output.type='f32']){const p=structuredClone(plan);change(p);assert.throws(()=>validatePipeline(p),/Image preview/);}});
+
+test('Float image pipelines validate copy storage and preview dimensions',()=>{const preset=()=>JSON.parse(readFileSync('showcases/dct/pipeline.json','utf8')).pipeline;assert.ok(validatePipeline(preset())>0);for(const change of [p=>p.buffers.working.type='u32',p=>p.steps[1].copyToTexture.target='missing',p=>p.buffers.working.records=10,p=>p.textures.plane.dimensions=[512,0],p=>p.textures.plane.fill='random',p=>p.preview.width=513,p=>p.buffers.output.type='u32']){const p=preset();change(p);assert.throws(()=>validatePipeline(p));}});

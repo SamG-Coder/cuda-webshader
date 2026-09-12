@@ -152,3 +152,8 @@ from CUDA Samples commit `5443602d89ed99aede2e4b7bf329daddeadb320e`,
 `dct8x8_kernel_quantization.cuh`. The default `FMUL` macro and block constants
 come from that sample's `Common.h`. Native captures derive from these kernels.
 The rounding fixture and test hosts are original MIT project code.
+
+The DCT showcase also redistributes NVIDIA's original `dct8x8/data/teapot512.ppm`
+and the selected kernel source in `showcases/dct/kernel.cu`, under the NVIDIA
+BSD-3-Clause notice retained in that file and `licenses/`. The two explicitly
+labelled pixel-conversion adapter kernels are project code under MIT.

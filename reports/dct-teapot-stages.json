@@ -1,0 +1,28 @@
+{
+  "results": [
+    {
+      "entry": "prepareDctInput",
+      "maxError": 0,
+      "count": 0,
+      "examples": []
+    },
+    {
+      "entry": "CUDAkernel1DCT",
+      "maxError": 0,
+      "count": 0,
+      "examples": []
+    },
+    {
+      "entry": "CUDAkernelQuantizationFloat",
+      "maxError": 0,
+      "count": 0,
+      "examples": []
+    },
+    {
+      "entry": "CUDAkernel1IDCT",
+      "maxError": 0,
+      "count": 0,
+      "examples": []
+    }
+  ]
+}

@@ -257,6 +257,7 @@ class Emitter {
         const ac = this.convert(a.code, a.type, common, n), bc = this.convert(b.code, b.type, ['<<', '>>'].includes(n.op) ? 'u32' : common, n);
         const out = ['==', '!=', '<', '>', '<=', '>='].includes(n.op) ? 'bool' : common;
         n.operandType = common;
+        if(n.op==='/'&&common==='f32'){this.compensatedDivisionUsed=true;return this.result(n,out,`cw_divide_f32(${ac}, ${bc})`,[...a.pre,...b.pre]);}
         return this.result(n, out, `(${ac} ${n.op} ${bc})`, [...a.pre, ...b.pre]);
       }
       case 'conditional': {
@@ -518,7 +519,7 @@ class Emitter {
         const op = n.op.slice(0, -1); if (target.atomic) this.fail('Use explicit atomicAdd/Min/Max/Exch rather than compound assignments to atomic arrays.', n);
         const type = ['<<', '>>'].includes(op) ? (narrow(target.type)?'i32':target.type) : this.common(narrow(target.type)?'i32':target.type, value.type==='cw_uchar'?'i32':value.type, n), rhsType = ['<<', '>>'].includes(op) ? 'u32' : type;
         if (['<<', '>>', '%', '&', '|', '^'].includes(op) && !['i32', 'u32'].includes(type)) this.fail('Integer operator requires integer operands.', n);
-        code = this.convert(`(${this.convert(target.code, target.type, type, n)} ${op} ${this.convert(value.code, value.type, rhsType, n)})`, type, target.type, n);
+        if(op==='/'&&type==='f32'){this.compensatedDivisionUsed=true;code=this.convert(`cw_divide_f32(${this.convert(target.code,target.type,type,n)}, ${this.convert(value.code,value.type,rhsType,n)})`,type,target.type,n);}else code = this.convert(`(${this.convert(target.code, target.type, type, n)} ${op} ${this.convert(value.code, value.type, rhsType, n)})`, type, target.type, n);
         n.operandType = type;
       }
       n.type = target.type;
@@ -753,6 +754,9 @@ class Emitter {
     for(const kind of this.linearFetchUsed||[]){const type=kind==='uint'?'u32':'f32';helperLines.unshift(`fn cw_fetch_${kind}(tex: texture_2d<${type}>, index: u32, length: u32) -> ${type} { if (index >= length) { return ${type}(0); } let width = textureDimensions(tex).x; return textureLoad(tex, vec2<i32>(i32(index % width), i32(index / width)), 0).r; }`);}
     if(this.float3DSamplingUsed)helperLines.unshift('fn cw_sample_float3d(tex: texture_3d<f32>, texSampler: sampler, coords: vec3<f32>, scale: vec3<f32>, pixelPoint: f32) -> f32 { if (pixelPoint > 0.0f) { let maximum = vec3<f32>(textureDimensions(tex)) - vec3<f32>(1.0f); let pixel = vec3<i32>(clamp(floor(coords), vec3<f32>(0.0f), maximum)); return textureLoad(tex, pixel, 0).r; } return textureSampleLevel(tex, texSampler, coords * scale, 0.0f).r; }');
     if(this.float2DSamplingUsed)helperLines.unshift('fn cw_sample_float2d(tex: texture_2d<f32>, texSampler: sampler, coords: vec2<f32>, scale: vec2<f32>, pixelPoint: f32) -> f32 { if (pixelPoint > 0.0f) { let maximum = vec2<f32>(textureDimensions(tex)) - vec2<f32>(1.0f); let pixel = vec2<i32>(clamp(floor(coords), vec2<f32>(0.0f), maximum)); return textureLoad(tex, pixel, 0).r; } return textureSampleLevel(tex, texSampler, coords * scale, 0.0f).r; }');
+    // Correct the approximate native WGSL quotient using its fused residual.
+    // Nonfinite quotients retain ordinary WGSL behavior; this is not a software IEEE divider.
+    if(this.compensatedDivisionUsed)helperLines.unshift('fn cw_divide_f32(a: f32, b: f32) -> f32 { let q = a / b; if ((bitcast<u32>(q) & 0x7f800000u) == 0x7f800000u || (bitcast<u32>(q) & 0x7fffffffu) == 0u || (bitcast<u32>(b) & 0x7f800000u) == 0x7f800000u) { return q; } let residual = fma(-q, b, a); return q + residual / b; }');
     if(this.roundAwayUsed)helperLines.unshift('fn cw_round_away(x: f32) -> f32 { let whole = trunc(x); let fraction = abs(x - whole); return select(whole, whole + select(-1.0f, 1.0f, x >= 0.0f), fraction >= 0.5f); }');
     if(this.byte2DSamplingUsed)helperLines.unshift('fn cw_sample_byte2d(tex: texture_2d<u32>, coords: vec2<f32>) -> u32 { let maximum = vec2<f32>(textureDimensions(tex)) - vec2<f32>(1.0f); let pixel = vec2<i32>(clamp(floor(coords), vec2<f32>(0.0f), maximum)); return textureLoad(tex, pixel, 0).x; }');
     if(this.rgba2DSamplingUsed)helperLines.unshift('fn cw_sample_rgba2d(tex: texture_2d<f32>, texSampler: sampler, coords: vec2<f32>, scale: vec2<f32>, pixelPoint: f32) -> vec4<f32> { if (pixelPoint > 0.0f) { let maximum = vec2<f32>(textureDimensions(tex)) - vec2<f32>(1.0f); let pixel = vec2<i32>(clamp(floor(coords), vec2<f32>(0.0f), maximum)); return textureLoad(tex, pixel, 0); } return textureSampleLevel(tex, texSampler, coords * scale, 0.0f); }');

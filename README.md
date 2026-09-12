@@ -497,3 +497,14 @@ Original NVIDIA kernels classify a 16³ field, compact voxels and generate 2,080
 ### NVIDIA image denoising
 
 Run [KNN](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=denoise-knn), [non-local means](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=denoise-nlm), or [shared non-local means](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=denoise-nlm2) on NVIDIA's original noisy portrait. All seven filter/copy/diagnostic kernels run in the sandbox with their original function bodies. Fourteen image captures match native CUDA exactly or within one colour level. [Settings and verification](showcases/denoising/README.md).
+
+### NVIDIA DCT image showcase
+
+[Run the DCT image in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=dct)
+(or [locally](http://localhost:5173/sandbox.html?example=dct)). The original first
+floating-point DCT, quantization and IDCT kernels reconstruct NVIDIA's 512 × 512
+teapot image. All intermediate values and final pixels match native CUDA on the
+validated NVIDIA Blackwell GPU. Five compiled CUDA passes, including two labelled
+project adapters for host pixel conversion, are available in the comparison view.
+See [validation and remaining DCT paths](reports/dct-progress.md). The optimized
+floating-point and packed-short paths are not yet claimed to work.

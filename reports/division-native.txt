@@ -1,0 +1,1 @@
+PASS: 12 native scalar division and compound division cases captured.

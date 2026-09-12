@@ -1,0 +1,165 @@
+{
+  "pipeline": {
+    "buffers": {
+      "working": {
+        "type": "f32",
+        "records": 262144,
+        "fill": "zero"
+      },
+      "output": {
+        "type": "f32",
+        "records": 262144,
+        "fill": "zero"
+      }
+    },
+    "textures": {
+      "image": {
+        "kind": "image-rgba",
+        "dimensions": [
+          512,
+          512
+        ],
+        "source": "showcases/dct/teapot512.ppm",
+        "filter": "nearest",
+        "addressMode": "clamp-to-edge",
+        "normalizedCoords": false
+      },
+      "plane": {
+        "kind": "scalar-f32",
+        "dimensions": [
+          512,
+          512
+        ],
+        "fill": "zero",
+        "filter": "nearest",
+        "addressMode": "clamp-to-edge",
+        "normalizedCoords": false
+      }
+    },
+    "steps": [
+      {
+        "entry": "prepareDctInput",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          64,
+          64,
+          1
+        ],
+        "bindings": {
+          "output": "working",
+          "image": "image"
+        },
+        "scalars": {
+          "width": 512,
+          "height": 512
+        }
+      },
+      {
+        "copyToTexture": {
+          "source": "working",
+          "target": "plane"
+        }
+      },
+      {
+        "entry": "CUDAkernel1DCT",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          64,
+          64,
+          1
+        ],
+        "bindings": {
+          "Dst": "working",
+          "TexSrc": "plane"
+        },
+        "scalars": {
+          "ImgWidth": 512,
+          "OffsetXBlocks": 0,
+          "OffsetYBlocks": 0
+        }
+      },
+      {
+        "entry": "CUDAkernelQuantizationFloat",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          64,
+          64,
+          1
+        ],
+        "bindings": {
+          "SrcDst": "working"
+        },
+        "scalars": {
+          "Stride": 512
+        }
+      },
+      {
+        "copyToTexture": {
+          "source": "working",
+          "target": "plane"
+        }
+      },
+      {
+        "entry": "CUDAkernel1IDCT",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          64,
+          64,
+          1
+        ],
+        "bindings": {
+          "Dst": "working",
+          "TexSrc": "plane"
+        },
+        "scalars": {
+          "ImgWidth": 512,
+          "OffsetXBlocks": 0,
+          "OffsetYBlocks": 0
+        }
+      },
+      {
+        "entry": "displayDctOutput",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bindings": {
+          "input": "working",
+          "output": "output"
+        },
+        "scalars": {
+          "n": 262144
+        }
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "output",
+      "width": 512,
+      "height": 512,
+      "format": "gray-f32"
+    }
+  }
+}

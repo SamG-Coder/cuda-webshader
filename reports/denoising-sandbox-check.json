@@ -14,8 +14,8 @@
     {
       "entry": "KNN",
       "pixels": 130560,
-      "nativeExact": false,
-      "maxChannelError": 1,
+      "nativeExact": true,
+      "maxChannelError": 0,
       "canvasMatchesGPU": true,
       "controlReadbackBytes": 0
     },
