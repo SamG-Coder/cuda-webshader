@@ -1,0 +1,4 @@
+scenario=0 theta=0.5 linear PASS all 262144 pixels, independent sampling reference and guards; max error 0.00128735; boundary choices 0
+scenario=1 theta=0 linear PASS all 262144 pixels, independent sampling reference and guards; max error 2.98023e-08; boundary choices 0
+scenario=2 theta=-0.7 linear PASS all 262144 pixels, independent sampling reference and guards; max error 0.0013004; boundary choices 0
+scenario=3 theta=0.5 nearest PASS all 262144 pixels, independent sampling reference and guards; max error 0.00784314; boundary choices 3

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+<defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#e5f5f6"/><stop offset="1" stop-color="#53758a"/></linearGradient></defs>
+<rect width="640" height="360" fill="#0a151e"/>
+<rect x="211" y="54" width="230" height="230" fill="none" stroke="#284654" stroke-dasharray="6 6"/>
+<g transform="rotate(-28 326 169)"><rect x="211" y="54" width="230" height="230" fill="#112632" stroke="#92e8cf"/>
+<path d="M368 140C431 90 439 208 368 206" fill="none" stroke="#97b3bf" stroke-width="12"/>
+<path d="M269 160L233 131L231 156L268 208M276 130Q255 167 276 223Q326 245 376 223Q397 167 376 130Z" fill="url(#g)" stroke="#aac8d1" stroke-width="2"/>
+<ellipse cx="326" cy="130" rx="49" ry="12" fill="#bcd5df"/><path d="M310 121V108H342V121" fill="#cde1e8"/>
+</g><path d="M138 217A160 160 0 0 1 177 88M160 86L179 84L180 105" fill="none" stroke="#8eebcb" stroke-width="3"/>
+<text x="32" y="332" fill="#a3c8d5" font-family="monospace" font-size="12" letter-spacing="2">2D TEXTURE ROTATION · GPU SAMPLING</text>
+</svg>

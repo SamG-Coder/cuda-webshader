@@ -63,7 +63,7 @@ class Emitter {
   constructor(ast, kernel, options, templates,bufferUsage) {
     this.ast = ast; this.kernel = kernel; this.options = options; this.scopes = [new Map()]; this.temp = 0; this.loopDepth = 0; this.integerIntrinsics=new Set();
     this.structs=new Map((ast.structs||[]).map(s=>[s.type,s]));for(const s of this.structs.values())for(const field of s.fields){let type=field.type;for(const dim of [...field.dimensions].reverse()){const length=constantValue(dim);if(!Number.isSafeInteger(length)||length<1||length>256)this.fail('Struct field array dimensions must be 1..256.',field);type=arrayOf(type,length);}field.resolvedType=type;}
-    this.textureKinds=new Map();walk(kernel.body,n=>{if(n.kind==='call'&&['tex1D','tex3D'].includes(n.callee?.name)&&n.args[0]?.kind==='id'){const name=n.args[0].name,dimension=n.callee.name==='tex1D'?'2d':'3d';if(this.textureKinds.has(name)&&this.textureKinds.get(name)!==dimension)this.fail('A texture parameter cannot mix 1D and 3D sampling.',n);this.textureKinds.set(name,dimension);}});
+    this.textureKinds=new Map();walk(kernel.body,n=>{if(n.kind==='call'&&['tex1D','tex3D','tex2D'].includes(n.callee?.name)&&n.args[0]?.kind==='id'){const name=n.args[0].name,dimension=n.callee.name;if(this.textureKinds.has(name)&&this.textureKinds.get(name)!==dimension)this.fail('A texture parameter cannot mix sampling dimensions or formats.',n);this.textureKinds.set(name,dimension);}});
     this.overloads=new Map();for(const f of ast.functions)if(f.overloadName){const list=this.overloads.get(f.overloadName)||[];list.push(f);this.overloads.set(f.overloadName,list);}
     this.functions = new Map(); this.shared = []; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
     for (const f of ast.functions) {
@@ -282,6 +282,7 @@ class Emitter {
     if (n.callee.kind !== 'id') this.fail('Only named functions are supported.', n);
     const name = n.callee.name; n.callName = name;
     if(name==='tex1D'){if(n.callee.templateArgument!=='float4'||n.args.length!==2||n.args[0].kind!=='id')this.fail('tex1D supports a bound float4 texture and one float coordinate.',n);const texture=this.lookup(n.args[0].name,n.args[0]),coordinate=this.expr(n.args[1]);if(texture.kind!=='texture'||texture.dimension!=='2d'||coordinate.type!=='f32')this.fail('tex1D requires a matching kernel texture parameter and float coordinate.',n);return this.result(n,'vec4<f32>',`textureSampleLevel(${texture.code}, ${texture.sampler}, vec2<f32>(${coordinate.code}, 0.5f), 0.0f)`,coordinate.pre);}
+    if(name==='tex2D'){if(n.callee.templateArgument!=='float'||n.args.length!==3||n.args[0].kind!=='id')this.fail('tex2D supports a bound float texture and two float coordinates.',n);const texture=this.lookup(n.args[0].name,n.args[0]),coords=n.args.slice(1).map(a=>this.expr(a));if(texture.kind!=='texture'||texture.format!=='r32float'||coords.some(c=>c.type!=='f32'))this.fail('tex2D requires a matching kernel texture parameter and float coordinates.',n);return this.result(n,'f32',`textureSampleLevel(${texture.code}, ${texture.sampler}, vec2<f32>(${coords.map(c=>c.code).join(', ')}), 0.0f).r`,coords.flatMap(c=>c.pre));}
     if(name==='tex3D'){if(n.callee.templateArgument!=='float'||n.args.length!==4||n.args[0].kind!=='id')this.fail('tex3D supports a bound texture object and three float coordinates, returning float.',n);const texture=this.lookup(n.args[0].name,n.args[0]);if(texture.kind!=='texture'||texture.dimension!=='3d')this.fail('tex3D requires a kernel texture parameter.',n);const coords=n.args.slice(1).map(a=>this.expr(a));if(coords.some(c=>c.type!=='f32'))this.fail('tex3D coordinates must be floats.',n);return this.result(n,'f32',`textureSampleLevel(${texture.code}, ${texture.sampler}, vec3<f32>(${coords.map(c=>c.code).join(', ')}), 0.0f).r`,coords.flatMap(c=>c.pre));}
     if (name === '__syncthreads') { if (n.args.length) this.fail('__syncthreads takes no arguments.', n); return this.result(n, 'void', 'workgroupBarrier()'); }
     if(name==='atomicCAS'){
@@ -488,7 +489,7 @@ class Emitter {
     const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t}>`;
     for (const p of this.kernel.params) {
       if (p.shared || p.reference || p.external || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
-      if(p.type==='texture3d'){if(p.pointer)this.fail('Texture objects must be passed by value.',p);const binding=bufferCount+textures.length*2,samplerBinding=binding+1,dimension=this.textureKinds.get(p.name)||'3d',format=dimension==='2d'?'rgba32float':'r8unorm';const symbol={name:p.name,type:p.type,code:'t_'+p.name,sampler:'s_'+p.name,dimension,kind:'texture',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;textures.push({name:p.name,binding,samplerBinding,dimension,format});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_${dimension}<f32>;`,`@group(0) @binding(${samplerBinding}) var ${symbol.sampler}: sampler;`);continue;}
+      if(p.type==='texture3d'){if(p.pointer)this.fail('Texture objects must be passed by value.',p);const binding=bufferCount+textures.length*2,samplerBinding=binding+1,sampling=this.textureKinds.get(p.name)||'tex3D',dimension=sampling==='tex3D'?'3d':'2d',format=sampling==='tex1D'?'rgba32float':sampling==='tex2D'?'r32float':'r8unorm';const symbol={name:p.name,type:p.type,code:'t_'+p.name,sampler:'s_'+p.name,dimension,format,kind:'texture',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;textures.push({name:p.name,binding,samplerBinding,dimension,format});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_${dimension}<f32>;`,`@group(0) @binding(${samplerBinding}) var ${symbol.sampler}: sampler;`);continue;}
       if (p.pointer) {
         if(this.structs.has(p.type))this.fail('Struct buffer layout is not supported; use local struct values.',p);
         if (p.type === 'bool' || vectorLength(p.type)===3) this.fail('bool* and three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
@@ -583,7 +584,7 @@ function instantiateHelperTemplates(ast, kernel) {
     resolveTraitTypes(fn,ast);
     walk(fn.body,node=>{
       if(node.kind!=='call'||node.callee.kind!=='id')return;
-      if(['tex3D','tex1D'].includes(node.callee.name))return;
+      if(['tex3D','tex1D','tex2D'].includes(node.callee.name))return;
       const callee=node.callee,definition=definitions.get(callee.name),argument=callee.templateArgument;
       if(!definition?.templateParameter){
         if(argument!==undefined)fail('Explicit template arguments require a templated device helper.',callee);

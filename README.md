@@ -13,6 +13,9 @@ See [launch requirements and validation](showcases/nbody/README.md).
 [NVIDIA FDTD3d is also available as a 3D scalar-volume showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fdtd),
 with the original shared-memory stencil, editable constant coefficients and
 GPU-only field feedback. See [volume setup and validation](showcases/fdtd3d/README.md).
+[NVIDIA texture rotation](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=texture2d)
+runs the original teapot-image rotation kernel with a float 2D GPU texture.
+See [sampling settings and native comparisons](showcases/texture2d/README.md).
 [NVIDIA volume renderer](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=volume)
 runs the complete original ray-marching device code with the Bucky volume and colour transfer table.
 Three rendered images are compared with native CUDA, including a rotated camera and partial blocks.
