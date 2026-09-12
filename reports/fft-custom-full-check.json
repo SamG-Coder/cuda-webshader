@@ -1,0 +1,89 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "variant": 1,
+      "width": 37,
+      "height": 19,
+      "fftWidth": 32,
+      "fftHeight": 32,
+      "components": 2048,
+      "relativeL2": 8.469367786584508e-8,
+      "maxError": 0.0009765625,
+      "originalCpuRelativeL2": 6.28194119328516e-8,
+      "cpuMaxError": 0.0009765625,
+      "intermediateReadbackBytes": 0,
+      "artifacts": [
+        "padKernel_kernel",
+        "padDataClampToBorder_kernel",
+        "forwardFftAxis",
+        "spPostprocess2D_kernel",
+        "modulateAndNormalize_kernel",
+        "spPreprocess2D_kernel",
+        "inverseFftAxis"
+      ]
+    },
+    {
+      "variant": 1,
+      "width": 2000,
+      "height": 2000,
+      "fftWidth": 1024,
+      "fftHeight": 2048,
+      "components": 4194304,
+      "relativeL2": 2.024730284647966e-7,
+      "maxError": 0.0035400390625,
+      "originalCpuRelativeL2": 1.407405516910913e-7,
+      "cpuMaxError": 0.0029296875,
+      "intermediateReadbackBytes": 0,
+      "artifacts": [
+        "padKernel_kernel",
+        "padDataClampToBorder_kernel",
+        "forwardFftAxis",
+        "spPostprocess2D_kernel",
+        "modulateAndNormalize_kernel",
+        "spPreprocess2D_kernel",
+        "inverseFftAxis"
+      ]
+    },
+    {
+      "variant": 2,
+      "width": 37,
+      "height": 19,
+      "fftWidth": 32,
+      "fftHeight": 32,
+      "components": 2048,
+      "relativeL2": 8.786428591733209e-8,
+      "maxError": 0.0009765625,
+      "originalCpuRelativeL2": 6.011973580314317e-8,
+      "cpuMaxError": 0.0009765625,
+      "intermediateReadbackBytes": 0,
+      "artifacts": [
+        "padKernel_kernel",
+        "padDataClampToBorder_kernel",
+        "forwardFftAxis",
+        "spProcess2D_kernel",
+        "inverseFftAxis"
+      ]
+    },
+    {
+      "variant": 2,
+      "width": 2000,
+      "height": 2000,
+      "fftWidth": 1024,
+      "fftHeight": 2048,
+      "components": 4194304,
+      "relativeL2": 2.0239125391561638e-7,
+      "maxError": 0.00341796875,
+      "originalCpuRelativeL2": 1.4038218432466336e-7,
+      "cpuMaxError": 0.0029296875,
+      "intermediateReadbackBytes": 0,
+      "artifacts": [
+        "padKernel_kernel",
+        "padDataClampToBorder_kernel",
+        "forwardFftAxis",
+        "spProcess2D_kernel",
+        "inverseFftAxis"
+      ]
+    }
+  ]
+}

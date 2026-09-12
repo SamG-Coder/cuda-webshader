@@ -1,0 +1,4 @@
+Original custom test1 37x19, FFT 64x32: native versus original CPU relative L2 6.76733099889e-08, maximum error 0.0009765625
+Original custom test1 2000x2000, FFT 2048x2048: native versus original CPU relative L2 8.63288827676e-08, maximum error 0.00146484375
+Original custom test2 37x19, FFT 64x32: native versus original CPU relative L2 6.58061626216e-08, maximum error 0.0009765625
+Original custom test2 2000x2000, FFT 2048x2048: native versus original CPU relative L2 8.60441143408e-08, maximum error 0.00146484375

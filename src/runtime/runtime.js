@@ -302,6 +302,16 @@ export class ComputeBatch {
     if(this.lastBindGroup!==invocation.bindGroup||this.lastOffset!==offset){pass.setBindGroup(0,invocation.bindGroup,meta.uniformSize?[offset]:[]);this.lastBindGroup=invocation.bindGroup;this.lastOffset=offset;}
     pass.dispatchWorkgroups(...groups);this.dispatchCount++;return this;
   }
+  copyToLinearTexture(source,target,{sourceOffset=0}={}){
+    this.assertOpen();this.runtime.checkResource(source);this.runtime.checkResource(target);
+    const bytes={r32float:4,rg32float:8,rgba32float:16,r32uint:4}[target.format];
+    if(!source.gpuBuffer||!target.gpuTexture||!target.linearLength||!bytes)throw Error('Linear texture copy requires a buffer and float or uint linear texture.');
+    if(!Number.isSafeInteger(sourceOffset)||sourceOffset<0||sourceOffset%bytes||sourceOffset+target.linearLength*bytes>source.byteLength)throw Error('Linear texture copy must fit aligned source records.');
+    this.endPass();for(let row=0,remaining=target.linearLength;remaining>0;row++){
+      const width=Math.min(remaining,target.width);this.encoder.copyBufferToTexture({buffer:source.gpuBuffer,offset:sourceOffset+row*target.width*bytes},{texture:target.gpuTexture,origin:[0,row,0]},[width,1,1]);remaining-=width;
+    }
+    return this;
+  }
   copyToTexture(source,target,{sourceOffset=0,bytesPerRow}={}){
     this.assertOpen();this.runtime.checkResource(source);this.runtime.checkResource(target);
     if(!source.gpuBuffer||!target.gpuTexture||target.dimension!=='2d'||!['r32float','rg32float'].includes(target.format))throw Error('Texture copy requires a buffer and a 2D r32float or rg32float texture.');

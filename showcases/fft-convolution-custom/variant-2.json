@@ -1,0 +1,219 @@
+{
+  "pipeline": {
+    "buffers": {
+      "input": {
+        "type": "f32",
+        "records": 4000000,
+        "fill": "binary-f32",
+        "source": "reports/fft-convolution-1-input.bin"
+      },
+      "kernel": {
+        "type": "f32",
+        "records": 42,
+        "fill": "binary-f32",
+        "source": "reports/fft-convolution-1-kernel.bin"
+      },
+      "paddedData": {
+        "type": "f32",
+        "records": 4194304,
+        "fill": "zero"
+      },
+      "paddedKernel": {
+        "type": "f32",
+        "records": 4194304,
+        "fill": "zero"
+      },
+      "data0": {
+        "type": "vec2<f32>",
+        "records": 2097152,
+        "fill": "zero"
+      },
+      "kernel0": {
+        "type": "vec2<f32>",
+        "records": 2097152,
+        "fill": "zero"
+      },
+      "result0": {
+        "type": "vec2<f32>",
+        "records": 2097152,
+        "fill": "zero"
+      }
+    },
+    "textures": {
+      "inputTexture": {
+        "kind": "linear-f32",
+        "records": 4000000,
+        "source": "reports/fft-convolution-1-input.bin"
+      },
+      "kernelTexture": {
+        "kind": "linear-f32",
+        "records": 42,
+        "source": "reports/fft-convolution-1-kernel.bin"
+      },
+      "compactTexture": {
+        "kind": "linear-f32",
+        "components": 2,
+        "records": 2097152,
+        "fill": "zero"
+      },
+      "kernelTextureComplex": {
+        "kind": "linear-f32",
+        "components": 2,
+        "records": 2097152,
+        "fill": "zero"
+      }
+    },
+    "steps": [
+      {
+        "entry": "padKernel_kernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "groups": [
+          1,
+          1,
+          1
+        ],
+        "bindings": {
+          "d_Dst": "paddedKernel",
+          "d_Src": "kernel",
+          "texFloat": "kernelTexture"
+        },
+        "scalars": {
+          "fftH": 2048,
+          "fftW": 2048,
+          "kernelH": 7,
+          "kernelW": 6,
+          "kernelY": 3,
+          "kernelX": 4
+        }
+      },
+      {
+        "entry": "padDataClampToBorder_kernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "groups": [
+          64,
+          256,
+          1
+        ],
+        "bindings": {
+          "d_Dst": "paddedData",
+          "d_Src": "input",
+          "texFloat": "inputTexture"
+        },
+        "scalars": {
+          "fftH": 2048,
+          "fftW": 2048,
+          "kernelH": 7,
+          "kernelW": 6,
+          "kernelY": 3,
+          "kernelX": 4,
+          "dataH": 2000,
+          "dataW": 2000
+        }
+      },
+      {
+        "copyBytes": {
+          "source": "paddedKernel",
+          "target": "kernel0",
+          "byteLength": 16777216
+        }
+      },
+      {
+        "complexFFT": {
+          "source": "kernel0",
+          "target": "kernel0",
+          "width": 1024,
+          "height": 2048
+        }
+      },
+      {
+        "copyBytes": {
+          "source": "paddedData",
+          "target": "data0",
+          "byteLength": 16777216
+        }
+      },
+      {
+        "complexFFT": {
+          "source": "data0",
+          "target": "data0",
+          "width": 1024,
+          "height": 2048
+        }
+      },
+      {
+        "copyToLinearTexture": {
+          "source": "data0",
+          "target": "compactTexture"
+        }
+      },
+      {
+        "copyToLinearTexture": {
+          "source": "kernel0",
+          "target": "kernelTextureComplex"
+        }
+      },
+      {
+        "entry": "spProcess2D_kernel",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          4096,
+          1,
+          1
+        ],
+        "bindings": {
+          "d_Dst": "result0",
+          "d_SrcA": "data0",
+          "d_SrcB": "kernel0",
+          "texComplexA": "compactTexture",
+          "texComplexB": "kernelTextureComplex"
+        },
+        "scalars": {
+          "DY": 2048,
+          "DX": 1024,
+          "threadCount": 1048576,
+          "phaseBase": -0.0030679615757712823,
+          "c": 2.384185791015625e-7
+        }
+      },
+      {
+        "complexFFT": {
+          "source": "result0",
+          "target": "data0",
+          "width": 1024,
+          "height": 2048,
+          "inverse": true
+        }
+      },
+      {
+        "copyBytes": {
+          "source": "data0",
+          "target": "paddedData",
+          "byteLength": 16777216
+        }
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "paddedData",
+      "format": "gray-f32",
+      "width": 2048,
+      "height": 2048,
+      "range": [
+        0,
+        5055
+      ]
+    }
+  }
+}

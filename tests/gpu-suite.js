@@ -1,7 +1,8 @@
+import {checkFFTCustomFull} from './fft-custom-full-gpu.js';
 import {checkSincos} from './sincos-gpu.js';
 import {checkFFTCustom} from './fft-custom-gpu.js';
 import {checkFFTConvolution} from './fft-convolution-gpu.js';
-import {checkLinearFloat} from './linear-float-gpu.js';
+import {checkLinearFloat,checkLinearFloatCopy} from './linear-float-gpu.js';
 import {checkOpticalFlow} from './optical-flow-gpu.js';
 import {checkOpticalJacobi} from './optical-jacobi-gpu.js';
 import {checkStereo} from './stereo-gpu.js';
@@ -228,8 +229,10 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Original fluids pitched kernels match native CUDA',()=>checkFluidsPitched(runtime));
   await run('2048-point real FFT axes match native cuFFT',()=>checkLargeFFT(runtime));
   await run('Sincos and first-set-bit intrinsics match native CUDA',()=>checkSincos(runtime));
+  await run('Complete custom FFT convolution variants match native CUDA',()=>checkFFTCustomFull(runtime));
   await run('Original custom FFT convolution stages match native CUDA',()=>checkFFTCustom(runtime));
   await run('Original full-size FFT convolution matches native CUDA',()=>checkFFTConvolution(runtime));
+  await run('GPU copies to multi-row float linear textures match native',()=>checkLinearFloatCopy(runtime));
   await run('Raw float linear texture records match native',()=>checkLinearFloat(runtime));
   await run('Complete optical flow matches original native pipeline',()=>checkOpticalFlow(runtime));
   await run('Original optical flow Jacobi matches 500 native iterations',()=>checkOpticalJacobi(runtime));
