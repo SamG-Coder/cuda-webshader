@@ -1,0 +1,9 @@
+========= COMPUTE-SANITIZER
+========= Uninitialized __global__ memory read of size 4 bytes
+=========     at nv12ToBGRplanarBatchKernel(const unsigned char *, int, float *, int, int, int, int)+0x380
+=========     by thread (32,7,0) in block (0,4,1)
+=========     Address 0xb1e27f380
+Instrumented run ended with cudaErrorLaunchTimeout; incomplete validation.
+========= Target application returned an error
+========= ERROR SUMMARY: 61632 errors
+========= ERROR SUMMARY: 61532 errors were not printed. Use --print-limit option to adjust the number of printed errors

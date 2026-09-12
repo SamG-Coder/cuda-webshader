@@ -247,7 +247,7 @@ export class Parser {
       if(templateParameters.length>1&&qualifier!=='__device__'&&templateKind!=='int')this.fail('Multiple template type parameters are supported on device helpers only.',token);
       if(templateParameter&&!['__global__','__device__'].includes(qualifier))this.fail('Templates are supported only on kernels and device helpers.',token);
       if (!['__global__', '__device__'].includes(qualifier)) this.fail('Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported.', token);
-      while (['inline', '__forceinline__','__host__'].includes(this.peek().value)) {if(this.take().value==='__host__')hostQualified=true;}
+      while (['static','inline', '__forceinline__','__host__'].includes(this.peek().value)) {if(this.take().value==='__host__')hostQualified=true;}
       if(hostQualified&&qualifier!=='__device__')this.fail('__host__ is supported only alongside __device__ helpers.',token);
       if(this.is('__launch_bounds__')){if(launchThreads!==null)this.fail('Duplicate launch bounds.');launchBounds();}
       if(launchThreads!==null&&qualifier!=='__global__')this.fail('Launch bounds apply only to kernels.',token);

@@ -1,0 +1,172 @@
+{
+  "revision": "5443602d89ed99aede2e4b7bf329daddeadb320e",
+  "correctnessReference": false,
+  "warning": "Observed native outputs only. Original NV12 resize batch addressing leaves frames unwritten; initcheck reports uninitialized reads. Do not use these captures as a correctness oracle.",
+  "input": {
+    "width": 1920,
+    "height": 1080,
+    "sha256": "cbd2fa8189dc0e485ce1d1708bff6f29172f708f2560840d2511f690cd62a030"
+  },
+  "output": {
+    "width": 640,
+    "height": 480,
+    "batch": 24,
+    "layout": "planar BGR f32"
+  },
+  "nativeSources": {
+    "bgr_resize.cu": "ecdacfed1326292c16a0ebb7b0501fcfd305df04b172a3a2ce0250e31513feb2",
+    "nv12_resize.cu": "22d2fa0ec810455e01868cf278d4618c6d1b37a6ebe00a8a517330000da6da27",
+    "nv12_to_bgr_planar.cu": "566b41b9d245388e8474fd91d103fe39ae34f557d306e6f2fc2bffb90711a8f1",
+    "resize_convert_main.cpp": "126f8711e82d53f3fab8f6ceeef98d10c04dfaba769c7cd8266b9a99b541087e",
+    "resize_convert.h": "5fdb78d407746c8c1823973d8343156d49ceba650bd261d066c87544089b1518"
+  },
+  "workflows": [
+    {
+      "id": "t1",
+      "name": "resize NV12 then convert",
+      "frameHashes": [
+        "89a7ab4786d745297886890669e046658295b3e40d704c9136227ac366890069",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1",
+        "6bbd289e69f1e2af0621c8991365236c0bfdfb22ba315e1aec30671462c3a3d1"
+      ],
+      "frameReferences": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "batchSha256": "34f9b5d04c865f3f353041f6233f602c1e893e97c50bfb2c57972e4d323a636d",
+      "checkedValues": 22118400,
+      "firstFrameRange": {
+        "min": 0,
+        "max": 255
+      },
+      "identicalFrames": false
+    },
+    {
+      "id": "t2",
+      "name": "convert then resize BGR",
+      "frameHashes": [
+        "d981d6620833042be337b77b4c4a1bdaea953eafefc2d3d4f61d2ddb2cdbeafb",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "d981d6620833042be337b77b4c4a1bdaea953eafefc2d3d4f61d2ddb2cdbeafb",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7",
+        "55cb9e69ed833d4fa5f95fafe77780a6610306d9a69e08ccaecf71dfb48935a7"
+      ],
+      "frameReferences": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "batchSha256": "9b54dded24101326ffb235f35383191cecf25596d9834729f526583f92a2ac49",
+      "checkedValues": 22118400,
+      "firstFrameRange": {
+        "min": 0,
+        "max": 255
+      },
+      "identicalFrames": false
+    }
+  ],
+  "compilerProbes": [
+    {
+      "entry": "nv12ToBGRplanarBatchKernel",
+      "compiled": false,
+      "error": "Unsupported expression 'pointer-cast'. (27:10)\n        *(uint32_t *)&luma2x01 = *(uint32_t *)pSrc;\n         ^"
+    },
+    {
+      "entry": "resizeNV12BatchKernel",
+      "compiled": false,
+      "error": "Expected an expression. (33:19)\n        *(uchar2 *)p               = make_uchar2(tex2D<uint8_t>(texSrcLuma, px_fxScale, py_fyScale),\n                  ^"
+    },
+    {
+      "entry": "resizeBGRplanarBatchKernel",
+      "compiled": false,
+      "error": "Unknown identifier 'NULL'. (23:24)\n    float *p         = NULL;\n                       ^"
+    }
+  ],
+  "processingOrderDifference": {
+    "differingValues": 74063,
+    "maxDifference": 255
+  }
+}
