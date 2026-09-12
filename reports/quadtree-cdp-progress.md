@@ -298,3 +298,28 @@ storageBarrier because the early-return condition depends on a node point count
 loaded from storage, which WGSL treats as potentially non-uniform. There is no
 diagnostic suppression for this. A correct workgroup-uniform storage snapshot
 and recursive launch execution remain required. No quadtree showcase is claimed.
+
+## Real GPU validation and the complete root partition
+
+The full original quadtree shader now validates without diagnostics on the NVIDIA
+Blackwell adapter. A conservative compiler pass recognizes scalar, pure record
+getters addressed by a workgroup index at kernel block scope. It publishes their
+value through a shared slot and workgroupUniformLoad, so storage-derived bounds
+can govern uniform control flow. It does not broadcast per-lane record indices,
+mutated buffer pointers, effectful getters, or getters with lane dependencies.
+Kernel-local CUDA threadIdx.x / warpSize is emitted directly as the subgroup ID
+when using fixed native tiles; a locally shadowed warpSize remains ordinary math.
+
+The original kernel's root dispatch now executes on all 1024 points from the
+native capture. All 35 fields across the root and four children match the native
+nodes; all points remain an exact permutation and fall in their native child
+quadrants. The device queue contains the expected four-block launch with depth 1,
+selector 1, four nodes at that level, and node-buffer offset 1. This validates only
+the first partition, not full recursive execution. Full recursion is the next step.
+
+The GPU test also verifies rejection of per-thread node selection and a divergent
+early return before the snapshot. All 681 unit tests, 222 real NVIDIA GPU tests,
+and Bezier/path-tracer sandbox regressions pass. Evidence is saved in
+quadtree-gpu-probe.json and quadtree-root-progress.json.
+
+WGSL reference: https://www.w3.org/TR/WGSL/#workgroupUniformLoad-builtin

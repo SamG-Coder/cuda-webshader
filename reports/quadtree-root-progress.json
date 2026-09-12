@@ -1,0 +1,36 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "subgroup-size-control",
+      "float32-filterable",
+      "subgroups",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "result": {
+    "name": "Original NVIDIA quadtree root partitions all 1024 native points",
+    "pass": true,
+    "originalKernel": true,
+    "points": 1024,
+    "nodesCompared": 5,
+    "fieldsCompared": 35,
+    "pointPermutationExact": true,
+    "allPointsInNativeQuadrants": true,
+    "queuedChildBlocks": 4,
+    "nonUniformVariantsRejected": 2,
+    "recursiveExecution": false,
+    "wallMs": 264.52499997615814
+  }
+}

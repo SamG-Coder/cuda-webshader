@@ -1,4 +1,5 @@
 import {checkCapturedPoints} from './captured-points-gpu.js';
+import {checkQuadtreeRoot} from './quadtree-root-gpu.js';
 import {checkBezierScheduled} from './bezier-scheduled-gpu.js';
 import {checkBezierParent} from './bezier-parent-gpu.js';
 import {checkBezierChild} from './bezier-cdp-gpu.js';
@@ -333,6 +334,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
     const source=await(await fetch('/tests/local-array-init.cu')).text(),kernel=await runtime.kernel(source,{workgroupSize:[32]}),out=runtime.createBuffer(1280);
     try{runtime.batch().dispatch(kernel.bind({out}),[1]).submit();const values=await runtime.read(out,Int32Array);for(let i=0;i<32;i++)if(values.slice(i*10,i*10+10).join(',')!==[i,i+1,i+2,0,i+3,i+3,0,0,9,32].join(','))throw Error('Local array initializer mismatch '+i);return {lanes:32,checkedValues:320,nestedZeroFill:true,leftToRight:true};}finally{runtime.destroyBuffer(out);}
   });
+  await run('Original NVIDIA quadtree root partitions all 1024 native points',()=>checkQuadtreeRoot(runtime));
   await run('Original quadtree storage references preserve node and nested field mutations',async()=>{
     const source=await(await fetch('/tests/quadtree-storage-references.cu')).text(),options={valueBuffers:['nodes'],workgroupSize:[32]},write=await runtime.kernel(source,{...options,entry:'write_nodes'}),read=await runtime.kernel(source,{...options,entry:'read_nodes'}),alias=await runtime.kernel(source,{...options,entry:'write_alias_nodes'}),nodes=runtime.createBuffer(1024),out=runtime.createBuffer(384);
     try{for(const kernel of [write,read,alias,read]){runtime.batch().dispatch(kernel.bind({nodes,out}),[1]).submit();const values=await runtime.read(out);for(let i=0;i<32;i++)if(values.slice(i*3,i*3+3).join(',')!==[i+2,i+3,7].join(','))throw Error('Storage record reference mismatch '+i);}return {nodes:32,checkedValues:384,bufferAliasOffsets:true,indexCapturedOnce:true,nestedMutationPersisted:true,originalClassBodies:true};}finally{runtime.destroyBuffer(nodes);runtime.destroyBuffer(out);}

@@ -4,6 +4,7 @@ export function lowerNativeTilePhases(fn,handles,walk,fail){
  const sync=n=>n?.kind==='call'&&n.callee?.name==='cooperative_groups::sync'&&n.args.length===1&&handles.has(n.args[0].name);
  const contains=n=>{let yes=false;walk(n,x=>{if(sync(x))yes=true;});return yes;};
  if(!contains(fn.body))return;
+ let warpSizeShadowed=fn.params.some(p=>p.name==='warpSize');walk(fn.body,n=>{if(n.kind==='decl'&&n.name==='warpSize')warpSizeShadowed=true;});
  const names=new Set(),warps=new Set();walk(fn.body,n=>{if(n.name)names.add(n.name);});let serial=0;
  const fresh=()=>{let name;do{name='cw_native_phase_'+serial++;}while(names.has(name));names.add(name);return name;};
  const id=(name,token)=>({kind:'id',name,token}),block=(body,token)=>({kind:'block',body,token});
@@ -11,7 +12,7 @@ export function lowerNativeTilePhases(fn,handles,walk,fail){
  const guard=(active,value,type)=>({kind:'conditional',condition:structuredClone(active),yes:value,no:type==='bool'?id('false',value.token):{kind:'literal',value:type==='f32'?'0.0f':type==='u32'?'0u':'0',token:value.token},token:value.token});
  const barrier=token=>({kind:'expr',value:{kind:'call',callee:id('__syncthreads',token),args:[],token},token});
  const root=n=>n?.kind==='id'?n.name:['member','index'].includes(n?.kind)?root(n.base):null;
- const warpIndex=n=>n?.kind==='binary'&&n.op==='/'&&n.left?.kind==='member'&&n.left.base?.name==='threadIdx'&&n.left.member==='x'&&(n.right?.name==='warpSize'||n.right?.kind==='literal'&&Number(n.right.value.replace(/[uU]$/,''))===32);
+ const warpIndex=n=>n?.kind==='binary'&&n.op==='/'&&n.left?.kind==='member'&&n.left.base?.name==='threadIdx'&&n.left.member==='x'&&(n.right?.name==='warpSize'&&!warpSizeShadowed||n.right?.kind==='literal'&&Number(n.right.value.replace(/[uU]$/,''))===32);
  function masked(n,active){
   const token=n.token;
   if(n.kind==='block')return block(n.body.map(x=>masked(x,active)),token);

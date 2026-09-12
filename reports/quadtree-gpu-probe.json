@@ -5,24 +5,8 @@
     "architecture": "blackwell"
   },
   "compiled": true,
-  "validated": false,
+  "validated": true,
   "executed": false,
   "softwareAdapterRequested": false,
-  "messages": [
-    {
-      "type": "error",
-      "line": 541,
-      "message": "'storageBarrier' must only be called from uniform control flow"
-    },
-    {
-      "type": "info",
-      "line": 297,
-      "message": "control flow depends on possibly non-uniform value"
-    },
-    {
-      "type": "info",
-      "line": 287,
-      "message": "reading from 'cw_ref_5' may result in a non-uniform value"
-    }
-  ]
+  "messages": []
 }

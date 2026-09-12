@@ -1,4 +1,5 @@
 import {lowerNativeTiles,emitNativeTile} from './native-tiles.js';
+import {markUniformRecordSnapshots} from './uniform-records.js';
 import {recordLeaves,recordConstructor} from './record-parameters.js';
 import {addBufferImports,bufferReferenceArgument,bufferReferenceIndex} from './buffer-references.js';
 import {launchQueues,launchQueueDeclarations,emitLaunch} from './device-launch.js';
@@ -949,6 +950,11 @@ class Emitter {
       const snapshot='cw_value_copy_'+this.temp++;
       return [...init.pre,`let ${snapshot} = ${init.code};`,`${n.constant?'let':'var'} ${code}: ${type} = ${this.aggregateCopy(type,snapshot)};`];
     }
+    if(n.workgroupUniformSnapshot){
+      const shared='cw_uniform_record_'+this.temp++,snapshot=shared+'_value';
+      this.shared.push({code:shared,type,atomic:false});
+      return [...init.pre,`let ${snapshot} = ${this.convert(init.code,init.type,type,n)};`,`if (all(cw_thread == vec3<u32>(0u))) { ${shared} = ${snapshot}; }`,`${n.constant?'let':'var'} ${code}: ${typeName(type)} = workgroupUniformLoad(&${shared});`];
+    }
     return [...(init?.pre || []), `${n.constant ? 'let' : 'var'} ${code}: ${typeName(type)}${init ? ` = ${isArray(type)?init.code:this.convert(init.code, init.type, type, n)}` : ''};`];
   }
   body(n) {
@@ -1307,6 +1313,7 @@ export function compile(source, options = {},bufferUsage=null) {
   resolveTraitTypes(kernel,ast,kernel.templateParameter,specialization?.[2]);
   lowerDeferredPointers(ast,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});
   lowerConstantRows(ast,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});
+  markUniformRecordSnapshots(ast,kernel,walk);
   lowerNativeTiles(ast,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});
   const tiledGroups=lowerTiledGroups(ast,options,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});
   const scalarConstraints=uniformBlockGuards(kernel,options,walk,message=>{throw new CompileError(message,kernel.token,source);});
