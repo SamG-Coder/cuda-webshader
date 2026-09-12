@@ -15,6 +15,7 @@ licenses; the project's MIT license does not relicense them.
 | NVIDIA CUDA Samples simpleGL kernel | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Imported, unchanged showcase kernel |
 | NVIDIA CUDA Samples N-body device code | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original integration kernel, helpers and type declarations in the N-body showcase and tests |
 | NVIDIA CUDA Samples FDTD3d kernel | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original 3D finite-difference kernel and launch constants in the volume showcase and tests |
+| NVIDIA CUDA Samples simpleTexture3D | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original d_render kernel and Bucky.raw sample volume |
 | NVIDIA CUDA Samples recursive Gaussian | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original recursive filter, pixel conversion helpers and transpose; upstream credits CImg contributors |
 | NVIDIA CUDA Samples Haar wavelet | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original dwtHaar1D kernel and launch constants in showcase and tests |
 | NVIDIA CUDA Samples separable convolution | commit 5443602d89ed99aede2e4b7bf329daddeadb320e | BSD-3-Clause | Original row/column kernels and constants in the two-pass showcase and tests |

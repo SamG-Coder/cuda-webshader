@@ -266,6 +266,7 @@ class Emitter {
     }
     if (n.callee.kind !== 'id') this.fail('Only named functions are supported.', n);
     const name = n.callee.name; n.callName = name;
+    if(name==='tex3D'){if(n.callee.templateArgument!=='float'||n.args.length!==4||n.args[0].kind!=='id')this.fail('tex3D supports a bound texture object and three float coordinates, returning float.',n);const texture=this.lookup(n.args[0].name,n.args[0]);if(texture.kind!=='texture')this.fail('tex3D requires a kernel texture parameter.',n);const coords=n.args.slice(1).map(a=>this.expr(a));if(coords.some(c=>c.type!=='f32'))this.fail('tex3D coordinates must be floats.',n);return this.result(n,'f32',`textureSampleLevel(${texture.code}, ${texture.sampler}, vec3<f32>(${coords.map(c=>c.code).join(', ')}), 0.0f).r`,coords.flatMap(c=>c.pre));}
     if (name === '__syncthreads') { if (n.args.length) this.fail('__syncthreads takes no arguments.', n); return this.result(n, 'void', 'workgroupBarrier()'); }
     if(name==='atomicCAS'){
       if(n.args.length!==3||n.args[0].kind!=='unary'||n.args[0].op!=='&'||!['index','id'].includes(n.args[0].value.kind))this.fail('atomicCAS requires &buffer[index] or &sharedScalar, compare and replacement.',n);
@@ -456,10 +457,12 @@ class Emitter {
   emit() {
     this.checkRecursion();
     if (this.kernel.result !== 'void') this.fail('__global__ kernels must return void.', this.kernel);
+    const textures=[],bufferCount=this.kernel.params.filter(p=>p.pointer).length;
     const bindings = [], scalars = [], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
     const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t}>`;
     for (const p of this.kernel.params) {
       if (p.shared || p.reference || p.external || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
+      if(p.type==='texture3d'){if(p.pointer)this.fail('Texture objects must be passed by value.',p);const binding=bufferCount+textures.length*2,samplerBinding=binding+1;const symbol={name:p.name,type:p.type,code:'t_'+p.name,sampler:'s_'+p.name,kind:'texture',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;textures.push({name:p.name,binding,samplerBinding,dimension:'3d',format:'r8unorm'});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_3d<f32>;`,`@group(0) @binding(${samplerBinding}) var ${symbol.sampler}: sampler;`);continue;}
       if (p.pointer) {
         if (p.type === 'bool' || vectorLength(p.type)===3) this.fail('bool* and three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
         const atomic = this.usage.atomic.has(p.name), readOnly = p.constant || !this.usage.writes.has(p.name);
@@ -484,7 +487,7 @@ class Emitter {
     const emitHelpers=()=>{while(emittedHelpers<this.helpers.length){const helper=this.helpers[emittedHelpers++];
       this.scopes = [new Map()]; this.currentFunction = helper;
       for (const p of helper.params) {
-        if (p.shared || p.external || p.type === 'void') this.fail('Invalid helper parameter.', p);
+        if (p.shared || p.external || p.type === 'void'||p.type==='texture3d') this.fail('Invalid helper parameter.', p);
         if(p.pointer){const base=this.bufferSymbols.get(p.boundBuffer);if(!base)this.fail('Helper buffer pointer was not specialized.',p);p.symbol=this.add(p.name,{...base,name:p.name,kind:'buffer-alias',constant:p.constant||p.boundConstant,offsetCode:'cw_buffer_offset_'+helper.params.indexOf(p)},p);continue;}
         if(p.type==='thread-block'){if(p.reference)this.fail('thread_block helper parameters must be passed by value.',p);p.symbol=this.add(p.name,{name:p.name,type:p.type,kind:'thread-block',constant:true},p);continue;}
         if(p.reference&&!numeric(p.type))this.fail('Helper references require a 32-bit numeric scalar.',p);
@@ -502,7 +505,7 @@ class Emitter {
     if(uniformSize){
       header.push('struct CWParams {',...scalars.map(s=>`  ${s.field||'p_'+s.name}: ${s.type},`));
       for(let i=scalars.length*4;i<uniformSize;i+=4)header.push(`  cw_pad_${i}: u32,`);
-      header.push('}',`@group(0) @binding(${bindings.length}) var<uniform> cw_params: CWParams;`);
+      header.push('}',`@group(0) @binding(${bindings.length+textures.length*2}) var<uniform> cw_params: CWParams;`);
     }
     header.push(`const cw_block_size: vec3<u32> = vec3<u32>(${this.workgroupSize.map(x => `${x}u`).join(', ')});`);
     if(this.dynamicSharedBytes&&!this.dynamicSharedUsed)this.fail('sharedMemoryBytes was supplied but the kernel has no dynamic shared array.',this.kernel);
@@ -513,7 +516,7 @@ class Emitter {
     for (const s of this.shared) header.push(`var<workgroup> ${s.code}: ${s.atomic ? sharedAtomicType(s.type) : typeName(s.type)};`);
     const storageSize = this.shared.reduce((n, s) => n + Math.ceil(typeStride(s.type) / 16) * 16, 0);
     const wgsl = [...header, '', ...helperLines, '', `@compute @workgroup_size(${this.workgroupSize.join(', ')})`, 'fn main(', '  @builtin(local_invocation_id) cw_thread: vec3<u32>,', '  @builtin(workgroup_id) cw_block: vec3<u32>,', '  @builtin(num_workgroups) cw_grid: vec3<u32>', ') {', ...indent(main), '}', ''].join('\n');
-    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {workgroupSize: this.workgroupSize, bindings, scalars, uniformSize, uniformBinding: uniformSize ? bindings.length : null, workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
+    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {workgroupSize: this.workgroupSize, bindings, scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2 : null,...(textures.length?{textures}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
   }
 }
 function resolveTraitTypes(fn, ast, parameter, argument) {
@@ -553,6 +556,7 @@ function instantiateHelperTemplates(ast, kernel) {
     resolveTraitTypes(fn,ast);
     walk(fn.body,node=>{
       if(node.kind!=='call'||node.callee.kind!=='id')return;
+      if(node.callee.name==='tex3D')return;
       const callee=node.callee,definition=definitions.get(callee.name),argument=callee.templateArgument;
       if(!definition?.templateParameter){
         if(argument!==undefined)fail('Explicit template arguments require a templated device helper.',callee);

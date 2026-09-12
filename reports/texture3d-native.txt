@@ -1,0 +1,8 @@
+nearest w=-0.25 PASS original texture3D, independent sampling reference and guards; max error 0/255
+nearest w=0.13 PASS original texture3D, independent sampling reference and guards; max error 0/255
+nearest w=0.5 PASS original texture3D, independent sampling reference and guards; max error 0/255
+nearest w=1.25 PASS original texture3D, independent sampling reference and guards; max error 0/255
+linear w=-0.25 PASS original texture3D, independent sampling reference and guards; max error 1/255
+linear w=0.13 PASS original texture3D, independent sampling reference and guards; max error 1/255
+linear w=0.5 PASS original texture3D, independent sampling reference and guards; max error 1/255
+linear w=1.25 PASS original texture3D, independent sampling reference and guards; max error 1/255

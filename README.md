@@ -13,6 +13,9 @@ See [launch requirements and validation](showcases/nbody/README.md).
 [NVIDIA FDTD3d is also available as a 3D scalar-volume showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fdtd),
 with the original shared-memory stencil, editable constant coefficients and
 GPU-only field feedback. See [volume setup and validation](showcases/fdtd3d/README.md).
+[NVIDIA 3D texture slice](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=texture3d)
+samples the original Bucky volume using a real 3D texture and sampler.
+See [texture setup and validation](showcases/texture3d/README.md).
 [NVIDIA recursive Gaussian](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=gaussian)
 runs the original four-pass colour-image filter with an RGBA preview.
 See [Gaussian setup and validation](showcases/recursive-gaussian/README.md).

@@ -1,0 +1,34 @@
+{
+  "passed": true,
+  "softwareAdapterRequested": false,
+  "staticBuild": true,
+  "allRenderedPixelsChecked": true,
+  "maxError": 0,
+  "error": null,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "stats": {
+    "pipelineCompiles": 1,
+    "pipelineCacheHits": 0,
+    "bindGroupsCreated": 1,
+    "submissions": 1,
+    "dispatches": 1,
+    "uniformBytesUploaded": 16,
+    "dataBytesUploaded": 98304,
+    "readbackBytes": 65536
+  }
+}

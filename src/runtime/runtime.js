@@ -31,6 +31,7 @@ export function validateWorkgroup(metadata, limits) {
   if (size.reduce((a,b)=>a*b,1)>limits.maxComputeInvocationsPerWorkgroup) throw new Error(`Workgroup ${size} exceeds maxComputeInvocationsPerWorkgroup.`);
   if (metadata.workgroupStorageBytes > limits.maxComputeWorkgroupStorageSize) throw new Error(`Kernel requires ${metadata.workgroupStorageBytes} workgroup bytes; device supports ${limits.maxComputeWorkgroupStorageSize}.`);
   if (metadata.uniformSize > limits.maxUniformBufferBindingSize) throw new Error('Uniform parameters exceed the device binding limit.');
+  if((metadata.textures?.length||0)>limits.maxSampledTexturesPerShaderStage||(metadata.textures?.length||0)>limits.maxSamplersPerShaderStage)throw Error('Too many sampled textures for this device.');
   if (metadata.bindings.length > limits.maxStorageBuffersPerShaderStage) throw new Error('Too many storage buffers for this device.');
 }
 export class GpuRuntime {
@@ -51,7 +52,7 @@ export class GpuRuntime {
   constructor(device, options = {}) {
     this.device=device; this.adapter=options.adapter; this.ownsDevice=options.ownsDevice ?? false;
     this.disposed=false; this.lost=null; this.onError=options.onError || (error=>console.error(error));
-    this.buffers=new Set(); this.pipelineCache=new Map(); this.pipelineQueue=Promise.resolve();
+    this.buffers=new Set();this.textures=new Set(); this.pipelineCache=new Map(); this.pipelineQueue=Promise.resolve();
     this.uniformAlignment=device.limits.minUniformBufferOffsetAlignment;
     this.uniformCapacity=roundUp(options.uniformCapacity || 65536,this.uniformAlignment);
     this.uniformBuffer=device.createBuffer({label:'CUDA WebShader uniform snapshot arena',size:this.uniformCapacity,usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST});
@@ -66,6 +67,11 @@ export class GpuRuntime {
     const info=this.adapter?.info;
     return {vendor:info?.vendor || 'not exposed',architecture:info?.architecture || '',device:info?.device || '',description:info?.description || '',features:[...this.device.features],timestampQuery:this.device.features.has('timestamp-query'),limits:{maxComputeInvocationsPerWorkgroup:this.device.limits.maxComputeInvocationsPerWorkgroup,maxComputeWorkgroupStorageSize:this.device.limits.maxComputeWorkgroupStorageSize,maxStorageBufferBindingSize:this.device.limits.maxStorageBufferBindingSize}};
   }
+  createTexture3D(data,{width,height,depth,filter='linear',addressMode='repeat',label='CUDA 3D texture'}={}){
+    this.assertAlive();if(!(data instanceof Uint8Array)||![width,height,depth].every(n=>Number.isInteger(n)&&n>0&&n<=this.device.limits.maxTextureDimension3D)||data.length!==width*height*depth)throw new RangeError('3D texture requires matching byte data and valid dimensions.');if(!['linear','nearest'].includes(filter)||!['repeat','clamp-to-edge','mirror-repeat'].includes(addressMode))throw new Error('Unsupported texture sampler settings.');
+    const gpuTexture=this.device.createTexture({label,size:[width,height,depth],dimension:'3d',format:'r8unorm',usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST});this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width,rowsPerImage:height},[width,height,depth]);const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode,addressModeW:addressMode}),format:'r8unorm',dimension:'3d',width,height,depth};this.textures.add(resource);this.stats.dataBytesUploaded+=data.byteLength;return resource;
+  }
+  destroyTexture(resource){this.checkResource(resource);if(!resource.gpuTexture)throw Error('Expected a texture resource.');resource.gpuTexture.destroy();resource.destroyed=true;this.textures.delete(resource);}
   createBuffer(dataOrBytes, {label='compute buffer',usage=0} = {}) {
     this.assertAlive(); const data=ArrayBuffer.isView(dataOrBytes)?dataOrBytes:null, bytes=data?data.byteLength:dataOrBytes;
     if(!Number.isSafeInteger(bytes)||bytes<0)throw new RangeError('Buffer size must be a nonnegative integer.');
@@ -82,14 +88,14 @@ export class GpuRuntime {
     return {id:++resourceId,gpuBuffer,byteLength,size:gpuBuffer.size,label,runtime:this,owned:false,destroyed:false};
   }
   checkResource(resource) { if(!resource||resource.runtime!==this||resource.destroyed)throw new Error('Buffer is destroyed or belongs to a different runtime.'); }
-  destroyBuffer(resource) { this.checkResource(resource); if(resource.owned){resource.gpuBuffer.destroy();this.buffers.delete(resource);}resource.destroyed=true; }
+  destroyBuffer(resource) { this.checkResource(resource);if(!resource.gpuBuffer)throw Error('Expected a buffer resource.'); if(resource.owned){resource.gpuBuffer.destroy();this.buffers.delete(resource);}resource.destroyed=true; }
   write(resource,data,offset=0) {
-    this.assertAlive();this.checkResource(resource);
+    this.assertAlive();this.checkResource(resource);if(!resource.gpuBuffer)throw Error('Expected a buffer resource.');
     if(!ArrayBuffer.isView(data)||offset%4||data.byteLength%4||offset<0||offset+data.byteLength>resource.size)throw new RangeError('Write must be aligned and fit in the destination.');
     this.device.queue.writeBuffer(resource.gpuBuffer,offset,data.buffer,data.byteOffset,data.byteLength);this.stats.dataBytesUploaded+=data.byteLength;
   }
   async read(resource, Type=Float32Array, byteLength=resource.byteLength, offset=0) {
-    this.assertAlive();this.checkResource(resource);
+    this.assertAlive();this.checkResource(resource);if(!resource.gpuBuffer)throw Error('Expected a buffer resource.');
     if(![Float32Array,Uint32Array,Int32Array].includes(Type))throw new TypeError('Readback supports 32-bit float/integer arrays.');
     if(!Number.isInteger(byteLength)||byteLength<0||byteLength%4||offset%4||offset<0||offset+byteLength>resource.size)throw new RangeError('Invalid readback range.');
     if(byteLength===0)return new Type(0);
@@ -111,6 +117,7 @@ export class GpuRuntime {
         const errors=info.messages.filter(m=>m.type==='error');
         if(errors.length)throw new Error(`${artifact.name}: WGSL validation failed\n`+errors.map(m=>`${m.lineNum}:${m.linePos} ${m.message}`).join('\n'));
         const entries=artifact.metadata.bindings.map(b=>({binding:b.binding,visibility:GPUShaderStage.COMPUTE,buffer:{type:b.readOnly?'read-only-storage':'storage',minBindingSize:b.stride}}));
+        for(const t of artifact.metadata.textures||[])entries.push({binding:t.binding,visibility:GPUShaderStage.COMPUTE,texture:{sampleType:'float',viewDimension:'3d',multisampled:false}},{binding:t.samplerBinding,visibility:GPUShaderStage.COMPUTE,sampler:{type:'filtering'}});
         if(artifact.metadata.uniformSize)entries.push({binding:artifact.metadata.uniformBinding,visibility:GPUShaderStage.COMPUTE,buffer:{type:'uniform',hasDynamicOffset:true,minBindingSize:artifact.metadata.uniformSize}});
         const layout=this.device.createBindGroupLayout({label:artifact.name,entries});
         const pipeline=await this.device.createComputePipelineAsync({label:artifact.name,layout:this.device.createPipelineLayout({bindGroupLayouts:[layout]}),compute:{module,entryPoint:artifact.entryPoint || 'main'}});
@@ -125,7 +132,7 @@ export class GpuRuntime {
   }
   batch(options={}) {this.assertAlive();return new ComputeBatch(this,options);}
   async idle() {this.assertAlive();await this.device.queue.onSubmittedWorkDone();}
-  dispose() {if(this.disposed)return;this.disposed=true;for(const b of this.buffers){b.gpuBuffer.destroy();b.destroyed=true;}this.buffers.clear();this.uniformBuffer.destroy();this.pipelineCache.clear();this.batchMemory=[];this.device.removeEventListener('uncapturederror',this.errorListener);if(this.ownsDevice)this.device.destroy();}
+  dispose() {if(this.disposed)return;this.disposed=true;for(const t of this.textures){t.gpuTexture.destroy();t.destroyed=true;}this.textures.clear();for(const b of this.buffers){b.gpuBuffer.destroy();b.destroyed=true;}this.buffers.clear();this.uniformBuffer.destroy();this.pipelineCache.clear();this.batchMemory=[];this.device.removeEventListener('uncapturederror',this.errorListener);if(this.ownsDevice)this.device.destroy();}
 }
 export class Kernel {
   constructor(runtime,artifact,pipeline,layout,messages){this.runtime=runtime;this.artifact=artifact;this.pipeline=pipeline;this.layout=layout;this.messages=messages;}
@@ -135,15 +142,16 @@ export class Invocation {
   constructor(kernel,buffers,scalars) {
     this.kernel=kernel;this.runtime=kernel.runtime;this.runtime.assertAlive();this.version=0;this.values={};
     this.uniformData=new ArrayBuffer(kernel.artifact.metadata.uniformSize);this.buffers={...buffers};
-    const meta=kernel.artifact.metadata,entries=[],seen=new Map(),known=new Set(meta.bindings.map(b=>b.name));
+    const meta=kernel.artifact.metadata,entries=[],seen=new Map(),known=new Set([...meta.bindings,...(meta.textures||[])].map(b=>b.name));
     for(const name of Object.keys(buffers))if(!known.has(name))throw new Error(`Unknown buffer '${name}'.`);
     for(const b of meta.bindings){
-      const resource=buffers[b.name];this.runtime.checkResource(resource);
+      const resource=buffers[b.name];this.runtime.checkResource(resource);if(!resource.gpuBuffer)throw Error('Binding '+b.name+' requires a buffer.');
       if(resource.size<b.stride)throw new RangeError(`Buffer ${b.name} is smaller than one ${b.elementType} record.`);
       if(resource.size%b.stride)throw new RangeError(`Buffer ${b.name} is not aligned to ${b.stride}-byte records.`);
       if(seen.has(resource.gpuBuffer)&&(!b.readOnly||!seen.get(resource.gpuBuffer)))throw new Error('Writable buffer aliasing across bindings is rejected; use separate buffers or a single in-place parameter.');
       seen.set(resource.gpuBuffer,b.readOnly);entries.push({binding:b.binding,resource:{buffer:resource.gpuBuffer,offset:0,size:resource.size}});
     }
+    for(const t of meta.textures||[]){const r=buffers[t.name];this.runtime.checkResource(r);if(!r.gpuTexture||r.dimension!==t.dimension||r.format!==t.format)throw Error('Texture '+t.name+' requires a matching 3D r8unorm resource.');entries.push({binding:t.binding,resource:r.view},{binding:t.samplerBinding,resource:r.sampler});}
     if(meta.uniformSize)entries.push({binding:meta.uniformBinding,resource:{buffer:this.runtime.uniformBuffer,offset:0,size:meta.uniformSize}});
     this.bindGroup=this.runtime.device.createBindGroup({label:`${kernel.artifact.name}: persistent bindings`,layout:kernel.layout,entries});this.runtime.stats.bindGroupsCreated++;
     this.setScalars(scalars);
@@ -181,7 +189,7 @@ export class ComputeBatch {
     pass.dispatchWorkgroups(...groups);this.dispatchCount++;return this;
   }
   clear(resource){this.assertOpen();this.runtime.checkResource(resource);this.endPass();this.encoder.clearBuffer(resource.gpuBuffer,0,resource.size);return this;}
-  copy(source,target,range){this.assertOpen();this.runtime.checkResource(source);this.runtime.checkResource(target);if(source.gpuBuffer===target.gpuBuffer)throw new RangeError('Copy requires distinct buffers.');if(range===undefined&&(source.byteLength!==target.byteLength||source.byteLength%4))throw new RangeError('Feedback copy requires equal aligned byte length.');const {sourceOffset=0,targetOffset=0,byteLength=source.byteLength}=range??{};if([sourceOffset,targetOffset,byteLength].some(n=>!Number.isSafeInteger(n)||n<0||n%4)||sourceOffset+byteLength>source.byteLength||targetOffset+byteLength>target.byteLength)throw new RangeError('Copy range must be aligned and within both buffers.');this.endPass();if(byteLength)this.encoder.copyBufferToBuffer(source.gpuBuffer,sourceOffset,target.gpuBuffer,targetOffset,byteLength);return this;}
+  copy(source,target,range){this.assertOpen();this.runtime.checkResource(source);this.runtime.checkResource(target);if(!source.gpuBuffer||!target.gpuBuffer)throw Error('Copy requires buffer resources.');if(source.gpuBuffer===target.gpuBuffer)throw new RangeError('Copy requires distinct buffers.');if(range===undefined&&(source.byteLength!==target.byteLength||source.byteLength%4))throw new RangeError('Feedback copy requires equal aligned byte length.');const {sourceOffset=0,targetOffset=0,byteLength=source.byteLength}=range??{};if([sourceOffset,targetOffset,byteLength].some(n=>!Number.isSafeInteger(n)||n<0||n%4)||sourceOffset+byteLength>source.byteLength||targetOffset+byteLength>target.byteLength)throw new RangeError('Copy range must be aligned and within both buffers.');this.endPass();if(byteLength)this.encoder.copyBufferToBuffer(source.gpuBuffer,sourceOffset,target.gpuBuffer,targetOffset,byteLength);return this;}
   submit(){
     this.assertOpen();this.endPass();this.ended=true;
     if(this.cursor){this.runtime.device.queue.writeBuffer(this.runtime.uniformBuffer,0,this.data,0,this.cursor);this.runtime.stats.uniformBytesUploaded+=this.cursor;}

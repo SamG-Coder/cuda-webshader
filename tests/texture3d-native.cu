@@ -1,0 +1,13 @@
+// Project reference harness, MIT. NVIDIA kernel retains its BSD notice.
+#include <cuda_runtime.h>
+#include <vector>
+#include <cmath>
+#include <cstdio>
+using uint = unsigned int;
+#include "texture3d-kernel.cuh"
+#define CHECK(x) do{auto e=(x);if(e!=cudaSuccess){printf("CUDA ERROR %s\n",cudaGetErrorString(e));return 2;}}while(0)
+int main(){std::vector<unsigned char>data(128);for(int i=0;i<128;i++)data[i]=(i*37+(i/8)*13)%256;cudaArray_t array;auto extent=make_cudaExtent(8,4,4);auto channel=cudaCreateChannelDesc<unsigned char>();CHECK(cudaMalloc3DArray(&array,&channel,extent));cudaMemcpy3DParms copy={};copy.srcPtr=make_cudaPitchedPtr(data.data(),8,8,4);copy.dstArray=array;copy.extent=extent;copy.kind=cudaMemcpyHostToDevice;CHECK(cudaMemcpy3D(&copy));std::vector<unsigned>out(17*9+16,0xdeadbeef);unsigned* output;CHECK(cudaMalloc(&output,out.size()*4));
+ for(bool linear:{false,true}){cudaResourceDesc resource={};resource.resType=cudaResourceTypeArray;resource.res.array.array=array;cudaTextureDesc desc={};desc.normalizedCoords=1;desc.filterMode=linear?cudaFilterModeLinear:cudaFilterModePoint;desc.readMode=cudaReadModeNormalizedFloat;for(int i=0;i<3;i++)desc.addressMode[i]=cudaAddressModeWrap;cudaTextureObject_t texture;CHECK(cudaCreateTextureObject(&texture,&resource,&desc,nullptr));
+ for(float w:{-.25f,.13f,.5f,1.25f}){std::fill(out.begin(),out.end(),0xdeadbeef);CHECK(cudaMemcpy(output,out.data(),out.size()*4,cudaMemcpyHostToDevice));d_render<<<dim3(3,2),dim3(8,8)>>>(output,17,9,w,texture);CHECK(cudaGetLastError());CHECK(cudaDeviceSynchronize());CHECK(cudaMemcpy(out.data(),output,out.size()*4,cudaMemcpyDeviceToHost));auto at=[&](int x,int y,int z){return data[(((z%4+4)%4)*4+(y%4+4)%4)*8+(x%8+8)%8];};int maxError=0;for(int i=0;i<int(out.size());i++){if(i>=17*9){if(out[i]!=0xdeadbeef)return 1;continue;}double coords[3]={double(i%17)/17*8,double(i/17)/9*4,double(w)*4},value=0;if(linear){int base[3];double f[3];for(int j=0;j<3;j++){coords[j]-=.5;base[j]=int(floor(coords[j]));f[j]=coords[j]-base[j];}for(int z=0;z<2;z++)for(int y=0;y<2;y++)for(int x=0;x<2;x++)value+=at(base[0]+x,base[1]+y,base[2]+z)*(x?f[0]:1-f[0])*(y?f[1]:1-f[1])*(z?f[2]:1-f[2]);}else value=at(int(floor(coords[0])),int(floor(coords[1])),int(floor(coords[2])));int error=abs(int(out[i])-int(value));maxError=std::max(maxError,error);if(error>(linear?2:1)){printf("FAIL filter=%d w=%g pixel=%d\n",linear,w,i);return 1;}}printf("%s w=%g PASS original texture3D, independent sampling reference and guards; max error %d/255\n",linear?"linear":"nearest",w,maxError);
+ }CHECK(cudaDestroyTextureObject(texture));}CHECK(cudaFree(output));CHECK(cudaFreeArray(array));return 0;}
+
