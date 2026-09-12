@@ -60,7 +60,7 @@ function analyse(functions, params) {
 class Emitter {
   constructor(ast, kernel, options, templates) {
     this.ast = ast; this.kernel = kernel; this.options = options; this.scopes = [new Map()]; this.temp = 0; this.loopDepth = 0; this.integerIntrinsics=new Set();
-    this.functions = new Map(); this.shared = []; this.templates=templates;this.helperCalls=new Map();
+    this.functions = new Map(); this.shared = []; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
     for (const f of ast.functions) {
       if (this.functions.has(f.name)) this.fail(`Duplicate function '${f.name}'.`, f);
       this.functions.set(f.name, f);
@@ -76,7 +76,23 @@ class Emitter {
     if(!Number.isSafeInteger(this.dynamicSharedBytes)||this.dynamicSharedBytes<0||this.dynamicSharedBytes>65536)this.fail('sharedMemoryBytes must be an integer in [0,65536].',kernel);
   }
   fail(message, n) { throw new CompileError(message, n?.token, this.ast.source); }
-  lookup(name, n) { for (let i = this.scopes.length - 1; i >= 0; --i) { const s = this.scopes[i].get(name); if (s) return s; } this.fail(`Unknown identifier '${name}'.`, n); }
+  lookup(name, n) {
+    for (let i = this.scopes.length - 1; i >= 0; --i) { const s = this.scopes[i].get(name); if (s) return s; }
+    const global=this.ast.constantGlobals.find(g=>g.name===name);
+    if(global){
+      if(!numeric(global.type))this.fail('Referenced constant globals require float, int or unsigned int scalar values.',n);
+      if(!this.globalSymbols.has(name)){
+        let value=0;
+        if(global.init){const literal=global.init.kind==='unary'&&['+','-'].includes(global.init.op)?global.init.value:global.init;if(literal.kind!=='literal')this.fail('Constant global initializers must be numeric literals with an optional sign.',global);value=constantValue(global.init);}
+        if(!Number.isFinite(value)||(global.type==='f32'&&!Number.isFinite(Math.fround(value)))||(global.type==='u32'&&(!Number.isInteger(value)||value<0||value>4294967295))||(global.type==='i32'&&(!Number.isInteger(value)||value<-2147483648||value>2147483647)))this.fail('Constant global initializer is outside its supported scalar range.',global);
+        const scalarName='constant.'+name,symbol={name:scalarName,type:global.type,code:'cw_params.c_'+name,constant:true,atomic:false,kind:'constant-global'};
+        this.globalSymbols.set(name,symbol);global.symbol=symbol;
+        this.constantScalars.push({name:scalarName,type:global.type,origin:'constant',field:'c_'+name,defaultValue:global.type==='f32'?Math.fround(value):value});
+      }
+      return this.globalSymbols.get(name);
+    }
+    this.fail(`Unknown identifier '${name}'.`, n);
+  }
   add(name, symbol, n, global = false) { const scope = global ? this.scopes[0] : this.scopes.at(-1); if (scope.has(name)) this.fail(`Duplicate identifier '${name}'.`, n); scope.set(name, symbol); return symbol; }
   common(a, b, n) {
     if (typeName(a) === typeName(b) && !isArray(a) && a !== 'void') return a;
@@ -377,13 +393,6 @@ class Emitter {
         this.add(p.name, symbol, p, true); p.symbol = symbol;
       }
     }
-    const uniformSize = scalars.length ? Math.ceil(scalars.length * 4 / 16) * 16 : 0;
-    if (uniformSize) {
-      header.push('struct CWParams {', ...scalars.map(s => `  p_${s.name}: ${s.type},`));
-      for (let i = scalars.length * 4; i < uniformSize; i += 4) header.push(`  cw_pad_${i}: u32,`);
-      header.push('}', `@group(0) @binding(${bindings.length}) var<uniform> cw_params: CWParams;`);
-    }
-    header.push(`const cw_block_size: vec3<u32> = vec3<u32>(${this.workgroupSize.map(x => `${x}u`).join(', ')});`);
     const helperLines = [];
     // Helpers cannot capture kernel arguments; explicit scalar arguments only.
     const kernelScope = this.scopes;
@@ -402,6 +411,14 @@ class Emitter {
     this.scopes = kernelScope; this.currentFunction = this.kernel;
     const main = this.body(this.kernel.body);
     emitHelpers();this.scopes=kernelScope;this.currentFunction=this.kernel;
+    for(const scalar of this.constantScalars)scalars.push({...scalar,offset:scalars.length*4});
+    const uniformSize=scalars.length?Math.ceil(scalars.length*4/16)*16:0;
+    if(uniformSize){
+      header.push('struct CWParams {',...scalars.map(s=>`  ${s.field||'p_'+s.name}: ${s.type},`));
+      for(let i=scalars.length*4;i<uniformSize;i+=4)header.push(`  cw_pad_${i}: u32,`);
+      header.push('}',`@group(0) @binding(${bindings.length}) var<uniform> cw_params: CWParams;`);
+    }
+    header.push(`const cw_block_size: vec3<u32> = vec3<u32>(${this.workgroupSize.map(x => `${x}u`).join(', ')});`);
     if(this.dynamicSharedBytes&&!this.dynamicSharedUsed)this.fail('sharedMemoryBytes was supplied but the kernel has no dynamic shared array.',this.kernel);
     // Runtime parameters preserve CUDA wraparound even when call arguments are literals;
     // WGSL rejects overflowing constant expressions in an inline multiply.

@@ -100,10 +100,17 @@ export class Parser {
     return {type, constant, shared, pointer,reference,external};
   }
   parse() {
-    const functions = [];
+    const functions = [],constantGlobals=[];
     while (this.peek().kind !== 'eof') {
       const token = this.peek();
       let templateParameter=null,templateKind=null;this.templateTypeName=null;this.templateParameterName=null;this.deferUnsupportedTypes=false;
+      if(this.match('__constant__')){
+        this.deferUnsupportedTypes=true;const valueType=this.type(),name=this.name();
+        if(valueType.pointer||valueType.reference||valueType.shared||valueType.external||this.is('['))this.fail('Constant globals currently support scalar values only.',token);
+        const init=this.match('=')?this.expression(2):null;this.take(';');
+        if(constantGlobals.some(g=>g.name===name))this.fail('Duplicate constant global.',token);
+        constantGlobals.push({kind:'constant-global',token,name,type:valueType.type,init});continue;
+      }
       if(this.match('extern')){const linkage=this.take();if(linkage.kind!=='string'||linkage.value!=='"C"')this.fail('Only extern "C" linkage on a single device function definition is supported.',linkage);if(!['__global__','__device__'].includes(this.peek().value))this.fail('extern "C" must precede a single __global__ or __device__ function definition; linkage blocks and templates are unsupported.');}
       if(this.match('template')){
         this.take('<');
@@ -150,7 +157,7 @@ export class Parser {
       functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads,templateParameter,templateKind,...(specializationArgument!==undefined?{specializationArgument}:{})});
     }
     if (!functions.some(f => f.qualifier === '__global__')) this.fail('No __global__ kernel was found.');
-    return {kind: 'module', functions, typeTraits:[...this.typeTraits.values()], source: this.source};
+    return {kind: 'module', functions, constantGlobals,typeTraits:[...this.typeTraits.values()], source: this.source};
   }
   block() { const token = this.take('{'), body = []; while (!this.is('}')) { if (this.peek().kind === 'eof') this.fail('Unclosed block.'); body.push(this.statement()); } this.take('}'); return {kind: 'block', token, body}; }
   declaration(semicolon = true) {

@@ -98,7 +98,7 @@ class Context {
     }
     const helper=this.artifact.ast.functions.find(x=>x.name===name);
     if(!helper)throw new Error(`No CPU implementation of ${name}.`);
-    const env=new Map();helper.params.forEach((p,i)=>env.set(p.symbol,p.reference?{get value(){return args[i].get();},set value(v){args[i].set(v);}}:{value:convert(args[i],p.type)}));
+    const env=new Map([...this.env].filter(([symbol])=>symbol.kind==='constant-global'));helper.params.forEach((p,i)=>env.set(p.symbol,p.reference?{get value(){return args[i].get();},set value(v){args[i].set(v);}}:{value:convert(args[i],p.type)}));
     const child=new Context(this.artifact,env,this.ids,this.budget-this.steps),result=yield* child.statement(helper.body);this.steps+=child.steps;
     return convert(result?.value,helper.result);
   }
@@ -128,6 +128,7 @@ export function executeCPU(artifact,buffers,scalars,workgroups,{instructionBudge
   const grid=Array.isArray(workgroups)?[...workgroups]:[workgroups];while(grid.length<3)grid.push(1);
   if(grid.some(x=>!Number.isInteger(x)||x<0)||grid.length!==3)throw new RangeError('Invalid workgroup shape.');
   const block=artifact.metadata.workgroupSize,baseEnv=new Map();
+  for(const global of artifact.ast.constantGlobals)if(global.symbol){const meta=artifact.metadata.scalars.find(s=>s.name===global.symbol.name),value=Object.hasOwn(scalars,meta.name)?scalars[meta.name]:meta.defaultValue;if(!Number.isFinite(value))throw new Error('Invalid constant global '+meta.name);baseEnv.set(global.symbol,{value:convert(value,global.type)});}
   for(const p of artifact.kernel.params){
     if(p.pointer){if(!ArrayBuffer.isView(buffers[p.name]))throw new Error(`Missing CPU buffer ${p.name}.`);baseEnv.set(p.symbol,{value:new BufferView(buffers[p.name],p.type)});}
     else{if(!Number.isFinite(scalars[p.name]))throw new Error(`Missing/invalid scalar ${p.name}.`);baseEnv.set(p.symbol,{value:convert(scalars[p.name],p.type)});}

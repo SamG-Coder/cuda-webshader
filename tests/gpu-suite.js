@@ -63,6 +63,23 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
       }finally{await runtime.idle();runtime.destroyBuffer(positions);}
     }
   });
+  await run('NVIDIA N-body interaction reads constant uniforms with per-dispatch snapshots',async()=>{
+    const files=['nbody-vector-traits.cuh','nbody-rsqrt.cuh','nbody-interaction.cuh','constant-globals.cu'],source=(await Promise.all(files.map(async f=>await(await fetch('/tests/'+f)).text()))).join('\n');
+    const kernel=await runtime.kernel(source,{workgroupSize:[128,1,1]});
+    for(const n of [1,129,1025]){
+      const out=runtime.createBuffer(new Float32Array((n*3+4)*4).fill(-12345)),softening=[0,0.25,2];
+      try{
+        const invocation=kernel.bind({out},{n,offset:0}),batch=runtime.batch();
+        for(let pass=0;pass<3;pass++){invocation.setScalars({n,offset:pass*n,...(pass?{'constant.softeningSquared':softening[pass]}:{})});batch.dispatch(invocation,[Math.ceil(n/128)]);}batch.submit();
+        const output=await runtime.read(out);
+        for(let pass=0;pass<3;pass++)for(let i=0;i<n;i++){
+          const r=[2-(i%8)*0.125,-1-(i%3)*0.25,0.5-(i%5)*0.125],s=1.5/Math.pow(r.reduce((sum,x)=>sum+x*x,softening[pass]),1.5),expected=[...r.map(x=>x*s),1];
+          for(let c=0;c<4;c++){const actual=output[(pass*n+i)*4+c];if(!Number.isFinite(actual)||Math.abs(actual-expected[c])>3e-6+2e-6*Math.abs(expected[c]))throw Error('N-body interaction mismatch');}
+        }
+        if(!output.slice(n*12).every(v=>v===-12345))throw Error('N-body interaction guard changed');
+      }finally{await runtime.idle();runtime.destroyBuffer(out);}
+    }
+  });
   // Explicitly exercise workgroup variants used by the tuner, beyond the catalogue defaults.
   for(const block of [64,256])await run(`SAXPY workgroup specialization ${block}`,async()=>{
     const n=1031,xData=Float32Array.from({length:n},(_,i)=>i*0.125),x=runtime.createBuffer(xData),y=runtime.createBuffer(n*4);

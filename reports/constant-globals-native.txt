@@ -1,0 +1,9 @@
+n=1 softening=0 PASS original N-body interaction and guards; maxError=3.56472244e-08
+n=1 softening=0.25 PASS original N-body interaction and guards; maxError=6.03406739e-08
+n=1 softening=2 PASS original N-body interaction and guards; maxError=6.51735002e-09
+n=129 softening=0 PASS original N-body interaction and guards; maxError=1.37716205e-07
+n=129 softening=0.25 PASS original N-body interaction and guards; maxError=9.82700882e-08
+n=129 softening=2 PASS original N-body interaction and guards; maxError=5.2706086e-08
+n=1025 softening=0 PASS original N-body interaction and guards; maxError=1.37716205e-07
+n=1025 softening=0.25 PASS original N-body interaction and guards; maxError=9.82700882e-08
+n=1025 softening=2 PASS original N-body interaction and guards; maxError=5.2706086e-08

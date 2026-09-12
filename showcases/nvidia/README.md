@@ -264,8 +264,9 @@ deduction is supported for direct scalar/vector template parameters, including
 references with the existing restrictions. Conflicting deductions are rejected;
 integer arguments and non-deduced trait contexts still need explicit arguments
 unless another parameter determines the type. Explicit device-function
-specializations are selected for the deduced or supplied argument. Constant
-globals and shared-memory helper access remain unsupported. The dependent vector
+specializations are selected for the deduced or supplied argument. Scalar constant
+globals are supported as uniforms; constant arrays and shared-memory helper access
+remain unsupported. The dependent vector
 traits now resolve through typedef-only template structs and explicit type
 specializations; unsupported value types still fail if selected.
 This does not add N-body to the verified catalog. The feature regression fixture
@@ -287,3 +288,17 @@ are preserved in `tests/nbody-rsqrt.cuh`. The helper regression fixture calls it
 with a float argument and verifies the float specialization in native CUDA and
 hardware WebGPU. Unused double specialization declarations can be parsed without
 enabling double-precision execution; selected unsupported value types still fail.
+
+Scalar `__constant__` declarations are supplied through namespaced scalar keys
+such as `constant.softeningSquared`. Only referenced float/int/unsigned-int globals
+receive uniform slots. Missing values use a numeric declaration initializer or
+zero; values are captured per dispatch. CUDA host calls such as
+`cudaMemcpyToSymbol` are not executed by the browser.
+The original `bodyBodyInteraction` helper and softening getter/declarations are
+retained in `tests/nbody-interaction.cuh`. A project test wrapper checks pairwise
+accelerations for 1, 129 and 1,025 records at softening values 0, 0.25 and 2,
+against an independent double-precision force calculation, with untouched output
+guards. Native results are in `reports/constant-globals-native.txt`; build
+`tests/constant-globals-native.cu` with the NVCC flags above. The hardware WebGPU
+suite also checks multiple constant values in the same dispatch batch. This
+verifies the interaction helper, not the complete N-body integration pipeline.
