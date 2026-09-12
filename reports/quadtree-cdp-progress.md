@@ -78,3 +78,24 @@ The complete unchanged quadtree now parses past Points and stops at the const
 float2 reference returned by Bounding_box::get_max. Reference-return accessors,
 remaining record bindings/constructors, and recursive launch support are still
 required before this candidate gets a showcase card.
+
+## Const field-reference getters
+
+Const getters with exactly `return field;` retain an addressable scalar, vector
+or nested-record field. Const local references bind that address once, preserving
+later owner mutations instead of snapshotting a value. Access through the getter
+remains const, and public getters may expose private fields without exposing
+writable access. Nested mutable class methods now receive the address of their
+member receiver rather than the enclosing record.
+
+The original Bounding_box and Quadtree_node bodies pass a 32-thread GPU test:
+64 nested references remain live when set_bounding_box changes the owning node.
+CPU reference tests independently check the same values and rejection of writes
+through const references. This verifies local owners; mutable references into
+storage records still require their existing supported binding rules.
+
+Validation: 650 unit tests, 211 real NVIDIA WebGPU tests, and the Bezier and
+path-tracer sandbox regressions pass. The unchanged complete-source probe now
+stops at Parameters, whose struct contains const fields and constructors. That
+record representation and the remaining recursive launch machinery are still
+required before adding a quadtree showcase.

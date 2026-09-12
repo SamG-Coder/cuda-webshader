@@ -176,3 +176,10 @@ test('Public index references can expose private arrays without exposing their f
  assert.throws(()=>compile(s.replace('out[0]=v[1]','out[0]=v.data[1]'),{entry:'k'}),/Private/);
  assert.throws(()=>compile(s.replace('public:','public:').replace('__device__ float& operator[]','private:__device__ float& operator[]'),{entry:'k'}),/Private/);
 });
+
+test('Original nested field getters preserve const references after owner mutation',()=>{
+ const s=readFileSync('tests/quadtree-field-references.cu','utf8'),a=compile(s,{entry:'field_references',workgroupSize:[32]}),out=new Float32Array(96);executeCPU(a,{out},{},[1]);for(let i=0;i<32;i++)assert.deepEqual([...out.slice(i*3,i*3+3)],[1,i+2,i+3]);
+ assert.throws(()=>compile(s.replace('out[i*3]=corner.x;','corner.x=5.f;'),{entry:'field_references'}),/const/);
+ assert.throws(()=>compile(s.replace('const float2 &corner','float2 &corner'),{entry:'field_references'}),/const/);
+ assert.throws(()=>compile(s.replace('return m_p_max;','return make_float2(0.f,0.f);'),{entry:'field_references'}),/exactly return field/);
+});

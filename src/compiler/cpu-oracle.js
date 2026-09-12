@@ -43,6 +43,7 @@ class Context {
   constructor(artifact,env,ids,budget){this.artifact=artifact;this.env=env;this.ids=ids;this.budget=budget;this.steps=0;this.objectHeaps=new Map();}
   tick(){if(++this.steps>this.budget)throw new Error('CPU oracle instruction budget exceeded; possible nonterminating kernel.');}
   *ref(n){
+    if(n.classIdentity)return yield* this.ref(n.classIdentity);
     if(n.kind==='object-deref'){const handle=n.virtualHandleCode?this.virtualHandles.get(n.virtualHandleCode):yield* this.eval(n.value),index=(handle&1048575)-1,heap=this.objectHeaps.get(n.heapName);if(!handle||!heap?.alive[index])throw Error('Invalid object reference.');return {get:()=>heap.values[index],set:v=>{heap.values[index]=structuredClone(v);}};}
     if(n.packedPairView){const p=n.packedPairView,base=this.env.get(p.pointerBaseSymbol)?.value,offset=(p.pointerOffset?yield* this.eval(p.pointerOffset):0)+2*(yield* this.eval(n.index));return {get:()=>base.get(offset)|(base.get(offset+1)<<8),set:value=>{base.set(offset,value&255);base.set(offset+1,(value>>>8)&255);}};}
     if(n.scalarVectorView){const p=n.scalarVectorView,base=this.env.get(p.pointerBaseSymbol)?.value,offset=(p.pointerOffset?yield* this.eval(p.pointerOffset):0)+n.scalarVectorCount*(yield* this.eval(n.index));return {get:()=>Array.from({length:n.scalarVectorCount},(_,i)=>base.get(offset+i)),set:value=>{for(let i=0;i<n.scalarVectorCount;i++)base.set(offset+i,value[i]);}};}
@@ -155,7 +156,7 @@ class Context {
     this.tick();
     switch(n.kind){
       case 'block':for(const s of n.body){const signal=yield* this.statement(s);if(signal)return signal;}return;
-      case 'decl':if(n.aliasBase){let base=this.env.get(n.aliasBase).value;if(Array.isArray(base))base=new BufferView(base,n.aliasBase.type.element);const offset=convert(base.offset+convert(n.aliasOffset?yield* this.eval(n.aliasOffset):0,'i32'),'i32');if(!Number.isInteger(offset))throw new RangeError('CPU alias needs an integer offset.');this.env.set(n.symbol,{value:new BufferView(base.data,base.type,offset)});}else if(!n.shared)this.env.set(n.symbol,{value:n.init?convert(yield* this.eval(n.init),n.resolvedType):zero(n.resolvedType,this.artifact.ast.structs)});return;
+      case 'decl':if(n.localReference){const ref=yield* this.ref(n.init);this.env.set(n.symbol,{get value(){return ref.get();},set value(v){ref.set(v);}});}else if(n.aliasBase){let base=this.env.get(n.aliasBase).value;if(Array.isArray(base))base=new BufferView(base,n.aliasBase.type.element);const offset=convert(base.offset+convert(n.aliasOffset?yield* this.eval(n.aliasOffset):0,'i32'),'i32');if(!Number.isInteger(offset))throw new RangeError('CPU alias needs an integer offset.');this.env.set(n.symbol,{value:new BufferView(base.data,base.type,offset)});}else if(!n.shared)this.env.set(n.symbol,{value:n.init?convert(yield* this.eval(n.init),n.resolvedType):zero(n.resolvedType,this.artifact.ast.structs)});return;
       case 'decls':for(const d of n.declarations)yield* this.statement(d);return;
       case 'expr':yield* this.eval(n.value);return;
       case 'if':if(yield* this.eval(n.condition))return yield* this.statement(n.yes);else if(n.no)return yield* this.statement(n.no);return;

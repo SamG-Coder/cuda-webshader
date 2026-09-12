@@ -33,10 +33,11 @@ export function parseValueClass(p) {
     if(p.is('(')) {
       const mutableSelf=spec.reference&&!spec.constant&&spec.type===record.type;
       const selfReference=spec.reference&&spec.constant&&spec.type===record.type;
+      const fieldReference=spec.reference&&spec.constant&&!selfReference;
       if(mutableSelf&&!['+=','-=','*=','/='].includes(operator))p.fail('Mutable self references currently require compound operators.',start);
       const indexedReference=spec.reference&&!spec.constant&&operator==='[]';
       if(selfReference&&!['+','-'].includes(operator))p.fail('Const self-reference returns currently require a unary class operator.',start);
-      if(!device||spec.pointer||spec.reference&&!selfReference&&!indexedReference&&!mutableSelf||spec.shared||spec.external)p.fail('Value-class methods require value returns or supported receiver/array references.',start);
+      if(!device||spec.pointer||spec.reference&&!selfReference&&!indexedReference&&!mutableSelf&&!fieldReference||spec.shared||spec.external)p.fail('Value-class methods require value returns or supported receiver/array references.',start);
       p.take('(');const params=[];
       if(!p.is(')'))do{const t=p.peek(),type=p.type(),param=p.name();capturedScalar(p,type);if(type.pointer&&type.type.startsWith('cw_objectptr_')){type.pointer=false;type.type=type.type.replace('cw_objectptr_','cw_objectlist_');(p.objectListTypes??=new Set()).add(type.type);}if(type.pointer&&!type.type.startsWith('cw_struct_')||type.shared||type.external)p.fail('Value-class method parameters require values, references or record pointers.',t);params.push({kind:'param',token:t,name:param,...type});}while(p.match(','));
       p.take(')');const constant=!!p.match('const');
@@ -47,6 +48,10 @@ export function parseValueClass(p) {
       const initializers=[];
       if(p.match(':')){if(!constructor)p.fail('Member initializer lists require a constructor.',start);do{const token=p.peek(),field=p.name();p.take('(');const args=[];if(!p.is(')'))do{args.push(p.expression(2));}while(p.match(','));p.take(')');if(initializers.some(i=>i.field===field))p.fail('Duplicate member initializer.',token);initializers.push({field,args,token});}while(p.match(','));}
       const declaration=!!p.match(';'),body=declaration?null:p.block(),helper=constructor?'cw_ctor_'+name:'cw_method_'+name+'_'+(operator?{'+':'positive','-':'negative','[]':'index','+=':'add_assign','-=':'subtract_assign','*=':'multiply_assign','/=':'divide_assign'}[operator]:member);
+      if(fieldReference){
+        const ret=body?.body[0];if(!constant||params.length||body?.body.length!==1||ret?.kind!=='return'||ret.value?.kind!=='id')p.fail('Const field reference getters require exactly return field and no arguments.',start);
+        record.methods.push({name:member,access,fieldReference:true,field:ret.value.name,result:spec.type,token:start});p.match(';');continue;
+      }
       if(indexedReference){
         if(!body)p.fail('Reference index accessors require an inline definition.',start);
         const ret=body.body[0],value=ret?.value;
@@ -74,6 +79,7 @@ export function parseValueClass(p) {
   p.take('}');p.take(';');
   if(!record.fields.length){if(!record.abstractMethods?.length||functions.length)p.fail('Empty classes require a pure virtual interface.',token);record.interfaceOnly=true;record.complete=true;return [];}
   if(record.abstractMethods?.length)p.fail('Abstract classes with fields are unsupported.',token);
+  for(const method of record.methods.filter(m=>m.fieldReference)){const field=record.fields.find(f=>f.name===method.field);if(!field||field.dimensions.length||field.type!==method.result)p.fail('Const field getter must return a matching field.',method.token);}
   for(const method of record.methods.filter(m=>m.indexedReference)){const field=record.fields.find(f=>f.name===method.field);if(!field||field.dimensions.length!==1||field.type!==method.result)p.fail('Reference indexing must return an element of a matching array field.',method.token);}
   if(!functions.some(f=>f.classConstructor)&&record.fields.some(f=>f.type.startsWith('cw_struct_'))){
     const helper='cw_ctor_'+name;record.constructors.push(helper);

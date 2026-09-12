@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-12T20:31:31.730Z",
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "results": [
+    {
+      "name": "Original quadtree getters retain nested const field references",
+      "pass": true,
+      "references": 64,
+      "ownerMutationVisible": true,
+      "originalBoundingBoxAndNode": true,
+      "wallMs": 25.0450000166893
+    }
+  ]
+}

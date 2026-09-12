@@ -567,6 +567,12 @@ class Emitter {
     if(n.callee.kind==='member'&&n.callee.member!=='sync'){
       const receiver=n.callee.base,value=this.expr(receiver),record=this.structs.get(value.type),method=record?.methods?.find(m=>m.name===n.callee.member&&!m.indexedReference);
       if(!method)this.fail('Unknown or unsupported value-class method.',n);
+      if(method.fieldReference){
+        if(n.args.length||!value.rootSymbol||!['local','reference','buffer','buffer-alias','shared'].includes(value.rootSymbol.kind))this.fail('Field reference getter requires a stable receiver and no arguments.',n);
+        if(method.access==='private'&&this.currentFunction.classOwner!==record.name)this.fail('Private class getter is inaccessible here.',n);
+        const field={kind:'member',base:receiver,member:method.field,token:n.token,accessorOwner:record.name};n.classIdentity=field;n.fieldReference=true;
+        const result=this.expr(field);return this.result(n,result.type,result.code,result.pre,{rootSymbol:{...result.rootSymbol,constant:true},fieldReference:true});
+      }
       n.args=[receiver,...n.args];n.callee={kind:'id',token:n.token,name:method.helper};
     }
     const groupSync=n.callee.kind==='id'&&n.callee.name==='cooperative_groups::sync';
@@ -752,8 +758,8 @@ class Emitter {
       if(s?.kind==='shared'&&s.atomic)this.fail('Atomic shared values cannot bind ordinary references.',node);
       if(s?.referenceSpace==='storage'){if(!p.constant)this.fail('Mutable helper references into persistent objects are not yet supported.',node);const temp='cw_storage_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
       if(p.constant){if(node.kind==='member'&&['cw_uchar2','cw_uchar4'].includes(node.base.type)&&p.type==='cw_uchar'){const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: cw_uchar = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||['cw_uchar2','cw_uchar4'].includes(p.type)||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s)&&!references.get(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.set(s,true);if(s?.kind==='reference')return node.kind==='id'?s.pointerCode:'&'+a.code;if(s?.kind==='shared'){if(!['id','index'].includes(node.kind))this.fail('Shared references require whole scalars/vectors or array elements.',node);return '&'+a.code;}if(s?.kind==='local'&&!s.constant&&['id','member','object-deref'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
-      if(!['id','index','object-deref'].includes(node.kind)||!s||!['local','reference','shared'].includes(s.kind)||s.constant||isArray(a.type)||!(numeric(a.type)||vectorLength(a.type)||this.structs.has(a.type))||a.type!==p.type)this.fail('Reference arguments require a mutable scalar/vector or array element in local or shared memory, of the exact type.',node);
-      if(references.has(s))this.fail('Aliased reference arguments are unsupported.',node);references.set(s,false);return s.kind==='reference'?s.pointerCode:`&${a.code}`;
+      if(!(['id','index','object-deref'].includes(node.kind)||node.kind==='member'&&this.structs.has(a.type))||!s||!['local','reference','shared'].includes(s.kind)||s.constant||isArray(a.type)||!(numeric(a.type)||vectorLength(a.type)||this.structs.has(a.type))||a.type!==p.type)this.fail('Reference arguments require a mutable scalar/vector or array element in local or shared memory, of the exact type.',node);
+      if(references.has(s))this.fail('Aliased reference arguments are unsupported.',node);references.set(s,false);return s.kind==='reference'&&node.kind==='id'?s.pointerCode:`&${a.code}`;
     });
     return this.result(n, helper.result, `f_${helper.name}(${[...codes.filter(c=>c!==null),'cw_thread','cw_block','cw_grid'].join(', ')})`, pre);
   }
@@ -855,7 +861,13 @@ class Emitter {
       if(n.constant)this.fail('Const shared wrapper views are not yet supported.',n);
     }
     if(n.external&&(!n.shared||n.pointer||n.reference||n.constant||n.init||n.dimensions.length!==1||n.dimensions[0]!==null))this.fail('extern is supported only as extern __shared__ T name[].',n);
-    if(n.reference)this.fail('References are supported only as helper parameters, not local declarations.',n);
+    if(n.reference){
+      if(!n.constant||n.pointer||n.shared||n.external||n.dimensions.length||!n.init)this.fail('Local references currently require const and a stable initializer.',n);
+      const value=this.expr(n.init),root=value.rootSymbol;
+      if(value.type!==n.type||!root||!['local','reference','buffer','buffer-alias','shared'].includes(root.kind)||root.atomic||!(['id','member','index'].includes(n.init.kind)||value.fieldReference))this.fail('Const local reference needs an addressable value of the same type.',n);
+      const pointer='cw_ref_'+this.temp++,symbol={...root,name:n.name,type:n.type,code:`(*${pointer})`,pointerCode:pointer,kind:'reference',constant:true,referenceSpace:root.referenceSpace||(['buffer','buffer-alias'].includes(root.kind)?'storage':root.kind==='shared'?'workgroup':'function')};
+      this.add(n.name,symbol,n);n.symbol=symbol;n.localReference=true;n.resolvedType=n.type;return [...value.pre,`let ${pointer} = &${value.code};`];
+    }
     if(n.pointer&&n.dimensions.length){
       const length=n.dimensions.length===1?constantValue(n.dimensions[0]):null;
       if(n.shared||n.external||n.init||!Number.isInteger(length)||length<1||length>256||!(numeric(n.type)||vectorLength(n.type)))this.fail('Pointer arrays require 1..256 local slots and scalar/vector shared pointees.',n);
