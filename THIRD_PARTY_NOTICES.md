@@ -123,3 +123,8 @@ and BSD-3-Clause notice from CUDA Samples commit
 `cpp/5_Domain_Specific/SobelFilter/SobelFilter_kernels.cu`.
 The neighbourhood captures derive from this helper; wrappers, compiler support
 and validation harnesses are original MIT project code.
+
+`showcases/sobel/kernel.cu` and `tests/sobel-image-kernel.cuh` retain the same
+NVIDIA notice and unchanged `ComputeSobel`, `SobelTex` and `SobelCopyImage`
+functions. `showcases/sobel/teapot.pgm` is the original SobelFilter input under
+that BSD-3-Clause license. Image captures derive from those sources and data.

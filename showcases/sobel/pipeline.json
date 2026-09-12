@@ -1,0 +1,57 @@
+{
+  "pipeline": {
+    "buffers": {
+      "output": {
+        "type": "cw_uchar",
+        "records": 1048576,
+        "fill": "zero"
+      }
+    },
+    "textures": {
+      "image": {
+        "kind": "image-u8",
+        "dimensions": [
+          1024,
+          1024
+        ],
+        "source": "showcases/sobel/teapot.pgm",
+        "filter": "nearest",
+        "addressMode": "clamp-to-edge",
+        "normalizedCoords": false
+      }
+    },
+    "steps": [
+      {
+        "entry": "SobelTex",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          1024,
+          1,
+          1
+        ],
+        "bindings": {
+          "pSobelOriginal": "output",
+          "tex": "image"
+        },
+        "scalars": {
+          "Pitch": 1024,
+          "w": 1024,
+          "h": 1024,
+          "fScale": 1
+        }
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "output",
+      "width": 1024,
+      "height": 1024,
+      "format": "gray-u8",
+      "flipY": true
+    }
+  }
+}

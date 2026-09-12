@@ -1,0 +1,8 @@
+PASS SobelTex 31x17 pitch=34 scale=1, all pixels and guards.
+PASS SobelCopyImage 31x17 pitch=34 scale=1, all pixels and guards.
+PASS SobelTex 61x65 pitch=64 scale=1, all pixels and guards.
+PASS SobelCopyImage 61x65 pitch=64 scale=1, all pixels and guards.
+PASS SobelTex 1024x1024 pitch=1024 scale=1, all pixels and guards.
+PASS SobelCopyImage 1024x1024 pitch=1024 scale=1, all pixels and guards.
+PASS SobelTex 1024x1024 pitch=1024 scale=0.25, all pixels and guards.
+PASS SobelCopyImage 1024x1024 pitch=1024 scale=0.25, all pixels and guards.

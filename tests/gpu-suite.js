@@ -1,3 +1,4 @@
+import {checkSobelImages} from './sobel-image-gpu.js';
 import {checkShortValues} from './short-values-gpu.js';
 import {checkSobelNeighborhoods} from './sobel-neighborhoods-gpu.js';
 import {checkByteStores} from './byte-stores-gpu.js';
@@ -192,6 +193,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Complete implicit marching-cubes GPU pipeline matches native CUDA',()=>checkMarchingPipeline(runtime));
   await run('Hierarchical exclusive scan matches native CUDA',()=>checkExclusiveScan(runtime));
   await run('Original shared marching-cubes triangle generation matches native CUDA',()=>checkMarchingTriangles(runtime));
+  await run('Original NVIDIA Sobel image kernels match native CUDA',()=>checkSobelImages(runtime));
   await run('Short narrowing, promotion and launch values match native CUDA',()=>checkShortValues(runtime));
   await run('Original NVIDIA ComputeSobel matches native CUDA across five scales',()=>checkSobelNeighborhoods(runtime));
   await run('Packed byte stores preserve neighbouring pixels and match native CUDA',()=>checkByteStores(runtime));

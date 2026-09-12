@@ -3,7 +3,8 @@
 Candidate source: CUDA Samples commit `5443602d89ed99aede2e4b7bf329daddeadb320e`,
 `cpp/5_Domain_Specific/SobelFilter/SobelFilter_kernels.cu`.
 
-This is a compiler foundation milestone, not a runnable full-image showcase.
+The texture-based image path now runs as a standalone sandbox showcase.
+The shared-memory variant remains in scope and unfinished.
 The original `ComputeSobel` device helper is preserved byte-for-byte in
 `tests/sobel-compute.cuh`, including its NVIDIA BSD-3-Clause notice.
 
@@ -24,18 +25,28 @@ The original `ComputeSobel` device helper is preserved byte-for-byte in
 - The unchanged NVIDIA `ComputeSobel` helper matches native CUDA exactly for
   4,099 neighbourhoods at each scale -1, 0, 0.25, 1 and 4, including 21 guard bytes.
   Native and CPU-oracle tests also check independent stencil equations.
-- 491 unit tests and 146 hardware GPU checks pass. The adapter reports NVIDIA
+- 495 unit tests and 147 hardware GPU checks pass. The adapter reports NVIDIA
   Blackwell; software adapters were not requested. Compilation of the existing
   catalogue passes.
 
-## Remaining work before a showcase
+## Image path completed
 
-1. `tex2D<unsigned char>` with CUDA element-value point sampling.
-2. Pitched byte-address pointer casts retained in the original image kernels.
-3. Module-scope dynamic shared byte storage for `SobelShared`.
-4. Full original image-kernel native/WebGPU comparisons and a sandbox pipeline.
+`tex2D<unsigned char>` now uses unnormalized point loads from an `r8uint`
+texture with clamp addressing. Same-type byte storage supports the original
+pitched `char*` round-trip casts. Eight full-image captures from unchanged
+`SobelTex` and `SobelCopyImage` match native CUDA exactly, including pitch
+padding and guards. The sandbox shows NVIDIA's original 1024² teapot with
+editable scale, generated shader comparison and grayscale byte output.
+Every displayed pixel was checked against the GPU result.
+See `showcases/sobel/README.md` for launch settings and captured evidence.
+
+## Remaining work
+
+1. Module-scope dynamic shared byte storage for `SobelShared`.
+2. Checked aligned casts from byte offsets back to `uchar4*`.
+3. Full native/WebGPU comparison of that shared-memory image path.
 
 Short storage pointers and dynamic shared short arrays remain explicit rejections;
 there is no packed 16-bit storage ABI. The tested float-to-short casts stay in
 range. General C++/CUDA host execution is outside the compiler's scope.
-No full Sobel image result or performance comparison is claimed in this milestone.
+No performance comparison is claimed by these correctness checks.
