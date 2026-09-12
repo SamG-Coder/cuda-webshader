@@ -17,6 +17,7 @@ const MAP = { float: 'f32', int: 'i32', uint: 'u32', bool: 'bool', void: 'void',
 TYPES.add('uchar');MAP.uchar='cw_uchar';
 TYPES.add('short');MAP.short='cw_short';TYPES.add('ushort');MAP.ushort='cw_ushort';
 TYPES.add('uchar4');MAP.uchar4='cw_uchar4';
+TYPES.add('uchar2');MAP.uchar2='cw_uchar2';
 TYPES.add('size_t');MAP.size_t='cw_size64';
 TYPES.add('cudaExtent');MAP.cudaExtent='cw_extent';
 TYPES.add('cudaTextureObject_t');MAP.cudaTextureObject_t='texture3d';

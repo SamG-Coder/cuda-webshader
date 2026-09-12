@@ -98,12 +98,13 @@ export class GpuRuntime {
     const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView({dimension:'2d-array'}),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode}),format,dimension:'2d-array',width,height,depth:layers,storage,normalizedCoords:true,filter};
     this.textures.add(resource);this.stats.dataBytesUploaded+=data?.byteLength||0;return resource;
   }
-  createByteTexture2D(data,{width,height,label='CUDA byte element texture'}={}) {
+  createByteTexture2D(data,{width,height,components=1,label='CUDA byte element texture'}={}) {
     this.assertAlive();
-    if(![width,height].every(n=>Number.isInteger(n)&&n>0&&n<=this.device.limits.maxTextureDimension2D)||!(data instanceof Uint8Array)||data.length!==width*height)throw new RangeError('Byte texture requires Uint8Array matching valid width and height.');
-    const gpuTexture=this.device.createTexture({label,size:[width,height,1],dimension:'2d',format:'r8uint',usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST});
-    this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width,rowsPerImage:height},[width,height,1]);
-    const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:'nearest',magFilter:'nearest'}),format:'r8uint',dimension:'2d',width,height,depth:1,normalizedCoords:false,filter:'nearest',addressMode:'clamp-to-edge'};
+    if(![1,2].includes(components)||![width,height].every(n=>Number.isInteger(n)&&n>0&&n<=this.device.limits.maxTextureDimension2D)||!(data instanceof Uint8Array)||data.length!==width*height*components)throw new RangeError('Byte texture requires Uint8Array matching valid width and height.');
+    const format=components===2?'rg8uint':'r8uint';
+    const gpuTexture=this.device.createTexture({label,size:[width,height,1],dimension:'2d',format,usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST});
+    this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width*components,rowsPerImage:height},[width,height,1]);
+    const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:'nearest',magFilter:'nearest'}),format,dimension:'2d',width,height,depth:1,normalizedCoords:false,filter:'nearest',addressMode:'clamp-to-edge'};
     this.textures.add(resource);this.stats.dataBytesUploaded+=data.byteLength;return resource;
   }
   createUintTexture2D(data,{width,height,label='CUDA unsigned element texture'}={}) {
@@ -237,7 +238,7 @@ export class GpuRuntime {
         const errors=info.messages.filter(m=>m.type==='error');
         if(errors.length)throw new Error(`${artifact.name}: WGSL validation failed\n`+errors.map(m=>`${m.lineNum}:${m.linePos} ${m.message}`).join('\n'));
         const entries=artifact.metadata.bindings.map(b=>({binding:b.binding,visibility:GPUShaderStage.COMPUTE,buffer:{type:b.readOnly?'read-only-storage':'storage',minBindingSize:Math.max(4,b.minBindingSize||b.stride)}}));
-        for(const t of artifact.metadata.textures||[])entries.push({binding:t.binding,visibility:GPUShaderStage.COMPUTE,texture:{sampleType:['r32uint','r8uint'].includes(t.format)?'uint':t.coordinates==='linear'?'unfilterable-float':'float',viewDimension:t.dimension,multisampled:false}},{binding:t.samplerBinding,visibility:GPUShaderStage.COMPUTE,sampler:{type:['linear','pixel-byte','pixel-uint'].includes(t.coordinates)?'non-filtering':'filtering'}});
+        for(const t of artifact.metadata.textures||[])entries.push({binding:t.binding,visibility:GPUShaderStage.COMPUTE,texture:{sampleType:['r32uint','r8uint','rg8uint'].includes(t.format)?'uint':t.coordinates==='linear'?'unfilterable-float':'float',viewDimension:t.dimension,multisampled:false}},{binding:t.samplerBinding,visibility:GPUShaderStage.COMPUTE,sampler:{type:['linear','pixel-byte','pixel-uint'].includes(t.coordinates)?'non-filtering':'filtering'}});
         for(const surface of artifact.metadata.surfaces||[])entries.push({binding:surface.binding,visibility:GPUShaderStage.COMPUTE,storageTexture:{access:'write-only',format:surface.format,viewDimension:surface.dimension}});
         if(artifact.metadata.uniformSize)entries.push({binding:artifact.metadata.uniformBinding,visibility:GPUShaderStage.COMPUTE,buffer:{type:'uniform',hasDynamicOffset:true,minBindingSize:artifact.metadata.uniformSize}});
         const layout=this.device.createBindGroupLayout({label:artifact.name,entries});

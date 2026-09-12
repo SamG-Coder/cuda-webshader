@@ -152,12 +152,12 @@
     {
       "entry": "nv12ToBGRplanarBatchKernel",
       "compiled": true,
-      "wgslLines": 137
+      "wgslLines": 138
     },
     {
       "entry": "resizeNV12BatchKernel",
-      "compiled": false,
-      "error": "Expected an expression. (33:19)\n        *(uchar2 *)p               = make_uchar2(tex2D<uint8_t>(texSrcLuma, px_fxScale, py_fyScale),\n                  ^"
+      "compiled": true,
+      "wgslLines": 74
     },
     {
       "entry": "resizeBGRplanarBatchKernel",

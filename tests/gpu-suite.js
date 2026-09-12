@@ -1,6 +1,7 @@
 import {checkLayered} from './layered-gpu.js';
 import {checkDeferredPointers} from './deferred-pointers-gpu.js';
 import {checkNv12Convert} from './nv12-convert-gpu.js';
+import {checkNv12Resize} from './nv12-resize-gpu.js';
 import {checkCubemap} from './cubemap-gpu.js';
 import {checkWalshFull} from './walsh-full-gpu.js';
 import {checkBinomial} from './binomial-gpu.js';
@@ -247,6 +248,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Original NVIDIA scalar layered textures match native CUDA',()=>checkLayered(runtime));
   await run('Deferred pointer assignments preserve batch and channel offsets',()=>checkDeferredPointers(runtime));
   await run('Original full-resolution NV12 conversion matches native CUDA',()=>checkNv12Convert(runtime));
+  await run('Original single-frame NV12 resize matches native byte output',()=>checkNv12Resize(runtime));
   await run('NVIDIA cubemap faces and edge filtering match native CUDA',()=>checkCubemap(runtime));
   await run('Complete NVIDIA Walsh convolution matches native CUDA',()=>checkWalshFull(runtime));
   await run('Original NVIDIA binomial options match all native outputs',()=>checkBinomial(runtime));

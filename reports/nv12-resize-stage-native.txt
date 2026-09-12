@@ -1,0 +1,1 @@
+Original NV12 resize stage: one 1920x1080 frame -> 640x480, 460800 bytes captured; full batch defect not bypassed or fixed

@@ -55,7 +55,16 @@ output or replace the full batch with a single-frame test.
   colour scale. Conversion reads only its own frame, so this streaming does
   not introduce texture-tile boundary changes. The focused conversion capture
   is separate from the invalid resize-first pipeline captures above.
-- NV12 resize requires `uchar2`, packed pair stores and byte-pair texture reads.
+- NV12 resize now compiles unchanged as well. Added local/helper `uchar2`
+  values, two-byte `sizeof`, byte-storage pointer views, race-safe pair stores,
+  and `tex2D<uchar2>` backed by an `rg8uint` point-sampled texture. Direct
+  `uchar2*` buffer parameters remain explicitly unsupported; byte storage
+  preserves the actual CUDA layout. A full-resolution single-frame stage
+  fixture runs the original wrapper and compares all 460,800 resized bytes
+  with WebGPU over three launches: every byte matches. This isolates the new
+  operations without claiming that the defective original 24-frame resize
+  workflow is correct. See `tests/nv12-resize-native.cu` and
+  `tests/nv12-resize-gpu.js`.
 - BGR resize now compiles unchanged. Deferred pointers initialized to `NULL`
   or literal zero are lowered only when every use follows an assignment and
   every assignment retains the same storage parameter. Ambiguous initialization,

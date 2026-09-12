@@ -12,6 +12,7 @@ function convert(value,type){
   if(type==='cw_short')return (Number(value)<<16)>>16;
   if(type==='cw_ushort')return Number(value)&65535;
   if(type==='cw_uchar')return Number(value)&255;
+  if(type==='cw_uchar2')return Number(value)&65535;
   if(type==='cw_uchar4')return Number(value)>>>0;
   if(type==='cw_f64')return Number(value);if(type==='f32')return f(Number(value));if(type==='u32')return typeof value==='bigint'?Number(BigInt.asUintN(32,value)):Number(value)>>>0;if(type==='i32')return typeof value==='bigint'?Number(BigInt.asIntN(32,value)):Number(value)|0;if(type==='bool')return !!value;
   const size=vectorLength(type);if(size){if(!Array.isArray(value)||value.length!==size)throw new Error('Invalid vector value.');return value.map(v=>convert(v,vectorElement(type)));}return value;
@@ -42,6 +43,7 @@ class Context {
   constructor(artifact,env,ids,budget){this.artifact=artifact;this.env=env;this.ids=ids;this.budget=budget;this.steps=0;}
   tick(){if(++this.steps>this.budget)throw new Error('CPU oracle instruction budget exceeded; possible nonterminating kernel.');}
   *ref(n){
+    if(n.packedPairView){const p=n.packedPairView,base=this.env.get(p.pointerBaseSymbol)?.value,offset=(p.pointerOffset?yield* this.eval(p.pointerOffset):0)+2*(yield* this.eval(n.index));return {get:()=>base.get(offset)|(base.get(offset+1)<<8),set:value=>{base.set(offset,value&255);base.set(offset+1,(value>>>8)&255);}};}
     if(n.scalarVectorView){const p=n.scalarVectorView,base=this.env.get(p.pointerBaseSymbol)?.value,offset=(p.pointerOffset?yield* this.eval(p.pointerOffset):0)+n.scalarVectorCount*(yield* this.eval(n.index));return {get:()=>Array.from({length:n.scalarVectorCount},(_,i)=>base.get(offset+i)),set:value=>{for(let i=0;i<n.scalarVectorCount;i++)base.set(offset+i,value[i]);}};}
     if(n.packedWordLocal)return yield* this.ref(n.packedWordLocal);
     if(n.kind==='id'){const cell=this.env.get(n.symbol);if(!cell)throw new Error(`Uninitialized symbol ${n.name}`);return {get:()=>cell.value,set:v=>{cell.value=convert(v,n.type);}};}
@@ -53,7 +55,7 @@ class Context {
     }
     if(n.kind==='member'){
       const reference=yield* this.ref(n.base),structure=typeof n.base.type==='string'&&n.base.type.startsWith('cw_struct_'),i=structure?n.member:'xyzw'.indexOf(n.member);
-      if(n.base.type==='cw_uchar4'){const shift=i*8;return {get:()=>(reference.get()>>>shift)&255,set:v=>reference.set(((reference.get()&~(255<<shift))|((Number(v)&255)<<shift))>>>0)};}
+      if(['cw_uchar2','cw_uchar4'].includes(n.base.type)){const shift=i*8;return {get:()=>(reference.get()>>>shift)&255,set:v=>reference.set(((reference.get()&~(255<<shift))|((Number(v)&255)<<shift))>>>0)};}
       if(structure)return {get:()=>reference.get()[i],set:v=>{const copy=structuredClone(reference.get());copy[i]=convert(v,n.type);reference.set(copy);}};
       return {get:()=>reference.get()[i],set:v=>{const copy=[...reference.get()];copy[i]=convert(v,n.type);reference.set(copy);}};
     }
@@ -74,7 +76,7 @@ class Context {
       case 'member':{
         if(n.base.type==='cw_extent')return (yield* this.eval(n.base))[n.member];
         if(n.base.kind==='id'&&this.ids[n.base.name])return this.ids[n.base.name]['xyz'.indexOf(n.member)];
-        const base=yield* this.eval(n.base);if(n.base.type==='cw_uchar4')return(base>>>('xyzw'.indexOf(n.member)*8))&255;return base[typeof n.base.type==='string'&&n.base.type.startsWith('cw_struct_')?n.member:'xyzw'.indexOf(n.member)];
+        const base=yield* this.eval(n.base);if(['cw_uchar2','cw_uchar4'].includes(n.base.type))return(base>>>('xyzw'.indexOf(n.member)*8))&255;return base[typeof n.base.type==='string'&&n.base.type.startsWith('cw_struct_')?n.member:'xyzw'.indexOf(n.member)];
       }
       case 'ptx-sad4':{const values=[];for(const a of n.args)values.push((yield* this.eval(a))>>>0);let sum=values[2];for(let shift=0;shift<32;shift+=8)sum+=Math.abs(((values[0]>>>shift)&255)-((values[1]>>>shift)&255));return sum>>>0;}
       case 'cast':if(n.byteScale!==undefined)return convert((yield* this.eval(n.byteScaleValue))*n.byteScale,n.target);return convert(yield* this.eval(n.value),n.target);
@@ -117,7 +119,7 @@ class Context {
     if(['atomicAdd','atomicMin','atomicMax','atomicExch'].includes(name)){
       const old=args[0].get(),value=name==='atomicAdd'?old+args[1]:name==='atomicMin'?Math.min(old,args[1]):name==='atomicMax'?Math.max(old,args[1]):args[1];args[0].set(value);return old;
     }
-    if(name==='make_uchar4')return args.reduce((packed,v,i)=>packed|((Number(v)&255)<<(i*8)),0)>>>0;
+    if(['make_uchar2','make_uchar4'].includes(name))return args.reduce((packed,v,i)=>packed|((Number(v)&255)<<(i*8)),0)>>>0;
     if(['float','int','uint','bool','uchar'].includes(name))return convert(args[0],n.type);
     if(name==='make_float3'&&Array.isArray(args[0]))return args[0].slice(0,3);
     if(name==='make_float4'&&Array.isArray(args[0]))return [...args[0],args[1]];
