@@ -1,0 +1,4 @@
+Captured original 3/4-colour endpoint fitting: 1024 permutations at block (21,98).
+Captured original 3/4-colour endpoint fitting: 1024 permutations at block (64,64).
+Captured original 3/4-colour endpoint fitting: 1024 permutations at block (100,100).
+Captured original 3/4-colour endpoint fitting: 1024 permutations at block (0,0).

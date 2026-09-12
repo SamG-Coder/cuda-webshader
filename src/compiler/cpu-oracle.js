@@ -124,6 +124,7 @@ class Context {
     if(name==='__fdividef')return f(args[0]/args[1]);
     if(name==='__saturatef')return f(Number.isNaN(args[0])?0:Math.max(0,Math.min(1,args[0])));
     if(name==='sqrt')return f(Math.sqrt(args[0]));
+    if(name==='rintf'){const x=args[0],lo=Math.floor(x),fraction=x-lo,result=fraction>.5||fraction===.5&&lo%2!==0?lo+1:lo;return result===0&&x<0?-0:result;}
     if(name==='roundf'){const x=args[0],whole=Math.trunc(x);return f(Math.abs(x-whole)>=.5?whole+(x>=0?1:-1):whole);}
     if(name==='abs')return Math.abs(args[0])|0;
     const unary={sinf:Math.sin,cosf:Math.cos,tanf:Math.tan,sqrtf:Math.sqrt,rsqrtf:x=>1/Math.sqrt(x),exp:Math.exp,expf:Math.exp,__expf:Math.exp,exp2f:x=>2**x,logf:Math.log,__logf:Math.log,log2f:Math.log2,fabs:Math.abs,fabsf:Math.abs,floorf:Math.floor,ceilf:Math.ceil,truncf:Math.trunc};

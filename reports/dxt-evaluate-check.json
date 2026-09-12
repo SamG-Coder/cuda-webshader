@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "nativeExact": true,
+  "permutations": 4096,
+  "endpointComponents": 16384,
+  "errorComponents": 16384,
+  "results": [
+    {
+      "block": 0,
+      "maxError": 0,
+      "endpointMismatches": 0,
+      "nonfiniteMatches": 0,
+      "nonfiniteMismatches": 0
+    },
+    {
+      "block": 1,
+      "maxError": 0,
+      "endpointMismatches": 0,
+      "nonfiniteMatches": 0,
+      "nonfiniteMismatches": 0
+    },
+    {
+      "block": 2,
+      "maxError": 0,
+      "endpointMismatches": 0,
+      "nonfiniteMatches": 0,
+      "nonfiniteMismatches": 0
+    },
+    {
+      "block": 3,
+      "maxError": 0,
+      "endpointMismatches": 0,
+      "nonfiniteMatches": 0,
+      "nonfiniteMismatches": 0
+    }
+  ]
+}

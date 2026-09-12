@@ -1,0 +1,1 @@
+Captured 6152 rintf values, including halfway ties, signed zero and large finite floats.
