@@ -5,7 +5,7 @@
   "results": [
     {
       "compiled": false,
-      "error": "Array initializers are unsupported. Initialize elements explicitly. (300:5)\n    int    warp_cnts[4] = {0, 0, 0, 0};\r\n    ^"
+      "error": "Unknown identifier 'cooperative_groups::thread_block_tile'. (338:5)\n    cg::thread_block_tile<32> tile32 = cg::tiled_partition<32>(cta);\r\n    ^"
     }
   ]
 }

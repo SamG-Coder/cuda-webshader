@@ -1,0 +1,29 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "result": {
+    "name": "Local CUDA array initializers preserve ordering and zero-filled elements",
+    "pass": true,
+    "lanes": 32,
+    "checkedValues": 320,
+    "nestedZeroFill": true,
+    "leftToRight": true,
+    "wallMs": 25.139999985694885
+  }
+}

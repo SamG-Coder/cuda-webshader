@@ -223,6 +223,17 @@ class Emitter {
     if (!n) this.fail('Missing expression.', this.kernel);
     switch (n.kind) {
       case 'initializer': {
+        if(isArray(n.target)){
+          const {element,length}=n.target;if(!Number.isInteger(length)||n.items.length>length)this.fail('Array initializer has too many elements.',n);
+          if(!isArray(element)&&!['i32','u32','f32','bool'].includes(element))this.fail('Local array initializers require scalar elements or explicitly nested scalar arrays.',n);
+          const code='cw_array_init_'+this.temp++,pre=[`var ${code}: ${typeName(n.target)};`];
+          for(let i=0;i<n.items.length;i++){const item=n.items[i];if(isArray(element)&&item.kind!=='initializer')this.fail('Nested arrays require explicit brace initializers.',item);if(item.kind==='initializer')item.target=element;const value=this.expr(item);let compatible=typeName(value.type)===typeName(element);
+            if(!compatible&&['i32','u32'].includes(value.type)&&['i32','u32','f32'].includes(element)){try{const v=constantValue(item);compatible=Number.isInteger(v)&&(element==='f32'?Math.fround(v)===v:element==='u32'?v>=0&&v<=4294967295:v>=-2147483648&&v<=2147483647);}catch{}}
+            if(!compatible)this.fail('Array initializer narrows or changes its element type; use an explicit cast.',item);
+            pre.push(...value.pre,`${code}[${i}u] = ${isArray(element)?value.code:this.convert(value.code,value.type,element,item)};`);
+          }
+          return this.result(n,n.target,code,pre);
+        }
         const width=vectorLength(n.target),element=vectorElement(n.target);
         if(!width||n.items.length>width)this.fail('Vector initializers require at most one scalar per component.',n);
         const values=n.items.map(item=>this.expr(item));
@@ -476,6 +487,7 @@ class Emitter {
     return node?.kind==='binary'&&node.op==='+'&&((product(node.left)&&member(node.right,'threadIdx'))||(product(node.right)&&member(node.left,'threadIdx')));
   }
   argument(n){
+    if(n.kind==='id'&&n.name==='warpSize'&&!this.scopes.some(scope=>scope.has('warpSize')))return this.expr(n);
     if(n.kind==='unary'&&n.op==='&'&&n.value.kind==='id'){const value=this.expr(n.value),symbol=value.rootSymbol;if(!symbol||!['local','reference'].includes(symbol.kind)||symbol.constant||!(numeric(value.type)||this.structs.has(value.type)))this.fail('Local pointer arguments require a mutable named scalar or record.',n);return this.result(n,arrayOf(value.type),value.code,value.pre,{rootSymbol:symbol,localPointer:true,pointerCode:symbol.kind==='reference'?symbol.pointerCode:'&'+value.code});}
     const address=n.kind==='unary'&&n.op==='&'&&n.value.kind==='index'?n.value:null;
     const parts=pointerParts(n),base=parts?.base;
@@ -900,7 +912,7 @@ class Emitter {
     const dims = n.dimensions.map(d => {if(d===null){if(!n.external||!n.shared)this.fail('Unsized arrays require extern __shared__.',n);if(this.dynamicSharedUsed&&this.dynamicSharedOwner!==sharedOwner)this.fail('Only one dynamic shared array is supported; CUDA declarations alias the same allocation.',n);const stride=n.type==='cw_uchar'?1:typeStride(n.type);if(n.type==='bool'||['cw_short','cw_ushort'].includes(n.type)||vectorLength(n.type)===3)this.fail('Dynamic shared arrays require 32-bit scalars or two/four-component vectors.',n);if(!this.dynamicSharedBytes||this.dynamicSharedBytes%stride)this.fail('Set sharedMemoryBytes to a positive multiple of the dynamic shared element size.',n);this.dynamicSharedUsed=true;this.dynamicSharedOwner=sharedOwner;return this.dynamicSharedBytes/stride;}const value = constantValue(d); if (!Number.isSafeInteger(value) || value < 1 || value > 65536) this.fail('Invalid fixed array dimension (1..65536).', n); return value; });
     for (let i = dims.length - 1; i >= 0; i--) type = arrayOf(type, dims[i]);
     if (n.shared && n.init) this.fail('__shared__ variables cannot have an initializer.', n);
-    if (isArray(type) && n.init) this.fail('Array initializers are unsupported. Initialize elements explicitly.', n);
+    if (isArray(type) && n.init&&n.init.kind!=='initializer') this.fail('Local arrays require a brace initializer.', n);
     let volatileAliased=false;if(n.shared){const slots=new Set();walk(this.currentFunction.body,x=>{if(x.kind==='decl'&&x.volatilePointer)slots.add(x.name);});walk(this.currentFunction.body,x=>{if(x.kind!=='assign'||x.left.kind!=='index'||!slots.has(x.left.base.name))return;const rhs=x.right.kind==='pointer-cast'?x.right.value:x.right;if(rhs.kind==='unary'&&rhs.op==='&'&&rhs.value.kind==='index'&&rhs.value.base.name===n.name)volatileAliased=true;});}
     const atomic = n.shared && (volatileAliased||n.volatileShared||analyse([this.currentFunction],[]).atomic.has(n.name));
     if (atomic && !['i32', 'u32'].includes(n.type)&&!(n.volatileShared&&n.type==='f32')) this.fail('Shared atomics require int or unsigned int.', n);
@@ -923,7 +935,7 @@ class Emitter {
       const snapshot='cw_value_copy_'+this.temp++;
       return [...init.pre,`let ${snapshot} = ${init.code};`,`${n.constant?'let':'var'} ${code}: ${type} = ${this.aggregateCopy(type,snapshot)};`];
     }
-    return [...(init?.pre || []), `${n.constant ? 'let' : 'var'} ${code}: ${typeName(type)}${init ? ` = ${this.convert(init.code, init.type, type, n)}` : ''};`];
+    return [...(init?.pre || []), `${n.constant ? 'let' : 'var'} ${code}: ${typeName(type)}${init ? ` = ${isArray(type)?init.code:this.convert(init.code, init.type, type, n)}` : ''};`];
   }
   body(n) {
     this.scopes.push(new Map());

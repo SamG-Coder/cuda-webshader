@@ -344,7 +344,7 @@ export class Parser {
     }
     if(!this.is('{'))return this.expression(2);
     const token=this.take('{'),items=[];
-    while(!this.is('}')){items.push(this.expression(2));if(!this.match(','))break;}
+    while(!this.is('}')){items.push(this.initializer());if(!this.match(','))break;}
     this.take('}');return {kind:'initializer',token,items};
   }
   declaration(semicolon = true) {

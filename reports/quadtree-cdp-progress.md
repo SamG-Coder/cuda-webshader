@@ -209,3 +209,19 @@ checks 96 values, then checks the same values from a second dispatch. All 663
 unit and 217 real NVIDIA GPU tests pass, plus Bezier/path-tracer sandbox checks.
 The unchanged full source now stops at the local warp_cnts array initializer;
 full recursive execution remains required before publishing a quadtree showcase.
+
+## Local scalar array initialization
+
+Local fixed arrays now accept brace initialization, including explicitly nested
+scalar arrays. Each initializer is evaluated and stored in source order, and
+omitted elements receive zero values. The compiler rejects excess elements,
+narrowing conversions, unsupported element types and writes to const arrays.
+The CPU oracle implements matching nested zero-fill. CUDA warpSize also works
+when passed as a function argument.
+
+A real GPU test checks 320 values across 32 lanes: incrementing initializers,
+partial/nested/empty lists, const arrays and warpSize in max(). All 665 unit and
+218 real NVIDIA GPU tests pass, as do the Bezier and path-tracer sandbox checks.
+The original quadtree now reaches cooperative_groups::thread_block_tile<32>.
+Its tiled collectives and full recursive execution remain before a runnable
+quadtree showcase can be added.
