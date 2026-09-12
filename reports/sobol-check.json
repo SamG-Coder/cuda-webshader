@@ -1,0 +1,61 @@
+{
+  "passed": true,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "workgroupSize": [
+    64,
+    1,
+    1
+  ],
+  "sharedBytes": 128,
+  "results": [
+    {
+      "vectors": 100000,
+      "dimensions": 100,
+      "groups": [
+        512,
+        100,
+        1
+      ],
+      "components": 10000000,
+      "mismatches": 0
+    },
+    {
+      "vectors": 1025,
+      "dimensions": 3,
+      "groups": [
+        32,
+        3,
+        1
+      ],
+      "components": 3075,
+      "mismatches": 0
+    },
+    {
+      "vectors": 2000,
+      "dimensions": 512,
+      "groups": [
+        1,
+        512,
+        1
+      ],
+      "components": 1024000,
+      "mismatches": 0
+    }
+  ]
+}

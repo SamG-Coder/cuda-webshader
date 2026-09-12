@@ -73,11 +73,17 @@ test('Repeat pipelines bound expansion and validate every expanded clear',()=>{a
 test('Full-size FFT convolution stays bounded and preserves explicit float display range',()=>{
  const preset=()=>JSON.parse(readFileSync('showcases/fft-convolution/pipeline.json','utf8')).pipeline;
  assert.ok(validatePipeline(preset())>64*1048576);
- for(const change of [p=>p.steps[2].realFFT.width=4096,p=>p.buffers.paddedData.records=4194305,p=>{p.buffers.extra={type:'vec4<f32>',records:4194304,fill:'zero'};},p=>p.preview.range=[1,1],p=>p.preview.range=[0,Infinity]]){const p=preset();change(p);assert.throws(()=>validatePipeline(p));}
+ for(const change of [p=>p.steps[2].realFFT.width=4096,p=>p.buffers.paddedData.records=16777217,p=>{p.buffers.extra={type:'vec4<f32>',records:4194304,fill:'zero'};},p=>p.preview.range=[1,1],p=>p.preview.range=[0,Infinity]]){const p=preset();change(p);assert.throws(()=>validatePipeline(p));}
 });
 
 test('Custom FFT pipeline validates reinterpretation copies, texture records and transform direction',()=>{
  const preset=()=>JSON.parse(readFileSync('showcases/fft-convolution-custom/variant-1.json','utf8')).pipeline;
  assert.ok(validatePipeline(preset())>0);
  for(const change of [p=>p.steps[2].copyBytes.byteLength=3,p=>p.steps[2].copyBytes.byteLength=999999999,p=>p.steps[2].copyBytes.target=p.steps[2].copyBytes.source,p=>p.steps[3].complexFFT.inverse=1,p=>p.steps[3].complexFFT.width=4096,p=>p.textures.compactTexture.records=4194304,p=>p.textures.compactTexture.components=4]){const p=preset();change(p);assert.throws(()=>validatePipeline(p));}
+});
+
+test('Large scalar pipeline buffers retain per-buffer and total byte limits',()=>{
+ const p=JSON.parse(readFileSync('showcases/sobol/pipeline.json','utf8')).pipeline;
+ assert.equal(validatePipeline(p),41612800);
+ for(const change of [q=>q.buffers.values.records=16777217,q=>q.buffers.positions.records=4194305,q=>{q.buffers.a={type:'f32',records:16777216,fill:'zero'};q.buffers.b={type:'f32',records:16777216,fill:'zero'};}]){const q=structuredClone(p);change(q);assert.throws(()=>validatePipeline(q));}
 });

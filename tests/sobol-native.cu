@@ -1,0 +1,8 @@
+#include <cstdio>
+#include <vector>
+#include "../.local/nvidia-audit/cpp/5_Domain_Specific/SobolQRNG/sobol_gpu.cu"
+#include "../.local/nvidia-audit/cpp/5_Domain_Specific/SobolQRNG/sobol_gold.h"
+template<class T> void save(const char*path,const T*data,size_t n){FILE*f=fopen(path,"wb");if(!f||fwrite(data,sizeof(T),n,f)!=n){fprintf(stderr,"Capture write failed\n");exit(1);}fclose(f);}
+int main(){const int counts[]={100000,1025,2000},dimensions[]={100,3,512};cudaDeviceProp prop;checkCudaErrors(cudaGetDeviceProperties(&prop,0));printf("multiprocessors %d\n",prop.multiProcessorCount);
+ for(int c=0;c<3;c++){int N=counts[c],D=dimensions[c];std::vector<unsigned> directions(D*32);std::vector<float> host(N*D);initSobolDirectionVectors(D,directions.data());unsigned*dd;float*out;checkCudaErrors(cudaMalloc(&dd,directions.size()*sizeof(unsigned)));checkCudaErrors(cudaMalloc(&out,host.size()*sizeof(float)));checkCudaErrors(cudaMemcpy(dd,directions.data(),directions.size()*sizeof(unsigned),cudaMemcpyHostToDevice));sobolGPU(N,D,dd,out);checkCudaErrors(cudaDeviceSynchronize());checkCudaErrors(cudaMemcpy(host.data(),out,host.size()*sizeof(float),cudaMemcpyDeviceToHost));char path[128];snprintf(path,sizeof(path),"reports/sobol-%d-directions.bin",c);save(path,directions.data(),directions.size());snprintf(path,sizeof(path),"reports/sobol-%d-native.bin",c);save(path,host.data(),host.size());unsigned target=D<4*prop.multiProcessorCount?4*prop.multiProcessorCount:1;if(target>(unsigned)(N/64))target=(N+63)/64;unsigned groups=1;while(groups<target)groups*=2;printf("case %d vectors %d dimensions %d groups %u x %d threads 64\n",c,N,D,groups,D);checkCudaErrors(cudaFree(dd));checkCudaErrors(cudaFree(out));}
+}

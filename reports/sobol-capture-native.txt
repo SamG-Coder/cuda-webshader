@@ -1,0 +1,4 @@
+multiprocessors 84
+case 0 vectors 100000 dimensions 100 groups 512 x 100 threads 64
+case 1 vectors 1025 dimensions 3 groups 32 x 3 threads 64
+case 2 vectors 2000 dimensions 512 groups 1 x 512 threads 64

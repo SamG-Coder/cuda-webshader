@@ -1,3 +1,4 @@
+import {checkSobol} from './sobol-gpu.js';
 import {checkQuasirandom} from './quasirandom-gpu.js';
 import {checkDxtCompress} from './dxt-compress-gpu.js';
 import {checkDxtColors} from './dxt-colors-gpu.js';
@@ -234,6 +235,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Original fluids pitched kernels match native CUDA',()=>checkFluidsPitched(runtime));
   await run('2048-point real FFT axes match native cuFFT',()=>checkLargeFFT(runtime));
   await run('Sincos and first-set-bit intrinsics match native CUDA',()=>checkSincos(runtime));
+  await run('Full Sobol sequence matches native CUDA',()=>checkSobol(runtime));
   await run('Full quasirandom sequence matches native CUDA',()=>checkQuasirandom(runtime));
   await run('DXT full image matches native CUDA',()=>checkDxtCompress(runtime));
   await run('DXT tiled colour stage matches native CUDA',()=>checkDxtColors(runtime));
