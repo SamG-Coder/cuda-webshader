@@ -1,3 +1,4 @@
+import {launchQueues,launchQueueDeclarations,emitLaunch} from './device-launch.js';
 import {deviceHeaps,deviceHeapDeclarations,deviceHeapCall,deviceHeapIndex} from './device-heap.js';
 import {lowerConstantRows} from './constant-rows.js';
 import {lowerDeferredPointers} from './deferred-pointers.js';
@@ -103,6 +104,7 @@ class Emitter {
     this.containsDevicePointer=type=>String(type).startsWith('cw_deviceptr_')||isArray(type)&&this.containsDevicePointer(type.element)||this.structs.has(type)&&this.structs.get(type).fields.some(f=>this.containsDevicePointer(f.resolvedType));
     for(const heap of this.objectHeaps.values()){heap.aliveCode=heap.code+'_alive';if(this.persistentObjects){const layout=storageLayout(heap.type);heap.binding=this.objectHeaps.size?heap.tag-1:0;heap.byteLength=Math.ceil((heap.capacity*4)/layout.align)*layout.align+layout.size*heap.capacity;heap.recordLayout=JSON.stringify([...this.structs.values()].map(s=>({type:s.type,fields:s.fields.map(f=>({name:f.name,type:f.resolvedType}))})));heap.variable=heap.code+'_storage';heap.code=heap.variable+'.objects';heap.aliveCode=heap.variable+'.alive';}}
     this.deviceHeaps=deviceHeaps(this);
+    this.launchQueues=launchQueues(this,walk,constantValue);
     this.overloads=new Map();for(const f of ast.functions)if(f.overloadName){const list=this.overloads.get(f.overloadName)||[];list.push(f);this.overloads.set(f.overloadName,list);}
     this.functions = new Map(); this.shared = [];this.pointerConstraints=[]; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
     for (const f of ast.functions) {
@@ -383,7 +385,7 @@ class Emitter {
         const value=this.expr(n.value),name=String(value.type).replace('cw_objectptr_',''),heaps=[...this.objectHeaps.values()].filter(h=>h.name===name||this.structs.get(h.type)?.base===name);if(!heaps.length)this.fail('delete requires an allocated class or interface.',n);n.deleteHeapTags=heaps.map(h=>({name:h.name,tag:h.tag}));
         const snapshot='cw_delete_'+this.temp++;return this.result(n,'void','',[...value.pre,`let ${snapshot} = ${value.code};`,...heaps.map(heap=>`if ((${snapshot} >> 20u) == ${heap.tag}u && (${snapshot} & 1048575u) != 0u) { ${this.persistentObjects?`atomicStore(&${heap.aliveCode}[(${snapshot} & 1048575u) - 1u], 0u);`:`${heap.aliveCode}[(${snapshot} & 1048575u) - 1u] = false;`} }`)]);
       }
-      case 'device-launch': this.fail('Device child-kernel launches require GPU scheduling support.',n);
+      case 'device-launch': return emitLaunch(this,n);
       case 'binary': {
         let a = this.expr(n.left), b = this.expr(n.right);if(narrow(a.type))a={...a,type:'i32',code:`i32(${a.code})`};if(narrow(b.type))b={...b,type:'i32',code:`i32(${b.code})`};
         if([a.type,b.type].some(t=>String(t).startsWith('cw_deviceptr_'))){
@@ -759,7 +761,7 @@ class Emitter {
     return path;
   }
   effect(n) {
-    if(n.kind==='object-delete')return this.expr(n).pre;
+    if(n.kind==='object-delete'||n.kind==='device-launch')return this.expr(n).pre;
     if(n.kind==='sequence')return n.expressions.flatMap(e=>this.effect(e));
     if (n.kind === 'assign') {
       if(['+=','-=','*=','/='].includes(n.op)){const left=this.expr(n.left,true),method=this.structs.get(left.type)?.methods.find(m=>m.name==='operator'+n.op);if(method){const receiver=n.left,right=n.right;delete n.left;delete n.right;delete n.op;Object.assign(n,{kind:'call',callee:{kind:'member',base:receiver,member:method.name,token:n.token},args:[right]});return this.effect(n);}}
@@ -988,7 +990,7 @@ class Emitter {
       if(this.persistentObjects)header.push(`struct CWHeap_${heap.name} { alive: array<atomic<u32>, ${heap.capacity}>, objects: array<${heap.type}, ${heap.capacity}>, }`,`@group(1) @binding(${heap.binding}) var<storage, read_write> ${heap.variable}: CWHeap_${heap.name};`);
       else header.push(`var<private> ${heap.code}: array<${heap.type}, ${heap.capacity}>;`,`var<private> ${heap.aliveCode}: array<bool, ${heap.capacity}>;`);
     }
-    header.push(...deviceHeapDeclarations(this.deviceHeaps));
+    header.push(...deviceHeapDeclarations(this.deviceHeaps),...launchQueueDeclarations(this.launchQueues));
     const moduleShared=new Map(),usedGlobalNames=new Set();for(const fn of [this.kernel,...this.helpers])walk(fn.body,n=>{if(n.kind==='id')usedGlobalNames.add(n.name);});
     for(const declaration of this.ast.sharedGlobals||[])if(usedGlobalNames.has(declaration.name)){this.declare(declaration);moduleShared.set(declaration.name,declaration.symbol);}
     const helperLines = [];
@@ -1079,7 +1081,7 @@ class Emitter {
     const storageSize = this.shared.reduce((n, s) => n + Math.ceil(typeStride(s.type) / 16) * 16, 0);
     let usesPackedBytes=(this.ast.structs||[]).some(s=>s.fields.some(f=>['cw_uchar','cw_uchar2','cw_uchar4'].includes(f.type)));walk(this.ast,n=>{if(['cw_uchar','cw_uchar2','cw_uchar4'].includes(n.type)||['cw_uchar','cw_uchar2','cw_uchar4'].includes(n.result))usesPackedBytes=true;});let usesShort=false;walk(this.ast,n=>{if(['cw_short','cw_ushort'].includes(n.type)||['cw_short','cw_ushort'].includes(n.result))usesShort=true;});if(usesShort)header.unshift('alias cw_short = i32;','alias cw_ushort = u32;');if(usesPackedBytes)header.unshift('alias cw_uchar = u32;','alias cw_uchar2 = u32;','alias cw_uchar4 = u32;');
     const wgsl = [...header, '', ...helperLines, '', `@compute @workgroup_size(${this.workgroupSize.join(', ')})`, 'fn main(', '  @builtin(local_invocation_id) cw_thread: vec3<u32>,', '  @builtin(workgroup_id) cw_block: vec3<u32>,', '  @builtin(num_workgroups) cw_grid: vec3<u32>', ') {', ...indent(main), '}', ''].join('\n');
-    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {...(this.objectHeaps.size||this.deviceHeaps.size?{objectHeap:{scope:this.persistentObjects?'arena':'invocation',persistent:this.persistentObjects,imports:this.objectImports,pointerBuffers:this.deviceHeaps.size?bindings.filter(b=>this.containsDevicePointer(b.elementType)).map(b=>b.name):[],types:[...[...this.deviceHeaps.values()].map(h=>({name:h.name,capacity:h.capacity,binding:h.binding,byteLength:h.byteLength,recordLayout:h.recordLayout})),...[...this.objectHeaps.values()].map(h=>({name:h.name,capacity:h.capacity,tag:h.tag,...(this.persistentObjects?{binding:h.binding,byteLength:h.byteLength,recordLayout:h.recordLayout}:{})}))]}}:{}),workgroupSize: this.workgroupSize, bindings,...(Object.keys(this.bufferAliases).length?{bufferAliases:{...this.bufferAliases}}:{}), scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2+surfaces.length : null,...(textures.length?{textures}:{}),...(textureScales.length?{textureScales}:{}),...(textureLengths.length?{textureLengths}:{}),...(surfaces.length?{surfaces}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
+    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {...(this.launchQueues.length?{deviceLaunchQueue:{producerOnly:true,queues:this.launchQueues.map(({variable,...q})=>q)}}:{}),...(this.objectHeaps.size||this.deviceHeaps.size||this.launchQueues.length?{objectHeap:{scope:this.persistentObjects?'arena':'invocation',persistent:this.persistentObjects,imports:this.objectImports,pointerBuffers:this.deviceHeaps.size?bindings.filter(b=>this.containsDevicePointer(b.elementType)).map(b=>b.name):[],types:[...this.launchQueues.map(q=>({name:q.name,capacity:q.capacity,binding:q.binding,byteLength:q.byteLength,recordLayout:q.recordLayout})),...[...this.deviceHeaps.values()].map(h=>({name:h.name,capacity:h.capacity,binding:h.binding,byteLength:h.byteLength,recordLayout:h.recordLayout})),...[...this.objectHeaps.values()].map(h=>({name:h.name,capacity:h.capacity,tag:h.tag,...(this.persistentObjects?{binding:h.binding,byteLength:h.byteLength,recordLayout:h.recordLayout}:{})}))]}}:{}),workgroupSize: this.workgroupSize, bindings,...(Object.keys(this.bufferAliases).length?{bufferAliases:{...this.bufferAliases}}:{}), scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2+surfaces.length : null,...(textures.length?{textures}:{}),...(textureScales.length?{textureScales}:{}),...(textureLengths.length?{textureLengths}:{}),...(surfaces.length?{surfaces}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
   }
 }
 function resolveTraitTypes(fn, ast, parameter, argument) {

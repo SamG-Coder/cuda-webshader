@@ -265,9 +265,10 @@ export class Kernel {
   bind(buffers,scalars={},options={}) {return new Invocation(this,buffers,scalars,options);}
 }
 export class Invocation {
-  constructor(kernel,buffers,scalars,{objectArena}={}) {
+  constructor(kernel,buffers,scalars,{objectArena,queueOnly=false}={}) {
     this.kernel=kernel;this.runtime=kernel.runtime;this.runtime.assertAlive();this.version=0;this.values={};
     this.uniformData=new ArrayBuffer(kernel.artifact.metadata.uniformSize);this.buffers={...buffers};
+    if(kernel.artifact.metadata.deviceLaunchQueue?.producerOnly&&kernel.artifact.metadata.deviceLaunchQueue.queues.some(q=>q.caller===kernel.artifact.name)&&!queueOnly)throw Error('This kernel produces child-launch queues only; explicitly bind queueOnly: true until automatic scheduling is supported.');
     const meta=kernel.artifact.metadata,entries=[],seen=new Map(),known=new Set([...meta.bindings,...(meta.textures||[]),...(meta.surfaces||[]),...(meta.objectHeap?.imports||[])].map(b=>b.name));
     for(const [alias,target]of Object.entries(meta.bufferAliases||{})){known.add(alias);if(Object.hasOwn(buffers,alias)&&buffers[alias]!==buffers[target])throw new Error('Declared buffer alias '+alias+' must use the same resource as '+target);}
     for(const name of Object.keys(buffers))if(!known.has(name))throw new Error(`Unknown buffer '${name}'.`);

@@ -1,0 +1,39 @@
+{
+  "stage": "GPU queue production; children not executed",
+  "date": "2026-09-12T19:48:59.577Z",
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "results": [
+    {
+      "name": "Original Bezier parent computes native counts and queues child work",
+      "pass": true,
+      "curves": 256,
+      "queuedLaunches": 256,
+      "countsMatchNative": true,
+      "originalParentBody": true,
+      "allocationAndCurvatureOnGpu": true,
+      "queueOverflow": false,
+      "overflowCaseVerified": true,
+      "argumentSnapshotsVerified": true,
+      "invalidGridRejected": true,
+      "allFreed": true,
+      "childrenExecuted": false,
+      "wallMs": 166.9050000011921
+    }
+  ]
+}

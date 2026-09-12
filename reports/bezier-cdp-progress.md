@@ -99,3 +99,25 @@ This is stage verification: the test harness supplies 256 child dispatches and
 the captured counts. It is not a substitute for executing the parent's curvature
 calculation, allocation, and dynamic launches. The full sandbox card remains
 pending that scheduler. Results are in `bezier-cdp-stages.json`.
+
+## Original parent queue production
+
+The original parent kernel now executes curvature calculation, chooses each
+curve's vertex count, allocates its vertex storage, and writes child-launch
+records on the GPU. All 256 counts match the native capture exactly. The queue
+contains each curve once, with the correct grid, block size and scalar arguments.
+The original cleanup kernel frees these allocations after the producer test.
+
+The explicit `deviceLaunchQueue: {maxLaunches: 256}` compiler option enables this
+producer stage. Runtime binding additionally requires `queueOnly: true` for a
+kernel that produces child launches. This prevents queue production being
+reported as completed dynamic parallel execution. Automatic queue consumption
+and sandbox integration remain outstanding; no runnable card is added yet.
+
+Queue records contain three indirect-dispatch dimension words followed by
+32-bit scalar argument snapshots. Named parent buffers are retained as typed
+binding descriptors. Current launches require one-dimensional scalar grids,
+constant block sizes, and no dynamic shared-memory or stream argument. Each
+source launch site has its own bounded queue. Overflow or invalid grid sizes set
+an error flag. Tests exercise overflow, float and integer snapshots, and invalid
+fractional grid dimensions as well as the complete original parent workload.
