@@ -1,0 +1,2 @@
+Captured original stereo kernel: 67x19, disparities -16..0.
+Captured original stereo kernel: 640x533, disparities -16..0.

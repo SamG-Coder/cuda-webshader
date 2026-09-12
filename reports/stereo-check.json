@@ -1,0 +1,20 @@
+{
+  "name": "Original stereo disparity matches native pixels",
+  "pass": true,
+  "results": [
+    {
+      "width": 67,
+      "height": 19,
+      "pixels": 1273,
+      "nativeExact": true
+    },
+    {
+      "width": 640,
+      "height": 533,
+      "pixels": 341120,
+      "nativeExact": true
+    }
+  ],
+  "originalDeviceBodiesUnchanged": true,
+  "wallMs": 88.89500001072884
+}

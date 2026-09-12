@@ -64,3 +64,5 @@ test('Real FFT pipeline validates padded real rows and packed complex spectra',(
 });
 
 test('Fluid preview rejects invalid particle counts, force controls and texture pitches',()=>{const fluid=()=>JSON.parse(readFileSync('showcases/fluids/pipeline.json','utf8')).pipeline;assert.ok(validatePipeline(fluid())>0);for(const change of [p=>p.preview.count=262145,p=>p.preview.positions='realX',p=>p.preview.stir.step=99,p=>p.preview.stir.radius=256,p=>p.preview.stir.scale=Infinity,p=>p.preview.stir.fx='absent',p=>p.steps[1].copyToTexture.bytesPerRow=4095,p=>p.steps[1].copyToTexture.bytesPerRow=4088,p=>p.textures.field.kind='scalar-f32']){const p=fluid();change(p);assert.throws(()=>validatePipeline(p));}});
+
+test('Signed disparity display validates range and output storage',()=>{const preset=()=>JSON.parse(readFileSync('showcases/stereo/pipeline.json','utf8')).pipeline;assert.ok(validatePipeline(preset())>0);for(const range of [null,[0,0],[0,Infinity],[0]]){const p=preset();p.preview.range=range;assert.throws(()=>validatePipeline(p));}const p=preset();p.buffers.g_odata.type='f32';assert.throws(()=>validatePipeline(p));});

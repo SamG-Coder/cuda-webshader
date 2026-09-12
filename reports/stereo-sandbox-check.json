@@ -1,0 +1,26 @@
+{
+  "pixels": 341120,
+  "nativeExact": true,
+  "displayExact": true,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "passed": true,
+  "sourceUnchanged": true,
+  "mobileOverflow": false,
+  "softwareAdapterRequested": false
+}

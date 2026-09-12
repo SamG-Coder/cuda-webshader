@@ -549,3 +549,5 @@ initial conditions and rendering. See [validation and support boundaries](report
 [Run the smoke showcase in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=smoke): 16,384 particles, original CUDA integration/depth functions, GPU depth sorting and a WebGPU adaptation of NVIDIA's 32-slice shadow renderer. See [the smoke notes](showcases/smoke/README.md) for validation and presentation differences.
 
 [Try NVIDIA fluid flow in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fluids): drag to stir 262,144 GPU particles, inspect the original CUDA and generated WGSL, and run a 512 × 512 FFT fluid solver. [Implementation and native comparison details](showcases/fluids/README.md).
+
+[Try NVIDIA stereo disparity in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=stereo): compare the original CUDA and generated WGSL while recovering a disparity image from NVIDIA's stereo camera pair. [Details and native verification](showcases/stereo/README.md).

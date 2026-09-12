@@ -1,0 +1,71 @@
+{
+  "pipeline": {
+    "buffers": {
+      "g_img0": {
+        "type": "u32",
+        "records": 341120,
+        "fill": "zero"
+      },
+      "g_img1": {
+        "type": "u32",
+        "records": 341120,
+        "fill": "zero"
+      },
+      "g_odata": {
+        "type": "u32",
+        "records": 341120,
+        "fill": "zero"
+      }
+    },
+    "textures": {
+      "tex2Dleft": {
+        "kind": "uint2d",
+        "dimensions": [
+          640,
+          533
+        ],
+        "source": "showcases/stereo/image-0.bin"
+      },
+      "tex2Dright": {
+        "kind": "uint2d",
+        "dimensions": [
+          640,
+          533
+        ],
+        "source": "showcases/stereo/image-1.bin"
+      }
+    },
+    "steps": [
+      {
+        "entry": "stereoDisparityKernel",
+        "block": [
+          32,
+          8,
+          1
+        ],
+        "groups": [
+          20,
+          67,
+          1
+        ],
+        "scalars": {
+          "w": 640,
+          "h": 533,
+          "minDisparity": -16,
+          "maxDisparity": 0
+        }
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "g_odata",
+      "width": 640,
+      "height": 533,
+      "format": "gray-i32",
+      "range": [
+        -8,
+        8
+      ]
+    }
+  }
+}

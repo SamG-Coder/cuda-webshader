@@ -1,0 +1,9 @@
+#include <cuda_runtime.h>
+#include <cooperative_groups.h>
+#include <cstdio>
+#include <vector>
+#include "stereo-kernels.cuh"
+#define CHECK(x) do{if((x)!=cudaSuccess)return 2;}while(0)
+int main(){for(int c=0;c<2;c++){int w=c?640:67,h=c?533:19,n=w*h;std::vector<unsigned> left(n),right(n),out(n);if(c){for(int side=0;side<2;side++){char name[100];sprintf(name,"reports/stereo-input-%d.bin",side);FILE*f=fopen(name,"rb");if(!f||fread(side?right.data():left.data(),4,n,f)!=n)return 2;fclose(f);}}else{for(int y=0;y<h;y++)for(int x=0;x<w;x++){unsigned v=(x*196613u+y*3145739u)^0xfedcba98u;left[y*w+x]=v;}for(int y=0;y<h;y++)for(int x=0;x<w;x++)right[y*w+x]=left[y*w+min(x+3,w-1)];}
+unsigned *a,*b,*o;CHECK(cudaMalloc(&a,n*4));CHECK(cudaMalloc(&b,n*4));CHECK(cudaMalloc(&o,n*4));CHECK(cudaMemcpy(a,left.data(),n*4,cudaMemcpyHostToDevice));CHECK(cudaMemcpy(b,right.data(),n*4,cudaMemcpyHostToDevice));cudaArray_t arrays[2];cudaTextureObject_t tex[2];for(int i=0;i<2;i++){auto channel=cudaCreateChannelDesc<unsigned>();CHECK(cudaMallocArray(&arrays[i],&channel,w,h));CHECK(cudaMemcpy2DToArray(arrays[i],0,0,i?right.data():left.data(),w*4,w*4,h,cudaMemcpyHostToDevice));cudaResourceDesc r={};r.resType=cudaResourceTypeArray;r.res.array.array=arrays[i];cudaTextureDesc d={};d.addressMode[0]=d.addressMode[1]=cudaAddressModeClamp;d.filterMode=cudaFilterModePoint;d.readMode=cudaReadModeElementType;CHECK(cudaCreateTextureObject(&tex[i],&r,&d,nullptr));}
+stereoDisparityKernel<<<dim3((w+31)/32,(h+7)/8),dim3(32,8)>>>(a,b,o,w,h,-16,0,tex[0],tex[1]);CHECK(cudaMemcpy(out.data(),o,n*4,cudaMemcpyDeviceToHost));char path[100];sprintf(path,"reports/stereo-%d-native.bin",c);FILE*f=fopen(path,"wb");if(!f)return 2;fwrite(out.data(),4,n,f);fclose(f);for(int i=0;i<2;i++){CHECK(cudaDestroyTextureObject(tex[i]));CHECK(cudaFreeArray(arrays[i]));}CHECK(cudaFree(a));CHECK(cudaFree(b));CHECK(cudaFree(o));printf("Captured original stereo kernel: %dx%d, disparities -16..0.\n",w,h);}return 0;}
