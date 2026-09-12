@@ -1,0 +1,6 @@
+Captured original custom FFT stage 0, direction -1, 64x32, padding 16 and guard values.
+Captured original custom FFT stage 1, direction -1, 64x32, padding 16 and guard values.
+Captured original custom FFT stage 2, direction -1, 64x32, padding 16 and guard values.
+Captured original custom FFT stage 0, direction 1, 64x32, padding 16 and guard values.
+Captured original custom FFT stage 1, direction 1, 64x32, padding 16 and guard values.
+Captured original custom FFT stage 2, direction 1, 64x32, padding 16 and guard values.

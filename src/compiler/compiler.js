@@ -398,6 +398,19 @@ class Emitter {
     }
     if (n.callee.kind !== 'id') this.fail('Only named functions are supported.', n);
     const name = n.callee.name; n.callName = name;
+    if(name==='__ffs'){
+      if(n.args.length!==1)this.fail('__ffs requires one 32-bit integer.',n);const a=this.expr(n.args[0]);if(!['i32','u32'].includes(a.type))this.fail('__ffs requires one 32-bit integer.',n);return this.result(n,'i32',`(i32(firstTrailingBit(u32(${a.code}))) + 1i)`,a.pre);
+    }
+    if(['sincosf','__sincosf'].includes(name)){
+      if(n.args.length!==3||n.args.slice(1).some(a=>a.kind!=='unary'||a.op!=='&'||!['id','member'].includes(a.value.kind)))this.fail('sincosf requires a phase and addresses of two mutable local float values or components.',n);
+      const phase=this.expr(n.args[0]),outputs=n.args.slice(1).map(a=>this.expr(a.value,true));
+      if(!numeric(phase.type))this.fail('sincosf phase must convert to float.',n);
+      for(const [i,out]of outputs.entries()){this.writable(out,n.args[i+1].value);if(out.type!=='f32'||!['local','reference'].includes(out.rootSymbol?.kind)||out.atomic||out.pre.length)this.fail('sincosf outputs require mutable local float values or components.',n.args[i+1]);}
+      if(outputs[0].code===outputs[1].code)this.fail('sincosf outputs must be distinct.',n);
+      const input='cw_sincos_phase_'+this.temp++,turns='cw_sincos_turns_'+this.temp++,reduced='cw_sincos_reduced_'+this.temp++,sin='cw_sincos_sin_'+this.temp++,cos='cw_sincos_cos_'+this.temp++;
+      n.localPointerArgs=[false,true,true];
+      return this.result(n,'void',`${outputs[1].code} = ${cos}`,[...phase.pre,`let ${input}: f32 = ${this.convert(phase.code,phase.type,'f32',n)};`,`let ${turns} = round(${input} * 0.15915494309189535f);`,`let ${reduced} = (${input} - ${turns} * 6.28125f) - ${turns} * 0.001935307179586477f;`,`let ${sin} = sin(select(${input}, ${reduced}, abs(${input}) <= 8192.0f));`,`let ${cos} = cos(select(${input}, ${reduced}, abs(${input}) <= 8192.0f));`,`${outputs[0].code} = ${sin};`]);
+    }
     if(name==='tex1D'){if(n.callee.templateArgument!=='float4'||n.args.length!==2||n.args[0].kind!=='id')this.fail('tex1D supports a bound float4 texture and one float coordinate.',n);const texture=this.lookup(n.args[0].name,n.args[0]),coordinate=this.expr(n.args[1]);if(texture.kind!=='texture'||texture.dimension!=='2d'||!numeric(coordinate.type))this.fail('tex1D requires a matching kernel texture parameter and float coordinate.',n);return this.result(n,'vec4<f32>',`textureSampleLevel(${texture.code}, ${texture.sampler}, vec2<f32>(${this.convert(coordinate.code,coordinate.type,'f32',n)}, 0.5f), 0.0f)`,coordinate.pre);}
     if(name==='tex2DLayered'){
       if(n.callee.templateArgument!=='float4'||n.args.length!==4||n.args[0]?.kind!=='id')this.fail('tex2DLayered requires a float4 texture, two coordinates and an integer layer.',n);

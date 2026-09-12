@@ -105,6 +105,8 @@ class Context {
       else if(n.constRefTemporaries?.[i]){let value=yield* this.eval(a);args.push({get:()=>value,set:v=>{value=v;}});}
       else args.push(n.groupArgs?.[i]?null:yield* (n.referenceArgs?.[i]?this.ref(a):this.eval(a)));
     }
+    if(['sincosf','__sincosf'].includes(name)){const phase=f(args[0]),s=f(Math.sin(phase)),c=f(Math.cos(phase));args[1].set(s);args[2].set(c);return;}
+    if(name==='__ffs'){const x=args[0]|0;return x===0?0:32-Math.clz32(x&-x);}
     if(name==='__mul24')return Math.imul((args[0]<<8)>>8,(args[1]<<8)>>8);
     if(name==='__umul24')return Math.imul(args[0]&0xffffff,args[1]&0xffffff)>>>0;
     if(name==='atomicCAS'){const old=args[0].get();if(old===convert(args[1],n.type))args[0].set(convert(args[2],n.type));return old;}

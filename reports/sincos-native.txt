@@ -1,0 +1,1 @@
+Captured 8195 sincosf/__sincosf pairs and __ffs values, including all 32 one-bit positions and zero.

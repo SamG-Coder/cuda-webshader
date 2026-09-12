@@ -1,0 +1,47 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "entry": "spPostprocess2D_kernel",
+      "direction": -1,
+      "compared": 4100,
+      "guards": 1028,
+      "maxError": 0
+    },
+    {
+      "entry": "spPreprocess2D_kernel",
+      "direction": -1,
+      "compared": 4096,
+      "guards": 1032,
+      "maxError": 0
+    },
+    {
+      "entry": "spProcess2D_kernel",
+      "direction": -1,
+      "compared": 4096,
+      "guards": 1032,
+      "maxError": 0
+    },
+    {
+      "entry": "spPostprocess2D_kernel",
+      "direction": 1,
+      "compared": 4100,
+      "guards": 1028,
+      "maxError": 0
+    },
+    {
+      "entry": "spPreprocess2D_kernel",
+      "direction": 1,
+      "compared": 4096,
+      "guards": 1032,
+      "maxError": 0
+    },
+    {
+      "entry": "spProcess2D_kernel",
+      "direction": 1,
+      "compared": 4096,
+      "guards": 1032,
+      "maxError": 0
+    }
+  ]
+}

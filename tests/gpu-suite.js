@@ -1,3 +1,5 @@
+import {checkSincos} from './sincos-gpu.js';
+import {checkFFTCustom} from './fft-custom-gpu.js';
 import {checkFFTConvolution} from './fft-convolution-gpu.js';
 import {checkLinearFloat} from './linear-float-gpu.js';
 import {checkOpticalFlow} from './optical-flow-gpu.js';
@@ -225,6 +227,8 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Real FFT packed transforms match native cuFFT',()=>checkRealFFT(runtime));
   await run('Original fluids pitched kernels match native CUDA',()=>checkFluidsPitched(runtime));
   await run('2048-point real FFT axes match native cuFFT',()=>checkLargeFFT(runtime));
+  await run('Sincos and first-set-bit intrinsics match native CUDA',()=>checkSincos(runtime));
+  await run('Original custom FFT convolution stages match native CUDA',()=>checkFFTCustom(runtime));
   await run('Original full-size FFT convolution matches native CUDA',()=>checkFFTConvolution(runtime));
   await run('Raw float linear texture records match native',()=>checkLinearFloat(runtime));
   await run('Complete optical flow matches original native pipeline',()=>checkOpticalFlow(runtime));

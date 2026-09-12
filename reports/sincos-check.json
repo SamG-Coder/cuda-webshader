@@ -1,0 +1,12 @@
+{
+  "values": 8195,
+  "components": 32780,
+  "maxNativeError": 0.000007748603820800781,
+  "maxStandardNativeError": 4.172325134277344e-7,
+  "maxMathError": 4.2384562060071573e-7,
+  "firstSetBitNativeExact": true,
+  "phaseRange": [
+    -51.20000076293945,
+    51.22500228881836
+  ]
+}

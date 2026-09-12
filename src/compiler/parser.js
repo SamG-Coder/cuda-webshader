@@ -365,7 +365,7 @@ export class Parser {
   }
   expandExpressionMacro(macro,args,token){
     if(args.length!==macro.params.length)this.fail('Wrong argument count for expression macro '+macro.name,token);
-    const parser=new Parser([...Object.entries(macro.defines).map(([name,value])=>'#define '+name+' '+value),macro.body].join('\n'));parser.functionNames=new Set(this.functionNames);
+    const parser=new Parser([...Object.entries(macro.defines).map(([name,value])=>'#define '+name+' '+value),macro.body].join('\n'));parser.functionNames=new Set(this.functionNames);parser.typeAliases=new Map(this.typeAliases);
     if(parser.tokens.some(t=>t.kind==='word'&&macro.forbidden.includes(t.value)))this.fail('Nested or recursive expression macros are unsupported.',token);
     const expression=parser.expression();if(parser.peek().kind!=='eof')this.fail('Expression macro must contain one expression.',token);
     const copy=(node,substitute)=>{if(!node||typeof node!=='object')return node;if(node.kind&&++this.expandedMacroNodes>65536)this.fail('Expression macro expansion exceeds 65,536 AST nodes.',token);if(substitute&&node.kind==='id'&&macro.params.includes(node.name))return copy(args[macro.params.indexOf(node.name)],false);if(Array.isArray(node))return node.map(n=>copy(n,substitute));return Object.fromEntries(Object.entries(node).map(([key,value])=>[key,key==='token'?(substitute?token:value):copy(value,substitute)]));};return copy(expression,true);
