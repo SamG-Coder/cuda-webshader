@@ -5,10 +5,12 @@ import {alignedCopyFixture} from './aligned-copy-fixtures.js';
 import {fwtPassFixture} from './fwt-pass-fixtures.js';
 import {fwtSharedFixture} from './fwt-shared-fixtures.js';
 import {histogramMergeFixture} from './histogram-merge-fixtures.js';
+import {inverseCndFixture} from './inverse-cnd-fixtures.js';
 // Deterministic correctness fixtures for isolated upstream kernels, not host applications.
 import {scalarFixture} from './scalar-fixtures.js';
 import {blackScholesFixture} from './blackscholes-fixtures.js';
 export function fixture(row) {
+ if(row.entry==='inverseCNDKernel')return inverseCndFixture();
  if(/^mergeHistogram(64|256)Kernel$/.test(row.entry))return histogramMergeFixture(Number(row.entry.match(/\d+/)[0]));
  if(row.entry==='fwtBatch1Kernel')return fwtSharedFixture();
  if(row.entry==='fwtBatch2Kernel')return fwtPassFixture();

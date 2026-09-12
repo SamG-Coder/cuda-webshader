@@ -84,6 +84,7 @@ class Emitter {
     this.fail(`Incompatible operand types: ${typeName(a)} and ${typeName(b)}. Use explicit scalar/vector components.`, n);
   }
   convert(code, from, to, n) {
+    if(to==='bool'&&isArray(from)&&from.length===null&&n){return 'true';} // All runtime storage bindings are required and non-null.
     if (typeName(from) === typeName(to) && !isArray(to)) return code;
     if (numeric(from) && numeric(to)) return `${to}(${code})`;
     if (to === 'bool' && numeric(from)) return `(${code} != ${from === 'f32' ? '0.0f' : from === 'u32' ? '0u' : '0i'})`;
@@ -379,10 +380,10 @@ class Emitter {
       for (const p of helper.params) {
         if (p.pointer || p.shared || p.external || p.type === 'void') this.fail('Helper arguments must be scalar/vector values, not pointers.', p);
         if(p.reference&&!numeric(p.type))this.fail('Helper references require a 32-bit numeric scalar.',p);
-        p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined, constant: p.reference?p.constant:true, atomic: false, kind: p.reference?'reference':'local'}, p);
+        p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined, constant:p.constant, atomic: false, kind: p.reference?'reference':'local'}, p);
       }
       const body = this.body(helper.body);
-      helperLines.push(`fn f_${helper.name}(${helper.params.map(p => `v_${p.name}: ${p.reference?`ptr<function, ${p.type}>`:p.type}`).join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`, ...indent(body), '}');
+      helperLines.push(`fn f_${helper.name}(${helper.params.map(p => `${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.reference?`ptr<function, ${p.type}>`:p.type}`).join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
     }
     this.scopes = kernelScope; this.currentFunction = this.kernel;
     const main = this.body(this.kernel.body);

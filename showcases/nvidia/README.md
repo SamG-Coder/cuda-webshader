@@ -8,12 +8,12 @@ NVIDIA cuda-samples revision `5443602d89ed99aede2e4b7bf329daddeadb320e`.
 The audit scans direct source files for standalone global void kernels. It is
 not a complete C++ preprocessor or a claim to compile every template instance.
 
-The 33 translated entries were run separately with NVCC on RTX 5080 and with
+The 34 translated entries were run separately with NVCC on RTX 5080 and with
 WebGPU on a real NVIDIA adapter. Fixtures use 256 elements or a 32×32 grid,
 with 64×64 matrices for the two transpose kernels and 17 vectors of 1,537
 elements for the scalar-product kernel;
 every output component is compared with an independent CPU reference (absolute
-tolerance 0.000003, except Black–Scholes below). These are small correctness checks, not performance results
+tolerance 0.000003, except Black–Scholes and inverse-normal below). These are small correctness checks, not performance results
 or exhaustive numerical validation. The browser records its actual adapter.
 
 These are **isolated kernel stages**. Passing the ocean heightmap stage does
@@ -36,6 +36,7 @@ node scripts/prepare-nvidia-aligned-copy.mjs
 node scripts/prepare-nvidia-fwt-pass.mjs
 node scripts/prepare-nvidia-fwt-shared.mjs
 node scripts/prepare-nvidia-histogram-merge.mjs
+node scripts/prepare-nvidia-inverse-cnd.mjs
 node scripts/prepare-nvidia-checks.mjs
 nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor .local/nvidia-checks/check.cu -o .local/nvidia-checks/check.exe
 .local/nvidia-checks/check.exe
@@ -50,6 +51,7 @@ node scripts/test-nvidia-aligned-copy.mjs
 node scripts/test-nvidia-fwt-pass.mjs
 node scripts/test-nvidia-fwt-shared.mjs
 node scripts/test-nvidia-histogram-merge.mjs
+node scripts/test-nvidia-inverse-cnd.mjs
 ```
 
 Run the server first (`npm start`) for browser checks. The browser script uses
@@ -195,3 +197,16 @@ checks, not end-to-end byte histogram generation. The original counting stages
 still use unsupported byte-sized storage and/or shared-memory pointer helpers.
 Reports are `reports/nvidia-histogram-merge-native.txt` and
 `reports/nvidia-histogram-merge.json`; use the same native build flags as above.
+
+The inverse-normal follow-up preserves the original `inverseCNDKernel`,
+`MoroInvCNDgpu` helper and forwarding macro from quasirandomGenerator. Its input
+buffer is required; the runtime cannot bind null, and buffer truth tests compile
+as true under that contract. Thus the null-input generation branch is unavailable,
+and the separate direction-table quasirandom generator is not implemented.
+`inverse-cnd-native.cu` and `scripts/test-nvidia-inverse-cnd.mjs` check 0, 1, 17,
+129 and 513 values, both distribution tails, center and polynomial branch
+boundaries, with 16 output guards. Native reference inversion uses `erfc` and
+bisection; browser reference inversion uses normal-tail quadrature and bisection,
+independently of NVIDIA's Moro polynomial. Absolute tolerance is 0.00002.
+Reports are `reports/nvidia-inverse-cnd-native.txt` and
+`reports/nvidia-inverse-cnd.json`; native build flags are the same as above.

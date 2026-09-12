@@ -1,0 +1,58 @@
+{
+  "date": "2026-09-12T00:03:00.949Z",
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "sourceCompiled": true,
+  "inputMode": "Required non-null input buffer",
+  "absoluteTolerance": 0.00002,
+  "reference": "Normal-tail quadrature and bisection, independent of the Moro polynomial",
+  "results": [
+    {
+      "n": 0,
+      "maxError": 0,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "n": 1,
+      "maxError": 0.000001345554665022064,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "n": 17,
+      "maxError": 0.000001345554665022064,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "n": 129,
+      "maxError": 0.000001345554665022064,
+      "guardsPreserved": true,
+      "pass": true
+    },
+    {
+      "n": 513,
+      "maxError": 0.0000015291394674932235,
+      "guardsPreserved": true,
+      "pass": true
+    }
+  ],
+  "nullInputRejected": true,
+  "passed": true
+}

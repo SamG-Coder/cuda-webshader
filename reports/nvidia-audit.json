@@ -7090,8 +7090,25 @@
         ]
       },
       "browser": {
-        "status": "translation-rejected",
-        "reason": "Expected ')', found ','. (55:55)\n        for (int bit = 0; bit < QRNG_RESOLUTION; bit++, data >>= 1)\r\n                                                      ^"
+        "status": "kernel-verified",
+        "reason": "Isolated kernels checked against CPU reference on a real NVIDIA WebGPU adapter. Full host program is not executed.",
+        "checks": [
+          {
+            "sample": "cpp/5_Domain_Specific/quasirandomGenerator",
+            "entry": "inverseCNDKernel",
+            "pass": true,
+            "values": 64,
+            "maxError": 0.0000013455546934437734,
+            "failures": 0,
+            "outputs": {
+              "d_Output": {
+                "values": 64,
+                "maxError": 0.0000013455546934437734,
+                "failures": 0
+              }
+            }
+          }
+        ]
       }
     },
     {
@@ -9605,11 +9622,11 @@
       }
     }
   ],
-  "executionUpdated": "2026-09-11T23:57:52.622Z",
+  "executionUpdated": "2026-09-12T00:04:33.792Z",
   "counts": {
     "samples": 208,
     "compilerProbes": 350,
-    "webgpuPassed": 33,
+    "webgpuPassed": 34,
     "nativeProgramsAttempted": 149,
     "nativeStatuses": {
       "exited-zero": 142,

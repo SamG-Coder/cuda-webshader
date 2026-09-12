@@ -1,0 +1,5 @@
+n=0 result + guards: PASS maxError=0
+n=1 result + guards: PASS maxError=8.49152914e-07
+n=17 result + guards: PASS maxError=9.51803915e-07
+n=129 result + guards: PASS maxError=9.51803915e-07
+n=513 result + guards: PASS maxError=9.51803915e-07

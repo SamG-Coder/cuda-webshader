@@ -167,6 +167,11 @@
       "entry": "mergeHistogram256Kernel",
       "sample": "cpp/2_Concepts_and_Techniques/histogram",
       "passed": true
+    },
+    {
+      "entry": "inverseCNDKernel",
+      "sample": "cpp/5_Domain_Specific/quasirandomGenerator",
+      "passed": true
     }
   ]
 }

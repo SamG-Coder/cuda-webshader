@@ -10,7 +10,8 @@ struct CWParams {
 @group(0) @binding(2) var<uniform> cw_params: CWParams;
 const cw_block_size: vec3<u32> = vec3<u32>(128u, 1u, 1u);
 
-fn f_softened_inverse_radius(v_radiusSquared: f32) -> f32 {
+fn f_softened_inverse_radius(cw_arg_radiusSquared: f32) -> f32 {
+  var v_radiusSquared: f32 = cw_arg_radiusSquared;
   return inverseSqrt((v_radiusSquared + 0.35f));
 }
 
