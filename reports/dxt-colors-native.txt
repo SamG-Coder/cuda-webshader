@@ -1,0 +1,1 @@
+Captured original colour loading/sums/covariance/ranking at 64 threads for all 16384 blocks, with split offset launch.

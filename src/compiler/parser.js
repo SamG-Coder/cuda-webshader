@@ -116,7 +116,7 @@ export class Parser {
     let constant = false, shared = false,external=false;
     while (QUALIFIERS.has(this.peek().value)) { const q = this.take().value; constant ||= q === 'const'; shared ||= q === '__shared__';external ||= q==='extern'; }
     const tok = this.take(); let type;
-    if(this.groupNamespaces.has(tok.value)){this.take('::');this.take('thread_block');type='thread-block';}
+    if(this.groupNamespaces.has(tok.value)){this.take('::');const group=this.name();if(!['thread_block','thread_group'].includes(group))this.fail('Supported cooperative group types are thread_block and thread_group.',tok);type=group==='thread_block'?'thread-block':'thread-tile';}
     else if(tok.value==='typename'||this.typeTraits.has(tok.value)){
       const name=tok.value==='typename'?this.name():tok.value;
       if(!this.typeTraits.has(name))this.fail(`Unknown type trait '${name}'.`,tok);
@@ -256,7 +256,7 @@ export class Parser {
       const name = this.name();if(this.typeAliases.has(name))this.fail('Functions cannot shadow a type alias.',token);this.functionNames.add(name);let specializationArgument;
       if(templateKind==='specialization')specializationArgument=this.templateArgument();
       this.take('('); const params = [];
-      if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(),defaultValue=this.match('=')?this.expression(2):undefined;
+      if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name();if(this.match('[')){const size=this.take();if(size.kind!=='number'||!/^\d+[uU]?$/.test(size.value)||Number(size.value.replace(/[uU]$/,''))<1||Number(size.value.replace(/[uU]$/,''))>65536||type.pointer||type.reference)this.fail('Array parameters require one positive fixed dimension.',size);this.take(']');type.pointer=true;}const defaultValue=this.match('=')?this.expression(2):undefined;
         if(this.typeAliases.has(name))this.fail('Parameters cannot shadow a type alias.',token);if(defaultValue!==undefined){const literal=defaultValue.kind==='unary'&&['+','-'].includes(defaultValue.op)?defaultValue.value:defaultValue;if(!['__device__','__global__'].includes(qualifier)||templateKind==='specialization')this.fail('Default arguments belong on primary device or kernel definitions only.',token);if(type.pointer||type.reference||(!['f32','i32','u32','bool','cw_uchar'].includes(type.type)&&!String(type.type).startsWith('template:')))this.fail('Default arguments require scalar value parameters.',token);if(literal.kind!=='literal'&&!(literal===defaultValue&&literal.kind==='id'&&['true','false'].includes(literal.name)))this.fail('Default arguments support numeric or boolean literals with an optional numeric sign.',defaultValue.token);}
         else if(params.some(p=>p.defaultValue!==undefined))this.fail('Parameters after a default argument must also have defaults.',token);
         params.push({kind: 'param', token, name, ...type,...(defaultValue!==undefined?{defaultValue}:{})});
@@ -338,6 +338,9 @@ export class Parser {
       this.take(')');this.take(';');if(left.kind!=='id')this.fail('PTX output requires a named 32-bit integer register.',token);return {kind:'expr',token,value:{kind:'assign',op:'=',token,left,right:{kind:'ptx-sad4',token,args,outputName:left.name}}};
     }
     if(this.match('do')){const body=this.statement();this.take('while');this.take('(');const condition=this.expression();this.take(')');this.take(';');return {kind:'do',token,body,condition};}
+    if(this.groupNamespaces.has(token.value)&&this.peek(1).value==='::'&&this.peek(2).value==='thread_group'){
+      this.qualifiedName();const name=this.name();this.take('=');const factory=this.qualifiedName();this.take('(');const parent=this.name();this.take(',');const size=this.expression(2);this.take(')');this.take(';');if(factory!=='cooperative_groups::tiled_partition')this.fail('thread_group requires tiled_partition(block, size).',token);return {kind:'thread-tile',token,name,parent,size};
+    }
     if(this.groupNamespaces.has(token.value)&&this.peek(1).value==='::'&&this.peek(2).value==='thread_block'){
       this.qualifiedName();const name=this.name();this.take('=');const factory=this.qualifiedName();this.take('(');this.take(')');this.take(';');
       if(factory!=='cooperative_groups::this_thread_block')this.fail('thread_block must be initialized with cooperative_groups::this_thread_block().',token);

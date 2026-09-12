@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "blocks": 16384,
+  "workgroupSize": 64,
+  "tileSize": 16,
+  "sharedBytes": 1024,
+  "results": [
+    {
+      "name": "dxt-colors-native",
+      "components": 1048576,
+      "mismatches": 0,
+      "maxError": 0
+    },
+    {
+      "name": "dxt-sums-native",
+      "components": 1048576,
+      "mismatches": 0,
+      "maxError": 0
+    },
+    {
+      "name": "dxt-ranks-native",
+      "components": 262144,
+      "mismatches": 0,
+      "maxError": 0
+    }
+  ]
+}

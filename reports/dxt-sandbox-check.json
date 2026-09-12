@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "blocks": 16384,
+  "nativeWordsMatched": 32768,
+  "decodedPixelsMatched": 262144,
+  "nonblack": 198128,
+  "softwareAdapterRequested": false,
+  "passes": [
+    "1. compress",
+    "2. decodeDxtPreview"
+  ],
+  "sourceUnchanged": true
+}

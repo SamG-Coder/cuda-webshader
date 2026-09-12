@@ -1,3 +1,4 @@
+import {lowerTiledGroups} from './tiled-groups.js';
 import {FLOAT64_WGSL} from './float64.js';
 import {inferTextureTypes,textureShape} from './texture-types.js';
 import {integerExpression} from './integer-expression.js';
@@ -198,7 +199,7 @@ class Emitter {
         if (isFloat && !Number.isFinite(Math.fround(value))) this.fail('Floating literal overflows f32.', n);
         n.numericValue = value;
         if(type==='i32'&&value===-2147483648)return this.result(n,type,'i32(2147483648u)');
-        return this.result(n, type, `${isFloat && Number.isInteger(value) ? value + '.0' : value}${type === 'f32' ? 'f' : type === 'u32' ? 'u' : 'i'}`);
+        return this.result(n, type, `${isFloat && Number.isInteger(value) && !/[eE]/.test(String(value)) ? value + '.0' : value}${type === 'f32' ? 'f' : type === 'u32' ? 'u' : 'i'}`);
       }
       case 'id': {
         if (['true', 'false'].includes(n.name)) return this.result(n, 'bool', n.name);
@@ -942,7 +943,7 @@ function instantiateHelperTemplates(ast, kernel) {
     if(!matches.length)fail('Cannot deduce helper template type from these parameters; supply an explicit argument.',callee);
     const type=matches[0];
     if(matches.some(t=>typeName(t)!==typeName(type)))fail('Conflicting deduced helper template argument types.',callee);
-    const names=['float','int','uint','bool','uchar','uchar4',...['float','int','uint'].flatMap(p=>[2,3,4].map(n=>p+n))],argument=names.find(n=>builtinType(n)===type);
+    const names=['float','int','uint','bool','uchar','uchar4','short','ushort',...['float','int','uint'].flatMap(p=>[2,3,4].map(n=>p+n))],argument=names.find(n=>builtinType(n)===type);
     if(!argument)fail('Deduced helper template argument must be a supported built-in value type.',callee);
     const call={kind:'call',token:callee.token,callee:{...callee,templateArgument:argument},args:[]};
     process({kind:'function',name:'deduction',token:callee.token,result:'void',params:[],body:{kind:'block',body:[call]}});
@@ -964,7 +965,7 @@ export function compile(source, options = {},bufferUsage=null) {
     if(n.kind==='decl'&&n.pointer){const p=bytePointer(n.init);if(!p)return;if(p.target!==n.type)throw new CompileError('Byte pointer alias must retain its pointee type.',n.token,source);if(p.constant&&!n.constant)throw new CompileError('Cannot discard const through a pointer cast.',n.token,source);n.init={kind:'binary',op:'+',left:p.base,right:p.index,token:n.token};}
     if(n.kind==='unary'&&n.op==='*'){const p=bytePointer(n.value),base=n.value;delete n.value;delete n.op;Object.assign(n,p?{kind:'index',base:p.base,index:p.index,pointerTarget:p.target,pointerConstant:p.constant,dereference:true}:{kind:'index',base,index:{kind:'literal',value:'0',token:n.token},dereference:true});}
   });
-  const specialization=options.entry?.match(/^([A-Za-z_]\w*)<\s*([^<>]+)\s*>$/),entry=specialization?specialization[1]:options.entry;if(specialization)specialization[2]=specialization[2].trim();if(specialization&&ast.typeAliases?.[specialization[2]])specialization[2]=['float','int','uint','bool','uchar','uchar4',...['float','int','uint'].flatMap(p=>[2,3,4].map(n=>p+n))].find(n=>builtinType(n)===ast.typeAliases[specialization[2]]);
+  const specialization=options.entry?.match(/^([A-Za-z_]\w*)<\s*([^<>]+)\s*>$/),entry=specialization?specialization[1]:options.entry;if(specialization)specialization[2]=specialization[2].trim();if(specialization&&ast.typeAliases?.[specialization[2]])specialization[2]=['float','int','uint','bool','uchar','uchar4','short','ushort',...['float','int','uint'].flatMap(p=>[2,3,4].map(n=>p+n))].find(n=>builtinType(n)===ast.typeAliases[specialization[2]]);
   const kernel = entry ? kernels.find(k => k.name === entry) : kernels.length === 1 ? kernels[0] : null;
   if (!kernel) throw new CompileError(options.entry ? `Kernel '${options.entry}' was not found.` : 'Multiple kernels found; specify options.entry.');
   if(!!kernel.templateParameter!==!!specialization)throw new CompileError(kernel.templateParameter?'Specify a template entry, for example '+kernel.name+(kernel.templateKind==='type'?'<float>.':'<16>.'):'This kernel does not have a template parameter.',kernel.token,source);
@@ -983,10 +984,12 @@ export function compile(source, options = {},bufferUsage=null) {
   }
   if(specialization&&kernel.templateKind==='type')walk(kernel.body,n=>{if(n.templateArgument!==undefined)n.templateArgument=n.templateArgument.replace(/[A-Za-z_]\w*/g,name=>name===kernel.templateParameter?specialization[2]:name);});
   resolveTraitTypes(kernel,ast,kernel.templateParameter,specialization?.[2]);
+  const tiledGroups=lowerTiledGroups(ast,options,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});
   const scalarConstraints=uniformBlockGuards(kernel,options,walk,message=>{throw new CompileError(message,kernel.token,source);});
   const overloadGroups=new Map();for(const f of ast.functions)if(f.specializationArgument===undefined){const group=overloadGroups.get(f.name)||[];group.push(f);overloadGroups.set(f.name,group);}let overloadIndex=0;const occupied=new Set(ast.functions.map(f=>f.name));for(const [name,group]of overloadGroups)if(group.length>1){if(group.some(f=>f.qualifier!=='__device__'||f.templateParameter))throw new CompileError('Overloads support non-template device helpers only.',group[0].token,source);const signatures=new Set();for(const f of group){const signature=JSON.stringify(f.params.map(p=>[p.type,p.pointer,p.reference,(p.pointer||p.reference)&&p.constant]));if(signatures.has(signature))throw new CompileError('Duplicate function signature '+name,f.token,source);signatures.add(signature);let unique='cw_overload_'+overloadIndex+++'_'+name;while(occupied.has(unique))unique+='_';occupied.add(unique);f.overloadName=name;f.name=unique;}}
   const templates=instantiateHelperTemplates(ast,kernel);
   const emitter=new Emitter(ast,kernel,options,templates,bufferUsage),result=emitter.emit();
+  if(tiledGroups)result.metadata.tiledGroups='predicated-first-tile';
   if(scalarConstraints.length||emitter.pointerConstraints.length)result.metadata.scalarConstraints=[...scalarConstraints,...emitter.pointerConstraints];
   const changed=['reads','writes','atomic'].some(k=>[...emitter.usage[k]].some(name=>!emitter.initialBufferUsage[k].has(name)));
   if(changed){if(bufferUsage)throw new CompileError('Helper buffer access analysis did not converge.');return compile(source,options,Object.fromEntries(['reads','writes','atomic'].map(k=>[k,[...emitter.usage[k]]])));}if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};return result;

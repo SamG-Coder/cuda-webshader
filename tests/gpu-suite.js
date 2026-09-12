@@ -1,3 +1,5 @@
+import {checkDxtCompress} from './dxt-compress-gpu.js';
+import {checkDxtColors} from './dxt-colors-gpu.js';
 import {checkDxtEvaluate} from './dxt-evaluate-gpu.js';
 import {checkRoundEven} from './round-even-gpu.js';
 import {checkFFTCustomFull} from './fft-custom-full-gpu.js';
@@ -231,6 +233,8 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Original fluids pitched kernels match native CUDA',()=>checkFluidsPitched(runtime));
   await run('2048-point real FFT axes match native cuFFT',()=>checkLargeFFT(runtime));
   await run('Sincos and first-set-bit intrinsics match native CUDA',()=>checkSincos(runtime));
+  await run('DXT full image matches native CUDA',()=>checkDxtCompress(runtime));
+  await run('DXT tiled colour stage matches native CUDA',()=>checkDxtColors(runtime));
   await run('DXT endpoint fitting matches native CUDA',()=>checkDxtEvaluate(runtime));
   await run('rintf matches native bits including halfway ties',()=>checkRoundEven(runtime));
   await run('Complete custom FFT convolution variants match native CUDA',()=>checkFFTCustomFull(runtime));
