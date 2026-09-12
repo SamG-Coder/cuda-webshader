@@ -1,0 +1,7 @@
+Build: nvcc -O3 --fmad=false -std=c++17 -arch=native
+case=0 frame=0 33x25 Julia=0 native capture PASS; guards unchanged
+case=0 frame=1 33x25 Julia=0 native capture PASS; guards unchanged
+case=1 frame=0 256x192 Julia=0 native capture PASS; guards unchanged
+case=1 frame=1 256x192 Julia=0 native capture PASS; guards unchanged
+case=2 frame=0 256x192 Julia=1 native capture PASS; guards unchanged
+case=2 frame=1 256x192 Julia=1 native capture PASS; guards unchanged

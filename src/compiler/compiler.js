@@ -52,7 +52,7 @@ function analyse(functions, params) {
       const name = resolve(rootName(n)); if (bufferNames.has(name)) { if (mode !== 'write') reads.add(name); if (mode !== 'read') writes.add(name); }
       scan(n.index); if (n.base.kind === 'index') scan(n.base, mode); return;
     }
-    if (n.kind === 'member') { scan(n.base, mode); return; }
+    if (n.kind === 'member') {const name=resolve(rootName(n.base));if(mode!=='read'&&n.base.kind==='index'&&params.some(p=>p.pointer&&p.name===name&&p.type==='cw_uchar4')){atomic.add(name);atomicBindings.add(name);reads.add(name);}scan(n.base, mode); return; }
     for (const [key, val] of Object.entries(n)) {
       if (['token', 'source'].includes(key)) continue;
       if (Array.isArray(val)) val.forEach(x => scan(x)); else if (val?.kind) scan(val);
@@ -177,9 +177,10 @@ class Emitter {
         if(n.dereference&&!['buffer','buffer-alias'].includes(base.rootSymbol?.kind))this.fail('Dereference requires a storage-buffer pointer.',n);
         if (!isArray(base.type) || !['i32', 'u32'].includes(index.type)) this.fail('Indexing requires an array and a 32-bit integer index.', n);
         const offset=base.rootSymbol?.offsetCode,indexCode=offset?`(${offset} + ${this.convert(index.code,index.type,'i32',n)})`:index.code;
-        const code = `${base.code}[${indexCode}]`, type = base.type.element;
+        let code = `${base.code}[${indexCode}]`;const type = base.type.element;
         const atomic = base.atomicRoot && !isArray(type);
-        return this.result(n, type, atomic && !raw ? `atomicLoad(&${code})` : code, [...base.pre, ...index.pre], {rootSymbol: base.rootSymbol, atomicRoot: base.atomicRoot, atomic});
+        const addressPre=[];if(atomic&&raw&&type==='cw_uchar4'){const temp='cw_pixel_index_'+this.temp++;addressPre.push(`let ${temp} = ${indexCode};`);code=`${base.code}[${temp}]`;}
+        return this.result(n, type, atomic && !raw ? `atomicLoad(&${code})` : code, [...base.pre, ...index.pre,...addressPre], {rootSymbol: base.rootSymbol, atomicRoot: base.atomicRoot, atomic});
       }
       case 'member': {
         if (n.base.kind === 'id' && ['threadIdx', 'blockIdx', 'blockDim', 'gridDim'].includes(n.base.name)) {
@@ -188,7 +189,7 @@ class Emitter {
           return this.result(n, 'u32', `${code}.${n.member}`);
         }
         const base = this.expr(n.base, raw), size = vectorLength(base.type);
-        if(base.type==='cw_uchar4'){if(n.member.length!==1||!'xyzw'.includes(n.member))this.fail('uchar4 has x, y, z and w byte components.',n);const shift='xyzw'.indexOf(n.member)*8;return this.result(n,'cw_uchar',`((${base.code} >> ${shift}u) & 255u)`,base.pre,{rootSymbol:base.rootSymbol,packedBase:base.code,packedShift:shift});}
+        if(base.type==='cw_uchar4'){if(n.member.length!==1||!'xyzw'.includes(n.member))this.fail('uchar4 has x, y, z and w byte components.',n);const shift='xyzw'.indexOf(n.member)*8,read=base.atomic&&raw?`atomicLoad(&${base.code})`:base.code;return this.result(n,'cw_uchar',`((${read} >> ${shift}u) & 255u)`,base.pre,{rootSymbol:base.rootSymbol,packedBase:base.code,packedShift:shift,packedAtomic:!!base.atomic});}
         if(this.structs.has(base.type)){const field=this.structs.get(base.type).fields.find(f=>f.name===n.member);if(!field)this.fail('Unknown struct field '+n.member,n);return this.result(n,field.resolvedType,`${base.code}.cw_field_${n.member}`,base.pre,{rootSymbol:base.rootSymbol});}
         if (!size || n.member.length !== 1 || 'xyzw'.indexOf(n.member) < 0 || 'xyzw'.indexOf(n.member) >= size) this.fail('Only valid single vector components (.x/.y/.z/.w) are supported.', n);
         return this.result(n, vectorElement(base.type), `${base.code}.${n.member}`, base.pre, {rootSymbol: base.rootSymbol});
@@ -391,7 +392,7 @@ class Emitter {
   }
   writable(target, n) {
     const s = target.rootSymbol;
-    if(target.packedBase&&(n.base?.kind!=='id'||s?.kind!=='local'||s.type!=='cw_uchar4'))this.fail('Byte component writes require a named local uchar4; write complete uchar4 records to storage or shared memory.',n);
+    if(target.packedBase&&!target.packedAtomic&&(n.base?.kind!=='id'||s?.kind!=='local'||s.type!=='cw_uchar4'))this.fail('Byte component writes require a named local uchar4; write complete uchar4 records to storage or shared memory.',n);
     if (!s || !['id', 'index', 'member'].includes(n.kind) || isArray(target.type)) this.fail('Assignment requires a scalar/vector variable or array element.', n);
     if (s.constant) this.fail(`Cannot write through const '${s.name}'.`, n);
     if (s.kind === 'uniform') this.fail('Scalar kernel parameters are read-only in this subset. Copy the parameter to a local variable first.', n);
@@ -409,7 +410,7 @@ class Emitter {
           return [...value.pre,`${symbol.offsetCode} ${n.op} ${this.convert(value.code,value.type,'i32',n)};`];
         }
       }
-      const target = this.expr(n.left, true); this.writable(target, n.left); const value = this.expr(n.right);
+      const target = this.expr(n.left, true); this.writable(target, n.left); let value = this.expr(n.right);let packedPre;if(target.packedAtomic){n.packedAtomicAssignment=true;const tmp='cw_byte_value_'+this.temp++;packedPre=[...value.pre,`let ${tmp}: ${typeName(value.type)} = ${value.code};`,...target.pre];value={...value,code:tmp,pre:[]};}
       if(n.op!=='='&&vectorLength(target.type)){const op=n.op.slice(0,-1);if(n.left.kind!=='id'||vectorElement(target.type)!=='f32'||!['+','-','*','/'].includes(op)||![target.type,'f32'].includes(value.type))this.fail('Vector compound assignments require a named float vector and matching vector or float scalar.',n);const rhs=value.type===target.type?value.code:`${target.type}(${value.code})`;n.operandType=target.type;n.type=target.type;return [...target.pre,...value.pre,`${target.code} = ${target.code} ${op} ${rhs};`];}
       if(target.type==='cw_uchar4'&&n.op!=='=')this.fail('uchar4 compound arithmetic requires explicit byte components.',n);
       let code = this.convert(value.code, value.type, target.type, n);
@@ -421,12 +422,13 @@ class Emitter {
         n.operandType = type;
       }
       n.type = target.type;
+      if(target.packedAtomic){this.packedAtomicUsed=true;return [...packedPre,`cw_store_byte(&${target.packedBase}, ${target.packedShift}u, u32(${code}));`];}
       if(target.packedBase)return [...target.pre,...value.pre,`${target.packedBase} = (${target.packedBase} & ${(~(255<<target.packedShift))>>>0}u) | ((u32(${code}) & 255u) << ${target.packedShift}u);`];
       return [...target.pre, ...value.pre, target.atomic ? `atomicStore(&${target.code}, ${code});` : `${target.code} = ${code};`];
     }
     if (n.kind === 'unary' && ['++', '--'].includes(n.op)) {
       const target = this.expr(n.value, true); this.writable(target, n.value); if (target.atomic || !numeric(target.type)) this.fail('Increment/decrement require a non-atomic scalar.', n);
-      n.type = target.type;if(target.type==='cw_uchar'&&!target.packedBase)return [...target.pre,`${target.code} = (${target.code} ${n.op==='++'?'+':'-'} 1u) & 255u;`];if(target.packedBase)return [...target.pre,`${target.packedBase} = (${target.packedBase} & ${(~(255<<target.packedShift))>>>0}u) | ((u32(i32(${target.code}) ${n.op==='++'?'+':'-'} 1i) & 255u) << ${target.packedShift}u);`]; return [...target.pre, `${target.code} ${n.op === '++' ? '+=' : '-='} ${target.type}(1);`];
+      n.type = target.type;if(target.packedAtomic){this.packedAtomicUsed=true;return [...target.pre,`cw_store_byte(&${target.packedBase}, ${target.packedShift}u, u32(i32(${target.code}) ${n.op==='++'?'+':'-'} 1i));`];}if(target.type==='cw_uchar'&&!target.packedBase)return [...target.pre,`${target.code} = (${target.code} ${n.op==='++'?'+':'-'} 1u) & 255u;`];if(target.packedBase)return [...target.pre,`${target.packedBase} = (${target.packedBase} & ${(~(255<<target.packedShift))>>>0}u) | ((u32(i32(${target.code}) ${n.op==='++'?'+':'-'} 1i) & 255u) << ${target.packedShift}u);`]; return [...target.pre, `${target.code} ${n.op === '++' ? '+=' : '-='} ${target.type}(1);`];
     }
     const value = this.expr(n);
     if (n.kind !== 'call') this.fail('Only assignments, increments and function calls may stand alone as statements.', n);
@@ -493,6 +495,7 @@ class Emitter {
       case 'if': { const condition = this.expr(n.condition); return [...condition.pre, `if (${this.convert(condition.code, condition.type, 'bool', n)}) {`, ...indent(this.body(n.yes)), ...(n.no ? ['} else {', ...indent(this.body(n.no))] : []), '}']; }
       case 'do': {
         const condition=this.expr(n.condition);this.loopDepth++;const inner=this.body(n.body);this.loopDepth--;
+        if(!condition.pre.length&&((n.condition.kind==='literal'&&constantValue(n.condition)!==0)||(n.condition.kind==='id'&&n.condition.name==='true')))return ['loop {',...indent(inner),'}'];
         return ['loop {',...indent(inner),'  continuing {',...indent(indent([...condition.pre,`break if !${this.convert(condition.code,condition.type,'bool',n)};`])),'  }','}'];
       }
       case 'for': case 'while': {
@@ -534,7 +537,7 @@ class Emitter {
         if (p.type === 'bool' || vectorLength(p.type)===3) this.fail('bool* and three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
         const atomic = this.usage.atomic.has(p.name), readOnly = p.constant || !this.usage.writes.has(p.name);
         if (p.constant && this.usage.writes.has(p.name)) this.fail(`Cannot write through const buffer '${p.name}'.`, p);
-        if (atomic && !['i32', 'u32'].includes(p.type)) this.fail('Only 32-bit integer atomics are supported.', p);
+        if (atomic && !['i32', 'u32','cw_uchar4'].includes(p.type)) this.fail('Only 32-bit integer atomics are supported.', p);
         const binding = bindings.length;
         bindings.push({name: p.name, elementType: p.type, stride: typeStride(p.type), binding, readOnly, atomic});
         const symbol = {name: p.name, rootBufferName:p.name, type: arrayOf(p.type), code: `b_${p.name}`, constant: p.constant, atomic, kind: 'buffer',...(shiftedPointers(this.kernel).has(p.name)?{offsetCode:'cw_pointer_'+p.name}:{})};
@@ -582,6 +585,7 @@ class Emitter {
     // WGSL rejects overflowing constant expressions in an inline multiply.
     if(this.integerIntrinsics.has('__mul24'))helperLines.unshift('fn cw_mul24(a: i32, b: i32) -> i32 { return ((a << 8u) >> 8u) * ((b << 8u) >> 8u); }');
     if(this.integerIntrinsics.has('__umul24'))helperLines.unshift('fn cw_umul24(a: u32, b: u32) -> u32 { return (a & 16777215u) * (b & 16777215u); }');
+    if(this.packedAtomicUsed)helperLines.unshift('fn cw_store_byte(word: ptr<storage, atomic<u32>, read_write>, shift: u32, value: u32) { var old = atomicLoad(word); loop { let next = (old & ~(255u << shift)) | ((value & 255u) << shift); let result = atomicCompareExchangeWeak(word, old, next); if (result.exchanged) { return; } old = result.old_value; } }');
     if(this.float2DSamplingUsed)helperLines.unshift('fn cw_sample_float2d(tex: texture_2d<f32>, texSampler: sampler, coords: vec2<f32>, scale: vec2<f32>, pixelPoint: f32) -> f32 { if (pixelPoint > 0.0f) { let maximum = vec2<f32>(textureDimensions(tex)) - vec2<f32>(1.0f); let pixel = vec2<i32>(clamp(floor(coords), vec2<f32>(0.0f), maximum)); return textureLoad(tex, pixel, 0).r; } return textureSampleLevel(tex, texSampler, coords * scale, 0.0f).r; }');
     if(this.rgba2DSamplingUsed)helperLines.unshift('fn cw_sample_rgba2d(tex: texture_2d<f32>, texSampler: sampler, coords: vec2<f32>, scale: vec2<f32>, pixelPoint: f32) -> vec4<f32> { if (pixelPoint > 0.0f) { let maximum = vec2<f32>(textureDimensions(tex)) - vec2<f32>(1.0f); let pixel = vec2<i32>(clamp(floor(coords), vec2<f32>(0.0f), maximum)); return textureLoad(tex, pixel, 0); } return textureSampleLevel(tex, texSampler, coords * scale, 0.0f); }');
     for (const s of this.shared) header.push(`var<workgroup> ${s.code}: ${s.atomic ? sharedAtomicType(s.type) : typeName(s.type)};`);

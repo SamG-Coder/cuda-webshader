@@ -1,0 +1,2 @@
+PASS C++17 packed destination evaluation ordering
+PASS 257 packed records: four independent byte writers, helper stores, wraparound, increments and unchanged guards

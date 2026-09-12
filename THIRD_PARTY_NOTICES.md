@@ -73,3 +73,5 @@ project code under MIT.
 The `showcases/postprocess-gl/` CUDA source and `teapot.ppm` image are from NVIDIA CUDA Samples `postProcessGL`, revision `5443602d89ed99aede2e4b7bf329daddeadb320e`, under the NVIDIA BSD-3-Clause notice retained in `kernel.cu` and `licenses/`. The image is copied from `data/teapot_orig.ppm`. Original project integration and validation code remain MIT.
 
 The CUDA code and `nature.bmp` in `showcases/bilateral-filter/` come from NVIDIA CUDA Samples `bilateralFilter` at revision `5443602d89ed99aede2e4b7bf329daddeadb320e`. The image is `data/nature_monte.bmp`; the code retains NVIDIA's BSD-3-Clause notice. Original compiler, decoder, integration and tests remain MIT.
+
+The CUDA declarations in `showcases/mandelbrot/kernel.cu` and `tests/mandelbrot-kernel.cuh` are extracted from NVIDIA CUDA Samples `Mandelbrot/Mandelbrot_kernel.cuh` and `Mandelbrot/Mandelbrot_cuda.cu` at revision `5443602d89ed99aede2e4b7bf329daddeadb320e`. Original function bodies, NVIDIA BSD-3-Clause notice and DSFUN90 attribution comments are retained. Original compiler, integration, illustration and validation code remain MIT.

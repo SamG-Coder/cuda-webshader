@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "staticBuild": true,
+  "softwareAdapterRequested": false,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "comparisons": [
+    {
+      "name": "mandelbrot",
+      "pixels": 49152,
+      "exact": true
+    },
+    {
+      "name": "julia",
+      "pixels": 49152,
+      "exact": true
+    },
+    {
+      "name": "mandelbrot-accumulated",
+      "pixels": 49152,
+      "exact": true
+    }
+  ],
+  "editedColourAndOffset": true,
+  "shaderComparison": true,
+  "mobileLayout": true
+}

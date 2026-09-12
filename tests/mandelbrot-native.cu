@@ -1,0 +1,7 @@
+// MIT native validation host; NVIDIA device functions unchanged.
+#include <cuda_runtime.h>
+#include <cstdio>
+#include <vector>
+#include "mandelbrot-kernel.cuh"
+#define CHECK(x) do{auto e=(x);if(e!=cudaSuccess){printf("CUDA ERROR %s\n",cudaGetErrorString(e));return 2;}}while(0)
+int main(){const int ws[]={33,256,256},hs[]={25,192,192},crunches[]={40,120,120};const float scales[]={.125f,.0125f,.0125f},xs[]={-2.f,-2.1f,-1.6f},ys[]={-1.5f,-1.2f,-1.2f};for(int k=0;k<3;k++){int w=ws[k],h=hs[k],gridWidth=(w+15)/16,numBlocks=gridWidth*((h+15)/16);std::vector<unsigned> values(w*h+16,0xdeadbeef);uchar4* dst;CHECK(cudaMalloc(&dst,values.size()*4));CHECK(cudaMemcpy(dst,values.data(),values.size()*4,cudaMemcpyHostToDevice));for(int frame=0;frame<2;frame++){Mandelbrot0<float><<<2,dim3(16,16)>>>(dst,w,h,crunches[k],xs[k]+frame*.001f,ys[k]+frame*.001f,-.8f,.156f,scales[k],make_uchar4(3,5,7,0),frame,frame*11,gridWidth,numBlocks,k==2);CHECK(cudaGetLastError());CHECK(cudaDeviceSynchronize());CHECK(cudaMemcpy(values.data(),dst,values.size()*4,cudaMemcpyDeviceToHost));for(int i=w*h;i<w*h+16;i++)if(values[i]!=0xdeadbeef)return 1;char path[128];snprintf(path,sizeof(path),"reports/mandelbrot-native-%d-%d.bin",k,frame);FILE* f=fopen(path,"wb");if(!f||fwrite(values.data(),4,values.size(),f)!=values.size())return 2;fclose(f);printf("case=%d frame=%d %dx%d Julia=%d native capture PASS; guards unchanged\n",k,frame,w,h,k==2);}CHECK(cudaFree(dst));}return 0;}
