@@ -5,7 +5,7 @@
   "results": [
     {
       "compiled": false,
-      "error": "Value-class fields require plain scalar/vector values. (46:5)\n    float *m_x;\r\n    ^"
+      "error": "Value-class methods require value returns or supported receiver/array references. (107:5)\n    __host__ __device__ __forceinline__ const float2 &get_max() const { return m_p_max; }\r\n    ^"
     }
   ]
 }

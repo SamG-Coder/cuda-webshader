@@ -1,3 +1,10 @@
+function capturedScalar(p,spec){
+ if(spec.pointer&&['f32','i32','u32'].includes(spec.type)){
+  if(spec.constant)p.fail('Const scalar pointer members and parameters are not supported yet.');
+  const element=spec.type;spec.pointer=false;spec.type='cw_bufferref_'+element;
+  (p.bufferReferenceTypes??=new Map()).set(spec.type,element);
+ }
+}
 // Parse value classes with checked public/private access into storage records and device helpers.
 // Constructors return values; mutable methods receive a reference to the receiver.
 export function parseValueClass(p) {
@@ -31,7 +38,7 @@ export function parseValueClass(p) {
       if(selfReference&&!['+','-'].includes(operator))p.fail('Const self-reference returns currently require a unary class operator.',start);
       if(!device||spec.pointer||spec.reference&&!selfReference&&!indexedReference&&!mutableSelf||spec.shared||spec.external)p.fail('Value-class methods require value returns or supported receiver/array references.',start);
       p.take('(');const params=[];
-      if(!p.is(')'))do{const t=p.peek(),type=p.type(),param=p.name();if(type.pointer&&type.type.startsWith('cw_objectptr_')){type.pointer=false;type.type=type.type.replace('cw_objectptr_','cw_objectlist_');(p.objectListTypes??=new Set()).add(type.type);}if(type.pointer&&!type.type.startsWith('cw_struct_')||type.shared||type.external)p.fail('Value-class method parameters require values, references or record pointers.',t);params.push({kind:'param',token:t,name:param,...type});}while(p.match(','));
+      if(!p.is(')'))do{const t=p.peek(),type=p.type(),param=p.name();capturedScalar(p,type);if(type.pointer&&type.type.startsWith('cw_objectptr_')){type.pointer=false;type.type=type.type.replace('cw_objectptr_','cw_objectlist_');(p.objectListTypes??=new Set()).add(type.type);}if(type.pointer&&!type.type.startsWith('cw_struct_')||type.shared||type.external)p.fail('Value-class method parameters require values, references or record pointers.',t);params.push({kind:'param',token:t,name:param,...type});}while(p.match(','));
       p.take(')');const constant=!!p.match('const');
       if(constructor&&constant)p.fail('Constructors cannot be const.',start);
       if(functions.length>=128)p.fail('At most 128 methods per value class are supported.',start);
@@ -50,6 +57,7 @@ export function parseValueClass(p) {
       functions.push({kind:'function',token:start,name:helper,qualifier:'__device__',result:spec.type,params,body,classOwner:name,classAccess:access,classConstructor:constructor,classMethod:constructor?null:member,classSelfReference:selfReference,classMutableSelf:mutableSelf,classConstant:constant,classDeclaration:declaration,classResultSpec:spec,classInitializers:initializers});
       p.match(';');
     } else {
+      capturedScalar(p,spec);
       if(spec.pointer&&spec.type.startsWith('cw_objectptr_')){spec.pointer=false;spec.type=spec.type.replace('cw_objectptr_','cw_objectlist_');(p.objectListTypes??=new Set()).add(spec.type);}
       if(device||spec.pointer||spec.reference||spec.shared||spec.external||spec.constant||['void','texture3d','surface2d','thread-block','cw_extent','cw_size64'].includes(spec.type))p.fail('Value-class fields require plain scalar/vector values.',start);
       do {

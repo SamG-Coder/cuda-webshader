@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-12T20:26:11.344Z",
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "results": [
+    {
+      "name": "Original Points retains captured scalar buffers across GPU submissions",
+      "pass": true,
+      "boundsVerified": true,
+      "points": 64,
+      "updates": 3,
+      "originalPointsMethods": true,
+      "nonzeroOffsets": true,
+      "separateSubmissions": true,
+      "crossArenaRejected": true,
+      "wallMs": 98.10499998927116
+    }
+  ]
+}

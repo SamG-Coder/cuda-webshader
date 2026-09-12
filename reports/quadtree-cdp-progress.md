@@ -52,3 +52,29 @@ The unchanged quadtree probe now passes the private-access parse gate and stops
 at `Points::m_x`, a scalar pointer field. Its buffer identities need to survive
 class methods, point-buffer swapping and recursive launches. This is the next
 required representation change; the quadtree still has no runnable browser card.
+
+## Captured scalar buffer references
+
+Private class fields and constructor/method parameters can now retain mutable
+float, int or uint buffer references in a persistent object arena. Each reference
+stores an arena resource identity and an element offset. Buffer identities are
+stable across kernels/submissions; aliases from another arena are rejected.
+Reads and indexed assignments dispatch to the matching registered storage buffer.
+Null/out-of-range reads yield zero and out-of-range writes are ignored; these are
+bounds guards, not a claim that invalid CUDA pointer accesses have defined values.
+Argument offsets and indices are evaluated once. Pointer arithmetic after capture,
+const pointer captures, and vector-element captures remain unsupported.
+
+A GPU fixture preserves the original Points class bodies and uses a small test
+launch harness. Two 32-point sets retain four scalar buffers through initialization,
+three update submissions, offsets and output reads. The harness copies the Points
+record to a local before calling its methods: this verifies the captured-buffer
+representation, not quadtree's remaining storage-reference binding requirements.
+Tests also reject cross-arena pointers and check signed offsets, large unsigned
+indices, and out-of-range writes. All 649 unit and 210 real GPU tests pass; Bezier
+and path-tracer sandbox regressions also pass.
+
+The complete unchanged quadtree now parses past Points and stops at the const
+float2 reference returned by Bounding_box::get_max. Reference-return accessors,
+remaining record bindings/constructors, and recursive launch support are still
+required before this candidate gets a showcase card.
