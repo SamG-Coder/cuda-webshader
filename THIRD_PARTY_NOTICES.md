@@ -142,3 +142,13 @@ commit `5443602d89ed99aede2e4b7bf329daddeadb320e`,
 `showcases/denoising/portrait_noise.bmp` is the unchanged original sample asset
 under the same NVIDIA license. The native captures derive from this source and
 image. Host test harnesses and compiler support are original MIT project code.
+
+### NVIDIA dct8x8
+
+`tests/dct-float-kernel.cuh` retains the original first floating-point transform,
+inverse transform, float quantization, constant matrices and BSD-3-Clause notices
+from CUDA Samples commit `5443602d89ed99aede2e4b7bf329daddeadb320e`,
+`cpp/2_Concepts_and_Techniques/dct8x8/dct8x8_kernel1.cuh` and
+`dct8x8_kernel_quantization.cuh`. The default `FMUL` macro and block constants
+come from that sample's `Common.h`. Native captures derive from these kernels.
+The rounding fixture and test hosts are original MIT project code.

@@ -1,6 +1,7 @@
 // Supported function-like macros forward every argument once, in order, to a named call.
 // Forwarders do not perform general textual substitution.
 export function forwardingMacro(directive) {
+ const wrapped=directive.match(/^(#\s*define\s+[A-Za-z_]\w*\([^()]*\))\s+\(\s*([A-Za-z_]\w*\([^()]*\))\s*\)\s*(?:\/\/[^\n]*)?$/);if(wrapped)return forwardingMacro(wrapped[1]+' '+wrapped[2]);
  const m=directive.match(/^#\s*define\s+([A-Za-z_]\w*)\(([^()]*)\)\s+([A-Za-z_]\w*)\(([^()]*)\)\s*(?:\/\/[^\n]*)?$/);
  if(!m)return null;
  const split=s=>s.trim()?s.split(',').map(p=>p.trim()):[],params=split(m[2]),args=split(m[4]);

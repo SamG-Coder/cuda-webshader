@@ -1,0 +1,49 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "softwareAdapterRequested": false,
+  "intermediateCPUReadbackForProbe": false,
+  "results": [
+    {
+      "entry": "roundingProbe",
+      "pass": true,
+      "nativeBitExact": true
+    },
+    {
+      "entry": "CUDAkernel1DCT",
+      "pixels": 768,
+      "maxError": 0,
+      "pass": true,
+      "guardsIntact": true
+    },
+    {
+      "entry": "CUDAkernelQuantizationFloat",
+      "pixels": 768,
+      "maxError": 0,
+      "pass": true,
+      "guardsIntact": true
+    },
+    {
+      "entry": "CUDAkernel1IDCT",
+      "pixels": 768,
+      "maxError": 0,
+      "pass": true,
+      "guardsIntact": true
+    }
+  ]
+}

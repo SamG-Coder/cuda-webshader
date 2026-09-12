@@ -156,8 +156,9 @@ export class Parser {
       if(this.match('__constant__')){
         this.deferUnsupportedTypes=true;const valueType=this.type(),name=this.name();
         if(valueType.pointer||valueType.reference||valueType.shared||valueType.external)this.fail('Constant globals support scalar values and fixed scalar arrays only.',token);
-        const dimensions=[];while(this.match('[')){dimensions.push(this.expression(2));this.take(']');}if(dimensions.length>1)this.fail('Constant arrays must be one-dimensional.',token);
+        const dimensions=[];while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}if(dimensions.length>1)this.fail('Constant arrays must be one-dimensional.',token);
         const init=this.match('=')?this.initializer():null;this.take(';');
+        if(dimensions[0]===null){if(init?.kind!=='initializer'||!init.items.length)this.fail('Inferred constant arrays require a nonempty initializer.',token);dimensions[0]={kind:'literal',value:String(init.items.length),token};}
         if(constantGlobals.some(g=>g.name===name))this.fail('Duplicate constant global.',token);
         constantGlobals.push({kind:'constant-global',token,name,type:valueType.type,dimensions,init});continue;
       }
