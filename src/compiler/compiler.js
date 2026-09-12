@@ -91,7 +91,9 @@ class Emitter {
     this.bufferAliases=options.bufferAliases??{};
     if(typeof this.bufferAliases!=='object'||Array.isArray(this.bufferAliases))this.fail('bufferAliases must map pointer names to canonical pointer names.',kernel);
     for(const [alias,target]of Object.entries(this.bufferAliases)){const a=kernel.params.find(p=>p.name===alias),b=kernel.params.find(p=>p.name===target);if(typeof target!=='string'||alias===target||Object.hasOwn(this.bufferAliases,target)||!a?.pointer||!b?.pointer||a.type!==b.type)this.fail('Buffer aliases require distinct same-type pointer parameters and no chains.',kernel);}
-    this.usage = analyse([kernel], kernel.params);this.usage.atomic=this.usage.atomicBindings;
+    this.deviceParams=(ast.deviceGlobals||[]).map(g=>{const count=constantValue(g.length);if(!Number.isSafeInteger(count)||count<1||count>16777216)this.fail('Device global arrays require 1..16777216 elements.',g);if(kernel.params.some(p=>p.name===g.name))this.fail('Kernel parameters cannot shadow device global bindings.',g);return {...g,pointer:true,constant:false,origin:'device-global',count};});
+    this.usage = analyse([kernel], [...kernel.params,...this.deviceParams]);this.usage.atomic=this.usage.atomicBindings;
+    const globalUsage=analyse(ast.functions.map(f=>({...f,params:f.params.map(p=>({...p,pointer:false}))})),this.deviceParams);for(const kind of ['reads','writes'])for(const name of globalUsage[kind])this.usage[kind].add(name);for(const name of globalUsage.atomicBindings)this.usage.atomic.add(name);
     for(const kind of ['reads','writes','atomic'])for(const name of bufferUsage?.[kind]||[])this.usage[kind].add(name);
     for(const kind of ['reads','writes','atomic'])for(const [alias,target]of Object.entries(this.bufferAliases))if(this.usage[kind].has(alias))this.usage[kind].add(target);
     for(const p of kernel.params)if(p.pointer&&p.type==='cw_uchar'&&this.usage.writes.has(p.name))this.usage.atomic.add(p.name);
@@ -108,6 +110,7 @@ class Emitter {
   fail(message, n) { throw new CompileError(message, n?.token, this.ast.source); }
   lookup(name, n) {
     for (let i = this.scopes.length - 1; i >= 0; --i) { const s = this.scopes[i].get(name); if (s) return s; }
+    if(this.globalSymbols.has(name)&&this.globalSymbols.get(name).kind==='buffer')return this.globalSymbols.get(name);
     const global=this.ast.constantGlobals.find(g=>g.name===name);
     if(global){
       if(this.structs.has(global.type)||vectorLength(global.type)||global.dimensions.length===2){
@@ -722,11 +725,11 @@ class Emitter {
   emit() {
     this.checkRecursion();
     if (this.kernel.result !== 'void') this.fail('__global__ kernels must return void.', this.kernel);
-    const textures=[],surfaces=[],bufferCount=this.kernel.params.filter(p=>p.pointer&&!Object.hasOwn(this.bufferAliases,p.name)).length;
+    const textures=[],surfaces=[],bufferCount=this.kernel.params.filter(p=>p.pointer&&!Object.hasOwn(this.bufferAliases,p.name)).length+this.deviceParams.length;
     const bindings = [], scalars = [], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
     for(const s of this.structs.values())header.push(`struct ${s.type} {`,...s.fields.map(f=>`  cw_field_${f.name}: ${typeName(f.resolvedType)},`),'}');
     const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t==='f32'?'u32':t}>`;
-    for (const p of this.kernel.params) {
+    for (const p of [...this.kernel.params,...this.deviceParams]) {
       if (p.shared || p.reference || p.external || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
       if(p.type==='cw_size64'){
         if(p.pointer)this.fail('size_t supports value parameters, not storage buffers.',p);
@@ -754,9 +757,9 @@ class Emitter {
         if (p.constant && this.usage.writes.has(p.name)) this.fail(`Cannot write through const buffer '${p.name}'.`, p);
         if (atomic && !['i32', 'u32','cw_uchar4','cw_uchar'].includes(p.type)) this.fail('Only 32-bit integer atomics are supported.', p);
         const binding = bindings.length;
-        if(canonical===p.name)bindings.push({name: p.name, elementType: p.type, stride: p.type==='cw_uchar'?1:typeStride(p.type), binding, readOnly, atomic});
-        const symbol = {name: p.name, rootBufferName:canonical, type: arrayOf(p.type), code: `b_${canonical}`, constant: p.constant, atomic, kind: 'buffer',...(shiftedPointers(this.kernel).has(p.name)?{offsetCode:'cw_pointer_'+p.name}:{})};
-        this.add(p.name, symbol, p, true); p.symbol = symbol;this.bufferSymbols.set(p.name,symbol);
+        if(canonical===p.name)bindings.push({name: p.name, elementType: p.type, stride: p.type==='cw_uchar'?1:typeStride(p.type), binding, readOnly, atomic,...(p.origin?{origin:p.origin,count:p.count,minBindingSize:p.count*typeStride(p.type)}:{})});
+        const symbol = {name: p.name, rootBufferName:canonical, type: arrayOf(p.type), code: `b_${canonical}`, constant: p.constant, atomic, kind: 'buffer',...(p.origin?{deviceGlobal:true}:{}),...(!p.origin&&shiftedPointers(this.kernel).has(p.name)?{offsetCode:'cw_pointer_'+p.name}:{})};
+        if(p.origin)this.globalSymbols.set(p.name,symbol);else this.add(p.name, symbol, p, true); p.symbol = symbol;if(p.origin)this.ast.deviceGlobals.find(g=>g.name===p.name).symbol=symbol;this.bufferSymbols.set(p.name,symbol);
         if(canonical===p.name)header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type}>` : p.type==='cw_uchar'?'u32':p.type}>;`);
       } else {
         if ((!numeric(p.type)&&!['bool','cw_uchar4'].includes(p.type))||p.type==='cw_uchar') this.fail('Scalar kernel parameters must be float, int, unsigned int, bool or packed uchar4. Put other vectors in buffers.', p);

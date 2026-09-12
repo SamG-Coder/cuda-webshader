@@ -6,9 +6,9 @@ The target retains the original 2048 time steps and maximum 1024-option batch. T
 
 The original launch divisibility guard, `#if NUM_STEPS % THREADBLOCK_SIZE`, initially failed preprocessing. The compiler now evaluates bounded signed 32-bit integer arithmetic in conditional directives using its existing integer-expression parser. Regression tests cover NVIDIA's valid/invalid launch guard, arithmetic precedence, undefined macros, division by zero, overflow and unsupported expressions.
 
-The next confirmed blocker is the original mutable device-global declaration:
+The original mutable device-global declaration is now supported:
 `static __device__ real d_CallValue[MAX_OPTIONS];`
-The parser currently treats `__device__` as a function qualifier and expects a parameter list. Supporting this requires explicit storage metadata and runtime bindings for mutable device globals, rather than changing the CUDA kernel to take an output pointer.
+The compiler emits persistent storage bindings for fixed arrays of 32-bit scalar values. Helpers can access those globals, including integer atomics. Runtime bindings enforce the declared array's minimum size. The CPU oracle preserves backing storage across calls. Array names cannot be reassigned as pointers. The CUDA kernel needs no extra output parameter.
 
 The original input is an array of constant structs, `d_OptionData[MAX_OPTIONS]`; its full-size uniform layout and runtime upload also need validation after the output declaration is supported. Original native host preprocessing should generate reference inputs, and native outputs must be compared before a showcase card is added.
 
@@ -28,4 +28,6 @@ nvcc -O3 --fmad=false -std=c++17 -arch=native -Xcompiler /Zc:preprocessor -I.loc
 .local\nvidia-checks\binomial-capture.exe
 ```
 
-Remaining compiler work includes writable device-global arrays and the full 1024-entry constant struct array. This report does not claim that the WebGPU sample works yet.
+The remaining confirmed compiler blocker is the full 1024-entry constant struct array. This report does not claim that the WebGPU sample works yet.
+
+Device-global validation: 590 unit tests and 189 real NVIDIA GPU checks pass. The focused GPU test checks 128 outputs across two dispatches, 256 helper atomic increments, and rejection of undersized storage. No software adapter is requested.

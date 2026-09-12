@@ -29,6 +29,8 @@ export function kernelSource(source){
  while((match=valueAliases.exec(masked))){const name=/([A-Za-z_]\w*)\s*;$/.exec(match[0])[1];declarations.push({names:[name],range:[match.index,match.index+match[0].length]});}
  const sharedDeclarations=/\b(?:extern\s+)?__shared__\s+[^;{}]+;/g;
  while((match=sharedDeclarations.exec(masked)))spans.push([match.index,match.index+match[0].length]);
+ const deviceArrays=/\b(?:static\s+)?__device__\s+(?:unsigned\s+)?\w+\s+\w+\s*\[[^;{}]*\]\s*;/g;
+ while((match=deviceArrays.exec(masked)))spans.push([match.index,match.index+match[0].length]);
  const constants=/\b__constant__\b[^;]*;/g;
  while((match=constants.exec(masked)))spans.push([match.index,match.index+match[0].length]);
  // Keep declaration dependencies of the extracted device code, not unrelated

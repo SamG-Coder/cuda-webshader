@@ -168,7 +168,7 @@ export class Parser {
     launch.token=token;launch.body.body.push(...body.body);launch.zipFunctor=true;this.functionNames.add(name);return launch;
   }
   parse() {
-    const functions = [],constantGlobals=[],sharedGlobals=[];
+    const functions = [],constantGlobals=[],sharedGlobals=[],deviceGlobals=[];
     while (this.peek().kind !== 'eof') {
       const token = this.peek();
       if(this.match('static')&&!['__constant__','__global__','__device__'].includes(this.peek().value))this.fail('Static module declarations require CUDA constant storage or a device function.',token);
@@ -254,7 +254,14 @@ export class Parser {
       const result = this.type();
       if (result.pointer || result.shared || result.reference || result.external || result.type==='cw_extent') this.fail('Function return pointers/references/shared/extern qualifiers are unsupported.');
       if(this.peek().forward||this.peek().expressionMacro)this.fail('Function-like macros are supported at call sites, not in function declarations.');
-      const name = this.name();if(this.typeAliases.has(name))this.fail('Functions cannot shadow a type alias.',token);this.functionNames.add(name);let specializationArgument;
+      const name = this.name();
+      if(qualifier==='__device__'&&this.is('[')){
+        if(templateKind||hostQualified||result.constant||!['f32','i32','u32'].includes(result.type))this.fail('Device globals require non-template mutable 32-bit scalar arrays.',token);
+        this.take('[');const length=this.expression(2);this.take(']');this.take(';');
+        if(deviceGlobals.some(g=>g.name===name)||constantGlobals.some(g=>g.name===name)||sharedGlobals.some(g=>g.name===name))this.fail('Duplicate global storage name.',token);
+        deviceGlobals.push({kind:'device-global',name,type:result.type,length,token});continue;
+      }
+      if(this.typeAliases.has(name))this.fail('Functions cannot shadow a type alias.',token);this.functionNames.add(name);let specializationArgument;
       if(templateKind==='specialization')specializationArgument=this.templateArgument();
       this.take('('); const params = [];
       if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name();if(this.match('[')){const size=this.take();if(size.kind!=='number'||!/^\d+[uU]?$/.test(size.value)||Number(size.value.replace(/[uU]$/,''))<1||Number(size.value.replace(/[uU]$/,''))>65536||type.pointer||type.reference)this.fail('Array parameters require one positive fixed dimension.',size);this.take(']');type.pointer=true;}const defaultValue=this.match('=')?this.expression(2):undefined;
@@ -266,7 +273,8 @@ export class Parser {
       functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads,templateParameter,templateParameters,templateKind,...(specializationArgument!==undefined?{specializationArgument}:{})});
     }
     if (!functions.some(f => f.qualifier === '__global__')) this.fail('No __global__ kernel was found.');
-    return {kind: 'module', functions:functions.concat(this.staticFunctions), constantGlobals,sharedGlobals,typeAliases:Object.fromEntries(this.typeAliases),structs:[...this.structs.values()],typeTraits:[...this.typeTraits.values()], source: this.source};
+    for(const g of deviceGlobals)if(constantGlobals.some(c=>c.name===g.name)||sharedGlobals.some(c=>c.name===g.name)||functions.some(f=>f.name===g.name))this.fail('Duplicate global storage name.',g.token);
+    return {kind: 'module', functions:functions.concat(this.staticFunctions), constantGlobals,sharedGlobals,deviceGlobals,typeAliases:Object.fromEntries(this.typeAliases),structs:[...this.structs.values()],typeTraits:[...this.typeTraits.values()], source: this.source};
   }
   staticStruct(name,argument,parameter,token){
     let owner=this.staticTemplates.get(name);
