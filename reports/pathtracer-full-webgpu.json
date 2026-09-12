@@ -1,0 +1,9 @@
+{
+  "width": 1200,
+  "height": 800,
+  "samples": 10,
+  "wallMs": 159.1099999845028,
+  "allFreed": true,
+  "vendor": "nvidia",
+  "timingNote": "CPU wall time around render_init + render submissions and waits; excludes compilation and scene creation. Not directly comparable with native event timing."
+}

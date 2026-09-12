@@ -48,6 +48,7 @@ export class GpuRuntime {
     if (!adapter && !options.device) throw new Error('No WebGPU adapter is available. Check the browser GPU settings and graphics driver.');
     const features = ['timestamp-query','core-features-and-limits','float32-filterable'].filter(f => adapter?.features.has(f));
     const requiredLimits = adapter ? {
+      maxStorageBuffersPerShaderStage: Math.min(adapter.limits.maxStorageBuffersPerShaderStage,16),
       maxComputeInvocationsPerWorkgroup: Math.min(adapter.limits.maxComputeInvocationsPerWorkgroup, 1024),
       maxComputeWorkgroupSizeX: Math.min(adapter.limits.maxComputeWorkgroupSizeX,1024),
       maxStorageBufferBindingSize: Math.min(adapter.limits.maxStorageBufferBindingSize, 256 * 1024 * 1024),

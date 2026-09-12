@@ -289,3 +289,9 @@ The complete device-module probe now compiles rand_init, render_init and
 free_world. create_world next stops at increment inside an assignment destination;
 render stops at the non-const camera method on a persistent object. These are
 integration blockers still to resolve before the full scene and sandbox card.
+
+## Full scene integration
+
+All five original device entries now compile and run: rand_init, create_world, render_init, render and free_world. Indexed assignment preserves C++17 RHS-before-LHS sequencing; persistent member methods use storage-backed object indices; virtual calls forward local RNG references. The generic sandbox pipeline owns the object arena, binds explicit record layouts, copies the original handle aliases on GPU and displays RGB float output. Original device function bodies are unchanged.
+
+The complete 1200 x 800, 10-sample, 488-sphere scene passes the sandbox test on NVIDIA Blackwell. All 960,000 displayed pixels are checked against GPU output. Native comparison over 2,880,000 components has mean absolute error 0.000614175 and 97.593% within 1e-4. Floating-point differences can change stochastic ray paths; this is not exact pixel parity. The standalone run also verifies all object slots are freed. Timings captured during concurrent native and browser runs are diagnostic only, not a speed comparison.

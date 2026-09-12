@@ -1,5 +1,8 @@
 # CUDA → WebShader
 
+**New: [Glass, metal and 488 spheres — CUDA path tracer](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=pathtracer)**. Roger Allen’s final scene runs through the compiler and sandbox at 1200 × 800, 10 samples per pixel. [Source, pipeline and validation](showcases/pathtracer/README.md).
+
+
 ## [Launch the live showcase explorer ↗](https://samg-coder.github.io/cuda-webshader/)
 
 **[NVIDIA sine-wave showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=wave)** · **[Particle sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=particles)** · **[CUDA vs. WebGPU results](https://samg-coder.github.io/cuda-webshader/reports/performance-comparison.html)**

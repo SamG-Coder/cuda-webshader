@@ -1,0 +1,175 @@
+{
+  "pipeline": {
+    "compilerOptions": {
+      "libraries": [
+        "curand-xorwow"
+      ],
+      "objectHeap": "persistent",
+      "valueBuffers": [
+        "fb"
+      ]
+    },
+    "buffers": {
+      "d_list": {
+        "type": "u32",
+        "records": 488,
+        "fill": "zero"
+      },
+      "d_world": {
+        "type": "u32",
+        "records": 1,
+        "fill": "zero"
+      },
+      "d_camera": {
+        "type": "u32",
+        "records": 1,
+        "fill": "zero"
+      },
+      "world": {
+        "type": "u32",
+        "records": 1,
+        "fill": "zero"
+      },
+      "cam": {
+        "type": "u32",
+        "records": 1,
+        "fill": "zero"
+      },
+      "worldState": {
+        "type": "u32",
+        "records": 6,
+        "fill": "zero",
+        "recordType": "cw_struct_curandState"
+      },
+      "states": {
+        "type": "u32",
+        "records": 5760000,
+        "fill": "zero",
+        "recordType": "cw_struct_curandState"
+      },
+      "fb": {
+        "type": "f32",
+        "records": 2880000,
+        "fill": "zero",
+        "recordType": "cw_struct_vec3"
+      }
+    },
+    "steps": [
+      {
+        "entry": "rand_init",
+        "block": [
+          1,
+          1,
+          1
+        ],
+        "groups": [
+          1,
+          1,
+          1
+        ],
+        "scalars": {},
+        "bindings": {
+          "rand_state": "worldState"
+        }
+      },
+      {
+        "entry": "create_world",
+        "block": [
+          1,
+          1,
+          1
+        ],
+        "groups": [
+          1,
+          1,
+          1
+        ],
+        "scalars": {
+          "nx": 1200,
+          "ny": 800
+        },
+        "bindings": {
+          "rand_state": "worldState"
+        }
+      },
+      {
+        "copyBuffer": {
+          "source": "d_world",
+          "target": "world",
+          "records": 1
+        }
+      },
+      {
+        "copyBuffer": {
+          "source": "d_camera",
+          "target": "cam",
+          "records": 1
+        }
+      },
+      {
+        "entry": "render_init",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          150,
+          100,
+          1
+        ],
+        "scalars": {
+          "max_x": 1200,
+          "max_y": 800
+        },
+        "bindings": {
+          "rand_state": "states"
+        }
+      },
+      {
+        "entry": "render",
+        "block": [
+          8,
+          8,
+          1
+        ],
+        "groups": [
+          150,
+          100,
+          1
+        ],
+        "scalars": {
+          "max_x": 1200,
+          "max_y": 800,
+          "ns": 10
+        },
+        "bindings": {
+          "rand_state": "states"
+        }
+      },
+      {
+        "entry": "free_world",
+        "block": [
+          1,
+          1,
+          1
+        ],
+        "groups": [
+          1,
+          1,
+          1
+        ],
+        "scalars": {},
+        "bindings": {}
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "format": "rgb-f32",
+      "buffer": "fb",
+      "width": 1200,
+      "height": 800,
+      "flipY": true
+    }
+  }
+}

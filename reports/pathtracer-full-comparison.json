@@ -1,0 +1,10 @@
+{
+  "width": 1200,
+  "height": 800,
+  "samples": 10,
+  "components": 2880000,
+  "meanAbsoluteError": 0.0006141753508264686,
+  "maxAbsoluteError": 0.4693072438240051,
+  "fractionWithin1eMinus4": 0.9759309027777778,
+  "fractionOver0_02": 0.009762152777777778
+}

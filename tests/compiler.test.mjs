@@ -30,7 +30,7 @@ const bad=[
  ['warp shuffle',wrap('output[0]=__shfl_sync(0xffffffffu,1.0f,0);'),/Unsupported function/],
  ['const write','__global__ void k(const float* x){x[0]=1.0f;}',/const/],
  ['pointer multiplication',wrap('output=output*2;'),/scalar|operand|allocation/],
- ['post-increment in an assignment destination',wrap('int i=0;output[i++]=1.0f;'),/assignment destinations/],
+ ['post-increment in an assignment destination',wrap('int i=0;output[i++]+=1.0f;'),/assignment destinations/],
  ['unknown identifier',wrap('output[0]=missing;'),/Unknown identifier/],
  ['recursion','__device__ float f(float x){return f(x);} __global__ void k(float* x){x[0]=f(x[0]);}',/Recursive/],
  ['helper capture','__device__ float f(float a){return output[0];} __global__ void k(float* output){output[0]=f(1.0f);}',/Unknown identifier/],

@@ -1,0 +1,7 @@
+{
+  "width": 1200,
+  "height": 800,
+  "samples": 10,
+  "gpuMs": 651.688965,
+  "timingNote": "Diagnostic timing only: concurrent native/browser run; not a controlled benchmark."
+}

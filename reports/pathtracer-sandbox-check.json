@@ -1,0 +1,48 @@
+{
+  "passed": true,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "width": 1200,
+  "height": 800,
+  "samplesPerPixel": 10,
+  "spheres": 488,
+  "components": 2880000,
+  "meanAbsoluteError": 0.0006141753508264685,
+  "maxAbsoluteError": 0.4693072438240051,
+  "fractionWithin1eMinus4": 0.9759309027777778,
+  "previewPixelsVerified": 960000,
+  "softwareAdapterRequested": false,
+  "persistentMemberState": {
+    "values": [
+      16,
+      35,
+      16,
+      35
+    ],
+    "separateSubmissions": true,
+    "allFreed": true
+  },
+  "passes": [
+    "1. rand_init",
+    "2. create_world",
+    "3. render_init",
+    "4. render",
+    "5. free_world"
+  ],
+  "sourceUnchanged": true
+}
