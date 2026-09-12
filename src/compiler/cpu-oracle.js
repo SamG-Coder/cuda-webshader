@@ -6,10 +6,11 @@
 import {isArray, vectorLength, vectorElement, walk} from './compiler.js';
 const f = Math.fround;
 function convert(value,type){
+  if(typeof type==='string'&&type.startsWith('cw_struct_'))return structuredClone(value);
   if(type==='f32')return f(value);if(type==='u32')return Number(value)>>>0;if(type==='i32')return Number(value)|0;if(type==='bool')return !!value;
   const size=vectorLength(type);if(size){if(!Array.isArray(value)||value.length!==size)throw new Error('Invalid vector value.');return value.map(v=>convert(v,vectorElement(type)));}return value;
 }
-function zero(type){if(isArray(type))return Array.from({length:type.length},()=>zero(type.element));const n=vectorLength(type);return n?Array(n).fill(0):type==='bool'?false:0;}
+function zero(type,structs=[]){const spec=structs.find(s=>s.type===type);if(spec)return Object.fromEntries(spec.fields.map(f=>[f.name,zero(f.resolvedType,structs)]));if(isArray(type))return Array.from({length:type.length},()=>zero(type.element,structs));const n=vectorLength(type);return n?Array(n).fill(0):type==='bool'?false:0;}
 class BufferView {
   constructor(data,type,offset=0){this.data=data;this.type=type;this.offset=offset;this.width=vectorLength(type)||1;this.length=data.length/this.width;if(!Number.isInteger(this.length))throw new Error('Buffer record count is not integral.');}
   check(i){if(!Number.isInteger(i)||i+this.offset<0||i+this.offset>=this.length)throw new RangeError(`CPU oracle detected out-of-bounds access at ${i}, length ${this.length}.`);}
@@ -42,7 +43,8 @@ class Context {
       return {get:()=>base[i],set:v=>{base[i]=convert(v,n.type);}};
     }
     if(n.kind==='member'){
-      const reference=yield* this.ref(n.base),i='xyzw'.indexOf(n.member);
+      const reference=yield* this.ref(n.base),structure=typeof n.base.type==='string'&&n.base.type.startsWith('cw_struct_'),i=structure?n.member:'xyzw'.indexOf(n.member);
+      if(structure)return {get:()=>reference.get()[i],set:v=>{const copy=structuredClone(reference.get());copy[i]=convert(v,n.type);reference.set(copy);}};
       return {get:()=>reference.get()[i],set:v=>{const copy=[...reference.get()];copy[i]=convert(v,n.type);reference.set(copy);}};
     }
     throw new Error(`Expression ${n.kind} is not an lvalue.`);
@@ -57,7 +59,7 @@ class Context {
       case 'index':return (yield* this.ref(n)).get();
       case 'member':{
         if(n.base.kind==='id'&&this.ids[n.base.name])return this.ids[n.base.name]['xyz'.indexOf(n.member)];
-        const base=yield* this.eval(n.base);return base['xyzw'.indexOf(n.member)];
+        const base=yield* this.eval(n.base);return base[typeof n.base.type==='string'&&n.base.type.startsWith('cw_struct_')?n.member:'xyzw'.indexOf(n.member)];
       }
       case 'cast':return convert(yield* this.eval(n.value),n.target);
       case 'unary':{
@@ -117,7 +119,7 @@ class Context {
     this.tick();
     switch(n.kind){
       case 'block':for(const s of n.body){const signal=yield* this.statement(s);if(signal)return signal;}return;
-      case 'decl':if(n.aliasBase){const base=this.env.get(n.aliasBase).value,offset=convert(base.offset+convert(n.aliasOffset?yield* this.eval(n.aliasOffset):0,'i32'),'i32');if(!Number.isInteger(offset))throw new RangeError('CPU alias needs an integer offset.');this.env.set(n.symbol,{value:new BufferView(base.data,base.type,offset)});}else if(!n.shared)this.env.set(n.symbol,{value:n.init?convert(yield* this.eval(n.init),n.resolvedType):zero(n.resolvedType)});return;
+      case 'decl':if(n.aliasBase){const base=this.env.get(n.aliasBase).value,offset=convert(base.offset+convert(n.aliasOffset?yield* this.eval(n.aliasOffset):0,'i32'),'i32');if(!Number.isInteger(offset))throw new RangeError('CPU alias needs an integer offset.');this.env.set(n.symbol,{value:new BufferView(base.data,base.type,offset)});}else if(!n.shared)this.env.set(n.symbol,{value:n.init?convert(yield* this.eval(n.init),n.resolvedType):zero(n.resolvedType,this.artifact.ast.structs)});return;
       case 'decls':for(const d of n.declarations)yield* this.statement(d);return;
       case 'expr':yield* this.eval(n.value);return;
       case 'if':if(yield* this.eval(n.condition))return yield* this.statement(n.yes);else if(n.no)return yield* this.statement(n.no);return;
@@ -140,7 +142,7 @@ export function executeCPU(artifact,buffers,scalars,workgroups,{instructionBudge
   const grid=Array.isArray(workgroups)?[...workgroups]:[workgroups];while(grid.length<3)grid.push(1);
   if(grid.some(x=>!Number.isInteger(x)||x<0)||grid.length!==3)throw new RangeError('Invalid workgroup shape.');
   const block=artifact.metadata.workgroupSize,baseEnv=new Map();
-  for(const global of artifact.ast.constantGlobals)if(global.symbol){if(global.symbol.elements){const values=global.symbol.elements.map(name=>{const meta=artifact.metadata.scalars.find(s=>s.name===name),value=Object.hasOwn(scalars,name)?scalars[name]:meta.defaultValue;if(!Number.isFinite(value))throw new Error('Invalid constant array value '+name);return convert(value,global.type);});baseEnv.set(global.symbol,{value:values});continue;}const meta=artifact.metadata.scalars.find(s=>s.name===global.symbol.name),value=Object.hasOwn(scalars,meta.name)?scalars[meta.name]:meta.defaultValue;if(!Number.isFinite(value))throw new Error('Invalid constant global '+meta.name);baseEnv.set(global.symbol,{value:convert(value,global.type)});}
+  for(const global of artifact.ast.constantGlobals)if(global.symbol){if(global.symbol.aggregate){const build=node=>{if(node.kind==='struct')return Object.fromEntries(node.fields.map(([name,value])=>[name,build(value)]));if(node.kind==='array')return node.items.map(build);const value=scalars[node.name]??0;if(!Number.isFinite(value))throw Error('Invalid constant struct component '+node.name);return convert(value,node.type);};baseEnv.set(global.symbol,{value:build(global.symbol.aggregate)});continue;}if(global.symbol.elements){const values=global.symbol.elements.map(name=>{const meta=artifact.metadata.scalars.find(s=>s.name===name),value=Object.hasOwn(scalars,name)?scalars[name]:meta.defaultValue;if(!Number.isFinite(value))throw new Error('Invalid constant array value '+name);return convert(value,global.type);});baseEnv.set(global.symbol,{value:values});continue;}const meta=artifact.metadata.scalars.find(s=>s.name===global.symbol.name),value=Object.hasOwn(scalars,meta.name)?scalars[meta.name]:meta.defaultValue;if(!Number.isFinite(value))throw new Error('Invalid constant global '+meta.name);baseEnv.set(global.symbol,{value:convert(value,global.type)});}
   for(const p of artifact.kernel.params){
     if(p.pointer){if(!ArrayBuffer.isView(buffers[p.name]))throw new Error(`Missing CPU buffer ${p.name}.`);baseEnv.set(p.symbol,{value:new BufferView(buffers[p.name],p.type)});}
     else{if(!Number.isFinite(scalars[p.name]))throw new Error(`Missing/invalid scalar ${p.name}.`);baseEnv.set(p.symbol,{value:convert(scalars[p.name],p.type)});}

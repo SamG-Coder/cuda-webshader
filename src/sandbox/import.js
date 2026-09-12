@@ -19,6 +19,8 @@ export function kernelSource(source){
  }
  const traits=/\btemplate\s*<[^>]*>\s*struct\s+\w+(?:\s*<[^>]*>)?\s*\{([^{}]*)\}\s*;/g;
  while((match=traits.exec(masked)))if(/^(?:\s*typedef\s+(?:unsigned\s+)?\w+\s+\w+\s*;)+\s*$/.test(match[1]))spans.push([match.index,match.index+match[0].length]);
+ const plainStructs=/\b(?:typedef\s+)?struct\s*(?:\w+\s*)?\{[^{}]*\}\s*(?:\w+\s*)?;/g;
+ while((match=plainStructs.exec(masked)))spans.push([match.index,match.index+match[0].length]);
  const constants=/\b__constant__\b[^;]*;/g;
  while((match=constants.exec(masked)))spans.push([match.index,match.index+match[0].length]);
  const chars=source.replace(/[^\n]/g,' ').split('');for(const [start,end]of spans)for(let i=start;i<end;i++)chars[i]=source[i];

@@ -1,0 +1,3 @@
+row=0 PASS native struct copy, helper return, dynamic matrix row and unchanged constant
+row=1 PASS native struct copy, helper return, dynamic matrix row and unchanged constant
+row=2 PASS native struct copy, helper return, dynamic matrix row and unchanged constant

@@ -62,6 +62,7 @@ function analyse(functions, params) {
 class Emitter {
   constructor(ast, kernel, options, templates,bufferUsage) {
     this.ast = ast; this.kernel = kernel; this.options = options; this.scopes = [new Map()]; this.temp = 0; this.loopDepth = 0; this.integerIntrinsics=new Set();
+    this.structs=new Map((ast.structs||[]).map(s=>[s.type,s]));for(const s of this.structs.values())for(const field of s.fields){let type=field.type;for(const dim of [...field.dimensions].reverse()){const length=constantValue(dim);if(!Number.isSafeInteger(length)||length<1||length>256)this.fail('Struct field array dimensions must be 1..256.',field);type=arrayOf(type,length);}field.resolvedType=type;}
     this.functions = new Map(); this.shared = []; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
     for (const f of ast.functions) {
       if (this.functions.has(f.name)) this.fail(`Duplicate function '${f.name}'.`, f);
@@ -86,6 +87,12 @@ class Emitter {
     for (let i = this.scopes.length - 1; i >= 0; --i) { const s = this.scopes[i].get(name); if (s) return s; }
     const global=this.ast.constantGlobals.find(g=>g.name===name);
     if(global){
+      if(this.structs.has(global.type)){
+        if(!this.globalSymbols.has(name)){if(global.init||global.dimensions.length)this.fail('Constant structs currently require zero initialization and a single struct value.',global);const leaves=[];
+          const build=(type,path)=>{if(this.structs.has(type)){const fields=this.structs.get(type).fields.map(f=>[f.name,build(f.resolvedType,path+'.'+f.name)]);return {code:`${type}(${fields.map(([,v])=>v.code).join(', ')})`,shape:{kind:'struct',fields:fields.map(([name,v])=>[name,v.shape])}};}if(isArray(type)||vectorLength(type)){const count=isArray(type)?type.length:vectorLength(type),element=isArray(type)?type.element:vectorElement(type),items=Array.from({length:count},(_,i)=>build(element,path+(isArray(type)?'['+i+']':'.'+'xyzw'[i])));return {code:`${typeName(type)}(${items.map(v=>v.code).join(', ')})`,shape:{kind:'array',items:items.map(v=>v.shape)}};}if(!numeric(type)||leaves.length>=256)this.fail('Constant structs support at most 256 float/int/uint components.',global);const field='cw_struct_constant_'+this.ast.constantGlobals.indexOf(global)+'_'+leaves.length;leaves.push({name:path,type,origin:'constant',field,defaultValue:0});return {code:'cw_params.'+field,shape:{kind:'scalar',name:path,type}};};
+          const value=build(global.type,'constant.'+name),symbol={name:'constant.'+name,type:global.type,code:value.code,constant:true,atomic:false,kind:'constant-global',aggregate:value.shape};this.constantScalars.push(...leaves);this.globalSymbols.set(name,symbol);global.symbol=symbol;
+        }return this.globalSymbols.get(name);
+      }
       if(!numeric(global.type))this.fail('Referenced constant globals require float, int or unsigned int scalar values.',n);
       if(!this.globalSymbols.has(name)){
         if(global.dimensions?.length){
@@ -174,6 +181,7 @@ class Emitter {
           return this.result(n, 'u32', `${code}.${n.member}`);
         }
         const base = this.expr(n.base, raw), size = vectorLength(base.type);
+        if(this.structs.has(base.type)){const field=this.structs.get(base.type).fields.find(f=>f.name===n.member);if(!field)this.fail('Unknown struct field '+n.member,n);return this.result(n,field.resolvedType,`${base.code}.cw_field_${n.member}`,base.pre,{rootSymbol:base.rootSymbol});}
         if (!size || n.member.length !== 1 || 'xyzw'.indexOf(n.member) < 0 || 'xyzw'.indexOf(n.member) >= size) this.fail('Only valid single vector components (.x/.y/.z/.w) are supported.', n);
         return this.result(n, vectorElement(base.type), `${base.code}.${n.member}`, base.pre, {rootSymbol: base.rootSymbol});
       }
@@ -396,6 +404,7 @@ class Emitter {
       const offsetCode=`cw_offset_${this.temp++}`,symbol={...base,name:n.name,constant:n.constant||base.constant,kind:'buffer-alias',offsetCode};this.add(n.name,symbol,n);n.symbol=symbol;n.aliasBase=base;n.aliasOffset=offsetNode;
       return [...offset.pre,`var ${offsetCode} = ${base.offsetCode?base.offsetCode+' + ':''}${this.convert(offset.code,offset.type,'i32',n)};`];
     }
+    if(this.structs.has(n.type)&&(n.shared||n.dimensions.length))this.fail('Structs currently support local values only, not shared memory or arrays of structs.',n);
     if (n.type === 'void') this.fail('Variables cannot have void type.', n);
     let type = n.type;const sharedOwner=(this.currentFunction.pointerOrigin||this.currentFunction.name)+':'+n.token.offset+':'+n.name;
     const dims = n.dimensions.map(d => {if(d===null){if(!n.external||!n.shared)this.fail('Unsized arrays require extern __shared__.',n);if(this.dynamicSharedUsed&&this.dynamicSharedOwner!==sharedOwner)this.fail('Only one dynamic shared array is supported; CUDA declarations alias the same allocation.',n);const stride=typeStride(n.type);if(n.type==='bool'||vectorLength(n.type)===3)this.fail('Dynamic shared arrays require 32-bit scalars or two/four-component vectors.',n);if(!this.dynamicSharedBytes||this.dynamicSharedBytes%stride)this.fail('Set sharedMemoryBytes to a positive multiple of the dynamic shared element size.',n);this.dynamicSharedUsed=true;this.dynamicSharedOwner=sharedOwner;return this.dynamicSharedBytes/stride;}const value = constantValue(d); if (!Number.isSafeInteger(value) || value < 1 || value > 65536) this.fail('Invalid fixed array dimension (1..65536).', n); return value; });
@@ -464,11 +473,13 @@ class Emitter {
     if (this.kernel.result !== 'void') this.fail('__global__ kernels must return void.', this.kernel);
     const textures=[],bufferCount=this.kernel.params.filter(p=>p.pointer).length;
     const bindings = [], scalars = [], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
+    for(const s of this.structs.values())header.push(`struct ${s.type} {`,...s.fields.map(f=>`  cw_field_${f.name}: ${typeName(f.resolvedType)},`),'}');
     const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t}>`;
     for (const p of this.kernel.params) {
       if (p.shared || p.reference || p.external || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
       if(p.type==='texture3d'){if(p.pointer)this.fail('Texture objects must be passed by value.',p);const binding=bufferCount+textures.length*2,samplerBinding=binding+1;const symbol={name:p.name,type:p.type,code:'t_'+p.name,sampler:'s_'+p.name,kind:'texture',constant:true};this.add(p.name,symbol,p,true);p.symbol=symbol;textures.push({name:p.name,binding,samplerBinding,dimension:'3d',format:'r8unorm'});header.push(`@group(0) @binding(${binding}) var ${symbol.code}: texture_3d<f32>;`,`@group(0) @binding(${samplerBinding}) var ${symbol.sampler}: sampler;`);continue;}
       if (p.pointer) {
+        if(this.structs.has(p.type))this.fail('Struct buffer layout is not supported; use local struct values.',p);
         if (p.type === 'bool' || vectorLength(p.type)===3) this.fail('bool* and three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
         const atomic = this.usage.atomic.has(p.name), readOnly = p.constant || !this.usage.writes.has(p.name);
         if (p.constant && this.usage.writes.has(p.name)) this.fail(`Cannot write through const buffer '${p.name}'.`, p);
