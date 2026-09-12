@@ -2,3 +2,7 @@
 *.ppm binary
 *.pgm binary
 *.bmp binary
+
+# Native GPU captures and byte volumes must remain byte-for-byte exact.
+*.bin binary
+*.raw binary

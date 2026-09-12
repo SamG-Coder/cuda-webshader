@@ -1,0 +1,100 @@
+{
+  "passed": true,
+  "staticBuild": true,
+  "softwareAdapterRequested": false,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "comparisons": [
+    {
+      "name": "volume-filter",
+      "slice": 16,
+      "pixels": 1024,
+      "exact": true
+    },
+    {
+      "name": "volume-filter",
+      "slice": 0,
+      "pixels": 1024,
+      "exact": true
+    },
+    {
+      "name": "volume-filter",
+      "slice": 31,
+      "pixels": 1024,
+      "exact": true
+    },
+    {
+      "name": "volume-filter",
+      "slice": 8,
+      "pixels": 1024,
+      "exact": true
+    },
+    {
+      "name": "volume-filter-nearest",
+      "slice": 16,
+      "pixels": 1024,
+      "exact": true
+    },
+    {
+      "name": "volume-filter-nearest",
+      "slice": 0,
+      "pixels": 1024,
+      "exact": true
+    },
+    {
+      "name": "volume-filter-nearest",
+      "slice": 31,
+      "pixels": 1024,
+      "exact": true
+    },
+    {
+      "name": "volume-filter-nearest",
+      "slice": 8,
+      "pixels": 1024,
+      "exact": true
+    },
+    {
+      "name": "volume-filter-upstream",
+      "slice": 16,
+      "pixels": 1024,
+      "exact": true
+    },
+    {
+      "name": "volume-filter-upstream",
+      "slice": 0,
+      "pixels": 1024,
+      "exact": true
+    },
+    {
+      "name": "volume-filter-upstream",
+      "slice": 31,
+      "pixels": 1024,
+      "exact": true
+    },
+    {
+      "name": "volume-filter-upstream",
+      "slice": 8,
+      "pixels": 1024,
+      "exact": true
+    }
+  ],
+  "unchangedSource": true,
+  "noRedispatchOnSliceChange": true,
+  "shaderComparison": true,
+  "mobileLayout": true
+}

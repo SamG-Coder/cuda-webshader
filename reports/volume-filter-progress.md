@@ -53,3 +53,13 @@ Validation: 20 sizeof/multiplication results agree with native CUDA, including p
 These four native and WebGPU outputs are uniform: scenario 0 gives byte 120 on both passes; scenario 1 gives 120 then 135. The pinned upstream volume.cpp configures normalized texture coordinates and wrap addressing, while d_filter_surface3d builds base coordinates from integer voxel indices. Adding the tested offsets therefore samples equivalent wrapped positions for every voxel. This behaviour is reproduced in native CUDA; it is not a translation-only visual failure.
 
 Next: connect the filter to the generic sandbox volume preview and verify the presentation. Clearly distinguish the reproduced upstream texture settings from any configurable unnormalized-coordinate mode, preserving the original device code. No showcase card has been added yet.
+
+## Showcase and configurable 3D texture coordinates completed
+
+3D texture arguments now carry hidden XYZ coordinate scales and nearest-voxel selection through kernel and device-helper calls. Normalized sampling remains the runtime default; unnormalized sampling requires clamp addressing. CUDA device bodies remain unchanged.
+
+Sixteen native/WebGPU comparisons cover four configurations and two passes on both synthetic 8x8x4 and original Bucky 32³ data: 264,192 exact voxel comparisons, no intermediate CPU transfers. In the Bucky three-tap case, the upstream normalized configuration produces byte 30 throughout pass one, then 45 throughout pass two; voxel-coordinate modes preserve spatial variation.
+
+The sandbox supports bufferless surface output and generic scalar texture-slice inspection. Three presets and an individual showcase card now expose the filter. The default explicitly uses voxel coordinates; the upstream normalized preset preserves its flat result. The original Bucky data is included with NVIDIA attribution. Example host filter coefficients are identified as validation taps, not the desktop application's animated blur/sharpen presets.
+
+453 unit tests and 132 NVIDIA hardware GPU checks pass. The sandbox presentation check matches 12 slices (12,288 grayscale pixels) to native captures, verifies source remains unchanged and no dispatch occurs on slice changes, and checks CUDA/WGSL comparison and mobile layout. Compile-all and static build pass. The full desktop volumeFiltering rendering pipeline is outside this completed filter-stage showcase.

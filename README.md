@@ -474,3 +474,7 @@ The static build includes the project license, third-party notices and Three.js 
 [Try NVIDIA bilateral filtering in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=bilateral): the original edge-preserving filter and photograph, with editable colour-distance smoothing. [Validation and launch settings](showcases/bilateral-filter/README.md).
 
 [Try NVIDIA Mandelbrot in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=mandelbrot), [Julia](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=julia), or [two accumulated frames](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=mandelbrot-accumulated). Original float kernel, editable viewport and colours, and six exact native frame comparisons with multiply-add fusion disabled in the native build. [Validation, arithmetic profile and supported scope](showcases/mandelbrot/README.md).
+
+### NVIDIA 3D volume filtering
+
+[Try the volume filter in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=volume-filter). Run the unchanged NVIDIA filter on its original 32³ Bucky volume, compare CUDA/WGSL and move through the output with a Z-slice slider. Separate presets expose voxel coordinates, nearest sampling and the original normalized/wrap settings. Sixteen native volume captures match hardware WebGPU exactly for the tested configurations. [Supported scope and why upstream settings produce a flat volume](showcases/volume-filter/README.md).

@@ -24,7 +24,7 @@ export function packScalars(metadata, values, target = new ArrayBuffer(metadata.
     else if(p.type === 'i32') view.setInt32(p.offset,v,true);
     else view.setFloat32(p.offset,v,true);
   }
-  for(const scale of metadata.textureScales||[]){view.setFloat32(scale.offset,1,true);view.setFloat32(scale.offset+4,1,true);if(scale.pointOffset!==undefined)view.setFloat32(scale.pointOffset,0,true);}
+  for(const scale of metadata.textureScales||[]){view.setFloat32(scale.offset,1,true);view.setFloat32(scale.offset+4,1,true);if(scale.dimension==='3d')view.setFloat32(scale.offset+8,1,true);if(scale.pointOffset!==undefined)view.setFloat32(scale.pointOffset,0,true);}
   return target;
 }
 export function validateWorkgroup(metadata, limits) {
@@ -73,13 +73,14 @@ export class GpuRuntime {
     this.assertAlive();if(!['r32float','rgba32float'].includes(format)||storage&&format!=='r32float')throw Error('Unsupported 2D texture format or storage format.');const components=format==='rgba32float'?4:1;if(![width,height].every(n=>Number.isInteger(n)&&n>0&&n<=this.device.limits.maxTextureDimension2D)||!(data===null&&storage)&&(!(data instanceof Float32Array)||data.length!==width*height*components||data.some(v=>!Number.isFinite(v))))throw new RangeError('2D texture requires finite floats matching width and height within device limits.');
     if(typeof normalizedCoords!=='boolean'||(!normalizedCoords&&addressMode!=='clamp-to-edge'))throw Error('Unnormalized 2D textures require clamp-to-edge addressing.');
     if(!this.device.features.has('float32-filterable'))throw Error('Float textures require float32-filterable on this device.');if(!['linear','nearest'].includes(filter)||!['repeat','clamp-to-edge','mirror-repeat'].includes(addressMode))throw Error('Unsupported texture sampler settings.');
-    const gpuTexture=this.device.createTexture({label,size:[width,height,1],dimension:'2d',format,usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST|(storage?GPUTextureUsage.STORAGE_BINDING:0)});if(data)this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width*4*components,rowsPerImage:height},[width,height,1]);const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode}),format,dimension:'2d',width,height,depth:1,storage,normalizedCoords,filter};this.textures.add(resource);this.stats.dataBytesUploaded+=data?.byteLength||0;return resource;
+    const gpuTexture=this.device.createTexture({label,size:[width,height,1],dimension:'2d',format,usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST|GPUTextureUsage.COPY_SRC|(storage?GPUTextureUsage.STORAGE_BINDING:0)});if(data)this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width*4*components,rowsPerImage:height},[width,height,1]);const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode}),format,dimension:'2d',width,height,depth:1,storage,normalizedCoords,filter};this.textures.add(resource);this.stats.dataBytesUploaded+=data?.byteLength||0;return resource;
   }
   createTexture1D(data,{filter='linear',addressMode='clamp-to-edge',label='CUDA float4 transfer texture'}={}){
     this.assertAlive();if(!(data instanceof Float32Array)||!data.length||data.length%4||data.length/4>this.device.limits.maxTextureDimension2D||data.some(v=>!Number.isFinite(v)))throw new RangeError('1D texture requires finite float4 records within device width limits.');if(!this.device.features.has('float32-filterable'))throw Error('Float4 transfer textures require float32-filterable on this device.');if(!['linear','nearest'].includes(filter)||!['repeat','clamp-to-edge','mirror-repeat'].includes(addressMode))throw Error('Unsupported texture sampler settings.');const width=data.length/4,gpuTexture=this.device.createTexture({label,size:[width,1,1],dimension:'2d',format:'rgba32float',usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST});this.device.queue.writeTexture({texture:gpuTexture},data,{bytesPerRow:width*16,rowsPerImage:1},[width,1,1]);const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:'clamp-to-edge',addressModeW:'clamp-to-edge'}),format:'rgba32float',dimension:'2d',width,height:1,depth:1};this.textures.add(resource);this.stats.dataBytesUploaded+=data.byteLength;return resource;
   }
-  createTexture3D(data,{width,height,depth,filter='linear',addressMode='repeat',label='CUDA 3D texture',format='r8unorm',storage=false}={}){
+  createTexture3D(data,{width,height,depth,filter='linear',addressMode='repeat',label='CUDA 3D texture',format='r8unorm',storage=false,normalizedCoords=true}={}){
     this.assertAlive();if(!['r8unorm','r32float','rgba8unorm'].includes(format)||storage&&!['r32float','rgba8unorm'].includes(format))throw Error('Unsupported 3D texture format or storage format.');
+    if(typeof normalizedCoords!=='boolean'||!normalizedCoords&&addressMode!=='clamp-to-edge')throw Error('Unnormalized 3D texture coordinates require clamp-to-edge addressing.');
     const bytes=format==='r8unorm'?1:4,Type=format==='r32float'?Float32Array:Uint8Array;
     if(![width,height,depth].every(n=>Number.isInteger(n)&&n>0&&n<=this.device.limits.maxTextureDimension3D)||!(data===null&&storage)&&(!(data instanceof Type)||data.length!==width*height*depth||data.some(v=>!Number.isFinite(v))))throw new RangeError('3D texture requires matching byte or finite float data and valid dimensions.');
     if(!['linear','nearest'].includes(filter)||!['repeat','clamp-to-edge','mirror-repeat'].includes(addressMode))throw Error('Unsupported texture sampler settings.');
@@ -87,7 +88,7 @@ export class GpuRuntime {
     let upload=data;if(data&&format==='rgba8unorm'){upload=new Uint8Array(data.length*4);for(let i=0;i<data.length;i++){upload[i*4]=data[i];upload[i*4+3]=255;}}
     const gpuTexture=this.device.createTexture({label,size:[width,height,depth],dimension:'3d',format,usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST|GPUTextureUsage.COPY_SRC|(storage?GPUTextureUsage.STORAGE_BINDING:0)});
     if(upload)this.device.queue.writeTexture({texture:gpuTexture},upload,{bytesPerRow:width*bytes,rowsPerImage:height},[width,height,depth]);
-    const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode,addressModeW:addressMode}),format,dimension:'3d',width,height,depth,storage,filter,...(format==='rgba8unorm'?{scalarByteVolume:true}:{})};this.textures.add(resource);this.stats.dataBytesUploaded+=upload?.byteLength||0;return resource;
+    const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode,addressModeW:addressMode}),format,dimension:'3d',width,height,depth,storage,filter,normalizedCoords,...(format==='rgba8unorm'?{scalarByteVolume:true}:{})};this.textures.add(resource);this.stats.dataBytesUploaded+=upload?.byteLength||0;return resource;
   }
   destroyTexture(resource){this.checkResource(resource);if(!resource.gpuTexture)throw Error('Expected a texture resource.');resource.gpuTexture.destroy();resource.destroyed=true;this.textures.delete(resource);}
   createBuffer(dataOrBytes, {label='compute buffer',usage=0} = {}) {
@@ -119,6 +120,18 @@ export class GpuRuntime {
     if(byteLength===0)return new Type(0);
     const staging=this.device.createBuffer({label:'explicit readback (not render path)',size:byteLength,usage:GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ});
     try{const encoder=this.device.createCommandEncoder();encoder.copyBufferToBuffer(resource.gpuBuffer,offset,staging,0,byteLength);this.device.queue.submit([encoder.finish()]);await staging.mapAsync(GPUMapMode.READ);const result=new Type(staging.getMappedRange().slice(0));staging.unmap();this.stats.readbackBytes+=byteLength;return result;}finally{staging.destroy();}
+  }
+  async readTextureSlice(resource,{slice=0}={}) {
+    this.assertAlive();this.checkResource(resource);
+    if(!resource.gpuTexture||!['2d','3d'].includes(resource.dimension)||!['r32float','r8unorm','rgba8unorm'].includes(resource.format)||resource.format==='rgba8unorm'&&!resource.scalarByteVolume)throw Error('Slice inspection requires a scalar texture.');
+    if(!Number.isInteger(slice)||slice<0||slice>=resource.depth)throw new RangeError('Slice must be within the texture depth.');
+    const {width,height,format}=resource,bytes=format==='r8unorm'?1:4,bytesPerRow=roundUp(width*bytes,256),size=bytesPerRow*height;
+    const staging=this.device.createBuffer({label:'texture slice inspection',size,usage:GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ});
+    try{const encoder=this.device.createCommandEncoder();encoder.copyTextureToBuffer({texture:resource.gpuTexture,origin:[0,0,slice]},{buffer:staging,bytesPerRow,rowsPerImage:height},[width,height,1]);this.device.queue.submit([encoder.finish()]);await staging.mapAsync(GPUMapMode.READ);
+      const view=new DataView(staging.getMappedRange()),data=new Float32Array(width*height);
+      for(let y=0;y<height;y++)for(let x=0;x<width;x++){const offset=y*bytesPerRow+x*bytes;data[y*width+x]=format==='r32float'?view.getFloat32(offset,true):view.getUint8(offset)/255;}
+      staging.unmap();this.stats.readbackBytes+=size;return {data,width,height,slice};
+    }finally{staging.destroy();}
   }
   async kernel(sourceOrArtifact,options={}) {
     this.assertAlive();const artifact=typeof sourceOrArtifact==='string'?compile(sourceOrArtifact,options):sourceOrArtifact;
@@ -176,7 +189,7 @@ export class Invocation {
     this.bindGroup=this.runtime.device.createBindGroup({label:`${kernel.artifact.name}: persistent bindings`,layout:kernel.layout,entries});this.runtime.stats.bindGroupsCreated++;
     this.setScalars(scalars);
   }
-  setScalars(values) {const merged={...this.values,...values};packScalars(this.kernel.artifact.metadata,merged,this.uniformData);const view=new DataView(this.uniformData);for(const scale of this.kernel.artifact.metadata.textureScales||[]){const texture=this.buffers[scale.name];view.setFloat32(scale.offset,texture.normalizedCoords===false?1/texture.width:1,true);view.setFloat32(scale.offset+4,texture.normalizedCoords===false?1/texture.height:1,true);if(scale.pointOffset!==undefined)view.setFloat32(scale.pointOffset,texture.normalizedCoords===false&&texture.filter==='nearest'?1:0,true);}this.values=merged;this.version++;return this;}
+  setScalars(values) {const merged={...this.values,...values};packScalars(this.kernel.artifact.metadata,merged,this.uniformData);const view=new DataView(this.uniformData);for(const scale of this.kernel.artifact.metadata.textureScales||[]){const texture=this.buffers[scale.name];view.setFloat32(scale.offset,texture.normalizedCoords===false?1/texture.width:1,true);view.setFloat32(scale.offset+4,texture.normalizedCoords===false?1/texture.height:1,true);if(scale.dimension==='3d')view.setFloat32(scale.offset+8,texture.normalizedCoords===false?1/texture.depth:1,true);if(scale.pointOffset!==undefined)view.setFloat32(scale.pointOffset,texture.normalizedCoords===false&&texture.filter==='nearest'?1:0,true);}this.values=merged;this.version++;return this;}
 }
 export class ComputeBatch {
   constructor(runtime,{label='compute batch',timestampWrites}={}) {

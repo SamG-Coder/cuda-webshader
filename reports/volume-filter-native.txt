@@ -1,6 +1,20 @@
-Build: nvcc -O3 --fmad=false -std=c++17 -arch=native -I.local/nvidia-audit/Common
-Texture: normalized coordinates, linear filtering, wrap on XYZ, normalized unsigned-byte reads (upstream volume.cpp settings)
+Native CUDA RTX 5080; original NVIDIA d_filter_surface3d and byte conversion.
+Build: nvcc -O3 --fmad=false -std=c++17 -arch=native -I.local/nvidia-audit/Common tests/volume-filter-native.cu
+Scenarios: 0 normalized/wrap/linear identity; 1 normalized/wrap/linear three taps; 2 voxel/clamp/linear three taps; 3 voxel/clamp/nearest three taps.
+First eight captures: synthetic 8x8x4; next eight: original Bucky 32x32x32.
 scenario=0 pass=0 256 voxels captured, first=120 different-from-first=0
 scenario=0 pass=1 256 voxels captured, first=120 different-from-first=0
 scenario=1 pass=0 256 voxels captured, first=120 different-from-first=0
 scenario=1 pass=1 256 voxels captured, first=135 different-from-first=0
+scenario=2 pass=0 256 voxels captured, first=26 different-from-first=255
+scenario=2 pass=1 256 voxels captured, first=41 different-from-first=255
+scenario=3 pass=0 256 voxels captured, first=26 different-from-first=255
+scenario=3 pass=1 256 voxels captured, first=41 different-from-first=255
+scenario=0 pass=0 32768 voxels captured, first=1 different-from-first=0
+scenario=0 pass=1 32768 voxels captured, first=1 different-from-first=0
+scenario=1 pass=0 32768 voxels captured, first=30 different-from-first=0
+scenario=1 pass=1 32768 voxels captured, first=45 different-from-first=0
+scenario=2 pass=0 32768 voxels captured, first=16 different-from-first=30904
+scenario=2 pass=1 32768 voxels captured, first=31 different-from-first=32193
+scenario=3 pass=0 32768 voxels captured, first=16 different-from-first=29709
+scenario=3 pass=1 32768 voxels captured, first=31 different-from-first=30299
