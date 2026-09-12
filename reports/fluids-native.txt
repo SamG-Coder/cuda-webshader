@@ -1,0 +1,4 @@
+Captured original advection: dt=0, 19x13 field, 24-float row stride, unnormalized linear CUDA texture.
+Captured original advection: dt=0.09, 19x13 field, 24-float row stride, unnormalized linear CUDA texture.
+Captured original advection: dt=1, 19x13 field, 24-float row stride, unnormalized linear CUDA texture.
+Captured original diffusion/projection.

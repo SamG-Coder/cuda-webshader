@@ -1,0 +1,93 @@
+{
+  "name": "Original fluids kernels: native projection and bounded texture filtering",
+  "pass": true,
+  "comparisons": [
+    {
+      "name": "fluids-advect-0-0-native",
+      "components": 328,
+      "maxError": 0,
+      "tolerance": 1e-06,
+      "exact": true
+    },
+    {
+      "name": "fluids-advect-0-1-native",
+      "components": 328,
+      "maxError": 0,
+      "tolerance": 1e-06,
+      "exact": true
+    },
+    {
+      "name": "fluids-advect-1-0-native",
+      "components": 328,
+      "maxError": 0.0020176336402073503,
+      "tolerance": 0.011039058691726998,
+      "exact": false
+    },
+    {
+      "name": "fluids-advect-1-1-native",
+      "components": 328,
+      "maxError": 0.0036315321922302246,
+      "tolerance": 0.010163694342968986,
+      "exact": false
+    },
+    {
+      "name": "fluids-advect-2-0-native",
+      "components": 328,
+      "maxError": 0,
+      "tolerance": 1e-06,
+      "exact": true
+    },
+    {
+      "name": "fluids-advect-2-1-native",
+      "components": 328,
+      "maxError": 0,
+      "tolerance": 1e-06,
+      "exact": true
+    },
+    {
+      "name": "fluids-project-0-native",
+      "components": 494,
+      "maxError": 0,
+      "tolerance": 1e-06,
+      "exact": true
+    },
+    {
+      "name": "fluids-project-1-native",
+      "components": 494,
+      "maxError": 0,
+      "tolerance": 1e-06,
+      "exact": true
+    },
+    {
+      "name": "isolated sampler 0",
+      "maxError": 0,
+      "nativeVsBilinear": 0,
+      "webgpuVsBilinear": 0,
+      "advectionMatchesCapturedCoordinates": true
+    },
+    {
+      "name": "isolated sampler 1",
+      "maxError": 0.0036315321922302246,
+      "nativeVsBilinear": 0.0024845365450993917,
+      "webgpuVsBilinear": 0.0024845365450993917,
+      "advectionMatchesCapturedCoordinates": true
+    },
+    {
+      "name": "isolated sampler 2",
+      "maxError": 0,
+      "nativeVsBilinear": 0.002495133549707179,
+      "webgpuVsBilinear": 0.002495133549707179,
+      "advectionMatchesCapturedCoordinates": true
+    }
+  ],
+  "filteringBoundPerChannel": [
+    0.005519529345863499,
+    0.005081847171484493
+  ],
+  "filteringNote": "Each backend checked against ideal bilinear interpolation using (maximum horizontal slope + maximum vertical slope)/256 + 1e-6. Cross-backend tolerance is twice that bound; it is not an exact match claim.",
+  "originalKernelBodies": true,
+  "paddedRows": true,
+  "partialWorkgroups": true,
+  "wallMs": 88.84000000357628,
+  "softwareAdapterRequested": false
+}
