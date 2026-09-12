@@ -239,6 +239,12 @@ The quadtree showcase and `tests/quadtree-cdp-device.cuh` retain NVIDIA's origin
 
 ## Project Chrono kernels and type declarations
 
+`tests/chrono-activity.cu` retains the original `ActiveDomain`, `Counters`,
+`UpdateActivityD`, `checkActivityD`, `inAABB`, marker predicate and selected
+vector constructors (Copyright (c) 2014 projectchrono.org) from
+`SphDataManager.cuh`, `SphFluidDynamics.cu`, `SphMarkerType.cuh` and
+`SphCustomMath.cuh`, plus the previously documented parameter/type declarations.
+Its native harness is MIT code.
 `tests/chrono-counter-time.cu` retains the original `Counters` declaration
 (Copyright (c) 2014 projectchrono.org) from `SphDataManager.cuh` at the same
 pinned revision below. Its validation probe and native harness are MIT code.

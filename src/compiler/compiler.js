@@ -1,3 +1,4 @@
+import {containsNativeBool,nativeRecordLayout,decodeNativeRecord} from './native-records.js';
 import {lowerNativeTiles,emitNativeTile} from './native-tiles.js';
 import {lowerReturnPhases} from './return-phases.js';
 import {markUniformRecordSnapshots} from './uniform-records.js';
@@ -340,12 +341,17 @@ class Emitter {
         if(n.dereference&&!['buffer','buffer-alias'].includes(base.rootSymbol?.kind))this.fail('Dereference requires a storage-buffer pointer.',n);
         if (!isArray(base.type) || !['i32', 'u32'].includes(index.type)) this.fail('Indexing requires an array and a 32-bit integer index.', n);
         const offset=base.code===base.rootSymbol?.code?base.rootSymbol.offsetCode:undefined;let indexCode=offset?`(${offset} + ${this.convert(index.code,index.type,'i32',n)})`:index.code;
-        const capturePre=[];if(captureIndex&&['local','shared'].includes(base.rootSymbol?.kind)){const temp='cw_argument_index_'+this.temp++;capturePre.push(`let ${temp} = ${indexCode};`);indexCode=temp;}
+        const capturePre=[];if(captureIndex&&['local','shared','buffer','buffer-alias'].includes(base.rootSymbol?.kind)){const temp='cw_argument_index_'+this.temp++;capturePre.push(`let ${temp} = ${indexCode};`);indexCode=temp;}
         let code = `${base.code}[${indexCode}]`;const type = base.type.element;
-        if(type==='cw_uchar'&&base.rootSymbol?.rootBufferName){const temp='cw_byte_index_'+this.temp++,word=`${base.code}[${temp} >> 2u]`,shift=`((${temp} & 3u) * 8u)`,read=base.atomicRoot?`atomicLoad(&${word})`:word;return this.result(n,type,`((${read} >> ${shift}) & 255u)`,[...base.pre,...index.pre,`let ${temp} = u32(${indexCode});`],{rootSymbol:base.rootSymbol,...(raw&&base.atomicRoot?{packedBase:word,packedShiftCode:shift,packedAtomic:true}:{})});}
+        if(base.rootSymbol?.nativeLayout){
+          const layout=base.rootSymbol.nativeLayout,indexName='cw_native_index_'+this.temp++,codeName='cw_native_value_'+this.temp++;
+          const pre=[...base.pre,...index.pre,...capturePre,`let ${indexName} = u32(${indexCode}) * ${layout.size}u;`,`var ${codeName}: ${type} = ${decodeNativeRecord(layout,base.code,indexName)};`];
+          return this.result(n,type,codeName,pre,{rootSymbol:{name:codeName,type,code:codeName,constant:true,kind:'local'}});
+        }
+        if(type==='cw_uchar'&&base.rootSymbol?.rootBufferName){const temp='cw_byte_index_'+this.temp++,word=`${base.code}[${temp} >> 2u]`,shift=`((${temp} & 3u) * 8u)`,read=base.atomicRoot?`atomicLoad(&${word})`:word;return this.result(n,type,`((${read} >> ${shift}) & 255u)`,[...base.pre,...index.pre,...capturePre,`let ${temp} = u32(${indexCode});`],{rootSymbol:base.rootSymbol,...(raw&&base.atomicRoot?{packedBase:word,packedShiftCode:shift,packedAtomic:true}:{})});}
         const atomic = base.atomicRoot && !isArray(type);
         const addressPre=[];if(atomic&&raw&&type==='cw_uchar4'){const temp='cw_pixel_index_'+this.temp++;addressPre.push(`let ${temp} = ${indexCode};`);code=`${base.code}[${temp}]`;}
-        return this.result(n, type, atomic && !raw ? (base.rootSymbol?.volatileShared&&type==='f32'?`bitcast<f32>(atomicLoad(&${code}))`:`atomicLoad(&${code})`) : code, [...base.pre, ...index.pre,...capturePre,...addressPre], {rootSymbol: base.rootSymbol, atomicRoot: base.atomicRoot, atomic,...(this.structs.has(type)&&['buffer','buffer-alias'].includes(base.rootSymbol?.kind)?{storageReferenceRoot:base.code,storageReferenceIndexCode:indexCode}:{}),...(base.rootSymbol?.kind==='shared'&&n.base.kind==='id'&&!isArray(type)?{sharedReferenceIndexCode:indexCode}:{})});
+        return this.result(n, type, atomic && !raw ? (base.rootSymbol?.volatileShared&&type==='f32'?`bitcast<f32>(atomicLoad(&${code}))`:`atomicLoad(&${code})`) : code, [...base.pre, ...index.pre,...capturePre,...addressPre], {rootSymbol: base.rootSymbol, atomicRoot: base.atomicRoot, atomic,...((this.structs.has(type)||['f32','i32','u32'].includes(type)&&!atomic)&&['buffer','buffer-alias'].includes(base.rootSymbol?.kind)?{storageReferenceRoot:base.code,storageReferenceIndexCode:indexCode}:{}),...(base.rootSymbol?.kind==='shared'&&n.base.kind==='id'&&!isArray(type)?{sharedReferenceIndexCode:indexCode}:{})});
       }
       case 'member': {
         if (n.base.kind === 'id' && ['threadIdx', 'blockIdx', 'blockDim', 'gridDim'].includes(n.base.name)) {
@@ -1057,17 +1063,24 @@ class Emitter {
       if (p.pointer) {
         if(['cw_short','cw_ushort'].includes(p.type))this.fail('Short storage pointers need a packed 16-bit ABI; only short values are supported.',p);
         if(String(p.type).startsWith('cw_objectptr_')&&!this.persistentObjects)this.fail('Object pointer buffers require objectHeap: persistent.',p);
-        if(this.structs.has(p.type)&&p.origin!=='constant-struct-storage'){const layout=this.storageLayout(p.type);p.storageStride=Math.ceil(layout.size/layout.align)*layout.align;}
+        if(this.structs.has(p.type)&&p.origin!=='constant-struct-storage'){
+          if(containsNativeBool(this,p.type)){
+            if(!p.constant)this.fail('Native bool fields are not host-shareable; packed record buffers require const pointers.',p);
+            p.nativeLayout=nativeRecordLayout(this,p.type,p);
+            if(p.nativeLayout.size%4)this.fail('Native bool record strides must be a multiple of four bytes.',p);
+            p.storageStride=p.nativeLayout.size;
+          }else{const layout=this.storageLayout(p.type);p.storageStride=Math.ceil(layout.size/layout.align)*layout.align;}
+        }
         if(p.type==='cw_uchar2')this.fail('Use byte storage with uchar2 pointer views; direct uchar2 buffer parameters are unsupported.',p);
         if (p.type === 'bool' || vectorLength(p.type)===3) this.fail('bool* and three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
         const canonical=Object.hasOwn(this.bufferAliases,p.name)?this.bufferAliases[p.name]:p.name,atomic=this.usage.atomic.has(canonical),readOnly=!this.usage.writes.has(canonical);
         if (p.constant && this.usage.writes.has(p.name)) this.fail(`Cannot write through const buffer '${p.name}'.`, p);
         if (atomic && !['i32', 'u32','cw_uchar4','cw_uchar'].includes(p.type)) this.fail('Only 32-bit integer atomics are supported.', p);
         const binding = bindings.length;
-        if(canonical===p.name)bindings.push({name: p.name, elementType: p.type, stride: p.storageStride||(p.type==='cw_uchar'?1:typeStride(p.type)), binding, readOnly, atomic,...(p.origin?{origin:p.origin,count:p.count,minBindingSize:p.count*(p.storageStride||typeStride(p.type)),...(p.fields?{fields:p.fields,storageType:'u32'}:{})}:{})});
-        const symbol = {name: p.name, rootBufferName:canonical, type: arrayOf(p.type), code: `b_${canonical}`, constant: p.constant, atomic, kind: 'buffer',...(p.origin?{deviceGlobal:true}:{}),...(!p.origin&&(shiftedPointers(this.kernel).has(p.name)||this.launchConsumer?.buffers.some(b=>b.name===p.name))?{offsetCode:'cw_pointer_'+p.name}:{})};
+        if(canonical===p.name)bindings.push({name: p.name, elementType: p.type, stride: p.storageStride||(p.type==='cw_uchar'?1:typeStride(p.type)), binding, readOnly, atomic,...(p.nativeLayout?{storageType:'u32',nativeLayout:p.nativeLayout}:{}),...(p.origin?{origin:p.origin,count:p.count,minBindingSize:p.count*(p.storageStride||typeStride(p.type)),...(p.fields?{fields:p.fields,storageType:'u32'}:{})}:{})});
+        const symbol = {name: p.name, rootBufferName:canonical, type: arrayOf(p.type), code: `b_${canonical}`, constant: p.constant, atomic, kind: 'buffer',...(p.nativeLayout?{nativeLayout:p.nativeLayout}:{}),...(p.origin?{deviceGlobal:true}:{}),...(!p.origin&&(shiftedPointers(this.kernel).has(p.name)||this.launchConsumer?.buffers.some(b=>b.name===p.name))?{offsetCode:'cw_pointer_'+p.name}:{})};
         if(p.origin)this.globalSymbols.set(p.name,symbol);else this.add(p.name, symbol, p, true); p.symbol = symbol;if(p.origin)(p.origin==='constant-struct-storage'?this.ast.constantGlobals:this.ast.deviceGlobals).find(g=>g.name===p.name).symbol=symbol;this.bufferSymbols.set(p.name,symbol);
-        if(canonical===p.name)header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type}>` : p.type==='cw_uchar'?'u32':p.type}>;`);
+        if(canonical===p.name)header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type}>` : p.type==='cw_uchar'||p.nativeLayout?'u32':p.type}>;`);
       } else {
         if ((!numeric(p.type)&&!['bool','cw_uchar4'].includes(p.type))||p.type==='cw_uchar') this.fail('Scalar kernel parameters must be float, int, unsigned int, bool or packed uchar4. Put other vectors in buffers.', p);
         let defaultMetadata={};if(p.defaultValue!==undefined){let value=p.defaultValue.kind==='id'?Number(p.defaultValue.name==='true'):constantValue(p.defaultValue);if(!Number.isFinite(value)||p.type==='i32'&&(Math.trunc(value)<-2147483648||Math.trunc(value)>2147483647)||p.type==='u32'&&(Math.trunc(value)<0||Math.trunc(value)>4294967295))this.fail('Kernel default is outside its supported scalar range.',p);value=p.type==='f32'?Math.fround(value):p.type==='bool'?Number(!!value):p.type==='u32'?value>>>0:value|0;if(!Number.isFinite(value))this.fail('Kernel default overflows its scalar type.',p);defaultMetadata={defaultValue:value};}

@@ -1,0 +1,39 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "subgroup-size-control",
+      "float32-filterable",
+      "timestamp-query",
+      "subgroups"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "date": "2026-09-12T23:50:52.008Z",
+  "name": "Original Chrono activity selection matches native CUDA",
+  "pass": true,
+  "originalKernel": "UpdateActivityD",
+  "initializedMarkerPositions": 30327,
+  "controlledCases": 13,
+  "compared": 164505,
+  "nativeExact": true,
+  "nativeDomainStride": 52,
+  "nonzeroPaddingTested": true,
+  "additionalNativeAbiValues": 9,
+  "activityStates": [
+    -1,
+    0,
+    1
+  ],
+  "physicsStepAdvanced": false,
+  "wallMs": 335.7049999833107
+}

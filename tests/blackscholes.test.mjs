@@ -10,7 +10,7 @@ test('Helper references write and forward named local scalars',()=>{
  const c=compile('__device__ void inner(float &a){a+=2.0f;} __device__ void outer(float &a,float &b){inner(a);b=a*3.0f;} __global__ void k(float* out){float a=1.0f,b=0.0f;outer(a,b);out[0]=a;out[1]=b;}',{workgroupSize:[1,1,1]});
  const out=new Float32Array(2);executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[3,9]);assert.match(c.wgsl,/ptr<function, f32>/);
 });
-for(const [label,body] of [['alias','float a=0.0f;f(a,a);'],['storage','float a=0.0f;f(out[0],a);'],['constant','const float a=0.0f;float b=0.0f;f(a,b);'],['wrong type','int a=0;float b=0.0f;f(a,b);'],['expression','float a=0.0f;f(a+1.0f,a);']])test('Reference calls reject '+label,()=>assert.throws(()=>compile('__device__ void f(float &a,float &b){a=1.0f;b=2.0f;} __global__ void k(float* out){'+body+'}'),/Reference|reference/));
+for(const [label,body] of [['alias','float a=0.0f;f(a,a);'],['constant','const float a=0.0f;float b=0.0f;f(a,b);'],['wrong type','int a=0;float b=0.0f;f(a,b);'],['expression','float a=0.0f;f(a+1.0f,a);']])test('Reference calls reject '+label,()=>assert.throws(()=>compile('__device__ void f(float &a,float &b){a=1.0f;b=2.0f;} __global__ void k(float* out){'+body+'}'),/Reference|reference/));
 test('Reference return types, kernel parameters and nonnumeric mutable references are rejected',()=>{
  for(const source of ['__device__ float &f(float &a){return a;} __global__ void k(){}','__global__ void k(float &a){}','__device__ void f(bool &a){} __global__ void k(){}'])assert.throws(()=>compile(source));
 });
@@ -35,3 +35,5 @@ test('Original BlackScholes helpers agree with independent integrated normal dis
  const c=compile(readFileSync('showcases/nvidia/kernels/21.cu','utf8'),{workgroupSize:[128,1,1]}),f=blackScholesFixture(259,16);executeCPU(c,f.buffers,f.scalars,f.groups);
  for(const [name,expected]of Object.entries(f.expectedOutputs))for(let i=0;i<expected.length;i++)assert.ok(Math.abs(f.buffers[name][i]-expected[i])<=f.absoluteTolerance+f.relativeTolerance*Math.abs(expected[i]),`${name}[${i}]`);
 });
+
+test('Scalar storage references forward through helpers alongside local references',()=>{const a=compile('__device__ void inner(float& a){a+=2.f;}__device__ void outer(float& a,float& b){inner(a);b=a*3.f;}__global__ void k(float* out){float local=0.f;outer(out[0],local);out[1]=local;}',{workgroupSize:[1]});const out=new Float32Array([1,0]);executeCPU(a,{out},{},[1]);assert.deepEqual([...out],[3,9]);});

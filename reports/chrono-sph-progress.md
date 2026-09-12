@@ -1,4 +1,4 @@
-# Chrono SPH dam-break port: native reference and neighbour stages
+# Chrono SPH dam-break port: native reference, neighbours and activity selection
 
 This is an in-progress compiler port, not a runnable water showcase.
 
@@ -226,3 +226,46 @@ nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-counte
 
 Validation for this stage: 696 unit tests, 229 real NVIDIA GPU tests, and all
 1,152 counter/time probe values match native CUDA exactly. Compile checks pass.
+
+
+## Original activity-selection kernel
+
+`tests/chrono-activity.cu` now compiles and executes the original `UpdateActivityD`,
+`checkActivityD`, and `inAABB` functions without editing their bodies. The native
+harness verifies `ActiveDomain` is 52 bytes with fields at offsets 0, 4, 16, 28,
+and 40. Read-only buffers are bound as raw words and decoded to computational
+records, preserving one-byte booleans and ignoring padding. Records are decoded
+at each source read, including helper pointer offsets. Writable packed records,
+unsupported field types and record strides not divisible by four remain explicit
+errors. Native float3 fields use their CUDA alignment rather than WGSL storage
+alignment. GPU-resident 32-bit scalar buffer elements can also bind helper
+references, allowing the original helper to update activity outputs directly.
+
+The native reference runs 14 cases. The first uses the 30,327 captured initialized
+marker positions and captured dam-break parameters, with zero initial velocities
+and explicitly seeded fluid/BCE type codes from the known fluid-prefix count.
+It is an isolated kernel check, not a capture of Chrono's complete internal state.
+Thirteen controlled cases use 198 markers each, covering fluid/helper/ghost and
+BCE type codes, inverted boxes, all three domain arrays, inclusive boundaries,
+extended-only activity, nonperiodic outside-domain removal, eight periodic flag
+combinations, settling-time thresholds separated by 2^-40, and empty active-domain
+lists. Domain padding bytes are deliberately 0xA5, including padding after false
+booleans. Native CUDA and WebGPU agree on all 164,505 activity/extended-activity
+and velocity words. Nine further values check adjacent bool bytes, float3 fields,
+const local references, pointer offsets and aliased scalar output references
+against native CUDA.
+
+This advances marker selection only. Connecting selection and active-list
+compaction to the neighbour pipeline, pressure/force evaluation and integration
+remains necessary before the original solver can advance water in the sandbox.
+No water showcase is added yet.
+
+Regenerate after capturing the pinned native parameters and search input:
+
+```text
+nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-activity-native.cu -o .local/chrono-activity-native.exe
+.local/chrono-activity-native.exe
+```
+
+Validation for activity selection: 699 unit tests and 230 real NVIDIA GPU tests
+passed, including the existing Sobel, neighbour, quadtree and rendering checks.

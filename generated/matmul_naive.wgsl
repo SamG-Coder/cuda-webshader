@@ -26,7 +26,9 @@ fn main(
       var v_k: u32 = u32(0i);
       loop {
         if (!(v_k < cw_params.p_K)) { break; }
-        v_sum = fma(b_A[((v_row * cw_params.p_K) + v_k)], b_B[((v_k * cw_params.p_N) + v_col)], v_sum);
+        let cw_argument_index_0 = ((v_row * cw_params.p_K) + v_k);
+        let cw_argument_index_1 = ((v_k * cw_params.p_N) + v_col);
+        v_sum = fma(b_A[cw_argument_index_0], b_B[cw_argument_index_1], v_sum);
         continuing {
           v_k += u32(1);
         }

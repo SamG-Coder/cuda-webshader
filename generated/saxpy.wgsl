@@ -19,6 +19,8 @@ fn main(
 ) {
   var v_i: u32 = ((cw_block.x * cw_block_size.x) + cw_thread.x);
   if ((v_i < cw_params.p_n)) {
-    b_y[v_i] = fma(cw_params.p_a, b_x[v_i], b_y[v_i]);
+    let cw_argument_index_0 = v_i;
+    let cw_argument_index_1 = v_i;
+    b_y[v_i] = fma(cw_params.p_a, b_x[cw_argument_index_0], b_y[cw_argument_index_1]);
   }
 }
