@@ -84,3 +84,7 @@ test('Object reference stage rejects fabricated addresses, arithmetic and unimpl
  for(const stmt of ['M*p=1;','M*p=NULL;p=p+1;','M*p=NULL;float x=p->x;'])assert.throws(()=>compile('class M;__global__ void k(){'+stmt+'}'));
  assert.throws(()=>compile('class Base{public:__device__ virtual bool hit() const=0;};class D:public Base{public:int x;};__global__ void k(){}'),/implement/);
 });
+
+test('Concrete new objects preserve identity, member access and released slot reuse',()=>{
+ const c=compile('class V{public:float x;__device__ V(float a):x(a){} __device__ float get() const{return x;}__device__ void set(float v){x=v;}};__global__ void k(float*out){V*p=new V(3.0f);V*q=new V(7.0f);out[0]=p->get();out[1]=q->x;out[2]=float(p!=q);delete p;V*r=new V(10.0f);r->set(11.0f);out[3]=r->get();out[4]=q->get();delete r;delete q;}',{workgroupSize:[1,1,1]}),out=new Float32Array(5);executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[3,7,1,11,7]);assert.equal(c.metadata.objectHeap.scope,'invocation');
+});

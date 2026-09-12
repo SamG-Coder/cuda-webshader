@@ -395,6 +395,9 @@ export class Parser {
   templateCallAhead(){for(let offset=1;offset<=65;offset++){const token=this.peek(offset);if(token.value==='>')return this.peek(offset+1).value==='(';if(!['word','number'].includes(token.kind)&&!['+','-','*','/','%','(',')',','].includes(token.value))return false;}return false;}
   templateArgument(){this.take('<');const parts=[];while(!this.is('>')){const token=this.peek();if(parts.length>=64||(!['word','number'].includes(token.kind)&&!['+','-','*','/','%','(',')',','].includes(token.value)))this.fail('Template arguments support type lists or bounded integer arithmetic.',token);const word=this.take().value;parts.push(this.typeAliases.has(word)?Object.keys(MAP).find(k=>MAP[k]===this.typeAliases.get(word)):word);}this.take('>');if(!parts.length)this.fail('Missing template argument.');return parts.join(' ');}
   unary() {
+    if(this.is('new')){const token=this.take(),name=this.name(),record=this.structs.get(name);if(!record?.complete||record.interfaceOnly)p.fail('new requires a complete concrete value class.',token);this.take('(');const args=[];if(!this.is(')'))do{args.push(this.expression(2));}while(this.match(','));this.take(')');const pointerType='cw_objectptr_'+name;(this.objectPointerTypes??=new Set()).add(pointerType);return {kind:'object-new',token,name,pointerType,args};}
+    if(this.is('delete')){const token=this.take();return {kind:'object-delete',token,value:this.unary()};}
+
     const token = this.peek();
     if(this.match('sizeof')){this.take('(');const spec=this.type();if(spec.pointer||spec.reference||spec.shared||spec.external)this.fail('sizeof supports built-in value types only.',token);this.take(')');return {kind:'sizeof',token,target:spec.type};}
     if(this.match('static_cast')){this.take('<');const type=this.type();if(type.pointer||type.reference||type.shared||type.external)this.fail('static_cast supports value types only.',token);this.take('>');this.take('(');const value=this.expression();this.take(')');return {kind:'cast',token,target:type.type,value};}
@@ -413,6 +416,7 @@ export class Parser {
       if(value.kind==='id'&&this.staticTemplates.has(value.name)&&this.is('<')){const argument=this.templateArgument();this.take('::');const method=this.name();if(!this.is('('))this.fail('Static data member access is unsupported.',token);value={...value,name:this.staticMethod(value.name,argument,method,token)};}
       else if(value.kind==='id'&&this.functionNames.has(value.name)&&this.is('<')&&this.templateCallAhead())value.templateArgument=this.templateArgument();
       else if (this.match('[')) { const index = this.expression(); this.take(']'); value = {kind: 'index', token, base: value, index}; }
+      else if(this.match('->')){value={kind:'member',token,base:{kind:'object-deref',token,value},member:this.name()};}
       else if (this.match('.')) { value = {kind: 'member', token, base: value, member: this.name()}; }
       else if (this.match('(')) { const args = []; if (!this.is(')')) do { args.push(this.expression(2)); } while (this.match(',')); this.take(')');
         if(value.kind==='id'&&value.token.forward){const f=value.token.forward;if(f.tooDeep)this.fail('Forwarding macro chains are limited to 32 calls.',value.token);if(f.recursive||f.numericTarget)this.fail('Recursive or non-function forwarding macro target is unsupported.',value.token);if(f.chain.some(m=>m.arity!==args.length))this.fail(`Wrong argument count for forwarding macro '${value.name}'.`,value.token);value={...value,name:f.target};}

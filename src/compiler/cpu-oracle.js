@@ -40,9 +40,10 @@ function binary(op,a,b,type){
   }
 }
 class Context {
-  constructor(artifact,env,ids,budget){this.artifact=artifact;this.env=env;this.ids=ids;this.budget=budget;this.steps=0;}
+  constructor(artifact,env,ids,budget){this.artifact=artifact;this.env=env;this.ids=ids;this.budget=budget;this.steps=0;this.objectHeaps=new Map();}
   tick(){if(++this.steps>this.budget)throw new Error('CPU oracle instruction budget exceeded; possible nonterminating kernel.');}
   *ref(n){
+    if(n.kind==='object-deref'){const handle=yield* this.eval(n.value),heap=this.objectHeaps.get(n.heapName);if(!handle||!heap?.alive[handle-1])throw Error('Invalid object reference.');return {get:()=>heap.values[handle-1],set:v=>{heap.values[handle-1]=structuredClone(v);}};}
     if(n.packedPairView){const p=n.packedPairView,base=this.env.get(p.pointerBaseSymbol)?.value,offset=(p.pointerOffset?yield* this.eval(p.pointerOffset):0)+2*(yield* this.eval(n.index));return {get:()=>base.get(offset)|(base.get(offset+1)<<8),set:value=>{base.set(offset,value&255);base.set(offset+1,(value>>>8)&255);}};}
     if(n.scalarVectorView){const p=n.scalarVectorView,base=this.env.get(p.pointerBaseSymbol)?.value,offset=(p.pointerOffset?yield* this.eval(p.pointerOffset):0)+n.scalarVectorCount*(yield* this.eval(n.index));return {get:()=>Array.from({length:n.scalarVectorCount},(_,i)=>base.get(offset+i)),set:value=>{for(let i=0;i<n.scalarVectorCount;i++)base.set(offset+i,value[i]);}};}
     if(n.packedWordLocal)return yield* this.ref(n.packedWordLocal);
@@ -62,6 +63,9 @@ class Context {
     throw new Error(`Expression ${n.kind} is not an lvalue.`);
   }
   *eval(n){
+    if(n.kind==='object-new'){let heap=this.objectHeaps.get(n.name);if(!heap){heap={alive:Array(1024).fill(false),values:[]};this.objectHeaps.set(n.name,heap);}const index=heap.alive.indexOf(false);if(index<0)return 0;heap.alive[index]=true;heap.values[index]=structuredClone(yield* this.call(n.constructorCall));return index+1;}
+    if(n.kind==='object-deref')return (yield* this.ref(n)).get();
+    if(n.kind==='object-delete'){const value=yield* this.eval(n.value);if(value)this.objectHeaps.get(n.heapName).alive[value-1]=false;return;}
     if(n.classIdentity)return yield* this.eval(n.classIdentity);
     if(n.packedWordLocal)return (yield* this.ref(n.packedWordLocal)).get()>>>0;
     if(n.packedWordBytes){const p=n.packedWordBytes,base=this.env.get(p.pointerBaseSymbol)?.value,offset=(p.pointerOffset?yield* this.eval(p.pointerOffset):0)+4*(yield* this.eval(n.index));let word=0;for(let i=0;i<4;i++)word|=base.get(offset+i)<<(i*8);return word>>>0;}

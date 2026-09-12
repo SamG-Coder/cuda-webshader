@@ -83,6 +83,7 @@ class Emitter {
     this.ast = ast; this.kernel = kernel; this.options = options; this.scopes = [new Map()]; this.temp = 0; this.loopDepth = 0; this.integerIntrinsics=new Set();
     this.structs=new Map((ast.structs||[]).map(s=>[s.type,s]));for(const s of this.structs.values())for(const field of s.fields){let type=field.type;for(const dim of [...field.dimensions].reverse()){const length=constantValue(dim);if(!Number.isSafeInteger(length)||length<1||length>256)this.fail('Struct field array dimensions must be 1..256.',field);type=arrayOf(type,length);}field.resolvedType=type;}
     inferTextureTypes(ast.functions,kernel,walk,(message,node)=>this.fail(message,node));
+    this.objectHeaps=new Map();walk(ast,node=>{if(node.kind==='object-new'&&!this.objectHeaps.has(node.name))this.objectHeaps.set(node.name,{name:node.name,type:'cw_struct_'+node.name,code:'cw_heap_'+node.name,capacity:1024});});
     this.overloads=new Map();for(const f of ast.functions)if(f.overloadName){const list=this.overloads.get(f.overloadName)||[];list.push(f);this.overloads.set(f.overloadName,list);}
     this.functions = new Map(); this.shared = [];this.pointerConstraints=[]; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
     for (const f of ast.functions) {
@@ -167,6 +168,7 @@ class Emitter {
     this.fail(`Incompatible operand types: ${typeName(a)} and ${typeName(b)}. Use explicit scalar/vector components.`, n);
   }
   convert(code, from, to, n) {
+    if(to==='bool'&&String(from).startsWith('cw_objectptr_'))return `(${code} != 0u)`;
     if(String(to).startsWith('cw_objectptr_')&&['0i','0u','0'].includes(code)&&['i32','u32'].includes(from))return '0u';
     if(to==='bool'&&isArray(from)&&from.length===null&&n){return 'true';} // All runtime storage bindings are required and non-null.
     if(from==='cw_size64'||to==='cw_size64')this.extentUsed=true;
@@ -339,6 +341,19 @@ class Emitter {
         if (n.op === '-' && value.type === 'u32') return this.result(n, 'u32', `(0u - ${value.code})`, value.pre);
         return this.result(n, value.type, n.op === '+' ? value.code : `(${n.op}${value.code})`, value.pre);
       }
+      case 'object-new': {
+        const heap=this.objectHeaps.get(n.name),slot='cw_alloc_'+this.temp++,call=n.constructorCall??={kind:'call',token:n.token,callee:{kind:'id',name:n.name,token:n.token},args:n.args},value=this.call(call);
+        const pre=[`var ${slot}: u32 = 0u;`,`loop { if (${slot} >= ${heap.capacity}u) { break; } if (!${heap.code}_alive[${slot}]) { break; } ${slot} += 1u; }`,`if (${slot} < ${heap.capacity}u) {`,...indent([`${heap.code}_alive[${slot}] = true;`,...value.pre,`${heap.code}[${slot}] = ${value.code};`]),'}'];
+        return this.result(n,n.pointerType,`select(0u, ${slot} + 1u, ${slot} < ${heap.capacity}u)`,pre);
+      }
+      case 'object-deref': {
+        const value=this.expr(n.value),name=String(value.type).replace('cw_objectptr_',''),heap=this.objectHeaps.get(name);if(!String(value.type).startsWith('cw_objectptr_')||!heap)this.fail('Object dereference requires a concrete allocated class.',n);
+        n.heapName=name;return this.result(n,heap.type,`${heap.code}[${value.code} - 1u]`,value.pre,{rootSymbol:(heap.symbol??={kind:'local',name:heap.code,code:heap.code,type:heap.type,constant:false,referenceSpace:'private'})});
+      }
+      case 'object-delete': {
+        const value=this.expr(n.value),name=String(value.type).replace('cw_objectptr_',''),heap=this.objectHeaps.get(name);if(!heap)this.fail('delete requires a concrete allocated class.',n);n.heapName=name;
+        const snapshot='cw_delete_'+this.temp++;return this.result(n,'void','',[...value.pre,`let ${snapshot} = ${value.code};`,`if (${snapshot} != 0u) { ${heap.code}_alive[${snapshot} - 1u] = false; }`]);
+      }
       case 'binary': {
         let a = this.expr(n.left), b = this.expr(n.right);if(narrow(a.type))a={...a,type:'i32',code:`i32(${a.code})`};if(narrow(b.type))b={...b,type:'i32',code:`i32(${b.code})`};
         if([a.type,b.type].some(t=>String(t).startsWith('cw_objectptr_'))){
@@ -465,7 +480,7 @@ class Emitter {
     return this.pointerHelpers.get(key);
   }
   bindReferenceHelper(helper,args,n){
-    const spaces=helper.params.map((p,i)=>p.reference?(args[i].rootSymbol?.kind==='shared'||args[i].rootSymbol?.referenceSpace==='workgroup'?'workgroup':'function'):null);
+    const spaces=helper.params.map((p,i)=>p.reference?(args[i].rootSymbol?.referenceSpace==='private'?'private':args[i].rootSymbol?.kind==='shared'||args[i].rootSymbol?.referenceSpace==='workgroup'?'workgroup':'function'):null);
     if(spaces.every((space,i)=>space===null||space===(helper.params[i].referenceSpace||'function'))&&helper.params.every((p,i)=>!p.reference||args[i].sharedReferenceIndexCode===undefined&&!args[i].rootSymbol?.sharedReferenceRoot))return helper;
     const candidates=helper.params.map((p,i)=>p.reference?(args[i].sharedReferenceIndexCode!==undefined?args[i].rootSymbol.code:args[i].rootSymbol?.sharedReferenceRoot||null):null),roots=candidates.map((root,i)=>root&&(candidates.filter(r=>r===root).length>1||args[i].rootSymbol?.sharedReferenceRoot)?root:null);
     const origin=helper.referenceOrigin||helper.name,key=JSON.stringify([origin,spaces,roots]);
@@ -663,8 +678,8 @@ class Emitter {
       const node=n.args[i],s=a.rootSymbol;
       if(p.boundReferenceShared){if(s?.atomic||a.type!==p.type||!p.constant&&s?.constant)this.fail('Shared reference requires a matching non-atomic array element.',node);const index=a.sharedReferenceIndexCode??s?.sharedReferenceIndexCode;if(index===undefined)this.fail('Shared reference index is unavailable.',node);return `i32(${index})`;}
       if(s?.kind==='shared'&&s.atomic)this.fail('Atomic shared values cannot bind ordinary references.',node);
-      if(p.constant){if(node.kind==='member'&&['cw_uchar2','cw_uchar4'].includes(node.base.type)&&p.type==='cw_uchar'){const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: cw_uchar = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||['cw_uchar2','cw_uchar4'].includes(p.type)||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s)&&!references.get(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.set(s,true);if(s?.kind==='reference')return node.kind==='id'?s.pointerCode:'&'+a.code;if(s?.kind==='shared'){if(!['id','index'].includes(node.kind))this.fail('Shared references require whole scalars/vectors or array elements.',node);return '&'+a.code;}if(s?.kind==='local'&&!s.constant&&['id','member'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
-      if(!['id','index'].includes(node.kind)||!s||!['local','reference','shared'].includes(s.kind)||s.constant||isArray(a.type)||!(numeric(a.type)||vectorLength(a.type)||this.structs.has(a.type))||a.type!==p.type)this.fail('Reference arguments require a mutable scalar/vector or array element in local or shared memory, of the exact type.',node);
+      if(p.constant){if(node.kind==='member'&&['cw_uchar2','cw_uchar4'].includes(node.base.type)&&p.type==='cw_uchar'){const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: cw_uchar = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||['cw_uchar2','cw_uchar4'].includes(p.type)||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s)&&!references.get(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.set(s,true);if(s?.kind==='reference')return node.kind==='id'?s.pointerCode:'&'+a.code;if(s?.kind==='shared'){if(!['id','index'].includes(node.kind))this.fail('Shared references require whole scalars/vectors or array elements.',node);return '&'+a.code;}if(s?.kind==='local'&&!s.constant&&['id','member','object-deref'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
+      if(!['id','index','object-deref'].includes(node.kind)||!s||!['local','reference','shared'].includes(s.kind)||s.constant||isArray(a.type)||!(numeric(a.type)||vectorLength(a.type)||this.structs.has(a.type))||a.type!==p.type)this.fail('Reference arguments require a mutable scalar/vector or array element in local or shared memory, of the exact type.',node);
       if(references.has(s))this.fail('Aliased reference arguments are unsupported.',node);references.set(s,false);return s.kind==='reference'?s.pointerCode:`&${a.code}`;
     });
     return this.result(n, helper.result, `f_${helper.name}(${[...codes.filter(c=>c!==null),'cw_thread','cw_block','cw_grid'].join(', ')})`, pre);
@@ -682,6 +697,7 @@ class Emitter {
     return path;
   }
   effect(n) {
+    if(n.kind==='object-delete')return this.expr(n).pre;
     if(n.kind==='sequence')return n.expressions.flatMap(e=>this.effect(e));
     if (n.kind === 'assign') {
       if(['+=','-=','*=','/='].includes(n.op)){const left=this.expr(n.left,true),method=this.structs.get(left.type)?.methods.find(m=>m.name==='operator'+n.op);if(method){const receiver=n.left,right=n.right;delete n.left;delete n.right;delete n.op;Object.assign(n,{kind:'call',callee:{kind:'member',base:receiver,member:method.name,token:n.token},args:[right]});return this.effect(n);}}
@@ -898,6 +914,7 @@ class Emitter {
         this.add(p.name, symbol, p, true); p.symbol = symbol;
       }
     }
+    for(const heap of this.objectHeaps.values())header.push(`var<private> ${heap.code}: array<${heap.type}, ${heap.capacity}>;`,`var<private> ${heap.code}_alive: array<bool, ${heap.capacity}>;`);
     const moduleShared=new Map(),usedGlobalNames=new Set();for(const fn of [this.kernel,...this.helpers])walk(fn.body,n=>{if(n.kind==='id')usedGlobalNames.add(n.name);});
     for(const declaration of this.ast.sharedGlobals||[])if(usedGlobalNames.has(declaration.name)){this.declare(declaration);moduleShared.set(declaration.name,declaration.symbol);}
     const helperLines = [];
@@ -987,7 +1004,7 @@ class Emitter {
     const storageSize = this.shared.reduce((n, s) => n + Math.ceil(typeStride(s.type) / 16) * 16, 0);
     let usesPackedBytes=(this.ast.structs||[]).some(s=>s.fields.some(f=>['cw_uchar','cw_uchar2','cw_uchar4'].includes(f.type)));walk(this.ast,n=>{if(['cw_uchar','cw_uchar2','cw_uchar4'].includes(n.type)||['cw_uchar','cw_uchar2','cw_uchar4'].includes(n.result))usesPackedBytes=true;});let usesShort=false;walk(this.ast,n=>{if(['cw_short','cw_ushort'].includes(n.type)||['cw_short','cw_ushort'].includes(n.result))usesShort=true;});if(usesShort)header.unshift('alias cw_short = i32;','alias cw_ushort = u32;');if(usesPackedBytes)header.unshift('alias cw_uchar = u32;','alias cw_uchar2 = u32;','alias cw_uchar4 = u32;');
     const wgsl = [...header, '', ...helperLines, '', `@compute @workgroup_size(${this.workgroupSize.join(', ')})`, 'fn main(', '  @builtin(local_invocation_id) cw_thread: vec3<u32>,', '  @builtin(workgroup_id) cw_block: vec3<u32>,', '  @builtin(num_workgroups) cw_grid: vec3<u32>', ') {', ...indent(main), '}', ''].join('\n');
-    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {workgroupSize: this.workgroupSize, bindings,...(Object.keys(this.bufferAliases).length?{bufferAliases:{...this.bufferAliases}}:{}), scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2+surfaces.length : null,...(textures.length?{textures}:{}),...(textureScales.length?{textureScales}:{}),...(textureLengths.length?{textureLengths}:{}),...(surfaces.length?{surfaces}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
+    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {...(this.objectHeaps.size?{objectHeap:{scope:'invocation',persistent:false,types:[...this.objectHeaps.values()].map(h=>({name:h.name,capacity:h.capacity}))}}:{}),workgroupSize: this.workgroupSize, bindings,...(Object.keys(this.bufferAliases).length?{bufferAliases:{...this.bufferAliases}}:{}), scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2+surfaces.length : null,...(textures.length?{textures}:{}),...(textureScales.length?{textureScales}:{}),...(textureLengths.length?{textureLengths}:{}),...(surfaces.length?{surfaces}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
   }
 }
 function resolveTraitTypes(fn, ast, parameter, argument) {
