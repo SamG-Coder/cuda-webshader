@@ -17,6 +17,7 @@ TYPES.add('cudaTextureObject_t');MAP.cudaTextureObject_t='texture3d';
 TYPES.add('cudaSurfaceObject_t');MAP.cudaSurfaceObject_t='surface2d';
 for(const [prefix,type] of [['uint','u32'],['int','i32']])for(const size of [2,3,4]){TYPES.add(prefix+size);MAP[prefix+size]=`vec${size}<${type}>`;}
 export const builtinType = name => Object.hasOwn(MAP,name)?MAP[name]:null;
+function unwrapCondition(text){for(let wraps=0;wraps<32&&text.startsWith('(')&&text.endsWith(')');wraps++){let depth=0,whole=true;for(let i=0;i<text.length;i++){if(text[i]==='(')depth++;if(text[i]===')')depth--;if(depth<0||(depth===0&&i<text.length-1))whole=false;}if(!whole||depth!==0)break;text=text.slice(1,-1).trim();}return text;}
 export function tokenize(source, defines = {}) {
   if (typeof source !== 'string' || source.length > 1_000_000) throw new CompileError('Source must be a string of at most 1 MB.');
   const macros = new Map(Object.entries(defines).map(([k, v]) => {
@@ -34,7 +35,7 @@ export function tokenize(source, defines = {}) {
     if (rest[0] === '#') {
       const directive = rest.split('\n')[0];
       const conditional=directive.trimEnd().match(/^#\s*(if|else|endif)\b(.*)$/);
-      if(conditional){const [,kind,tail]=conditional,expression=tail.replace(/\/\/.*$/,'').trim();
+      if(conditional){const [,kind,tail]=conditional,expression=kind==='if'?unwrapCondition(tail.replace(/\/\/.*$/,'').trim()):tail.replace(/\/\/.*$/,'').trim();
         if(kind==='if'){const match=expression.match(/^(!)?\s*([A-Za-z_]\w*|[0-9]+)$/);if(!match)throw new CompileError('Conditional preprocessing supports an integer literal or numeric macro with optional !.',token,source);const raw=/^[0-9]+$/.test(match[2])?match[2]:macros.get(match[2])??'0',number=Number(raw.replace(/[uU]$/,''));if(!Number.isSafeInteger(number))throw new CompileError('Conditional macro must be an integer.',token,source);const selected=match[1]?!number:!!number;conditionals.push({parent:enabled,selected,otherwise:false});enabled=enabled&&selected;}
         else{const frame=conditionals.at(-1);if(!frame||expression)throw new CompileError('Unmatched or malformed conditional directive.',token,source);if(kind==='else'){if(frame.otherwise)throw new CompileError('Duplicate #else.',token,source);frame.otherwise=true;enabled=frame.parent&&!frame.selected;}else{conditionals.pop();enabled=frame.parent;}}
         advance(directive);continue;
@@ -184,7 +185,7 @@ export class Parser {
       if (result.pointer || result.shared || result.reference || result.external) this.fail('Function return pointers/references/shared/extern qualifiers are unsupported.');
       if(this.peek().forward)this.fail('Function-forwarding macros are supported at call sites, not in function declarations.');
       const name = this.name();this.functionNames.add(name);let specializationArgument;
-      if(templateKind==='specialization'){this.take('<');specializationArgument=this.take().value;this.take('>');}
+      if(templateKind==='specialization')specializationArgument=this.templateArgument();
       this.take('('); const params = [];
       if (!this.is(')')) do { const token = this.peek(), type = this.type(), name = this.name(); params.push({kind: 'param', token, name, ...type}); } while (this.match(','));
       this.take(')'); const body = this.block();
@@ -238,6 +239,8 @@ export class Parser {
     }
     return left;
   }
+  templateCallAhead(){for(let offset=1;offset<=65;offset++){const token=this.peek(offset);if(token.value==='>')return this.peek(offset+1).value==='(';if(!['word','number'].includes(token.kind)&&!['+','-','*','/','%','(',')'].includes(token.value))return false;}return false;}
+  templateArgument(){this.take('<');const parts=[];while(!this.is('>')){const token=this.peek();if(parts.length>=64||(!['word','number'].includes(token.kind)&&!['+','-','*','/','%','(',')'].includes(token.value)))this.fail('Template arguments support one type or bounded integer arithmetic.',token);parts.push(this.take().value);}this.take('>');if(!parts.length)this.fail('Missing template argument.');return parts.join(' ');}
   unary() {
     const token = this.peek();
     if(this.match('static_cast')){this.take('<');const type=this.type();if(type.pointer||type.reference||type.shared||type.external)this.fail('static_cast supports value types only.',token);this.take('>');this.take('(');const value=this.expression();this.take(')');return {kind:'cast',token,target:type.type,value};}
@@ -249,7 +252,7 @@ export class Parser {
     else if (token.kind === 'word') { value = {kind: 'id', token, name: this.qualifiedName()}; }
     else this.fail('Expected an expression.', token);
     while (true) {
-      if(value.kind==='id'&&this.functionNames.has(value.name)&&this.is('<')&&this.peek(2).value==='>'&&this.peek(3).value==='('&&(TYPES.has(this.peek(1).value)||this.peek(1).value===this.templateParameterName||this.peek(1).kind==='number')){this.take('<');value.templateArgument=this.take().value;this.take('>');}
+      if(value.kind==='id'&&this.functionNames.has(value.name)&&this.is('<')&&this.templateCallAhead())value.templateArgument=this.templateArgument();
       else if (this.match('[')) { const index = this.expression(); this.take(']'); value = {kind: 'index', token, base: value, index}; }
       else if (this.match('.')) { value = {kind: 'member', token, base: value, member: this.name()}; }
       else if (this.match('(')) { const args = []; if (!this.is(')')) do { args.push(this.expression(2)); } while (this.match(',')); this.take(')');

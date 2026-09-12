@@ -1,3 +1,4 @@
+import {integerExpression,substituteTemplateArgument} from './integer-expression.js';
 import {parse, CompileError,builtinType} from './parser.js';
 import {uniformBlockGuards} from './full-workgroups.js';
 export {CompileError, parse};
@@ -156,9 +157,10 @@ class Emitter {
         let value = Number(n.value.replace(isHex ? /[uU]$/ : /[fFuU]$/, ''));
         if (!Number.isFinite(value)) this.fail('Invalid numeric literal.', n);
         let type = isFloat ? 'f32' : isUnsigned || (/^0[xX]/.test(n.value) && value > 2147483647) ? 'u32' : 'i32';
-        if (!isFloat && (value < 0 || value > (type === 'u32' ? 4294967295 : 2147483647))) this.fail('Integer literal is outside the supported 32-bit range.', n);
+        if (!isFloat && (value < (type === 'u32' ? 0 : -2147483648) || value > (type === 'u32' ? 4294967295 : 2147483647))) this.fail('Integer literal is outside the supported 32-bit range.', n);
         if (isFloat && !Number.isFinite(Math.fround(value))) this.fail('Floating literal overflows f32.', n);
         n.numericValue = value;
+        if(type==='i32'&&value===-2147483648)return this.result(n,type,'i32(2147483648u)');
         return this.result(n, type, `${isFloat && Number.isInteger(value) ? value + '.0' : value}${type === 'f32' ? 'f' : type === 'u32' ? 'u' : 'i'}`);
       }
       case 'id': {
@@ -588,7 +590,7 @@ function instantiateHelperTemplates(ast, kernel) {
   const definitions=new Map(),specializations=new Map(),instances=new Map(),visiting=new Set(),done=new Set(),clones=[];
   for(const fn of ast.functions){
     if(fn.specializationArgument!==undefined){
-      const primary=definitions.get(fn.name),key=fn.name+'<'+fn.specializationArgument+'>';
+      const primary=definitions.get(fn.name);if(primary?.templateKind==='int'){try{fn.specializationArgument=String(integerExpression(fn.specializationArgument));}catch(e){throw new CompileError(e.message,fn.token,ast.source);}}const key=fn.name+'<'+fn.specializationArgument+'>';
       if(!primary?.templateParameter||primary.qualifier!=='__device__')throw new CompileError('Declare a primary device helper template before its specialization.',fn.token,ast.source);
       if(specializations.has(key))throw new CompileError('Duplicate device helper specialization.',fn.token,ast.source);
       if(fn.params.length!==primary.params.length)throw new CompileError('Device helper specialization signature does not match its primary template.',fn.token,ast.source);
@@ -606,7 +608,7 @@ function instantiateHelperTemplates(ast, kernel) {
     walk(fn.body,node=>{
       if(node.kind!=='call'||node.callee.kind!=='id')return;
       if(['tex3D','tex1D','tex2D'].includes(node.callee.name))return;
-      const callee=node.callee,definition=definitions.get(callee.name),argument=callee.templateArgument;
+      const callee=node.callee,definition=definitions.get(callee.name);let argument=callee.templateArgument;if(definition?.templateKind==='int'&&argument!==undefined){try{argument=String(integerExpression(argument));}catch(e){fail(e.message,callee);}}
       if(!definition?.templateParameter){
         if(argument!==undefined)fail('Explicit template arguments require a templated device helper.',callee);
         if(definition?.qualifier==='__device__')process(definition);
@@ -625,12 +627,12 @@ function instantiateHelperTemplates(ast, kernel) {
         if(definition.templateKind==='type'){
           type=builtinType(argument);
           if(!type||type==='void')fail('Template type argument must be a supported built-in value type.',callee);
-        }else if(!/^\d+$/.test(argument)||!Number.isSafeInteger(Number(argument))||Number(argument)>2147483647)fail('Template argument must be a nonnegative 32-bit signed integer.',callee);
+        }else if(!Number.isSafeInteger(Number(argument))||Number(argument)<-2147483648||Number(argument)>2147483647)fail('Template argument must be a signed 32-bit integer.',callee);
         for(const param of instance.params){if(param.name===parameter)fail('Template parameter shadowing is unsupported.',param);if(param.type===placeholder)param.type=type;}
         if(instance.result===placeholder)instance.result=type;
         walk(instance.body,n=>{
           if(['decl','thread-block'].includes(n.kind)&&n.name===parameter)fail('Template parameter shadowing is unsupported.',n);
-          if(n.templateArgument===parameter)n.templateArgument=argument;
+          if(n.templateArgument!==undefined){if(n.templateArgument===parameter)n.templateArgument=argument;else if(!type)n.templateArgument=substituteTemplateArgument(n.templateArgument,parameter,argument);}
           if(type){if(n.type===placeholder)n.type=type;if(n.target===placeholder)n.target=type;}
           else if(n.kind==='id'&&n.name===parameter){n.kind='literal';n.value=argument;delete n.name;}
         });
@@ -692,7 +694,7 @@ export function compile(source, options = {},bufferUsage=null) {
     for(const p of kernel.params)if(p.name===name)throw new CompileError('Template parameter shadowing is unsupported.',p.token,source);
     walk(kernel.body,n=>{if(['decl','thread-block'].includes(n.kind)&&n.name===name)throw new CompileError('Template parameter shadowing is unsupported.',n.token,source);if(n.kind==='id'&&n.name===name){n.kind='literal';n.value=String(value);delete n.name;}});
   }
-  if(specialization)walk(kernel.body,n=>{if(n.templateArgument===kernel.templateParameter)n.templateArgument=specialization[2];});
+  if(specialization)walk(kernel.body,n=>{if(n.templateArgument!==undefined){if(n.templateArgument===kernel.templateParameter)n.templateArgument=specialization[2];else if(kernel.templateKind==='int')n.templateArgument=substituteTemplateArgument(n.templateArgument,kernel.templateParameter,specialization[2]);}});
   resolveTraitTypes(kernel,ast,kernel.templateParameter,specialization?.[2]);
   const scalarConstraints=uniformBlockGuards(kernel,options,walk,message=>{throw new CompileError(message,kernel.token,source);});
   const overloadGroups=new Map();for(const f of ast.functions)if(f.specializationArgument===undefined){const group=overloadGroups.get(f.name)||[];group.push(f);overloadGroups.set(f.name,group);}let overloadIndex=0;const occupied=new Set(ast.functions.map(f=>f.name));for(const [name,group]of overloadGroups)if(group.length>1){if(group.some(f=>f.qualifier!=='__device__'||f.templateParameter))throw new CompileError('Overloads support non-template device helpers only.',group[0].token,source);const signatures=new Set();for(const f of group){const signature=JSON.stringify(f.params.map(p=>[p.type,p.pointer,p.reference,(p.pointer||p.reference)&&p.constant]));if(signatures.has(signature))throw new CompileError('Duplicate function signature '+name,f.token,source);signatures.add(signature);let unique='cw_overload_'+overloadIndex+++'_'+name;while(occupied.has(unique))unique+='_';occupied.add(unique);f.overloadName=name;f.name=unique;}}

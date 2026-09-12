@@ -1,0 +1,1 @@
+PASS native integer helper expressions: 187, 0, 7, -2, INT_MIN, -3; descending specialization, negative base and nested arithmetic

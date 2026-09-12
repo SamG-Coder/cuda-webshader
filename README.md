@@ -35,6 +35,10 @@ See [Haar setup and validation](showcases/haar/README.md).
 [NVIDIA separable convolution](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=separable)
 runs the original row and column filters as a GPU pass sequence, with both
 generated shaders available for comparison. See [pass setup and validation](showcases/convolution-separable/README.md).
+Device helper integer arguments also support bounded signed arithmetic such as
+`filter<i - 1>` and negative terminating specializations. Native CUDA and
+NVIDIA WebGPU verify the expansion, including INT_MIN. This is a prerequisite
+for the [texture-convolution candidate currently in progress](reports/convolution-texture-progress.md).
 Device helpers now
 support one built-in type or explicit integer template argument, including nested
 calls and arguments forwarded from a kernel template. Type-trait structs containing typedef members, including explicit type specializations
