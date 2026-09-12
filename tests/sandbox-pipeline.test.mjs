@@ -29,3 +29,19 @@ test('Float depth sorts require explicit f32 keys and uint payload buffers',()=>
   const plan=structuredClone(valid);change(plan);assert.throws(()=>validatePipeline(plan));
  }
 });
+
+test('Pipeline feedback copies reject aliases, type mismatch and invalid record ranges',()=>{
+ const plan={buffers:{a:{type:'vec4<f32>',records:4,fill:'zero'},b:{type:'vec4<f32>',records:4,fill:'zero'}},steps:[{copyBuffer:{source:'a',target:'b',records:4}}],preview:{kind:'particles',positions:'a',count:4,radius:.1}};
+ assert.ok(validatePipeline(plan)>0);
+ for(const change of [p=>p.steps[0].copyBuffer.target='a',p=>p.steps[0].copyBuffer.source='missing',p=>p.buffers.b.type='f32',p=>p.steps[0].copyBuffer.records=5,p=>p.steps[0].copyBuffer.records=0,p=>p.steps[0].copyBuffer.records=1.5]){
+  const p=structuredClone(plan);change(p);assert.throws(()=>validatePipeline(p),/Buffer copy/);
+ }
+});
+
+test('Float4 pipeline volumes reject invalid dimensions and excessive allocation before fetching',async()=>{
+ const buffers={a:{type:'vec4<f32>',records:4,fill:'zero'},b:{type:'vec4<f32>',records:4,fill:'zero'}};
+ for(const texture of [{dimensions:[64,64]},{dimensions:[64,0,64]},{dimensions:[2048,2048,2048]},{dimensions:[64,64,64],storage:true}]){
+  const plan={buffers,steps:[{copyBuffer:{source:'a',target:'b',records:4}}],textures:{noise:{kind:'volume-float4',source:'never-fetch',...texture}},preview:{kind:'particles',positions:'a',count:4,radius:.1}};
+  await assert.rejects(executePipeline({plan,source:'',compiler:{},runtime:{createBuffer:data=>({data})},rootArtifact:{},resources:[],textureResources:[]}),/Float4 volume|64 MiB/);
+ }
+});

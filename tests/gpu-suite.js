@@ -1,3 +1,4 @@
+import {checkSmokePipeline} from './smoke-pipeline-gpu.js';
 import {checkFloatSortPairs} from './float-sort-gpu.js';
 import {checkSmokeIntegration} from './smoke-integration-gpu.js';
 import {checkSmokeNoise} from './smoke-noise-gpu.js';
@@ -209,6 +210,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Complete implicit marching-cubes GPU pipeline matches native CUDA',()=>checkMarchingPipeline(runtime));
   await run('Hierarchical exclusive scan matches native CUDA',()=>checkExclusiveScan(runtime));
   await run('Original shared marching-cubes triangle generation matches native CUDA',()=>checkMarchingTriangles(runtime));
+  await run('Smoke sandbox pipeline matches native integration and depth sorting',()=>checkSmokePipeline(runtime));
   await run('Float key sorting preserves IEEE bits and matches native smoke depths',()=>checkFloatSortPairs(runtime));
   await run('Original smoke integration and depth match native Thrust',()=>checkSmokeIntegration(runtime));
   await run('Original smoke float4 noise sampling matches native CUDA',()=>checkSmokeNoise(runtime));

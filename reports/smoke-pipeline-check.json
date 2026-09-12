@@ -1,0 +1,47 @@
+{
+  "name": "Smoke sandbox pipeline matches native integration and depth sorting",
+  "pass": true,
+  "comparisons": [
+    {
+      "frame": 1,
+      "positionsExact": true,
+      "velocitiesExact": true,
+      "sortedKeysExact": true,
+      "indicesExact": true
+    },
+    {
+      "frame": 8,
+      "positionsExact": true,
+      "velocitiesExact": true,
+      "sortedKeysExact": true,
+      "indicesExact": true
+    },
+    {
+      "frame": 32,
+      "positionsExact": true,
+      "velocitiesExact": true,
+      "sortedKeysExact": true,
+      "indicesExact": true
+    },
+    {
+      "frame": 64,
+      "positionsExact": true,
+      "velocitiesExact": true,
+      "sortedKeysExact": true,
+      "indicesExact": true
+    }
+  ],
+  "frames": 64,
+  "particles": 257,
+  "intermediateReadbackBytes": 0,
+  "artifacts": [
+    "integrate_functor",
+    "calcDepth_functor",
+    "smokeIndices",
+    "sortPrepare",
+    "sortStage",
+    "sortFinish"
+  ],
+  "wallMs": 616.8250000178814,
+  "softwareAdapterRequested": false
+}
