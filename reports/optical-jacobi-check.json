@@ -1,0 +1,165 @@
+{
+  "name": "Original optical flow Jacobi matches 500 native iterations",
+  "pass": true,
+  "results": [
+    {
+      "width": 67,
+      "height": 19,
+      "block": [
+        32,
+        6,
+        1
+      ],
+      "step": 1,
+      "component": "u",
+      "maxError": 0,
+      "rms": 0
+    },
+    {
+      "width": 67,
+      "height": 19,
+      "block": [
+        32,
+        6,
+        1
+      ],
+      "step": 1,
+      "component": "v",
+      "maxError": 0,
+      "rms": 0
+    },
+    {
+      "width": 67,
+      "height": 19,
+      "block": [
+        32,
+        6,
+        1
+      ],
+      "step": 8,
+      "component": "u",
+      "maxError": 0,
+      "rms": 0
+    },
+    {
+      "width": 67,
+      "height": 19,
+      "block": [
+        32,
+        6,
+        1
+      ],
+      "step": 8,
+      "component": "v",
+      "maxError": 0,
+      "rms": 0
+    },
+    {
+      "width": 67,
+      "height": 19,
+      "block": [
+        32,
+        6,
+        1
+      ],
+      "step": 500,
+      "component": "u",
+      "maxError": 0,
+      "rms": 0
+    },
+    {
+      "width": 67,
+      "height": 19,
+      "block": [
+        32,
+        6,
+        1
+      ],
+      "step": 500,
+      "component": "v",
+      "maxError": 0,
+      "rms": 0
+    },
+    {
+      "width": 128,
+      "height": 96,
+      "block": [
+        16,
+        4,
+        1
+      ],
+      "step": 1,
+      "component": "u",
+      "maxError": 0,
+      "rms": 0
+    },
+    {
+      "width": 128,
+      "height": 96,
+      "block": [
+        16,
+        4,
+        1
+      ],
+      "step": 1,
+      "component": "v",
+      "maxError": 0,
+      "rms": 0
+    },
+    {
+      "width": 128,
+      "height": 96,
+      "block": [
+        16,
+        4,
+        1
+      ],
+      "step": 8,
+      "component": "u",
+      "maxError": 0,
+      "rms": 0
+    },
+    {
+      "width": 128,
+      "height": 96,
+      "block": [
+        16,
+        4,
+        1
+      ],
+      "step": 8,
+      "component": "v",
+      "maxError": 0,
+      "rms": 0
+    },
+    {
+      "width": 128,
+      "height": 96,
+      "block": [
+        16,
+        4,
+        1
+      ],
+      "step": 500,
+      "component": "u",
+      "maxError": 0,
+      "rms": 0
+    },
+    {
+      "width": 128,
+      "height": 96,
+      "block": [
+        16,
+        4,
+        1
+      ],
+      "step": 500,
+      "component": "v",
+      "maxError": 0,
+      "rms": 0
+    }
+  ],
+  "originalKernelUnchanged": true,
+  "iterations": 500,
+  "wallMs": 137.9050000011921
+}

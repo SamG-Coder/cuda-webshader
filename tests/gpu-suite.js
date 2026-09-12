@@ -1,3 +1,4 @@
+import {checkOpticalJacobi} from './optical-jacobi-gpu.js';
 import {checkStereo} from './stereo-gpu.js';
 import {checkPtxSad} from './ptx-sad-gpu.js';
 import {checkFluidsSolver} from './fluids-solver-gpu.js';
@@ -220,6 +221,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Full fluids solver compared with native CUDA and cuFFT',()=>checkFluidsSolver(runtime));
   await run('Real FFT packed transforms match native cuFFT',()=>checkRealFFT(runtime));
   await run('Original fluids pitched kernels match native CUDA',()=>checkFluidsPitched(runtime));
+  await run('Original optical flow Jacobi matches 500 native iterations',()=>checkOpticalJacobi(runtime));
   await run('Original stereo disparity matches native pixels',()=>checkStereo(runtime));
   await run('Original NVIDIA inline PTX SAD matches native',()=>checkPtxSad(runtime));
   await run('size_t launch values preserve native 64-bit arithmetic',()=>checkSizeValues(runtime));

@@ -201,7 +201,7 @@ export class Parser {
       if(this.match('template')){
         this.take('<');
         if(this.match('>'))templateKind='specialization';
-        else{do{const kind=this.take();if(!['int','class','typename'].includes(kind.value))this.fail('Template parameters require int, class or typename.',kind);const parameterKind=kind.value==='int'?'int':'type',name=this.name();if(TYPES.has(name)||templateParameters.includes(name))this.fail('Template parameters must have distinct names.',token);if(templateParameters.length>=4)this.fail('At most four helper template type parameters are supported.',token);if(templateParameters.length&&(templateKind!=='type'||parameterKind!=='type'))this.fail('Multiple template parameters currently require type parameters only.',kind);templateKind=parameterKind;templateParameters.push(name);if(parameterKind==='type')this.templateTypeNames.add(name);}while(this.match(','));this.take('>');templateParameter=templateParameters[0];}
+        else{do{const kind=this.take();if(!['int','class','typename'].includes(kind.value))this.fail('Template parameters require int, class or typename.',kind);const parameterKind=kind.value==='int'?'int':'type',name=this.name();if(TYPES.has(name)||templateParameters.includes(name))this.fail('Template parameters must have distinct names.',token);if(templateParameters.length>=4)this.fail('At most four template parameters are supported.',token);if(templateParameters.length&&templateKind!==parameterKind)this.fail('Template parameters must be all integer or all type parameters.',kind);templateKind=parameterKind;templateParameters.push(name);if(parameterKind==='type')this.templateTypeNames.add(name);}while(this.match(','));this.take('>');templateParameter=templateParameters[0];}
       }
       this.templateParameterName=templateParameter;
       if(this.match('struct')){
@@ -243,7 +243,7 @@ export class Parser {
       if(this.is('__launch_bounds__'))launchBounds();
       const qualifier = this.take().value;
       if(templateKind==='specialization'&&qualifier!=='__device__')this.fail('Explicit function specializations support only device helpers.',token);
-      if(templateParameters.length>1&&qualifier!=='__device__')this.fail('Multiple template type parameters are supported on device helpers only.',token);
+      if(templateParameters.length>1&&qualifier!=='__device__'&&templateKind!=='int')this.fail('Multiple template type parameters are supported on device helpers only.',token);
       if(templateParameter&&!['__global__','__device__'].includes(qualifier))this.fail('Templates are supported only on kernels and device helpers.',token);
       if (!['__global__', '__device__'].includes(qualifier)) this.fail('Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported.', token);
       while (['inline', '__forceinline__','__host__'].includes(this.peek().value)) {if(this.take().value==='__host__')hostQualified=true;}
@@ -325,7 +325,7 @@ export class Parser {
   }
   declaration(semicolon = true) {
     const token = this.peek(),volatileSnapshot=this.match('volatile'),d = this.type(),declarations=[];
-    do {const name=this.name(),dimensions=[];if(this.zipTuple&&['tuple0','tuple1','tuple2','tuple3','count','cw_zip_index'].includes(name))this.fail('Zip functor local name conflicts with generated launch storage.',token);if(this.typeAliases.has(name))this.fail('Value declarations cannot shadow a type alias.',token);while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.initializer():null;if(volatileSnapshot&&(d.pointer||d.reference||d.shared||d.external||dimensions.length||!init))this.fail('Volatile is supported only on initialized local value snapshots.',token);declarations.push({kind:'decl',token,name,...d,...(volatileSnapshot?{constant:true,volatileSnapshot:true}:{}),dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
+    do {const name=this.name(),dimensions=[];if(this.zipTuple&&['tuple0','tuple1','tuple2','tuple3','count','cw_zip_index'].includes(name))this.fail('Zip functor local name conflicts with generated launch storage.',token);if(this.typeAliases.has(name))this.fail('Value declarations cannot shadow a type alias.',token);while(this.match('[')){dimensions.push(this.is(']')?null:this.expression(2));this.take(']');}const init=this.match('=')?this.initializer():null;const volatileShared=volatileSnapshot&&d.shared&&!d.pointer&&!d.reference&&!d.external&&!d.constant&&!init&&['f32','i32','u32'].includes(d.type);if(volatileSnapshot&&!volatileShared&&(d.pointer||d.reference||d.shared||d.external||dimensions.length||!init))this.fail('Volatile is supported only on initialized local value snapshots.',token);declarations.push({kind:'decl',token,name,...d,...(volatileShared?{volatileShared:true}:volatileSnapshot?{constant:true,volatileSnapshot:true}:{}),dimensions,init});if(this.is(',')&&(d.pointer||d.reference))this.fail('Pointer/reference declaration lists are unsupported.');}while(this.match(','));
     if (semicolon) this.take(';');return declarations.length===1?declarations[0]:{kind:'decls',token,declarations};
   }
   statement() {

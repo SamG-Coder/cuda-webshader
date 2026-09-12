@@ -204,7 +204,7 @@ class Emitter {
         if (['true', 'false'].includes(n.name)) return this.result(n, 'bool', n.name);
         const s = this.lookup(n.name, n); n.symbol = s;
         if(s.kind==='thread-block')this.fail('A thread_block handle can only be used for block synchronization.',n);
-        const atomic=s.atomic&&!isArray(s.type);return this.result(n, s.type, atomic&&!raw?`atomicLoad(&${s.code})`:s.code, [], {rootSymbol: s, atomicRoot: s.atomic,atomic});
+        const atomic=s.atomic&&!isArray(s.type);return this.result(n, s.type, atomic&&!raw?(s.volatileShared&&s.type==='f32'?`bitcast<f32>(atomicLoad(&${s.code}))`:`atomicLoad(&${s.code})`):s.code, [], {rootSymbol: s, atomicRoot: s.atomic,atomic});
       }
       case 'index': {
         if(n.pointerTarget&&this.lookup(n.base.name,n).type.element!==n.pointerTarget)this.fail('Byte pointer dereference must retain its pointee type.',n);if(raw&&n.pointerConstant)this.fail('Cannot modify a const byte pointer.',n);
@@ -224,7 +224,7 @@ class Emitter {
         if(type==='cw_uchar'&&base.rootSymbol?.rootBufferName){const temp='cw_byte_index_'+this.temp++,word=`${base.code}[${temp} >> 2u]`,shift=`((${temp} & 3u) * 8u)`,read=base.atomicRoot?`atomicLoad(&${word})`:word;return this.result(n,type,`((${read} >> ${shift}) & 255u)`,[...base.pre,...index.pre,`let ${temp} = u32(${indexCode});`],{rootSymbol:base.rootSymbol,...(raw&&base.atomicRoot?{packedBase:word,packedShiftCode:shift,packedAtomic:true}:{})});}
         const atomic = base.atomicRoot && !isArray(type);
         const addressPre=[];if(atomic&&raw&&type==='cw_uchar4'){const temp='cw_pixel_index_'+this.temp++;addressPre.push(`let ${temp} = ${indexCode};`);code=`${base.code}[${temp}]`;}
-        return this.result(n, type, atomic && !raw ? `atomicLoad(&${code})` : code, [...base.pre, ...index.pre,...capturePre,...addressPre], {rootSymbol: base.rootSymbol, atomicRoot: base.atomicRoot, atomic});
+        return this.result(n, type, atomic && !raw ? (base.rootSymbol?.volatileShared&&type==='f32'?`bitcast<f32>(atomicLoad(&${code}))`:`atomicLoad(&${code})`) : code, [...base.pre, ...index.pre,...capturePre,...addressPre], {rootSymbol: base.rootSymbol, atomicRoot: base.atomicRoot, atomic});
       }
       case 'member': {
         if (n.base.kind === 'id' && ['threadIdx', 'blockIdx', 'blockDim', 'gridDim'].includes(n.base.name)) {
@@ -590,7 +590,7 @@ class Emitter {
       n.type = target.type;
       if(target.packedAtomic){this.packedAtomicUsed=true;return [...packedPre,`cw_store_byte(&${target.packedBase}, ${target.packedShiftCode??target.packedShift+'u'}, u32(${code}));`];}
       if(target.packedBase)return [...target.pre,...value.pre,`${target.packedBase} = (${target.packedBase} & ${(~(255<<target.packedShift))>>>0}u) | ((u32(${code}) & 255u) << ${target.packedShift}u);`];
-      return [...target.pre, ...value.pre, target.atomic ? `atomicStore(&${target.code}, ${code});` : `${target.code} = ${code};`];
+      return [...target.pre, ...value.pre, target.atomic ? `atomicStore(&${target.code}, ${target.rootSymbol?.volatileShared&&target.type==='f32'?`bitcast<u32>(${code})`:code});` : `${target.code} = ${code};`];
     }
     if (n.kind === 'unary' && ['++', '--'].includes(n.op)) {
       const target = this.expr(n.value, true); this.writable(target, n.value); if (target.atomic || !numeric(target.type)) this.fail('Increment/decrement require a non-atomic scalar.', n);
@@ -636,13 +636,13 @@ class Emitter {
     for (let i = dims.length - 1; i >= 0; i--) type = arrayOf(type, dims[i]);
     if (n.shared && n.init) this.fail('__shared__ variables cannot have an initializer.', n);
     if (isArray(type) && n.init) this.fail('Array initializers are unsupported. Initialize elements explicitly.', n);
-    const atomic = n.shared && analyse([this.currentFunction],[]).atomic.has(n.name);
-    if (atomic && !['i32', 'u32'].includes(n.type)) this.fail('Shared atomics require int or unsigned int.', n);
+    const atomic = n.shared && (n.volatileShared||analyse([this.currentFunction],[]).atomic.has(n.name));
+    if (atomic && !['i32', 'u32'].includes(n.type)&&!(n.volatileShared&&n.type==='f32')) this.fail('Shared atomics require int or unsigned int.', n);
     if(n.init?.kind==='initializer')n.init.target=type;
     const init = n.init ? this.expr(n.init) : null;
     if (n.constant && !init && !n.shared) this.fail('A const local variable needs an initializer.', n);
     const code = `${n.shared ? (this.currentFunction===this.kernel?'s':'s_'+(this.currentFunction.pointerOrigin||this.currentFunction.name)) : 'v'}_${n.name}`;
-    const symbol = {name: n.name, type, code, constant: n.constant, atomic, kind: n.shared ? 'shared' : 'local',...(n.shared?{sharedOwner}:{})};
+    const symbol = {name: n.name, type, code, constant: n.constant, atomic, kind: n.shared ? 'shared' : 'local',...(n.shared?{sharedOwner,volatileShared:!!n.volatileShared}:{})};
     const existing=n.shared&&this.shared.find(x=>x.code===code);
     if(existing){if(existing.sharedOwner!==sharedOwner||typeName(existing.type)!==typeName(type)||existing.atomic!==atomic)this.fail('Shared declaration conflicts across helper specializations.',n);this.add(n.name,existing,n);n.symbol=existing;n.resolvedDimensions=dims;n.resolvedType=type;return [];}
     this.add(n.name, symbol, n); n.symbol = symbol; n.resolvedDimensions = dims; n.resolvedType = type;
@@ -700,7 +700,7 @@ class Emitter {
     const textures=[],surfaces=[],bufferCount=this.kernel.params.filter(p=>p.pointer).length;
     const bindings = [], scalars = [], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
     for(const s of this.structs.values())header.push(`struct ${s.type} {`,...s.fields.map(f=>`  cw_field_${f.name}: ${typeName(f.resolvedType)},`),'}');
-    const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t}>`;
+    const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t==='f32'?'u32':t}>`;
     for (const p of this.kernel.params) {
       if (p.shared || p.reference || p.external || p.type === 'void') this.fail('Invalid kernel parameter type.', p);
       if(p.type==='cw_size64'){
@@ -849,7 +849,7 @@ function resolveTraitTypes(fn, ast, parameter, argument) {
 }
 function instantiateHelperTemplates(ast, kernel) {
   const parameters=fn=>fn.templateParameters?.length?fn.templateParameters:[fn.templateParameter];
-  const canonical=(fn,argument,node)=>{if(fn.templateKind==='int'){try{return String(integerExpression(argument));}catch(e){throw new CompileError(e.message,node.token,ast.source);}}const values=argument.split(',').map(x=>x.trim());if(values.length!==parameters(fn).length||values.some(v=>!v))throw new CompileError('Template argument count must match the helper type parameters.',node.token,ast.source);return values.join(',');};
+  const canonical=(fn,argument,node)=>{const values=argument.split(',').map(x=>x.trim());if(values.length!==parameters(fn).length||values.some(v=>!v))throw new CompileError('Template argument count must match its parameters.',node.token,ast.source);if(fn.templateKind==='int'){try{return values.map(v=>String(integerExpression(v))).join(',');}catch(e){throw new CompileError(e.message,node.token,ast.source);}}return values.join(',');};
   const definitions=new Map(),specializations=new Map(),instances=new Map(),visiting=new Set(),done=new Set(),clones=[];
   for(const fn of ast.functions){
     if(fn.specializationArgument!==undefined){
@@ -946,22 +946,24 @@ export function compile(source, options = {},bufferUsage=null) {
     if(n.kind==='decl'&&n.pointer){const p=bytePointer(n.init);if(!p)return;if(p.target!==n.type)throw new CompileError('Byte pointer alias must retain its pointee type.',n.token,source);if(p.constant&&!n.constant)throw new CompileError('Cannot discard const through a pointer cast.',n.token,source);n.init={kind:'binary',op:'+',left:p.base,right:p.index,token:n.token};}
     if(n.kind==='unary'&&n.op==='*'){const p=bytePointer(n.value),base=n.value;delete n.value;delete n.op;Object.assign(n,p?{kind:'index',base:p.base,index:p.index,pointerTarget:p.target,pointerConstant:p.constant,dereference:true}:{kind:'index',base,index:{kind:'literal',value:'0',token:n.token},dereference:true});}
   });
-  const specialization=options.entry?.match(/^([A-Za-z_]\w*)<\s*(\d+|[A-Za-z_]\w*)\s*>$/),entry=specialization?specialization[1]:options.entry;if(specialization&&ast.typeAliases?.[specialization[2]])specialization[2]=['float','int','uint','bool','uchar','uchar4',...['float','int','uint'].flatMap(p=>[2,3,4].map(n=>p+n))].find(n=>builtinType(n)===ast.typeAliases[specialization[2]]);
+  const specialization=options.entry?.match(/^([A-Za-z_]\w*)<\s*([^<>]+)\s*>$/),entry=specialization?specialization[1]:options.entry;if(specialization)specialization[2]=specialization[2].trim();if(specialization&&ast.typeAliases?.[specialization[2]])specialization[2]=['float','int','uint','bool','uchar','uchar4',...['float','int','uint'].flatMap(p=>[2,3,4].map(n=>p+n))].find(n=>builtinType(n)===ast.typeAliases[specialization[2]]);
   const kernel = entry ? kernels.find(k => k.name === entry) : kernels.length === 1 ? kernels[0] : null;
   if (!kernel) throw new CompileError(options.entry ? `Kernel '${options.entry}' was not found.` : 'Multiple kernels found; specify options.entry.');
   if(!!kernel.templateParameter!==!!specialization)throw new CompileError(kernel.templateParameter?'Specify a template entry, for example '+kernel.name+(kernel.templateKind==='type'?'<float>.':'<16>.'):'This kernel does not have a template parameter.',kernel.token,source);
+  if(specialization&&specialization[2].split(',').length!==(kernel.templateParameters?.length||1))throw new CompileError('Template argument count must match its parameters.',kernel.token,source);
   if(specialization&&kernel.templateKind==='type'){
     const type=builtinType(specialization[2]),name=kernel.templateParameter,placeholder='template:'+name;
     if(!type||type==='void')throw new CompileError('Template type argument must be a supported built-in value type.',kernel.token,source);
     for(const p of kernel.params){if(p.name===name)throw new CompileError('Template parameter shadowing is unsupported.',p.token,source);if(p.type===placeholder)p.type=type;}
     if(kernel.result===placeholder)kernel.result=type;
     walk(kernel.body,n=>{if(['decl','thread-block'].includes(n.kind)&&n.name===name)throw new CompileError('Template parameter shadowing is unsupported.',n.token,source);if(n.type===placeholder)n.type=type;if(n.target===placeholder)n.target=type;if(n.kind==='call'&&n.callee.kind==='id'&&n.callee.name===name)n.callee.name=specialization[2];});
-  }else if(specialization){const value=Number(specialization[2]),name=kernel.templateParameter;
-    if(!Number.isSafeInteger(value)||value>2147483647)throw new CompileError('Template argument must be a nonnegative 32-bit signed integer.',kernel.token,source);
-    for(const p of kernel.params)if(p.name===name)throw new CompileError('Template parameter shadowing is unsupported.',p.token,source);
-    walk(kernel.body,n=>{if(['decl','thread-block'].includes(n.kind)&&n.name===name)throw new CompileError('Template parameter shadowing is unsupported.',n.token,source);if(n.kind==='id'&&n.name===name){n.kind='literal';n.value=String(value);delete n.name;}});
+  }else if(specialization){
+    const names=kernel.templateParameters?.length?kernel.templateParameters:[kernel.templateParameter],values=specialization[2].split(',').map(v=>Number(v.trim())),replacements=new Map(names.map((name,i)=>[name,values[i]]));
+    if(specialization[2].split(',').some(v=>!/^\d+$/.test(v.trim()))||values.some(value=>!Number.isSafeInteger(value)||value<0||value>2147483647))throw new CompileError('Template arguments must be nonnegative 32-bit signed integers.',kernel.token,source);
+    for(const p of kernel.params)if(replacements.has(p.name))throw new CompileError('Template parameter shadowing is unsupported.',p.token,source);
+    walk(kernel.body,n=>{if(['decl','thread-block'].includes(n.kind)&&replacements.has(n.name))throw new CompileError('Template parameter shadowing is unsupported.',n.token,source);if(n.kind==='id'&&replacements.has(n.name)){n.kind='literal';n.value=String(replacements.get(n.name));delete n.name;}if(n.templateArgument!==undefined)n.templateArgument=n.templateArgument.replace(/[A-Za-z_]\w*/g,name=>replacements.has(name)?'('+replacements.get(name)+')':name);});
   }
-  if(specialization)walk(kernel.body,n=>{if(n.templateArgument!==undefined){n.templateArgument=n.templateArgument.replace(/[A-Za-z_]\w*/g,name=>name===kernel.templateParameter?(kernel.templateKind==='int'?'('+specialization[2]+')':specialization[2]):name);}});
+  if(specialization&&kernel.templateKind==='type')walk(kernel.body,n=>{if(n.templateArgument!==undefined)n.templateArgument=n.templateArgument.replace(/[A-Za-z_]\w*/g,name=>name===kernel.templateParameter?specialization[2]:name);});
   resolveTraitTypes(kernel,ast,kernel.templateParameter,specialization?.[2]);
   const scalarConstraints=uniformBlockGuards(kernel,options,walk,message=>{throw new CompileError(message,kernel.token,source);});
   const overloadGroups=new Map();for(const f of ast.functions)if(f.specializationArgument===undefined){const group=overloadGroups.get(f.name)||[];group.push(f);overloadGroups.set(f.name,group);}let overloadIndex=0;const occupied=new Set(ast.functions.map(f=>f.name));for(const [name,group]of overloadGroups)if(group.length>1){if(group.some(f=>f.qualifier!=='__device__'||f.templateParameter))throw new CompileError('Overloads support non-template device helpers only.',group[0].token,source);const signatures=new Set();for(const f of group){const signature=JSON.stringify(f.params.map(p=>[p.type,p.pointer,p.reference,(p.pointer||p.reference)&&p.constant]));if(signatures.has(signature))throw new CompileError('Duplicate function signature '+name,f.token,source);signatures.add(signature);let unique='cw_overload_'+overloadIndex+++'_'+name;while(occupied.has(unique))unique+='_';occupied.add(unique);f.overloadName=name;f.name=unique;}}

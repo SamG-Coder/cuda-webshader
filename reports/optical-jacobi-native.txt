@@ -1,0 +1,6 @@
+Captured optical Jacobi 67x19, tile 32x6, step 1.
+Captured optical Jacobi 67x19, tile 32x6, step 8.
+Captured optical Jacobi 67x19, tile 32x6, step 500.
+Captured optical Jacobi 128x96, tile 16x4, step 1.
+Captured optical Jacobi 128x96, tile 16x4, step 8.
+Captured optical Jacobi 128x96, tile 16x4, step 500.
