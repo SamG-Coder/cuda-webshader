@@ -124,7 +124,7 @@ export class Parser {
     return {type, constant, shared, pointer,reference,external};
   }
   parse() {
-    const functions = [],constantGlobals=[];
+    const functions = [],constantGlobals=[],sharedGlobals=[];
     while (this.peek().kind !== 'eof') {
       const token = this.peek();
       let templateParameter=null,templateKind=null,templateParameters=[];this.templateTypeNames=new Set();this.templateParameterName=null;this.deferUnsupportedTypes=false;
@@ -138,6 +138,10 @@ export class Parser {
         if(spec.pointer||spec.reference||spec.constant||spec.shared||spec.external||!Object.values(MAP).includes(spec.type)||['void','texture3d','surface2d'].includes(spec.type))this.fail('Typedef aliases require unqualified built-in scalar or vector value types.',token);
         if(this.structs.has(name)||this.typeTraits.has(name)||this.typeAliases.has(name)||TYPES.has(name)&&(!['uint','uchar'].includes(name)||builtinType(name)!==spec.type))this.fail('Duplicate or conflicting type alias.',token);
         if(this.typeAliases.size>=128)this.fail('At most 128 type aliases are supported.',token);this.typeAliases.set(name,spec.type);continue;
+      }
+      if(this.is('__shared__')||this.is('extern')&&this.peek(1).value==='__shared__'){
+        const declaration=this.declaration();if(declaration.kind!=='decl'||!declaration.shared||declaration.pointer||declaration.reference||declaration.constant||declaration.init)this.fail('Module shared storage requires a plain shared declaration.',token);
+        if(sharedGlobals.some(g=>g.name===declaration.name))this.fail('Duplicate module shared declaration.',token);sharedGlobals.push(declaration);continue;
       }
       if(this.match('__constant__')){
         this.deferUnsupportedTypes=true;const valueType=this.type(),name=this.name();
@@ -215,7 +219,7 @@ export class Parser {
       functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads,templateParameter,templateParameters,templateKind,...(specializationArgument!==undefined?{specializationArgument}:{})});
     }
     if (!functions.some(f => f.qualifier === '__global__')) this.fail('No __global__ kernel was found.');
-    return {kind: 'module', functions:functions.concat(this.staticFunctions), constantGlobals,typeAliases:Object.fromEntries(this.typeAliases),structs:[...this.structs.values()],typeTraits:[...this.typeTraits.values()], source: this.source};
+    return {kind: 'module', functions:functions.concat(this.staticFunctions), constantGlobals,sharedGlobals,typeAliases:Object.fromEntries(this.typeAliases),structs:[...this.structs.values()],typeTraits:[...this.typeTraits.values()], source: this.source};
   }
   staticStruct(name,argument,parameter,token){
     let owner=this.staticTemplates.get(name);

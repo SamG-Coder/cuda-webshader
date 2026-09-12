@@ -1,0 +1,4 @@
+PASS SobelShared 32x17 pitch=36 scale=1, all pixels and guards.
+PASS SobelShared 64x65 pitch=68 scale=1, all pixels and guards.
+PASS SobelShared 1024x1024 pitch=1024 scale=1, all pixels and guards.
+PASS SobelShared 1024x1024 pitch=1024 scale=0.25, all pixels and guards.

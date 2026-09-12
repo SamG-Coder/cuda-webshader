@@ -166,7 +166,7 @@ export function executeCPU(artifact,buffers,scalars,workgroups,{instructionBudge
     if(p.pointer){if(p.type==='cw_uchar'&&!(buffers[p.name] instanceof Uint8Array))throw Error('Byte CPU buffers require Uint8Array.');if(!ArrayBuffer.isView(buffers[p.name]))throw new Error(`Missing CPU buffer ${p.name}.`);baseEnv.set(p.symbol,{value:new BufferView(buffers[p.name],p.type)});}
     else{if(['cw_short','cw_ushort'].includes(p.type)&&(!Number.isInteger(scalars[p.name])||scalars[p.name]<(p.type==='cw_short'?-32768:0)||scalars[p.name]>(p.type==='cw_short'?32767:65535)))throw Error('Short launch value out of range.');if(p.type==='bool'&&![true,false,0,1].includes(scalars[p.name]))throw new Error(`Invalid Boolean scalar ${p.name}.`);if(p.type==='cw_uchar4'&&(!Number.isInteger(scalars[p.name])||scalars[p.name]<0||scalars[p.name]>0xffffffff))throw new Error(`Invalid packed scalar ${p.name}.`);if(!Number.isFinite(scalars[p.name])&&!(p.type==='bool'&&typeof scalars[p.name]==='boolean'))throw new Error(`Missing/invalid scalar ${p.name}.`);baseEnv.set(p.symbol,{value:convert(scalars[p.name],p.type)});}
   }
-  const shared=[];for(const fn of artifact.ast.functions)walk(fn.body,n=>{if(n.kind==='decl'&&n.shared&&n.symbol&&!shared.some(d=>d.symbol===n.symbol))shared.push(n);});
+  const shared=(artifact.ast.sharedGlobals||[]).filter(n=>n.symbol);for(const fn of artifact.ast.functions)walk(fn.body,n=>{if(n.kind==='decl'&&n.shared&&n.symbol&&!shared.some(d=>d.symbol===n.symbol))shared.push(n);});
   let groups=0,barriers=0;
   for(let z=0;z<grid[2];z++)for(let y=0;y<grid[1];y++)for(let x=0;x<grid[0];x++){
     const groupEnv=new Map(baseEnv);shared.forEach(n=>groupEnv.set(n.symbol,{value:zero(n.resolvedType)}));

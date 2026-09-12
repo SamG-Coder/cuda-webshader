@@ -128,3 +128,6 @@ and validation harnesses are original MIT project code.
 NVIDIA notice and unchanged `ComputeSobel`, `SobelTex` and `SobelCopyImage`
 functions. `showcases/sobel/teapot.pgm` is the original SobelFilter input under
 that BSD-3-Clause license. Image captures derive from those sources and data.
+
+`tests/sobel-shared-kernel.cuh` and `showcases/sobel/kernel.cu` additionally retain
+the original NVIDIA `SobelShared` function and its BSD-3-Clause notice.

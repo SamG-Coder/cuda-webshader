@@ -70,7 +70,7 @@ class Emitter {
     this.structs=new Map((ast.structs||[]).map(s=>[s.type,s]));for(const s of this.structs.values())for(const field of s.fields){let type=field.type;for(const dim of [...field.dimensions].reverse()){const length=constantValue(dim);if(!Number.isSafeInteger(length)||length<1||length>256)this.fail('Struct field array dimensions must be 1..256.',field);type=arrayOf(type,length);}field.resolvedType=type;}
     inferTextureTypes(ast.functions,kernel,walk,(message,node)=>this.fail(message,node));
     this.overloads=new Map();for(const f of ast.functions)if(f.overloadName){const list=this.overloads.get(f.overloadName)||[];list.push(f);this.overloads.set(f.overloadName,list);}
-    this.functions = new Map(); this.shared = []; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
+    this.functions = new Map(); this.shared = [];this.pointerConstraints=[]; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
     for (const f of ast.functions) {
       if (this.functions.has(f.name)) this.fail(`Duplicate function '${f.name}'.`, f);
       this.functions.set(f.name, f);
@@ -550,11 +550,20 @@ class Emitter {
       return [`var ${code}: array<i32, ${length}>;`];
     }
     if(n.pointer){
-      const baseNode=n.init?.kind==='id'?n.init:n.init?.kind==='binary'&&n.init.op==='+'?n.init.left:null,offsetNode=n.init?.kind==='binary'?n.init.right:null;
+      const baseNode=n.init?.kind==='id'?n.init:n.init?.kind==='binary'&&n.init.op==='+'?n.init.left:null;let offsetNode=n.init?.kind==='binary'?n.init.right:null;
       if(n.shared||n.dimensions.length||baseNode?.kind!=='id')this.fail('Local pointers require a buffer alias with an optional integer offset.',n);
       const base=this.lookup(baseNode.name,baseNode);if(!['buffer','buffer-alias'].includes(base.kind)||base.type.element!==n.type)this.fail('Local pointers can alias only same-type storage buffers.',n);
       if(base.constant&&!n.constant)this.fail('Cannot discard const through a buffer alias.',n);
-      if(n.byteOffsetCast&&n.type!=='cw_uchar')this.fail('Byte-address casts currently require same-type byte storage; wider types need checked alignment.',n);
+      if(n.byteOffsetCast&&n.type!=='cw_uchar'){
+        const stride=cudaValueSize(n.type);if(!stride)this.fail('Byte-address casts need a known pointee alignment.',n);
+        const multiple=node=>{if(node.kind==='literal')return Number(node.value.replace(/[uU]$/,''))%stride===0;if(node.kind==='binary'&&node.op==='*')return multiple(node.left)||multiple(node.right);return false;};
+        if(!multiple(offsetNode)){
+          const factor=offsetNode?.kind==='binary'&&offsetNode.op==='*'?[offsetNode.left,offsetNode.right].find(a=>a.kind==='id'&&this.lookup(a.name,a).kind==='uniform'&&['i32','u32','cw_short','cw_ushort'].includes(this.lookup(a.name,a).type)):null;
+          if(!factor)this.fail('Byte-address casts to wider types need provable alignment or an integer launch pitch factor.',n);
+          this.pointerConstraints.push({name:factor.name,minimum:0,multipleOf:stride});
+        }
+        offsetNode={kind:'binary',op:'/',left:offsetNode,right:{kind:'literal',value:String(stride),token:n.token},token:n.token};
+      }
       const offset=offsetNode?this.expr(offsetNode):{type:'i32',code:'0i',pre:[]};if(!['i32','u32'].includes(offset.type))this.fail('Buffer alias offsets must be 32-bit integers.',n);
       const offsetCode=`cw_offset_${this.temp++}`,symbol={...base,name:n.name,constant:n.constant||base.constant,kind:'buffer-alias',offsetCode};this.add(n.name,symbol,n);n.symbol=symbol;n.aliasBase=base;n.aliasOffset=offsetNode;
       return [...offset.pre,`var ${offsetCode} = ${base.offsetCode?base.offsetCode+' + ':''}${this.convert(offset.code,offset.type,'i32',n)};`];
@@ -562,7 +571,7 @@ class Emitter {
     if(this.structs.has(n.type)&&(n.shared||n.dimensions.length))this.fail('Structs currently support local values only, not shared memory or arrays of structs.',n);
     if (n.type === 'void') this.fail('Variables cannot have void type.', n);
     let type = n.type;const sharedOwner=(this.currentFunction.pointerOrigin||this.currentFunction.name)+':'+n.token.offset+':'+n.name;
-    const dims = n.dimensions.map(d => {if(d===null){if(!n.external||!n.shared)this.fail('Unsized arrays require extern __shared__.',n);if(this.dynamicSharedUsed&&this.dynamicSharedOwner!==sharedOwner)this.fail('Only one dynamic shared array is supported; CUDA declarations alias the same allocation.',n);const stride=typeStride(n.type);if(n.type==='bool'||narrow(n.type)||vectorLength(n.type)===3)this.fail('Dynamic shared arrays require 32-bit scalars or two/four-component vectors.',n);if(!this.dynamicSharedBytes||this.dynamicSharedBytes%stride)this.fail('Set sharedMemoryBytes to a positive multiple of the dynamic shared element size.',n);this.dynamicSharedUsed=true;this.dynamicSharedOwner=sharedOwner;return this.dynamicSharedBytes/stride;}const value = constantValue(d); if (!Number.isSafeInteger(value) || value < 1 || value > 65536) this.fail('Invalid fixed array dimension (1..65536).', n); return value; });
+    const dims = n.dimensions.map(d => {if(d===null){if(!n.external||!n.shared)this.fail('Unsized arrays require extern __shared__.',n);if(this.dynamicSharedUsed&&this.dynamicSharedOwner!==sharedOwner)this.fail('Only one dynamic shared array is supported; CUDA declarations alias the same allocation.',n);const stride=n.type==='cw_uchar'?1:typeStride(n.type);if(n.type==='bool'||['cw_short','cw_ushort'].includes(n.type)||vectorLength(n.type)===3)this.fail('Dynamic shared arrays require 32-bit scalars or two/four-component vectors.',n);if(!this.dynamicSharedBytes||this.dynamicSharedBytes%stride)this.fail('Set sharedMemoryBytes to a positive multiple of the dynamic shared element size.',n);this.dynamicSharedUsed=true;this.dynamicSharedOwner=sharedOwner;return this.dynamicSharedBytes/stride;}const value = constantValue(d); if (!Number.isSafeInteger(value) || value < 1 || value > 65536) this.fail('Invalid fixed array dimension (1..65536).', n); return value; });
     for (let i = dims.length - 1; i >= 0; i--) type = arrayOf(type, dims[i]);
     if (n.shared && n.init) this.fail('__shared__ variables cannot have an initializer.', n);
     if (isArray(type) && n.init) this.fail('Array initializers are unsupported. Initialize elements explicitly.', n);
@@ -665,12 +674,14 @@ class Emitter {
         this.add(p.name, symbol, p, true); p.symbol = symbol;
       }
     }
+    const moduleShared=new Map(),usedGlobalNames=new Set();for(const fn of [this.kernel,...this.helpers])walk(fn.body,n=>{if(n.kind==='id')usedGlobalNames.add(n.name);});
+    for(const declaration of this.ast.sharedGlobals||[])if(usedGlobalNames.has(declaration.name)){this.declare(declaration);moduleShared.set(declaration.name,declaration.symbol);}
     const helperLines = [];
     // Helpers cannot capture kernel arguments; explicit scalar arguments only.
     const kernelScope = this.scopes;
     let emittedHelpers=0;
     const emitHelpers=()=>{while(emittedHelpers<this.helpers.length){const helper=this.helpers[emittedHelpers++];
-      this.scopes = [new Map()]; this.currentFunction = helper;
+      this.scopes = [new Map(moduleShared)]; this.currentFunction = helper;
       for (const p of helper.params) {
         if (p.shared || p.external || p.type === 'void'||p.type==='surface2d'||p.type==='cw_extent') this.fail('Invalid helper parameter.', p);
         if(p.type==='texture3d'){if(p.pointer||p.reference)this.fail('Texture helper parameters must be passed by value.',p);const {dimension,format}=textureShape(p.textureSampling);p.symbol=this.add(p.name,{name:p.name,type:p.type,code:'cw_texture_'+p.name,sampler:'cw_sampler_'+p.name,coordinateScale:'cw_scale_'+p.name,pixelPoint:'cw_point_'+p.name,...(p.textureSampling.startsWith('fetch_')?{linearFetch:p.textureSampling.slice(6),lengthCode:'cw_length_'+p.name}:{}),dimension,format,kind:'texture',constant:true},p);continue;}
@@ -881,7 +892,7 @@ export function compile(source, options = {},bufferUsage=null) {
   const overloadGroups=new Map();for(const f of ast.functions)if(f.specializationArgument===undefined){const group=overloadGroups.get(f.name)||[];group.push(f);overloadGroups.set(f.name,group);}let overloadIndex=0;const occupied=new Set(ast.functions.map(f=>f.name));for(const [name,group]of overloadGroups)if(group.length>1){if(group.some(f=>f.qualifier!=='__device__'||f.templateParameter))throw new CompileError('Overloads support non-template device helpers only.',group[0].token,source);const signatures=new Set();for(const f of group){const signature=JSON.stringify(f.params.map(p=>[p.type,p.pointer,p.reference,(p.pointer||p.reference)&&p.constant]));if(signatures.has(signature))throw new CompileError('Duplicate function signature '+name,f.token,source);signatures.add(signature);let unique='cw_overload_'+overloadIndex+++'_'+name;while(occupied.has(unique))unique+='_';occupied.add(unique);f.overloadName=name;f.name=unique;}}
   const templates=instantiateHelperTemplates(ast,kernel);
   const emitter=new Emitter(ast,kernel,options,templates,bufferUsage),result=emitter.emit();
-  if(scalarConstraints.length)result.metadata.scalarConstraints=scalarConstraints;
+  if(scalarConstraints.length||emitter.pointerConstraints.length)result.metadata.scalarConstraints=[...scalarConstraints,...emitter.pointerConstraints];
   const changed=['reads','writes','atomic'].some(k=>[...emitter.usage[k]].some(name=>!emitter.initialBufferUsage[k].has(name)));
   if(changed){if(bufferUsage)throw new CompileError('Helper buffer access analysis did not converge.');return compile(source,options,Object.fromEntries(['reads','writes','atomic'].map(k=>[k,[...emitter.usage[k]]])));}if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};return result;
 }

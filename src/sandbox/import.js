@@ -24,6 +24,8 @@ export function kernelSource(source){
  while((match=plainStructs.exec(masked))){const names=/^(?:typedef\s+)?struct\s*(\w+)?\s*\{[\s\S]*\}\s*(\w+)?\s*;$/.exec(match[0]);declarations.push({names:[names?.[1],names?.[2]].filter(Boolean),range:[match.index,match.index+match[0].length]});}
  const valueAliases=/\btypedef\s+(?:unsigned\s+)?\w+\s+\w+\s*;/g;
  while((match=valueAliases.exec(masked))){const name=/([A-Za-z_]\w*)\s*;$/.exec(match[0])[1];declarations.push({names:[name],range:[match.index,match.index+match[0].length]});}
+ const sharedDeclarations=/\b(?:extern\s+)?__shared__\s+[^;{}]+;/g;
+ while((match=sharedDeclarations.exec(masked)))spans.push([match.index,match.index+match[0].length]);
  const constants=/\b__constant__\b[^;]*;/g;
  while((match=constants.exec(masked)))spans.push([match.index,match.index+match[0].length]);
  // Keep declaration dependencies of the extracted device code, not unrelated

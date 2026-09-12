@@ -4,7 +4,7 @@ Candidate source: CUDA Samples commit `5443602d89ed99aede2e4b7bf329daddeadb320e`
 `cpp/5_Domain_Specific/SobelFilter/SobelFilter_kernels.cu`.
 
 The texture-based image path now runs as a standalone sandbox showcase.
-The shared-memory variant remains in scope and unfinished.
+The shared-memory variant now runs too, with four additional exact native image comparisons.
 The original `ComputeSobel` device helper is preserved byte-for-byte in
 `tests/sobel-compute.cuh`, including its NVIDIA BSD-3-Clause notice.
 
@@ -25,7 +25,7 @@ The original `ComputeSobel` device helper is preserved byte-for-byte in
 - The unchanged NVIDIA `ComputeSobel` helper matches native CUDA exactly for
   4,099 neighbourhoods at each scale -1, 0, 0.25, 1 and 4, including 21 guard bytes.
   Native and CPU-oracle tests also check independent stencil equations.
-- 495 unit tests and 147 hardware GPU checks pass. The adapter reports NVIDIA
+- 498 unit tests and 148 hardware GPU checks pass. The adapter reports NVIDIA
   Blackwell; software adapters were not requested. Compilation of the existing
   catalogue passes.
 
@@ -40,13 +40,17 @@ editable scale, generated shader comparison and grayscale byte output.
 Every displayed pixel was checked against the GPU result.
 See `showcases/sobel/README.md` for launch settings and captured evidence.
 
-## Remaining work
+## Shared path completed
 
-1. Module-scope dynamic shared byte storage for `SobelShared`.
-2. Checked aligned casts from byte offsets back to `uchar4*`.
-3. Full native/WebGPU comparison of that shared-memory image path.
+The original `SobelShared` now runs with its module-scope dynamic byte tile,
+cooperative group barriers and aligned pitched `uchar4*` output. Four native
+captures match all pixels and guards exactly. The sandbox verifies both teapot
+scales and all displayed pixels. Logical shared bytes (2,304) and physical
+WebGPU workgroup bytes (9,216) are separately accounted for. Invalid pitch
+alignment is rejected before dispatch. The complete launch profile and the
+untested FIXED_BLOCKWIDTH specialization are documented in the showcase README.
 
-Short storage pointers and dynamic shared short arrays remain explicit rejections;
-there is no packed 16-bit storage ABI. The tested float-to-short casts stay in
-range. General C++/CUDA host execution is outside the compiler's scope.
-No performance comparison is claimed by these correctness checks.
+Short storage pointers and dynamic shared short arrays remain explicit
+rejections; there is no packed 16-bit storage ABI. General C++/CUDA host
+execution is outside the compiler's scope. These are correctness checks, not
+performance measurements.
