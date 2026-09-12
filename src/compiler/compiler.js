@@ -167,6 +167,7 @@ class Emitter {
     this.fail(`Incompatible operand types: ${typeName(a)} and ${typeName(b)}. Use explicit scalar/vector components.`, n);
   }
   convert(code, from, to, n) {
+    if(String(to).startsWith('cw_objectptr_')&&['0i','0u','0'].includes(code)&&['i32','u32'].includes(from))return '0u';
     if(to==='bool'&&isArray(from)&&from.length===null&&n){return 'true';} // All runtime storage bindings are required and non-null.
     if(from==='cw_size64'||to==='cw_size64')this.extentUsed=true;
     if(to==='cw_size64'&&['i32','u32','bool'].includes(from))return from==='i32'?`vec2<u32>(u32(${code}), select(0u, 4294967295u, ${code} < 0i))`:from==='bool'?`vec2<u32>(select(0u,1u,${code}),0u)`:`vec2<u32>(${code},0u)`;
@@ -219,6 +220,7 @@ class Emitter {
         return this.result(n, type, `${isFloat && Number.isInteger(value) && !/[eE]/.test(String(value)) ? value + '.0' : value}${type === 'f32' ? 'f' : type === 'u32' ? 'u' : 'i'}`);
       }
       case 'id': {
+        if(n.name==='NULL'||n.name==='nullptr'){n.kind='literal';n.value='0';delete n.name;return this.expr(n,raw);}
         if (['true', 'false'].includes(n.name)) return this.result(n, 'bool', n.name);
         const s = this.lookup(n.name, n); n.symbol = s;
         if(s.kind==='thread-block')this.fail('A thread_block handle can only be used for block synchronization.',n);
@@ -339,6 +341,10 @@ class Emitter {
       }
       case 'binary': {
         let a = this.expr(n.left), b = this.expr(n.right);if(narrow(a.type))a={...a,type:'i32',code:`i32(${a.code})`};if(narrow(b.type))b={...b,type:'i32',code:`i32(${b.code})`};
+        if([a.type,b.type].some(t=>String(t).startsWith('cw_objectptr_'))){
+          if(!['==','!='].includes(n.op))this.fail('Object references support only identity equality; allocation and dereference are not yet supported.',n);
+          const type=String(a.type).startsWith('cw_objectptr_')?a.type:b.type,ac=this.convert(a.code,a.type,type,n),bc=this.convert(b.code,b.type,type,n);n.operandType=type;return this.result(n,'bool',`(${ac} ${n.op} ${bc})`,[...a.pre,...b.pre]);
+        }
         if(this.structs.has(a.type)||this.structs.has(b.type)){
           const name='cw_binary_'+{'+':'add','-':'subtract','*':'multiply','/':'divide'}[n.op];
           if(!this.functions.has(name)&&!this.overloads.has(name))this.fail('No supported free class operator is declared for '+n.op,n);
@@ -408,7 +414,7 @@ class Emitter {
     if(n.kind==='unary'&&n.op==='&'&&n.value.kind==='id'){const value=this.expr(n.value),symbol=value.rootSymbol;if(!symbol||!['local','reference'].includes(symbol.kind)||symbol.constant||!numeric(value.type))this.fail('Local pointer arguments require a mutable named numeric scalar.',n);return this.result(n,arrayOf(value.type),value.code,value.pre,{rootSymbol:symbol,localPointer:true,pointerCode:symbol.kind==='reference'?symbol.pointerCode:'&'+value.code});}
     const address=n.kind==='unary'&&n.op==='&'&&n.value.kind==='index'?n.value:null;
     const parts=pointerParts(n),base=parts?.base;
-    if(base?.kind==='id'&&!['true','false'].includes(base.name)){
+    if(base?.kind==='id'&&!['true','false','NULL','nullptr'].includes(base.name)){
       const symbol=this.lookup(base.name,base);
       if(symbol.kind==='thread-block'&&n.kind==='id'){n.symbol=symbol;return {type:'thread-block',code:'',pre:[],rootSymbol:symbol};}
       if(symbol.kind==='shared'&&isArray(symbol.type)&&!isArray(symbol.type.element)){
@@ -637,7 +643,7 @@ class Emitter {
       return this.result(n, type, `${name}(${args.map(a => this.convert(a.code, a.type, type, n)).join(', ')})`, pre);
     }
     let helper = this.functions.get(name);
-    if(this.overloads.has(name)){const matches=this.overloads.get(name).filter(f=>args.length<=f.params.length&&f.params.every((p,i)=>i>=args.length?p.defaultValue!==undefined:typeName(p.pointer?(isArray(args[i].type)?args[i].type.element:null):args[i].type)===typeName(p.type)));if(matches.length!==1)this.fail('Overload '+name+' requires one exact parameter-type match; implicit conversions and ambiguous calls are unsupported.',n);helper=matches[0];}
+    if(this.overloads.has(name)){const matches=this.overloads.get(name).filter(f=>args.length<=f.params.length&&f.params.every((p,i)=>i>=args.length?p.defaultValue!==undefined:(typeName(p.pointer?(isArray(args[i].type)?args[i].type.element:null):args[i].type)===typeName(p.type)||String(p.type).startsWith('cw_objectptr_')&&['0i','0u'].includes(args[i].code))));if(matches.length!==1)this.fail('Overload '+name+' requires one exact parameter-type match; implicit conversions and ambiguous calls are unsupported.',n);helper=matches[0];}
     if(!helper&&this.templates){
       helper=this.templates.deduce(name,args.map(a=>a.type),n.callee);
       if(helper)for(const fn of this.ast.functions)if(fn.qualifier==='__device__'&&!this.functions.has(fn.name)){this.functions.set(fn.name,fn);if(!fn.params.some(p=>p.pointer))this.helpers.push(fn);}
@@ -657,7 +663,7 @@ class Emitter {
       const node=n.args[i],s=a.rootSymbol;
       if(p.boundReferenceShared){if(s?.atomic||a.type!==p.type||!p.constant&&s?.constant)this.fail('Shared reference requires a matching non-atomic array element.',node);const index=a.sharedReferenceIndexCode??s?.sharedReferenceIndexCode;if(index===undefined)this.fail('Shared reference index is unavailable.',node);return `i32(${index})`;}
       if(s?.kind==='shared'&&s.atomic)this.fail('Atomic shared values cannot bind ordinary references.',node);
-      if(p.constant){if(node.kind==='member'&&['cw_uchar2','cw_uchar4'].includes(node.base.type)&&p.type==='cw_uchar'){const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: cw_uchar = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||['cw_uchar2','cw_uchar4'].includes(p.type)||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s)&&!references.get(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.set(s,true);if(s?.kind==='reference')return s.pointerCode;if(s?.kind==='shared'){if(!['id','index'].includes(node.kind))this.fail('Shared references require whole scalars/vectors or array elements.',node);return '&'+a.code;}if(s?.kind==='local'&&!s.constant&&['id','member'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
+      if(p.constant){if(node.kind==='member'&&['cw_uchar2','cw_uchar4'].includes(node.base.type)&&p.type==='cw_uchar'){const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: cw_uchar = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||['cw_uchar2','cw_uchar4'].includes(p.type)||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s)&&!references.get(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.set(s,true);if(s?.kind==='reference')return node.kind==='id'?s.pointerCode:'&'+a.code;if(s?.kind==='shared'){if(!['id','index'].includes(node.kind))this.fail('Shared references require whole scalars/vectors or array elements.',node);return '&'+a.code;}if(s?.kind==='local'&&!s.constant&&['id','member'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
       if(!['id','index'].includes(node.kind)||!s||!['local','reference','shared'].includes(s.kind)||s.constant||isArray(a.type)||!(numeric(a.type)||vectorLength(a.type)||this.structs.has(a.type))||a.type!==p.type)this.fail('Reference arguments require a mutable scalar/vector or array element in local or shared memory, of the exact type.',node);
       if(references.has(s))this.fail('Aliased reference arguments are unsupported.',node);references.set(s,false);return s.kind==='reference'?s.pointerCode:`&${a.code}`;
     });
@@ -848,6 +854,7 @@ class Emitter {
     if (this.kernel.result !== 'void') this.fail('__global__ kernels must return void.', this.kernel);
     const textures=[],surfaces=[],bufferCount=this.kernel.params.filter(p=>p.pointer&&!Object.hasOwn(this.bufferAliases,p.name)).length+this.deviceParams.length;
     const bindings = [], scalars = [], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
+    for(const type of this.ast.objectPointerTypes||[])header.push(`alias ${type} = u32;`);
     for(const s of this.structs.values())header.push(`struct ${s.type} {`,...s.fields.map(f=>`  cw_field_${f.name}: ${typeName(f.resolvedType)},`),'}');
     const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t==='f32'?'u32':t}>`;
     for (const p of [...this.kernel.params,...this.deviceParams]) {

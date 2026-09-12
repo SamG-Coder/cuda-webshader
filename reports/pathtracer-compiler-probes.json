@@ -19,7 +19,10 @@
   },
   {
     "file": "hitable.h",
-    "compiled": false,
-    "error": "Expected '{', found ';'. (2:15)\nclass material;\r\n              ^"
+    "compiled": true
+  },
+  {
+    "file": "sphere.h",
+    "compiled": true
   }
 ]

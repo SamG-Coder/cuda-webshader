@@ -3,16 +3,17 @@
 export function parseValueClass(p) {
   const token=p.take('class'),name=p.name();
   if(p.structs.size>=64)p.fail('At most 64 value record types are supported.',token);
-  if(p.structs.has(name)||p.typeAliases.has(name)||p.typeTraits.has(name))p.fail('Duplicate value class name.',token);
+  if(p.structs.has(name)&&!p.structs.get(name).forward||p.typeAliases.has(name)||p.typeTraits.has(name))p.fail('Duplicate value class name.',token);
+  let base=null;if(p.match(':')){p.take('public');base=p.name();if(!p.structs.get(base)?.interfaceOnly)p.fail('Inheritance currently requires a fieldless abstract interface.',token);}
   p.take('{');
-  const record={name,type:'cw_struct_'+name,fields:[],methods:[],constructors:[],token,valueClass:true};
+  const record={name,type:'cw_struct_'+name,fields:[],methods:[],constructors:[],token,valueClass:true,base};
   p.structs.set(name,record);
   const functions=[];let access='private';
   while(!p.is('}')) {
     if(['public','private','protected'].includes(p.peek().value)){access=p.take().value;p.take(':');continue;}
     if(access!=='public')p.fail('Value classes currently require public fields and methods.');
-    const start=p.peek();let device=false;
-    while(['__host__','__device__','inline','__forceinline__'].includes(p.peek().value)){if(p.take().value==='__device__')device=true;}
+    const start=p.peek();let device=false,virtual=false;
+    while(['__host__','__device__','inline','__forceinline__','virtual'].includes(p.peek().value)){const qualifier=p.take().value;if(qualifier==='__device__')device=true;if(qualifier==='virtual')virtual=true;}
     const constructor=p.is(name)&&p.peek(1).value==='(';
     const spec=constructor?{type:record.type}:p.type();
     let member=p.name(),operator=null;
@@ -30,12 +31,13 @@ export function parseValueClass(p) {
       if(selfReference&&!['+','-'].includes(operator))p.fail('Const self-reference returns currently require a unary class operator.',start);
       if(!device||spec.pointer||spec.reference&&!selfReference&&!indexedReference&&!mutableSelf||spec.shared||spec.external)p.fail('Value-class methods require value returns or supported receiver/array references.',start);
       p.take('(');const params=[];
-      if(!p.is(')'))do{const t=p.peek(),type=p.type(),param=p.name();if(type.pointer||(type.reference&&!type.constant)||type.shared||type.external)p.fail('Value-class method parameters require values or const references.',t);params.push({kind:'param',token:t,name:param,...type});}while(p.match(','));
+      if(!p.is(')'))do{const t=p.peek(),type=p.type(),param=p.name();if(type.pointer||type.shared||type.external)p.fail('Value-class method parameters require values or const references.',t);params.push({kind:'param',token:t,name:param,...type});}while(p.match(','));
       p.take(')');const constant=!!p.match('const');
       if(constructor&&constant)p.fail('Constructors cannot be const.',start);
       if(functions.length>=128)p.fail('At most 128 methods per value class are supported.',start);
       if(!constructor&&!constant&&!indexedReference&&!mutableSelf&&spec.type!=='void')p.fail('Mutable methods currently require void or self-reference returns.',start);
       if(operator&&params.length!==(['[]','+=','-=','*=','/='].includes(operator)?1:0))p.fail('Class operators require zero unary arguments or one index/compound argument.',start);
+      if(p.match('=')){if(!virtual||constructor||p.take().value!=='0')p.fail('Only pure virtual = 0 declarations are supported.',start);p.take(';');(record.abstractMethods??=[]).push({name:member,result:spec.type,params,constant});continue;}
       const initializers=[];
       if(p.match(':')){if(!constructor)p.fail('Member initializer lists require a constructor.',start);do{const token=p.peek(),field=p.name();p.take('(');const args=[];if(!p.is(')'))do{args.push(p.expression(2));}while(p.match(','));p.take(')');if(initializers.some(i=>i.field===field))p.fail('Duplicate member initializer.',token);initializers.push({field,args,token});}while(p.match(','));}
       const declaration=!!p.match(';'),body=declaration?null:p.block(),helper=constructor?'cw_ctor_'+name:'cw_method_'+name+'_'+(operator?{'+':'positive','-':'negative','[]':'index','+=':'add_assign','-=':'subtract_assign','*=':'multiply_assign','/=':'divide_assign'}[operator]:member);
@@ -57,12 +59,14 @@ export function parseValueClass(p) {
     }
   }
   p.take('}');p.take(';');
-  if(!record.fields.length)p.fail('Value classes require at least one field.',token);
+  if(!record.fields.length){if(!record.abstractMethods?.length||functions.length)p.fail('Empty classes require a pure virtual interface.',token);record.interfaceOnly=true;record.complete=true;return [];}
+  if(record.abstractMethods?.length)p.fail('Abstract classes with fields are unsupported.',token);
   for(const method of record.methods.filter(m=>m.indexedReference)){const field=record.fields.find(f=>f.name===method.field);if(!field||field.dimensions.length!==1||field.type!==method.result)p.fail('Reference indexing must return an element of a matching array field.',method.token);}
   if(!functions.some(f=>f.classConstructor)&&record.fields.some(f=>f.type.startsWith('cw_struct_'))){
     const helper='cw_ctor_'+name;record.constructors.push(helper);
     functions.push({kind:'function',token,name:helper,qualifier:'__device__',result:record.type,params:[],body:{kind:'block',token,body:[]},classOwner:name,classConstructor:true,classMethod:null,classConstant:false});
   }
+  if(base)for(const method of p.structs.get(base).abstractMethods){const signature=params=>JSON.stringify(params.map(p=>[p.type,p.reference,p.pointer,p.constant]));if(!functions.some(f=>f.classMethod===method.name&&f.result===method.result&&f.classConstant===method.constant&&signature(f.params)===signature(method.params)))p.fail('Derived class must implement each abstract method with a matching signature.',token);}
   record.complete=true;
   (p.valueClassFunctions??=[]).push(...functions);
   return functions;

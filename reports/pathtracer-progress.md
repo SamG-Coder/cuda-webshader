@@ -30,13 +30,13 @@ The manifest records source and image hashes. This is a native baseline,
 `main.cu` directly stops at its external includes. The compiler now parses plain
 public value classes, constructors, array fields and const methods, lowering
 them to records and device helpers. The isolated `vec3.h` probe now reaches
-the host-only stream operators before stopping; the scene header
-still stops at its forward class declaration. Const unary signs, indexed reads and writes now compile. No original function bodies are rewritten by those probes.
+the host-only stream operators before stopping; the dependent ray, hit-record and sphere headers now compile with their
+required headers supplied by the probe. Const unary signs, indexed reads and writes now compile. No original function bodies are rewritten by those probes.
 
-The class-stage test compares 512 cases with **45,568 values matching native
+The class-stage test compares 512 cases with **50,176 values matching native
 CUDA exactly**, covering construction, copying, accessors, squared length,
 unary signs, dynamic indexed reads/writes, compound indexed updates, all six compound vector/scalar operators, normalization, free binary operators, dot/cross products and assignment copy isolation. Native
-compilation uses the complete original `vec3.h`, `ray.h` and `material.h`; the GPU fixture retains
+compilation uses the complete original `vec3.h`, `ray.h`, `material.h` and `sphere.h`; the GPU fixture retains
 all unchanged CUDA vec3 and ray definitions, omitting only includes, header guards and
 host stream functions.
 This is a focused language test, not support for the complete header or path
@@ -47,7 +47,7 @@ incorrect shared value after copying a class containing an array. The emitter
 now constructs independent aggregate fields explicitly for initialization and
 assignment. Both copy cases match native CUDA; the precise backend cause has
 not been isolated. The full regression run passes 197 GPU checks with no
-software adapter requested, alongside 616 unit tests.
+software adapter requested, alongside 618 unit tests.
 
 Writable indexing currently accepts the original `return field[index]` reference
 accessor and lowers it to an lvalue into the original receiver. It does not
@@ -106,3 +106,22 @@ node scripts/probe-pathtracer.mjs
 `capture-pathtracer.py` checks the pinned revision and unmodified tracked
 source, validates dimensions and every output colour, and writes a PNG plus
 the provenance manifest. Native PPM and executable remain under `.local`.
+
+## Sphere intersection stage
+
+The original sphere class, hit record and fieldless abstract hitable interface
+now compile unchanged after includes/guards are removed for the probe. A
+concrete sphere call executes the original intersection method. Five cases
+cover near root, far root, inside origin, miss and tangent; hit distances,
+positions, normals and untouched miss records match native CUDA exactly.
+
+This stage supports forward class declarations, nested values in plain structs,
+matching implementations of a fieldless abstract interface and mutable record
+output references. A bug passing a member of a referenced record to another
+helper was fixed: the emitted pointer now addresses the member, not its parent.
+
+Class pointer values currently retain a typed null token for copying and
+equality. The native test also uses a null material pointer. Nonzero addresses,
+pointer arithmetic, allocation and dereference are unsupported. There is no
+virtual call through a base pointer yet. The test must not be described as
+support for the complete scene, dynamic materials or a rendered showcase.

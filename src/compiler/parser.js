@@ -129,11 +129,12 @@ export class Parser {
     if(!type&&this.deferredType(tok.value))type='unsupported:'+tok.value;
     if (!type) this.fail(`Unsupported type '${tok.value}'. Use float, int, unsigned int, bool or float2/3/4.`, tok);
     if (this.match('const')) constant = true;
-    const pointer = this.match('*');
+    let pointer = this.match('*');
     const reference=this.match('&');
     if(pointer&&reference)this.fail('Pointer references are unsupported.');
     while (['__restrict__', '__restrict', 'restrict'].includes(this.peek().value)) this.take();
     if (this.is('*')) this.fail('Pointer-to-pointer types are not supported.');
+    if(pointer&&(this.structs.get(tok.value)?.valueClass||this.structs.get(tok.value)?.forward)){type='cw_objectptr_'+tok.value;pointer=false;(this.objectPointerTypes??=new Set()).add(type);}
     return {type, constant, shared, pointer,reference,external};
   }
   zipFunctorAhead(){
@@ -175,12 +176,13 @@ export class Parser {
       const token = this.peek();
       if(this.match('static')&&!['__constant__','__global__','__device__'].includes(this.peek().value))this.fail('Static module declarations require CUDA constant storage or a device function.',token);
       let templateParameter=null,templateKind=null,templateParameters=[];this.templateTypeNames=new Set();this.templateParameterName=null;this.deferUnsupportedTypes=false;
+      if(this.is('class')&&this.peek(2).value===';'){this.take();const name=this.name();this.take(';');if(builtinType(name)||this.typeAliases.has(name)||this.typeTraits.has(name)||this.structs.size>=64)this.fail('Invalid or excessive forward class declaration.',token);if(!this.structs.has(name))this.structs.set(name,{name,type:'cw_struct_'+name,fields:[],methods:[],forward:true});continue;}
       if(this.is('class')){if(builtinType(this.peek(1).value))this.fail('Class name conflicts with a built-in type.');functions.push(...parseValueClass(this));continue;}
       if(this.zipFunctorAhead()){functions.push(this.zipFunctor());continue;}
       if(this.is('typedef')&&this.peek(1).value==='struct'||this.is('struct')&&this.peek(2).value==='{'){
         const alias=this.match('typedef');this.take('struct');let name=this.is('{')?null:this.name();this.take('{');const fields=[];
-        while(!this.is('}')){const fieldToken=this.peek(),spec=this.type(),fieldName=this.name(),dimensions=[];if(spec.pointer||spec.reference||spec.shared||spec.external||spec.constant||(['void','texture3d','surface2d','thread-block','cw_extent','cw_size64'].includes(spec.type)||spec.type.startsWith('cw_struct_')))this.fail('Struct fields require plain scalar/vector value types.',fieldToken);while(this.match('[')){dimensions.push(this.expression(2));this.take(']');}this.take(';');if(dimensions.length>1||fields.length>=64)this.fail('Structs support at most 64 fields and one-dimensional field arrays.',fieldToken);if(fields.some(f=>f.name===fieldName))this.fail('Duplicate struct field.',fieldToken);fields.push({name:fieldName,type:spec.type,dimensions,token:fieldToken});}
-        this.take('}');if(alias){const aliasName=this.name();if(name&&name!==aliasName)this.fail('Distinct struct tag/typedef aliases are unsupported.',token);name=aliasName;}this.take(';');if(!name||!fields.length||this.structs.has(name)||this.typeAliases.has(name)||TYPES.has(name)||this.typeTraits.has(name))this.fail('Structs require a distinct name and at least one field.',token);if(this.structs.size>=64)this.fail('At most 64 plain structs are supported.',token);this.structs.set(name,{name,type:'cw_struct_'+name,fields,token});continue;
+        while(!this.is('}')){const fieldToken=this.peek(),spec=this.type(),fieldName=this.name(),dimensions=[];if(spec.pointer||spec.reference||spec.shared||spec.external||spec.constant||(['void','texture3d','surface2d','thread-block','cw_extent','cw_size64'].includes(spec.type)))this.fail('Struct fields require plain scalar/vector value types.',fieldToken);while(this.match('[')){dimensions.push(this.expression(2));this.take(']');}this.take(';');if(dimensions.length>1||fields.length>=64)this.fail('Structs support at most 64 fields and one-dimensional field arrays.',fieldToken);if(fields.some(f=>f.name===fieldName))this.fail('Duplicate struct field.',fieldToken);fields.push({name:fieldName,type:spec.type,dimensions,token:fieldToken});}
+        this.take('}');if(alias){const aliasName=this.name();if(name&&name!==aliasName)this.fail('Distinct struct tag/typedef aliases are unsupported.',token);name=aliasName;}this.take(';');if(!name||!fields.length||this.structs.has(name)||this.typeAliases.has(name)||TYPES.has(name)||this.typeTraits.has(name))this.fail('Structs require a distinct name and at least one field.',token);if(this.structs.size>=64)this.fail('At most 64 plain structs are supported.',token);this.structs.set(name,{name,type:'cw_struct_'+name,fields,token,complete:true});continue;
       }
       if(this.is('typedef')&&this.peek(1).value!=='struct'){
         this.take('typedef');const spec=this.type(),name=this.name();this.take(';');
@@ -282,7 +284,7 @@ export class Parser {
     finishValueClasses(this);
     if (!functions.some(f => f.qualifier === '__global__')) this.fail('No __global__ kernel was found.');
     for(const g of deviceGlobals)if(constantGlobals.some(c=>c.name===g.name)||sharedGlobals.some(c=>c.name===g.name)||functions.some(f=>f.name===g.name))this.fail('Duplicate global storage name.',g.token);
-    return {kind: 'module', functions:functions.concat(this.staticFunctions), constantGlobals,sharedGlobals,deviceGlobals,typeAliases:Object.fromEntries(this.typeAliases),structs:[...this.structs.values()],typeTraits:[...this.typeTraits.values()], source: this.source};
+    return {kind: 'module', functions:functions.concat(this.staticFunctions), constantGlobals,sharedGlobals,deviceGlobals,typeAliases:Object.fromEntries(this.typeAliases),objectPointerTypes:[...(this.objectPointerTypes||[])],structs:[...this.structs.values()].filter(s=>!s.forward&&!s.interfaceOnly),typeTraits:[...this.typeTraits.values()], source: this.source};
   }
   staticStruct(name,argument,parameter,token){
     let owner=this.staticTemplates.get(name);

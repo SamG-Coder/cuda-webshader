@@ -76,3 +76,11 @@ test('Member initializer lists follow field order and initialize nested values w
  assert.throws(()=>compile(src.replace('first(5)','first(5),first(6)')),/Duplicate member/);
  assert.throws(()=>compile(src.replace('first(5)','missing(5)')),/Unknown member/);
 });
+
+test('Original sphere intersection preserves hit records across near, far, tangent and missed rays',()=>{
+ const full=readFileSync(new URL('./pathtracer-value-class.cuh',import.meta.url),'utf8');const c=compile(full+'__global__ void k(float*out){int i=threadIdx.x;vec3 center(0.0f,0.0f,-1.0f),origin(i==1?2.0f:(i==4?0.5f:0.0f),0.0f,i==2?-1.0f:0.0f),direction(0.0f,0.0f,-1.0f);sphere s(center,0.5f,NULL);ray r(origin,direction);hit_record rec;rec.t=-1.0f;rec.mat_ptr=nullptr;bool ok=s.hit(r,i==3?0.75f:0.0f,100.0f,rec);out[i*3]=float(ok);out[i*3+1]=rec.t;out[i*3+2]=float(rec.mat_ptr==NULL);}',{workgroupSize:[5,1,1]}),out=new Float32Array(15);executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[1,0.5,1,0,-1,1,1,0.5,1,1,1.5,1,0,-1,1]);
+});
+test('Object reference stage rejects fabricated addresses, arithmetic and unimplemented interfaces',()=>{
+ for(const stmt of ['M*p=1;','M*p=NULL;p=p+1;','M*p=NULL;float x=p->x;'])assert.throws(()=>compile('class M;__global__ void k(){'+stmt+'}'));
+ assert.throws(()=>compile('class Base{public:__device__ virtual bool hit() const=0;};class D:public Base{public:int x;};__global__ void k(){}'),/implement/);
+});
