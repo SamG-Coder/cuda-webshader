@@ -1,0 +1,2 @@
+PASS 64 float4 surface writes and texture reads; integer-zero sample matches first texel.
+CAPTURED original d_integrate_trapezoidal: 64 finite float4 records. WebGPU translation still blocked on double arithmetic.

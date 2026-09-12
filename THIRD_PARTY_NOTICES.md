@@ -66,6 +66,11 @@ the upstream file and entry name; `reports/nvidia-audit.json` records the exact
 upstream revision. The explorer, fixture harness and audit scripts are original
 project code under MIT.
 
+`tests/volume-transfer-kernel.cuh` retains NVIDIA's BSD-3-Clause notice and the
+unchanged `d_integrate_trapezoidal` kernel from `volumeFiltering/volumeRender_kernel.cu`
+at revision `5443602d89ed99aede2e4b7bf329daddeadb320e`. The float4 surface ABI probe
+and native harness are project code under MIT.
+
 - [MIT license text](https://opensource.org/license/mit)
 - [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 - [NVIDIA CUDA Toolkit EULA](https://docs.nvidia.com/cuda/eula/index.html)
