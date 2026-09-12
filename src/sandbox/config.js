@@ -6,7 +6,7 @@ export function suggestLaunch(source){
 }
 export function suggestConfig(artifact){
  const {bindings,scalars,workgroupSize:block}=artifact.metadata;
- const values=Object.fromEntries(scalars.map(s=>[s.name,s.origin==='constant'?s.defaultValue:({n:65536,n4:16384,width:256,height:256,M:64,N:64,K:64,a:0.5,dt:0.016,time:0,attraction:1})[s.name]??(s.type==='f32'?1:256)]));
+ const values=Object.fromEntries(scalars.map(s=>[s.name,s.sourceType==='bool'?0:s.sourceType==='cw_uchar4'?0:s.origin==='constant'?s.defaultValue:({n:65536,n4:16384,width:256,height:256,M:64,N:64,K:64,a:0.5,dt:0.016,time:0,attraction:1})[s.name]??(s.type==='f32'?1:256)]));
  const n=values.n??(values.n4?values.n4*4:(values.width??256)*(values.height??256));
  let groups=[Math.ceil(n/block[0]),1,1];
  if(block[1]>1){const tile=artifact.name==='transpose'?32:artifact.name.startsWith('matmul_')&&artifact.name!=='matmul_naive'?16:block[0];groups=[Math.ceil((values.width??values.N??256)/tile),Math.ceil((values.height??values.M??256)/(artifact.name==='transpose'?32:tile)),1];}

@@ -1,0 +1,1 @@
+PASS native uchar4/bool launch parameters: 80ff0100 78563412 ffffffff 00000000; guards unchanged

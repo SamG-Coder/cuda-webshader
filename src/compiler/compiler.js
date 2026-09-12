@@ -539,9 +539,9 @@ class Emitter {
         this.add(p.name, symbol, p, true); p.symbol = symbol;this.bufferSymbols.set(p.name,symbol);
         header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type}>` : p.type}>;`);
       } else {
-        if (!numeric(p.type)||p.type==='cw_uchar') this.fail('Scalar kernel parameters must be float, int or unsigned int. Put vectors in buffers.', p);
-        scalars.push({name: p.name, type: p.type, offset: scalars.length * 4});
-        const symbol = {name: p.name, type: p.type, code: `cw_params.p_${p.name}`, constant: false, atomic: false, kind: 'uniform'};
+        if ((!numeric(p.type)&&!['bool','cw_uchar4'].includes(p.type))||p.type==='cw_uchar') this.fail('Scalar kernel parameters must be float, int, unsigned int, bool or packed uchar4. Put other vectors in buffers.', p);
+        scalars.push({name: p.name, type: ['bool','cw_uchar4'].includes(p.type)?'u32':p.type, ...(['bool','cw_uchar4'].includes(p.type)?{sourceType:p.type}:{}), offset: scalars.length * 4});
+        const symbol = {name: p.name, type: p.type, code: p.type==='bool'?`(cw_params.p_${p.name} != 0u)`:`cw_params.p_${p.name}`, constant: false, atomic: false, kind: 'uniform'};
         this.add(p.name, symbol, p, true); p.symbol = symbol;
       }
     }

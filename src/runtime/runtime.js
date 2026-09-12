@@ -8,7 +8,8 @@ export function packScalars(metadata, values, target = new ArrayBuffer(metadata.
   for (const name of Object.keys(values)) if (!known.has(name)) throw new Error(`Unknown scalar parameter '${name}'.`);
   const writes = [];
   for (const p of metadata.scalars) {
-    const v = Object.hasOwn(values,p.name)?values[p.name]:p.origin==='constant'?p.defaultValue:undefined;
+    let v = Object.hasOwn(values,p.name)?values[p.name]:p.origin==='constant'?p.defaultValue:undefined;
+    if(p.sourceType==='bool'){if(![true,false,0,1].includes(v))throw new TypeError(`Scalar '${p.name}' must be a boolean or 0/1.`);v=Number(v);}
     if (typeof v !== 'number' || !Number.isFinite(v)) throw new TypeError(`Scalar '${p.name}' must be finite.`);
     if (p.type === 'u32') { if (!Number.isInteger(v) || v < 0 || v > 0xffffffff) throw new RangeError(`${p.name} is not a u32.`); }
     else if (p.type === 'i32') { if (!Number.isInteger(v) || v < -2147483648 || v > 2147483647) throw new RangeError(`${p.name} is not an i32.`); }
