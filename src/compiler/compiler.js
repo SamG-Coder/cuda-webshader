@@ -105,6 +105,11 @@ class Emitter {
     for(const heap of this.objectHeaps.values()){heap.aliveCode=heap.code+'_alive';if(this.persistentObjects){const layout=storageLayout(heap.type);heap.binding=this.objectHeaps.size?heap.tag-1:0;heap.byteLength=Math.ceil((heap.capacity*4)/layout.align)*layout.align+layout.size*heap.capacity;heap.recordLayout=JSON.stringify([...this.structs.values()].map(s=>({type:s.type,fields:s.fields.map(f=>({name:f.name,type:f.resolvedType}))})));heap.variable=heap.code+'_storage';heap.code=heap.variable+'.objects';heap.aliveCode=heap.variable+'.alive';}}
     this.deviceHeaps=deviceHeaps(this);
     this.launchQueues=launchQueues(this,walk,constantValue);
+    if(options.deviceLaunchConsumer!==undefined){
+      this.launchConsumer=this.launchQueues.find(q=>q.id===options.deviceLaunchConsumer&&q.child===kernel.name);
+      if(!this.launchConsumer||this.launchQueues.some(q=>q.caller===kernel.name))this.fail('Queue consumers require a matching leaf child kernel.',kernel);
+
+    }
     this.overloads=new Map();for(const f of ast.functions)if(f.overloadName){const list=this.overloads.get(f.overloadName)||[];list.push(f);this.overloads.set(f.overloadName,list);}
     this.functions = new Map(); this.shared = [];this.pointerConstraints=[]; this.templates=templates;this.helperCalls=new Map();this.globalSymbols=new Map();this.constantScalars=[];
     for (const f of ast.functions) {
@@ -936,7 +941,8 @@ class Emitter {
     this.checkRecursion();
     if (this.kernel.result !== 'void') this.fail('__global__ kernels must return void.', this.kernel);
     const textures=[],surfaces=[],bufferCount=this.kernel.params.filter(p=>p.pointer&&!Object.hasOwn(this.bufferAliases,p.name)&&!this.objectImports.some(i=>i.name===p.name)).length+this.deviceParams.length;
-    const bindings = [], scalars = [], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
+    if(this.launchConsumer&&this.workgroupSize.some((v,i)=>v!==this.launchConsumer.block[i]))this.fail('Queue consumer block size must match the original child launch.',this.kernel);
+    const bindings = [], scalars = this.launchConsumer?[{name:'cw_launch_slot',type:'u32',offset:0}]:[], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
     for(const type of this.ast.objectListTypes||[])header.push(`alias ${type} = u32;`);
     for(const imported of this.objectImports)header.push(`@group(1) @binding(${imported.binding}) var<storage, read_write> cw_import_${imported.id}: array<${imported.type}>;`);
     for(const type of this.ast.devicePointerTypes||[])header.push(`alias ${type} = u32;`);
@@ -981,6 +987,12 @@ class Emitter {
       } else {
         if ((!numeric(p.type)&&!['bool','cw_uchar4'].includes(p.type))||p.type==='cw_uchar') this.fail('Scalar kernel parameters must be float, int, unsigned int, bool or packed uchar4. Put other vectors in buffers.', p);
         let defaultMetadata={};if(p.defaultValue!==undefined){let value=p.defaultValue.kind==='id'?Number(p.defaultValue.name==='true'):constantValue(p.defaultValue);if(!Number.isFinite(value)||p.type==='i32'&&(Math.trunc(value)<-2147483648||Math.trunc(value)>2147483647)||p.type==='u32'&&(Math.trunc(value)<0||Math.trunc(value)>4294967295))this.fail('Kernel default is outside its supported scalar range.',p);value=p.type==='f32'?Math.fround(value):p.type==='bool'?Number(!!value):p.type==='u32'?value>>>0:value|0;if(!Number.isFinite(value))this.fail('Kernel default overflows its scalar type.',p);defaultMetadata={defaultValue:value};}
+        const queuedScalar=this.launchConsumer?.scalars.find(s=>s.name===p.name);
+        if(queuedScalar){
+          const word=`${this.launchConsumer.variable}.words[cw_params.p_cw_launch_slot*${this.launchConsumer.stride}u+${queuedScalar.word}u]`;
+          const symbol={name:p.name,type:p.type,code:p.type==='u32'?word:`bitcast<${p.type}>(${word})`,constant:false,atomic:false,kind:'uniform'};
+          this.add(p.name,symbol,p,true);p.symbol=symbol;continue;
+        }
         scalars.push({...defaultMetadata,name:p.name,type:p.type==='cw_short'?'i32':['bool','cw_uchar4','cw_ushort'].includes(p.type)?'u32':p.type,...(['bool','cw_uchar4','cw_short','cw_ushort'].includes(p.type)?{sourceType:p.type}:{}),offset:scalars.length*4});
         const symbol = {name: p.name, type: p.type, code: p.type==='bool'?`(cw_params.p_${p.name} != 0u)`:`cw_params.p_${p.name}`, constant: false, atomic: false, kind: 'uniform'};
         this.add(p.name, symbol, p, true); p.symbol = symbol;
@@ -1234,8 +1246,13 @@ export function compile(source, options = {},bufferUsage=null) {
   if(tiledGroups)result.metadata.tiledGroups='predicated-first-tile';
   if(scalarConstraints.length||emitter.pointerConstraints.length)result.metadata.scalarConstraints=[...scalarConstraints,...emitter.pointerConstraints];
   const changed=['reads','writes','atomic'].some(k=>[...emitter.usage[k]].some(name=>!emitter.initialBufferUsage[k].has(name)));
-  if(changed){if(bufferUsage)throw new CompileError('Helper buffer access analysis did not converge.');return compile(source,options,Object.fromEntries(['reads','writes','atomic'].map(k=>[k,[...emitter.usage[k]]])));}if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};return result;
+  if(changed){if(bufferUsage)throw new CompileError('Helper buffer access analysis did not converge.');return compile(source,options,Object.fromEntries(['reads','writes','atomic'].map(k=>[k,[...emitter.usage[k]]])));}if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};if(options.scheduleDeviceLaunches){
+    const queues=result.metadata.deviceLaunchQueue?.queues.filter(q=>q.caller===result.name)||[];
+    if(!queues.length)throw new CompileError('Scheduled execution requires a parent with child launches.');
+    result.children=queues.map(q=>({queueId:q.id,artifact:compile(source,{...options,scheduleDeviceLaunches:false,deviceLaunchConsumer:q.id,entry:q.child,workgroupSize:q.block})}));
+  }
+  return result;
 }
 export function serializableArtifact(compiled) {
-  return {version: compiled.version, name: compiled.name, entryPoint: compiled.entryPoint, wgsl: compiled.wgsl, metadata: compiled.metadata};
+  return {version: compiled.version, name: compiled.name, entryPoint: compiled.entryPoint, wgsl: compiled.wgsl, metadata: compiled.metadata,...(compiled.children?{children:compiled.children.map(c=>({queueId:c.queueId,artifact:serializableArtifact(c.artifact)}))}:{})};
 }

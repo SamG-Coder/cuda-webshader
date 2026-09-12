@@ -230,7 +230,7 @@ export class GpuRuntime {
     this.assertAlive();const artifact=typeof sourceOrArtifact==='string'?compile(sourceOrArtifact,options):sourceOrArtifact;
     validateWorkgroup(artifact.metadata,this.device.limits);
     // Use complete source/ABI, not an unchecked short hash, as the cache key.
-    const key=artifact.wgsl+'\n'+JSON.stringify(artifact.metadata);
+    const key=artifact.wgsl+'\n'+JSON.stringify(artifact.metadata)+'\n'+JSON.stringify(artifact.children?.map(c=>({queueId:c.queueId,wgsl:c.artifact.wgsl,metadata:c.artifact.metadata})));
     if(this.pipelineCache.has(key)){this.stats.pipelineCacheHits++;return this.pipelineCache.get(key);}
     const build=async()=>{
       this.device.pushErrorScope('validation');
@@ -263,6 +263,30 @@ export class GpuRuntime {
 export class Kernel {
   constructor(runtime,artifact,pipeline,layout,messages,objectLayout=null){this.objectLayout=objectLayout;this.runtime=runtime;this.artifact=artifact;this.pipeline=pipeline;this.layout=layout;this.messages=messages;}
   bind(buffers,scalars={},options={}) {return new Invocation(this,buffers,scalars,options);}
+  async runQueued(buffers,scalars,workgroups,{objectArena}={}) {
+    const children=this.artifact.children;if(!children?.length)throw Error('Compile with scheduleDeviceLaunches: true before running queued children.');
+    const runtime=this.runtime,prepared=[];
+    for(const child of children)prepared.push({queue:this.artifact.metadata.deviceLaunchQueue.queues.find(q=>q.id===child.queueId),kernel:await runtime.kernel(child.artifact)});
+    const parent=this.bind(buffers,scalars,{objectArena,queueOnly:true}),types=this.artifact.metadata.objectHeap.types,scratch=[];
+    try {
+      const batch=runtime.batch();for(const {queue} of prepared)batch.clear(objectArena.buffers[types.findIndex(t=>t.name===queue.name)]);
+      batch.dispatch(parent,workgroups).submit();
+      for(const {queue,kernel} of prepared){
+        const queueBuffer=objectArena.buffers[types.findIndex(t=>t.name===queue.name)],indirect=runtime.createBuffer(queue.byteLength,{usage:GPUBufferUsage.INDIRECT,label:'GPU child dispatch dimensions'});scratch.push(indirect);
+        runtime.batch().copy(queueBuffer,indirect).submit();
+        const childBuffers=Object.fromEntries(queue.buffers.map(b=>[b.name,buffers[b.parent]]));
+        let childrenBatch=runtime.batch();
+        for(let slot=0;slot<queue.capacity;slot++){
+          if(childrenBatch.cursor+runtime.uniformAlignment>runtime.uniformCapacity){childrenBatch.submit();childrenBatch=runtime.batch();}
+          const invocation=kernel.bind(childBuffers,{cw_launch_slot:slot},{objectArena});
+          childrenBatch.dispatch(invocation,[1],{resource:indirect,offset:16+slot*queue.stride*4});
+        }
+        childrenBatch.submit();
+      }
+      await runtime.idle();
+      for(const {queue} of prepared){const flags=await runtime.read(objectArena.buffers[types.findIndex(t=>t.name===queue.name)],Uint32Array,8);if(flags[1])throw Error('GPU child-launch queue overflow or invalid launch dimensions.');}
+    } finally {for(const resource of scratch)runtime.destroyBuffer(resource);}
+  }
 }
 export class Invocation {
   constructor(kernel,buffers,scalars,{objectArena,queueOnly=false}={}) {
@@ -298,8 +322,9 @@ export class ComputeBatch {
   assertOpen(){if(this.ended)throw new Error('Batch has already been submitted or discarded.');this.runtime.assertAlive();}
   beginPass(){if(!this.pass){if(this.timestampWrites&&this.passCount)throw new Error('Timestamped batch supports a single compute pass.');this.pass=this.encoder.beginComputePass(this.timestampWrites?{timestampWrites:this.timestampWrites}:{});this.passCount++;this.lastPipeline=null;this.lastBindGroup=null;this.lastOffset=-1;}return this.pass;}
   endPass(){if(this.pass){this.pass.end();this.pass=null;}}
-  dispatch(invocation,workgroups) {
+  dispatch(invocation,workgroups,indirect=null) {
     this.assertOpen();if(invocation.runtime!==this.runtime)throw new Error('Invocation belongs to another runtime.');
+    if(indirect){this.runtime.checkResource(indirect.resource);if(!indirect.resource.gpuBuffer||!(indirect.resource.gpuBuffer.usage&GPUBufferUsage.INDIRECT)||!Number.isSafeInteger(indirect.offset)||indirect.offset<0||indirect.offset%4||indirect.offset+12>indirect.resource.byteLength)throw Error('Invalid indirect dispatch buffer or offset.');if(invocation.kernel.artifact.metadata.surfaces?.length)throw Error('Indirect surface dispatch needs explicit extent validation.');}
     const groups=Array.isArray(workgroups)?[...workgroups]:[workgroups];while(groups.length<3)groups.push(1);
     for(const surface of invocation.kernel.artifact.metadata.surfaces||[]){const r=invocation.buffers[surface.name],block=invocation.kernel.artifact.metadata.workgroupSize;if(surface.coordinates==='global-x'&&(r.height!==1||groups[1]*block[1]!==1||groups[2]*block[2]!==1))throw Error('Surface dispatch requires a one-row texture and a one-dimensional launch.');if(surface.coordinates==='global-xy-layer'){const layer=surface.layer?.scalar?(Object.hasOwn(invocation.values,surface.layer.scalar)?invocation.values[surface.layer.scalar]:invocation.kernel.artifact.metadata.scalars.find(p=>p.name===surface.layer.scalar)?.defaultValue):surface.layer?.value;if(!Number.isInteger(layer)||layer<0||layer>=r.depth)throw Error('Surface layer is outside the allocated array.');}if(!['global-x','global-xy','global-xyz','global-xy-layer'].includes(surface.coordinates)||groups[0]*block[0]>r.width||groups[1]*block[1]>r.height||groups[2]*block[2]>(surface.coordinates==='global-xyz'?r.depth:1))throw Error('Surface dispatch exceeds the checked global '+(surface.coordinates==='global-xyz'?'XYZ':'XY')+' extent.');}
     if(groups.length!==3||groups.some(x=>!Number.isSafeInteger(x)||x<0||x>this.runtime.device.limits.maxComputeWorkgroupsPerDimension))throw new RangeError('Invalid workgroup counts. These are block counts, not thread counts.');
@@ -319,7 +344,7 @@ export class ComputeBatch {
     if(this.lastPipeline!==invocation.kernel.pipeline){pass.setPipeline(invocation.kernel.pipeline);this.lastPipeline=invocation.kernel.pipeline;}
     if(this.lastBindGroup!==invocation.bindGroup||this.lastOffset!==offset){pass.setBindGroup(0,invocation.bindGroup,meta.uniformSize?[offset]:[]);this.lastBindGroup=invocation.bindGroup;this.lastOffset=offset;}
     if(invocation.objectArena){invocation.objectArena.assertAlive();pass.setBindGroup(1,invocation.objectBindGroup);}
-    pass.dispatchWorkgroups(...groups);this.dispatchCount++;return this;
+    if(indirect)pass.dispatchWorkgroupsIndirect(indirect.resource.gpuBuffer,indirect.offset);else pass.dispatchWorkgroups(...groups);this.dispatchCount++;return this;
   }
   copyToLinearTexture(source,target,{sourceOffset=0}={}){
     this.assertOpen();this.runtime.checkResource(source);this.runtime.checkResource(target);

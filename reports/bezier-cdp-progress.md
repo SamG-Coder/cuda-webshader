@@ -121,3 +121,25 @@ constant block sizes, and no dynamic shared-memory or stream argument. Each
 source launch site has its own bounded queue. Overflow or invalid grid sizes set
 an error flag. Tests exercise overflow, float and integer snapshots, and invalid
 fractional grid dimensions as well as the complete original parent workload.
+
+## Complete GPU-scheduled execution
+
+`compile(..., {scheduleDeviceLaunches: true, deviceLaunchQueue: {maxLaunches: 256},
+objectHeap: 'persistent', deviceHeap: {maxAllocations: 256, maxElements: 32}})`
+now emits the original parent plus a leaf-child variant that reads its scalar
+arguments from the GPU queue. `Kernel.runQueued` clears queues, dispatches the
+parent, copies GPU-produced dimension records to indirect buffers, and dispatches
+the bounded child slots. Empty slots dispatch zero workgroups. Only error headers
+are read back; native counts never control this execution. Nested child launches
+remain explicitly unsupported.
+
+All 256 original curves and 3,958 vertices match native CUDA, with maximum
+coordinate error 1.1920928955078125e-7. Original device allocation, parent curvature,
+child evaluation and cleanup bodies are retained. Tests also cover argument
+snapshots, queue reuse with fewer launches, zero launches and overflow rejection.
+The regression passes 643 unit tests and 208 real NVIDIA WebGPU tests.
+`bezier-cdp-scheduled.json` records the full execution result.
+
+The sandbox pipeline accepts `scheduleDeviceLaunches: true` on an individual
+kernel step and exposes generated child WGSL. A generic allocated-curve preview
+and its browser verification are still required before adding the runnable card.

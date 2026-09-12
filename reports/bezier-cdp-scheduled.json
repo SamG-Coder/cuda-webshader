@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-12T19:58:35.017Z",
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "results": [
+    {
+      "name": "Complete original Bezier parent and indirect children match native",
+      "pass": true,
+      "queueReuseVerified": true,
+      "unusedSlotsSkipped": true,
+      "overflowRejected": true,
+      "schedulingReadback": "error header only",
+      "curves": 256,
+      "vertices": 3958,
+      "maxError": 1.1920928955078125e-07,
+      "originalVertexAndFreeBodies": true,
+      "allFreed": true,
+      "parentSchedulingSupported": true,
+      "launchCountsFromNativeFixture": false,
+      "indirectDispatch": true,
+      "wallMs": 169.28999999165535
+    }
+  ]
+}
