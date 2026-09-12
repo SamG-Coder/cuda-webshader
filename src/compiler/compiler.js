@@ -1,5 +1,5 @@
 import {inferTextureTypes,textureShape} from './texture-types.js';
-import {integerExpression,substituteTemplateArgument} from './integer-expression.js';
+import {integerExpression} from './integer-expression.js';
 import {parse, CompileError,builtinType} from './parser.js';
 import {uniformBlockGuards} from './full-workgroups.js';
 export {CompileError, parse};
@@ -591,10 +591,12 @@ function resolveTraitTypes(fn, ast, parameter, argument) {
   walk(fn.body,n=>{if(n.type)n.type=resolve(n.type,n);if(n.target)n.target=resolve(n.target,n);});
 }
 function instantiateHelperTemplates(ast, kernel) {
+  const parameters=fn=>fn.templateParameters?.length?fn.templateParameters:[fn.templateParameter];
+  const canonical=(fn,argument,node)=>{if(fn.templateKind==='int'){try{return String(integerExpression(argument));}catch(e){throw new CompileError(e.message,node.token,ast.source);}}const values=argument.split(',').map(x=>x.trim());if(values.length!==parameters(fn).length||values.some(v=>!v))throw new CompileError('Template argument count must match the helper type parameters.',node.token,ast.source);return values.join(',');};
   const definitions=new Map(),specializations=new Map(),instances=new Map(),visiting=new Set(),done=new Set(),clones=[];
   for(const fn of ast.functions){
     if(fn.specializationArgument!==undefined){
-      const primary=definitions.get(fn.name);if(primary?.templateKind==='int'){try{fn.specializationArgument=String(integerExpression(fn.specializationArgument));}catch(e){throw new CompileError(e.message,fn.token,ast.source);}}const key=fn.name+'<'+fn.specializationArgument+'>';
+      const primary=definitions.get(fn.name);if(primary?.templateParameter)fn.specializationArgument=canonical(primary,fn.specializationArgument,fn);const key=fn.name+'<'+fn.specializationArgument+'>';
       if(!primary?.templateParameter||primary.qualifier!=='__device__')throw new CompileError('Declare a primary device helper template before its specialization.',fn.token,ast.source);
       if(specializations.has(key))throw new CompileError('Duplicate device helper specialization.',fn.token,ast.source);
       if(fn.params.length!==primary.params.length)throw new CompileError('Device helper specialization signature does not match its primary template.',fn.token,ast.source);
@@ -612,7 +614,7 @@ function instantiateHelperTemplates(ast, kernel) {
     walk(fn.body,node=>{
       if(node.kind!=='call'||node.callee.kind!=='id')return;
       if(['tex3D','tex1D','tex2D'].includes(node.callee.name))return;
-      const callee=node.callee,definition=definitions.get(callee.name);let argument=callee.templateArgument;if(definition?.templateKind==='int'&&argument!==undefined){try{argument=String(integerExpression(argument));}catch(e){fail(e.message,callee);}}
+      const callee=node.callee,definition=definitions.get(callee.name);let argument=callee.templateArgument;if(definition?.templateParameter&&argument!==undefined)argument=canonical(definition,argument,callee);
       if(!definition?.templateParameter){
         if(argument!==undefined)fail('Explicit template arguments require a templated device helper.',callee);
         if(definition?.qualifier==='__device__')process(definition);
@@ -626,26 +628,17 @@ function instantiateHelperTemplates(ast, kernel) {
         if(instances.size>=128)fail('At most 128 device helper template specializations are supported.',callee);
         const selected=specializations.get(key);
         instance=structuredClone(selected||definition);
-        const parameter=definition.templateParameter,placeholder='template:'+parameter;
-        let type;
-        if(definition.templateKind==='type'){
-          type=builtinType(argument);
-          if(!type||type==='void')fail('Template type argument must be a supported built-in value type.',callee);
-        }else if(!Number.isSafeInteger(Number(argument))||Number(argument)<-2147483648||Number(argument)>2147483647)fail('Template argument must be a signed 32-bit integer.',callee);
-        for(const param of instance.params){if(param.name===parameter)fail('Template parameter shadowing is unsupported.',param);if(param.type===placeholder)param.type=type;}
-        if(instance.result===placeholder)instance.result=type;
-        walk(instance.body,n=>{
-          if(['decl','thread-block'].includes(n.kind)&&n.name===parameter)fail('Template parameter shadowing is unsupported.',n);
-          if(n.templateArgument!==undefined){if(n.templateArgument===parameter)n.templateArgument=argument;else if(!type)n.templateArgument=substituteTemplateArgument(n.templateArgument,parameter,argument);}
-          if(type){if(n.type===placeholder)n.type=type;if(n.target===placeholder)n.target=type;}
-          else if(n.kind==='id'&&n.name===parameter){n.kind='literal';n.value=argument;delete n.name;}
-        });
-        resolveTraitTypes(instance,ast,parameter,argument);
-        if(selected){
-          const expected={...definition,params:structuredClone(definition.params),body:{kind:'block',body:[]}};
-          if(expected.result===placeholder)expected.result=type;
-          for(const p of expected.params)if(p.type===placeholder)p.type=type;
-          resolveTraitTypes(expected,ast,parameter,argument);
+        const names=parameters(definition),argumentsList=argument.split(','),replacements=new Map();
+        for(let i=0;i<names.length;i++){const value=argumentsList[i],type=definition.templateKind==='type'?builtinType(value):null;if(definition.templateKind==='type'&&(!type||['void','texture3d','surface2d'].includes(type)))fail('Template type argument must be a supported built-in value type.',callee);if(!type&&(!Number.isSafeInteger(Number(value))||Number(value)<-2147483648||Number(value)>2147483647))fail('Template argument must be a signed 32-bit integer.',callee);replacements.set(names[i],{value,type});}
+        const replaceType=type=>{if(typeof type==='string'&&type.startsWith('template:'))return replacements.get(type.slice(9))?.type??type;if(type?.kind==='trait-type')return {...type,argument:replacements.get(type.argument)?.value??type.argument};return type;};
+        const substitute=fn=>{fn.result=replaceType(fn.result);for(const param of fn.params){if(replacements.has(param.name))fail('Template parameter shadowing is unsupported.',param);param.type=replaceType(param.type);}
+          walk(fn.body,n=>{if(['decl','thread-block'].includes(n.kind)&&replacements.has(n.name))fail('Template parameter shadowing is unsupported.',n);if(n.type)n.type=replaceType(n.type);if(n.target)n.target=replaceType(n.target);
+            if(n.templateArgument!==undefined)n.templateArgument=n.templateArgument.replace(/[A-Za-z_]\w*/g,name=>{const r=replacements.get(name);return r?(r.type?r.value:'('+r.value+')'):name;});
+            if(n.kind==='id'){const r=replacements.get(n.name);if(r&&!r.type){n.kind='literal';n.value=r.value;delete n.name;}}
+          });resolveTraitTypes(fn,ast);
+        };
+        substitute(instance);
+        if(selected){const expected={...definition,params:structuredClone(definition.params),body:{kind:'block',body:[]}};substitute(expected);
           if(instance.result!==expected.result||instance.params.some((p,i)=>p.type!==expected.params[i].type||p.pointer!==expected.params[i].pointer||p.reference!==expected.params[i].reference||(p.reference&&p.constant!==expected.params[i].constant)))fail('Device helper specialization signature does not match its primary template.',selected);
           walk(instance.body,n=>{if([n.type,n.target].some(t=>typeof t==='string'&&t.startsWith('unsupported:')))fail('Double-precision value types are unsupported in selected helper specializations.',n);});
         }
@@ -667,6 +660,7 @@ function instantiateHelperTemplates(ast, kernel) {
     if(!definition?.templateParameter)return null;
     if(definition.qualifier!=='__device__')fail('Device-side kernel launches are unsupported.',callee);
     if(definition.templateKind!=='type')fail('Integer helper templates require an explicit template argument.',callee);
+    if(parameters(definition).length>1)fail('Multiple helper template types require explicit template arguments.',callee);
     if(types.length!==definition.params.length)fail(`Wrong number of arguments for '${name}'.`,callee);
     const matches=definition.params.flatMap((p,i)=>p.type==='template:'+definition.templateParameter?[p.pointer?(isArray(types[i])?types[i].element:undefined):types[i]]:[]);
     if(!matches.length)fail('Cannot deduce helper template type from these parameters; supply an explicit argument.',callee);
@@ -698,7 +692,7 @@ export function compile(source, options = {},bufferUsage=null) {
     for(const p of kernel.params)if(p.name===name)throw new CompileError('Template parameter shadowing is unsupported.',p.token,source);
     walk(kernel.body,n=>{if(['decl','thread-block'].includes(n.kind)&&n.name===name)throw new CompileError('Template parameter shadowing is unsupported.',n.token,source);if(n.kind==='id'&&n.name===name){n.kind='literal';n.value=String(value);delete n.name;}});
   }
-  if(specialization)walk(kernel.body,n=>{if(n.templateArgument!==undefined){if(n.templateArgument===kernel.templateParameter)n.templateArgument=specialization[2];else if(kernel.templateKind==='int')n.templateArgument=substituteTemplateArgument(n.templateArgument,kernel.templateParameter,specialization[2]);}});
+  if(specialization)walk(kernel.body,n=>{if(n.templateArgument!==undefined){n.templateArgument=n.templateArgument.replace(/[A-Za-z_]\w*/g,name=>name===kernel.templateParameter?(kernel.templateKind==='int'?'('+specialization[2]+')':specialization[2]):name);}});
   resolveTraitTypes(kernel,ast,kernel.templateParameter,specialization?.[2]);
   const scalarConstraints=uniformBlockGuards(kernel,options,walk,message=>{throw new CompileError(message,kernel.token,source);});
   const overloadGroups=new Map();for(const f of ast.functions)if(f.specializationArgument===undefined){const group=overloadGroups.get(f.name)||[];group.push(f);overloadGroups.set(f.name,group);}let overloadIndex=0;const occupied=new Set(ast.functions.map(f=>f.name));for(const [name,group]of overloadGroups)if(group.length>1){if(group.some(f=>f.qualifier!=='__device__'||f.templateParameter))throw new CompileError('Overloads support non-template device helpers only.',group[0].token,source);const signatures=new Set();for(const f of group){const signature=JSON.stringify(f.params.map(p=>[p.type,p.pointer,p.reference,(p.pointer||p.reference)&&p.constant]));if(signatures.has(signature))throw new CompileError('Duplicate function signature '+name,f.token,source);signatures.add(signature);let unique='cw_overload_'+overloadIndex+++'_'+name;while(occupied.has(unique))unique+='_';occupied.add(unique);f.overloadName=name;f.name=unique;}}

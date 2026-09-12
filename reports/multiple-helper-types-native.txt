@@ -1,0 +1,1 @@
+PASS native multiple helper types: 3, -30, -27, 7.5, 2, 4.5; four type parameters, reversed nested arguments, explicit specialization and texture helpers

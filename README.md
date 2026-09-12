@@ -44,8 +44,10 @@ NVIDIA WebGPU verify the expansion, including INT_MIN. These features now power 
 [verified texture-convolution showcase](showcases/convolution-texture/README.md),
 including texture handles in nested helpers and the original IMAD macro.
 Device helpers now
-support one built-in type or explicit integer template argument, including nested
-calls and arguments forwarded from a kernel template. Type-trait structs containing typedef members, including explicit type specializations
+support up to four explicit built-in type arguments or one integer template argument, including nested
+calls and arguments forwarded from a kernel template. Single type arguments can be deduced;
+multiple types currently require explicit arguments. This is a verified prerequisite for
+the [bicubic texture candidate](reports/bicubic-texture-progress.md). Type-trait structs containing typedef members, including explicit type specializations
 and dependent types such as `typename vec4<T>::Type`, now resolve to built-in
 value types. Helper type arguments can now be deduced from direct scalar/vector
 parameters, and explicit device-function specializations are selected when present.
