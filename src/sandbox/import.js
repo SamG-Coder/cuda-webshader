@@ -13,9 +13,9 @@ export function kernelSource(source){
  while((match=forwards.exec(masked)))if(forwardingMacro(match[0].trim())||expressionMacro(match[0].trim())||/^\s*#\s*define\s+\w+\s+\([^#;{}]*\)\s*$/.test(match[0]))spans.push([match.index,match.index+match[0].length]);
  const aliases=/\bnamespace\s+\w+\s*=\s*cooperative_groups\s*;/g;
  while((match=aliases.exec(masked)))spans.push([match.index,match.index+match[0].length]);
- const wrappers=[],structures=/\btemplate\s*<[^>]*>\s*struct\s+\w+\s*\{/g;
+ const wrappers=[],structures=/\btemplate\s*<[^>]*>\s*struct\s+\w+(?:\s*<[^>]*>)?\s*\{/g;
  while((match=structures.exec(masked))){let depth=1,end=structures.lastIndex;for(;end<masked.length&&depth;end++){if(masked[end]==='{')depth++;else if(masked[end]==='}')depth--;}
-   if(!depth&&/\boperator\s+(?:const\s+)?\w+\s*\*/.test(masked.slice(structures.lastIndex,end))){while(/\s/.test(masked[end]||'')&&end<masked.length)end++;if(masked[end]===';'){wrappers.push([match.index,end+1]);spans.push([match.index,end+1]);}}structures.lastIndex=end;
+   if(!depth&&(/\boperator\s+(?:const\s+)?\w+\s*\*/.test(masked.slice(structures.lastIndex,end))||/\bstatic\b/.test(masked.slice(structures.lastIndex,end))||!masked.slice(structures.lastIndex,end-1).trim())){while(/\s/.test(masked[end]||'')&&end<masked.length)end++;if(masked[end]===';'){wrappers.push([match.index,end+1]);spans.push([match.index,end+1]);}}structures.lastIndex=end;
  }
  const traits=/\btemplate\s*<[^>]*>\s*struct\s+\w+(?:\s*<[^>]*>)?\s*\{([^{}]*)\}\s*;/g;
  while((match=traits.exec(masked)))if(/^(?:\s*typedef\s+(?:unsigned\s+)?\w+\s+\w+\s*;)+\s*$/.test(match[1]))spans.push([match.index,match.index+match[0].length]);

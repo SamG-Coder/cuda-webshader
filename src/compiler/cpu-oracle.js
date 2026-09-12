@@ -64,7 +64,7 @@ class Context {
         if(n.base.kind==='id'&&this.ids[n.base.name])return this.ids[n.base.name]['xyz'.indexOf(n.member)];
         const base=yield* this.eval(n.base);if(n.base.type==='cw_uchar4')return(base>>>('xyzw'.indexOf(n.member)*8))&255;return base[typeof n.base.type==='string'&&n.base.type.startsWith('cw_struct_')?n.member:'xyzw'.indexOf(n.member)];
       }
-      case 'cast':return convert(yield* this.eval(n.value),n.target);
+      case 'cast':if(n.byteScale!==undefined)return convert((yield* this.eval(n.byteScaleValue))*n.byteScale,n.target);return convert(yield* this.eval(n.value),n.target);
       case 'unary':{
         if(['++','--'].includes(n.op)){const r=yield* this.ref(n.value),old=r.get(),value=convert(old+(n.op==='++'?1:-1),n.type);r.set(value);return n.prefix?value:old;}
         if(n.op==='&')return yield* this.ref(n.value);

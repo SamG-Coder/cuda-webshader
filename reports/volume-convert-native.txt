@@ -1,0 +1,2 @@
+PASS 767 original NVIDIA byte conversions and 16 guards; float-product shortcut differs at 0 inputs
+PASS 255 double-scale rounding boundaries; float-product shortcut differs at all 255

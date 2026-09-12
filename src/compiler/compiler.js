@@ -194,7 +194,13 @@ class Emitter {
         if (!size || n.member.length !== 1 || 'xyzw'.indexOf(n.member) < 0 || 'xyzw'.indexOf(n.member) >= size) this.fail('Only valid single vector components (.x/.y/.z/.w) are supported.', n);
         return this.result(n, vectorElement(base.type), `${base.code}.${n.member}`, base.pre, {rootSymbol: base.rootSymbol});
       }
-      case 'cast': { const literal=n.value.kind==='unary'&&['+','-'].includes(n.value.op)?n.value.value:n.value;if(n.target==='f32'&&literal.kind==='literal'&&/[.eE]/.test(literal.value)&&!/^0[xX]/.test(literal.value)&&!/[fFuU]$/.test(literal.value)){const rounded=Math.fround(Number(literal.value));if(!Number.isFinite(rounded))this.fail('Explicit float literal conversion overflows f32.',literal);literal.value=String(rounded)+'f';}const value = this.expr(n.value); return this.result(n, n.target, this.convert(value.code, value.type, n.target, n), value.pre); }
+      case 'cast': {
+        if(n.target==='cw_uchar'&&n.value.kind==='binary'&&n.value.op==='*'){
+          const doubleInteger=a=>a.kind==='literal'&&/[.eE]/.test(a.value)&&!/^0[xX]/.test(a.value)&&!/[fFuU]$/.test(a.value)&&Number.isInteger(Number(a.value))&&Number(a.value)>=1&&Number(a.value)<=65535;
+          const literal=doubleInteger(n.value.right)?n.value.right:doubleInteger(n.value.left)?n.value.left:null;
+          if(literal){const operand=literal===n.value.right?n.value.left:n.value.right,value=this.expr(operand);if(value.type!=='f32')this.fail('Exact byte scaling requires a float32 operand.',n);this.exactByteScaleUsed=true;n.byteScale=Number(literal.value);n.byteScaleValue=operand;return this.result(n,'cw_uchar',`cw_exact_byte_scale(${value.code}, ${n.byteScale}u)`,value.pre);}
+        }
+        const literal=n.value.kind==='unary'&&['+','-'].includes(n.value.op)?n.value.value:n.value;if(n.target==='f32'&&literal.kind==='literal'&&/[.eE]/.test(literal.value)&&!/^0[xX]/.test(literal.value)&&!/[fFuU]$/.test(literal.value)){const rounded=Math.fround(Number(literal.value));if(!Number.isFinite(rounded))this.fail('Explicit float literal conversion overflows f32.',literal);literal.value=String(rounded)+'f';}const value = this.expr(n.value); return this.result(n, n.target, this.convert(value.code, value.type, n.target, n), value.pre); }
       case 'unary': {
         if (['++', '--'].includes(n.op)){if(n.value.kind!=='id')this.fail('Expression increments require named local scalars or references.',n);const value=this.expr(n.value,true);if(!['local','reference'].includes(value.rootSymbol?.kind))this.fail('Expression increments require named local scalars or references.',n);const update=this.effect(n),tmp='cw_update_'+this.temp++,snapshot=`let ${tmp}: ${value.type} = ${value.code};`;return this.result(n,value.type,tmp,n.prefix?[...update,snapshot]:[snapshot,...update]);}
         if (n.op === '&' || n.op === '*') this.fail('Pointers are supported only as kernel buffer parameters and &buffer[index] atomic targets.', n);
@@ -592,6 +598,27 @@ class Emitter {
     // WGSL rejects overflowing constant expressions in an inline multiply.
     if(this.integerIntrinsics.has('__mul24'))helperLines.unshift('fn cw_mul24(a: i32, b: i32) -> i32 { return ((a << 8u) >> 8u) * ((b << 8u) >> 8u); }');
     if(this.integerIntrinsics.has('__umul24'))helperLines.unshift('fn cw_umul24(a: u32, b: u32) -> u32 { return (a & 16777215u) * (b & 16777215u); }');
+    // A float32 significand times a 16-bit integer fits exactly in 40 bits.
+    // Integer limbs preserve the original double product before truncating to a byte.
+    if(this.exactByteScaleUsed)helperLines.unshift(`fn cw_exact_byte_scale(value: f32, scale: u32) -> u32 {
+  let bits = bitcast<u32>(value);
+  let exponent = (bits >> 23u) & 255u;
+  let mantissa = (bits & 8388607u) | select(0u, 8388608u, exponent != 0u);
+  let lowProduct = (mantissa & 65535u) * scale;
+  let upper = (mantissa >> 16u) * scale + (lowProduct >> 16u);
+  let low = (lowProduct & 65535u) | (upper << 16u);
+  let high = upper >> 16u;
+  let shift = select(149i, 150i - i32(exponent), exponent != 0u);
+  var result = 0u;
+  if (exponent == 255u) { return 0u; }
+  if (shift >= 64i) { result = 0u; }
+  else if (shift >= 32i) { result = high >> u32(shift - 32i); }
+  else if (shift > 0i) { result = (low >> u32(shift)) | (high << u32(32i - shift)); }
+  else if (shift == 0i) { result = low; }
+  else if (shift > -8i) { result = low << u32(-shift); }
+  if ((bits & 2147483648u) != 0u) { result = 0u - result; }
+  return result & 255u;
+}`);
     if(this.packedAtomicUsed)helperLines.unshift('fn cw_store_byte(word: ptr<storage, atomic<u32>, read_write>, shift: u32, value: u32) { var old = atomicLoad(word); loop { let next = (old & ~(255u << shift)) | ((value & 255u) << shift); let result = atomicCompareExchangeWeak(word, old, next); if (result.exchanged) { return; } old = result.old_value; } }');
     if(this.float2DSamplingUsed)helperLines.unshift('fn cw_sample_float2d(tex: texture_2d<f32>, texSampler: sampler, coords: vec2<f32>, scale: vec2<f32>, pixelPoint: f32) -> f32 { if (pixelPoint > 0.0f) { let maximum = vec2<f32>(textureDimensions(tex)) - vec2<f32>(1.0f); let pixel = vec2<i32>(clamp(floor(coords), vec2<f32>(0.0f), maximum)); return textureLoad(tex, pixel, 0).r; } return textureSampleLevel(tex, texSampler, coords * scale, 0.0f).r; }');
     if(this.rgba2DSamplingUsed)helperLines.unshift('fn cw_sample_rgba2d(tex: texture_2d<f32>, texSampler: sampler, coords: vec2<f32>, scale: vec2<f32>, pixelPoint: f32) -> vec4<f32> { if (pixelPoint > 0.0f) { let maximum = vec2<f32>(textureDimensions(tex)) - vec2<f32>(1.0f); let pixel = vec2<i32>(clamp(floor(coords), vec2<f32>(0.0f), maximum)); return textureLoad(tex, pixel, 0); } return textureSampleLevel(tex, texSampler, coords * scale, 0.0f); }');

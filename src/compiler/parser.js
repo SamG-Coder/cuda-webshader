@@ -84,7 +84,7 @@ export function tokenize(source, defines = {}) {
 }
 const PRECEDENCE = {'=': 1, '+=': 1, '-=': 1, '*=': 1, '/=': 1, '%=': 1, '&=': 1, '|=': 1, '^=': 1, '<<=': 1, '>>=': 1, '||': 3, '&&': 4, '|': 5, '^': 6, '&': 7, '==': 8, '!=': 8, '<': 9, '>': 9, '<=': 9, '>=': 9, '<<': 10, '>>': 10, '+': 11, '-': 11, '*': 12, '/': 12, '%': 12};
 export class Parser {
-  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); this.functionNames=new Set(['tex3D','tex1D','tex2D','tex2Dgather']); this.typeAliases=new Map();this.typeTraits=new Map();this.structs=new Map(); this.sharedWrappers=new Map();this.expandedMacroNodes=0; }
+  constructor(source, defines) { this.source = source; this.tokens = tokenize(source, defines); this.i = 0; this.groupNamespaces = new Set(['cooperative_groups']); this.functionNames=new Set(['tex3D','tex1D','tex2D','tex2Dgather']); this.staticTemplates=new Map();this.staticFunctions=[];this.staticCache=new Map();this.staticResolving=new Set();this.typeAliases=new Map();this.typeTraits=new Map();this.structs=new Map(); this.sharedWrappers=new Map();this.expandedMacroNodes=0; }
   peek(offset = 0) { return this.tokens[this.i + offset] || this.tokens.at(-1); }
   is(value) { return this.peek().value === value; }
   take(value) { if (value && !this.is(value)) this.fail(`Expected '${value}', found '${this.peek().value}'.`); return this.tokens[this.i++]; }
@@ -155,8 +155,9 @@ export class Parser {
         if(templateParameters.length>1)this.fail('Type-trait and shared-wrapper structs require one template parameter.',token);
         if(!['type','specialization'].includes(templateKind))this.fail('Only type-trait template structs containing typedef members are supported.',token);
         const name=this.name();let argument=null;
-        if(templateKind==='specialization'){this.take('<');argument=this.name();this.take('>');}
+        if(templateKind==='specialization')argument=this.templateArgument().replace(/^unsigned char$/,'uchar').replace(/^unsigned int$/,'uint');
         this.take('{');const members=[];
+        if(this.is('static')||this.is('}')||this.staticTemplates.has(name)){this.staticStruct(name,argument,templateParameter,token);continue;}
         if(this.is('__device__')){
           if(templateKind!=='type')this.fail('Shared-memory conversion wrappers require one type parameter.',token);
           const conversions=[];
@@ -210,7 +211,51 @@ export class Parser {
       functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,launchThreads,templateParameter,templateParameters,templateKind,...(specializationArgument!==undefined?{specializationArgument}:{})});
     }
     if (!functions.some(f => f.qualifier === '__global__')) this.fail('No __global__ kernel was found.');
-    return {kind: 'module', functions, constantGlobals,typeAliases:Object.fromEntries(this.typeAliases),structs:[...this.structs.values()],typeTraits:[...this.typeTraits.values()], source: this.source};
+    return {kind: 'module', functions:functions.concat(this.staticFunctions), constantGlobals,typeAliases:Object.fromEntries(this.typeAliases),structs:[...this.structs.values()],typeTraits:[...this.typeTraits.values()], source: this.source};
+  }
+  staticStruct(name,argument,parameter,token){
+    let owner=this.staticTemplates.get(name);
+    if(argument===null){if(owner||this.typeTraits.has(name)||this.structs.has(name)||this.typeAliases.has(name)||TYPES.has(name))this.fail('Duplicate or reserved static template name.',token);owner={parameter,primary:null,specializations:new Map()};this.staticTemplates.set(name,owner);}
+    else if(!owner)this.fail('Declare the primary static template before its specializations.',token);
+    if(argument!==null&&[...this.staticCache.keys()].some(key=>key.startsWith(name+'<'+argument+'>::')))this.fail('Static specializations must precede their first use.',token);
+    if(argument!==null&&owner.specializations.has(argument))this.fail('Duplicate static template specialization.',token);
+    const methods=new Map(),constants=new Set();
+    while(!this.is('}')){
+      const start=this.i;this.take('static');
+      while(!['{',';','<eof>'].includes(this.peek().value)&&this.peek().kind!=='eof')this.take();
+      if(this.peek().kind==='eof')this.fail('Unclosed static template member.',token);
+      if(this.match(';')){
+        const header=this.tokens.slice(start,this.i-1),equal=header.findIndex(t=>t.value==='=');
+        if(header[1]?.value!=='const'||equal<3||header.some(t=>['(',')','[',']'].includes(t.value)))this.fail('Static template data members require a simple const declaration.',header[0]);
+        const constant=header[equal-1].value;if(constants.has(constant)||methods.has(constant))this.fail('Duplicate static template member.',header[0]);constants.add(constant);continue;
+      }
+      const header=this.tokens.slice(start,this.i),open=header.findIndex(t=>t.value==='('),method=header[open-1]?.value;
+      if(open<1||!header.some(t=>t.value==='__device__')||!method||methods.has(method)||constants.has(method))this.fail('Static templates require distinct static device method definitions.',header[0]);
+      this.take('{');let depth=1;while(depth){const t=this.take();if(t.kind==='eof')this.fail('Unclosed static device method.',token);if(t.value==='{')depth++;if(t.value==='}')depth--;}
+      methods.set(method,{tokens:this.tokens.slice(start,this.i),token:header[0]});
+      if(methods.size>64)this.fail('At most 64 static methods per template are supported.',token);
+    }
+    this.take('}');this.take(';');const record={methods,constants,aliases:new Map(this.typeAliases)};
+    if(argument===null)owner.primary=record;else owner.specializations.set(argument,record);
+  }
+  staticMethod(name,argument,method,token){
+    argument=argument.replace(/^unsigned char$/,'uchar').replace(/^unsigned int$/,'uint');
+    const type=builtinType(argument);if(!type||['void','texture3d','surface2d'].includes(type))this.fail('Static method calls require an explicit supported built-in type argument.',token);
+    const owner=this.staticTemplates.get(name),selected=owner.specializations.get(argument)||owner.primary,record=selected?.methods.get(method),key=name+'<'+argument+'>::'+method;
+    if(!record)this.fail('No static device method '+key+'. Static data member access is unsupported.',token);
+    if(this.staticResolving.has(key))this.fail('Recursive static device methods are unsupported.',token);
+    if(this.staticCache.has(key))return this.staticCache.get(key);
+    if(this.staticCache.size+this.staticResolving.size>=128)this.fail('At most 128 static method instances are supported.',token);
+    this.staticResolving.add(key);
+    const parser=Object.assign(Object.create(Parser.prototype),this,{tokens:[...record.tokens,{kind:'eof',value:'<eof>',line:token.line,column:token.column}],i:0,staticMemberNames:new Set([...selected.methods.keys(),...selected.constants]),typeAliases:new Map(selected.aliases),templateTypeNames:new Set(),deferUnsupportedTypes:false});
+    if(!owner.specializations.has(argument))parser.typeAliases.set(owner.parameter,type);
+    while(['static','inline','__inline__','__forceinline__','__device__'].includes(parser.peek().value))parser.take();
+    const result=parser.type();if(result.pointer||result.reference||result.shared||result.external)parser.fail('Static method return values cannot be pointers or references.',token);parser.take(method);parser.take('(');const params=[];
+    if(!parser.is(')'))do{const t=parser.peek(),spec=parser.type(),paramName=parser.name();if(parser.typeAliases.has(paramName))parser.fail('Parameters cannot shadow a type alias.',t);params.push({kind:'param',token:t,name:paramName,...spec});}while(parser.match(','));
+    parser.take(')');const body=parser.block();if(parser.peek().kind!=='eof')parser.fail('Unexpected static method suffix.');
+    const generated='cw_static_method_'+this.staticFunctions.length;
+    this.staticFunctions.push({kind:'function',token:record.token,name:generated,qualifier:'__device__',result:result.type,params,body,templateParameter:null,templateParameters:[],templateKind:null});
+    this.staticResolving.delete(key);this.staticCache.set(key,generated);return generated;
   }
   block() { const token = this.take('{'), body = []; while (!this.is('}')) { if (this.peek().kind === 'eof') this.fail('Unclosed block.'); body.push(this.statement()); } this.take('}'); return {kind: 'block', token, body}; }
   initializer(){
@@ -274,10 +319,11 @@ export class Parser {
     let value;
     if (token.kind === 'number') { this.take(); value = {kind: 'literal', token, value: token.value}; }
     else if (this.match('(')) { value = this.expression(); this.take(')'); }
-    else if (token.kind === 'word') { value = {kind: 'id', token, name: this.qualifiedName()}; }
+    else if (token.kind === 'word') { const name=this.qualifiedName();if(this.staticMemberNames?.has(name))this.fail('Unqualified static member references require explicit template qualification.',token);value = {kind: 'id', token, name}; }
     else this.fail('Expected an expression.', token);
     while (true) {
-      if(value.kind==='id'&&this.functionNames.has(value.name)&&this.is('<')&&this.templateCallAhead())value.templateArgument=this.templateArgument();
+      if(value.kind==='id'&&this.staticTemplates.has(value.name)&&this.is('<')){const argument=this.templateArgument();this.take('::');const method=this.name();if(!this.is('('))this.fail('Static data member access is unsupported.',token);value={...value,name:this.staticMethod(value.name,argument,method,token)};}
+      else if(value.kind==='id'&&this.functionNames.has(value.name)&&this.is('<')&&this.templateCallAhead())value.templateArgument=this.templateArgument();
       else if (this.match('[')) { const index = this.expression(); this.take(']'); value = {kind: 'index', token, base: value, index}; }
       else if (this.match('.')) { value = {kind: 'member', token, base: value, member: this.name()}; }
       else if (this.match('(')) { const args = []; if (!this.is(')')) do { args.push(this.expression(2)); } while (this.match(',')); this.take(')');
