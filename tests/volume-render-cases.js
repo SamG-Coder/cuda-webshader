@@ -1,0 +1,2 @@
+export const volumeTransfer=[0,0,0,0,1,0,0,1,1,.5,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0,1,1,1,0,1,1,0,0,0,0];
+export function volumeCase(scenario){const width=scenario===1?65:128,height=scenario===1?49:128,matrix=scenario===2?[.8660254,0,.5,2,0,1,0,0,-.5,0,.8660254,3.4641016]:[1,0,0,0,0,1,0,0,0,0,1,4],scalars={imageW:width,imageH:height,density:.05,brightness:1,transferOffset:0,transferScale:1};matrix.forEach((v,i)=>scalars[`constant.c_invViewMatrix.m[${Math.floor(i/4)}].${'xyzw'[i%4]}`]=v);return {width,height,scalars};}

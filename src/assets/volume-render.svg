@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+<defs><radialGradient id="v"><stop stop-color="#b4ffd1"/><stop offset=".48" stop-color="#f5cb59"/><stop offset=".8" stop-color="#ef7846"/><stop offset="1" stop-color="#213647"/></radialGradient><pattern id="p" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="11" fill="#102934" fill-opacity=".8" stroke="#a3efd4" stroke-opacity=".5"/></pattern></defs>
+<rect width="640" height="360" fill="#0a151e"/>
+<g stroke="#31566a" fill="none"><path d="M210 68H426L500 124V294H284L210 238Z M210 68L284 124H500 M284 124V294 M426 68V238H210 M426 238L500 294"/></g>
+<circle cx="352" cy="178" r="101" fill="url(#v)"/>
+<circle cx="352" cy="178" r="92" fill="url(#p)"/>
+<g stroke="#99f0d3" stroke-opacity=".6"><path d="M95 178L276 100 M95 178L254 178 M95 178L276 256"/></g>
+<circle cx="95" cy="178" r="7" fill="#a3efd4"/>
+<text x="32" y="330" fill="#a3c8d5" font-family="monospace" font-size="12" letter-spacing="2">VOLUME RAY MARCHING · COLOUR TRANSFER</text>
+</svg>

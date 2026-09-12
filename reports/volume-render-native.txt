@@ -1,0 +1,3 @@
+scenario=0 128x128 PASS native original volume renderer, 5284 lit pixels, output guards intact
+scenario=1 65x49 PASS native original volume renderer, 1021 lit pixels, output guards intact
+scenario=2 128x128 PASS native original volume renderer, 5105 lit pixels, output guards intact

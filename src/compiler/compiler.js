@@ -229,6 +229,7 @@ class Emitter {
     }
   }
   argument(n){
+    if(n.kind==='unary'&&n.op==='&'&&n.value.kind==='id'){const value=this.expr(n.value),symbol=value.rootSymbol;if(!symbol||!['local','reference'].includes(symbol.kind)||symbol.constant||!numeric(value.type))this.fail('Local pointer arguments require a mutable named numeric scalar.',n);return this.result(n,arrayOf(value.type),value.code,value.pre,{rootSymbol:symbol,localPointer:true,pointerCode:symbol.kind==='reference'?symbol.pointerCode:'&'+value.code});}
     const address=n.kind==='unary'&&n.op==='&'&&n.value.kind==='index'?n.value:null;
     const base=address?address.base:n.kind==='binary'&&n.op==='+'?n.left:n.kind==='id'?n:null;
     if(base?.kind==='id'&&!['true','false'].includes(base.name)){
@@ -248,6 +249,7 @@ class Emitter {
     const uses=analyse([helper],helper.params),roots=[];
     for(const [i,p]of helper.params.entries())if(p.pointer){
       const a=args[i],symbol=a?.rootSymbol,root=symbol?.rootBufferName;
+      if(a?.localPointer){if(a.type.element!==p.type)this.fail('Local pointer type must exactly match the helper parameter.',n.args[i]);roots.push([i,'@local',false]);continue;}
       if(!root||!isArray(a.type)||a.type.element!==p.type)this.fail('Helper pointers require a same-type storage buffer or buffer offset.',n.args[i]);
       if(symbol.constant&&!p.constant)this.fail('Cannot discard const through a helper pointer argument.',n.args[i]);
       roots.push([i,root,!!symbol.constant]);
@@ -261,7 +263,10 @@ class Emitter {
       if(this.pointerHelpers.size>=128)this.fail('At most 128 helper buffer specializations are supported.',n);
       const clone=structuredClone(helper);let name='cw_buffer_helper_'+this.pointerHelpers.size;while(this.functions.has(name))name+='_';
       clone.name=name;clone.pointerOrigin=helper.name;
-      for(const [i,root,constant]of roots){clone.params[i].boundBuffer=root;clone.params[i].boundConstant=constant;}
+      const localNames=new Set(roots.filter(([,root])=>root==='@local').map(([i])=>clone.params[i].name));
+      const inspect=(node,parent)=>{if(!node||typeof node!=='object')return;if(node.kind==='decl'&&localNames.has(node.name))this.fail('Shadowed local pointer parameters are unsupported.',node);if(node.kind==='id'&&localNames.has(node.name)&&!(parent?.kind==='index'&&parent.base===node&&parent.index.kind==='literal'&&Number(parent.index.value.replace(/[uU]$/,''))===0))this.fail('Local pointers support only dereference or index zero; arithmetic and escapes are unsupported.',node);for(const [key,value]of Object.entries(node))if(!['token','type'].includes(key)){if(Array.isArray(value))value.forEach(v=>inspect(v,node));else if(value&&typeof value==='object')inspect(value,node);}};inspect(clone.body,null);
+      walk(clone.body,node=>{if(node.kind==='index'&&node.base.kind==='id'&&localNames.has(node.base.name)){const name=node.base.name;delete node.base;delete node.index;delete node.dereference;node.kind='id';node.name=name;}});
+      for(const [i,root,constant]of roots){if(root==='@local'){clone.params[i].pointer=false;clone.params[i].reference=true;clone.params[i].localPointer=true;}else{clone.params[i].boundBuffer=root;clone.params[i].boundConstant=constant;}}
       this.pointerHelpers.set(key,clone);this.functions.set(name,clone);this.helpers.push(clone);this.ast.functions.push(clone);
     }
     return this.pointerHelpers.get(key);
@@ -342,8 +347,8 @@ class Emitter {
     const reaches=(from,target,seen=new Set())=>{if(from===target)return true;if(seen.has(from))return false;seen.add(from);return [...(this.helperCalls.get(from)||[])].some(next=>reaches(next,target,seen));};
     if(reaches(helper.name,caller))this.fail('Recursive helper calls are unsupported.',n);
     n.callee.name=helper.name;n.callName=helper.name;
-    const references=new Set();n.constRefTemporaries=[];n.referenceArgs=helper.params.map(p=>!!p.reference);n.groupArgs=helper.params.map(p=>p.type==='thread-block');n.pointerArgs=helper.params.map(p=>!!p.pointer);
-    const codes=args.map((a,i)=>{const p=helper.params[i];if(p.pointer)return a.pointerCode;if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
+    const references=new Set();n.constRefTemporaries=[];n.localPointerArgs=helper.params.map(p=>!!p.localPointer);n.referenceArgs=helper.params.map(p=>!!p.reference);n.groupArgs=helper.params.map(p=>p.type==='thread-block');n.pointerArgs=helper.params.map(p=>!!p.pointer);
+    const codes=args.map((a,i)=>{const p=helper.params[i];if(p.localPointer){if(references.has(a.rootSymbol))this.fail('Aliased local pointer/reference arguments are unsupported.',n.args[i]);references.add(a.rootSymbol);return a.pointerCode;}if(p.pointer)return a.pointerCode;if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
       const node=n.args[i],s=a.rootSymbol;
       if(p.constant){if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.add(s);if(s?.kind==='reference')return s.pointerCode;if(s?.kind==='local'&&!s.constant&&['id','member'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
       if(node.kind!=='id'||!s||!['local','reference'].includes(s.kind)||s.constant||isArray(a.type)||!numeric(a.type)||a.type!==p.type)this.fail('Reference arguments require a mutable named local scalar of the exact type.',node);

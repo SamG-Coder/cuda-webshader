@@ -1,11 +1,11 @@
-# NVIDIA volumeRender: in progress
+# NVIDIA volumeRender: complete device pipeline
 
 Target: the original full ray-marching kernel from NVIDIA CUDA Samples revision
 `5443602d89ed99aede2e4b7bf329daddeadb320e`,
 `cpp/5_Domain_Specific/volumeRender/volumeRender_kernel.cu`.
 
-This candidate is not yet a working sandbox showcase. The source is not being
-replaced by a custom JavaScript renderer or a simplified CUDA kernel.
+The complete original device pipeline runs in the sandbox at `sandbox.html?example=volume`.
+The CUDA function bodies remain unchanged; the browser supplies resources and launch settings.
 
 ## Verified prerequisite: ray vector math
 
@@ -91,21 +91,27 @@ interpreter and NVIDIA WebGPU all produce the exact expected eight components
 for a non-identity matrix and buffer-supplied point. See
 `reports/volume-mul-native.txt` and the matrix-overload GPU regression entry.
 
-## Remaining work for the complete candidate
+## Complete ray-marching validation
 
-The current full-source importer/compiler probe fails at:
+Local scalar output pointers now support the original intersectBox call with
+&tnear and &tfar. Typed specialization emits function-address-space pointers.
+Only dereference or index zero is supported for these local pointer arguments;
+pointer arithmetic, escape, mismatched pointee types and aliased arguments are
+rejected. See tests/local-pointer.test.mjs.
 
-```
-Pointers are supported only as kernel buffer parameters and &buffer[index] atomic targets. (148:54)
-int hit = intersectBox(eyeRay, boxMin, boxMax, &tnear, &tfar);
-```
+The native harness runs the original device functions against NVIDIA's original
+32³ Bucky volume and nine-entry transfer table. The WebGPU regression compares
+all RGBA channels for 128×128 and 65×49 images, plus a rotated 128×128 camera.
+Sixteen trailing output guards must remain intact in each case. Observed maximum
+channel differences were 1, 0 and 1 on an 8-bit scale; the regression allows 2.
+See reports/volume-render-native.txt, the three native binary images, and the
+complete-volume-renderer check in reports/nvidia-regression-gpu.json.
 
-Source inspection also identifies these required capabilities:
+The built sandbox test compares every displayed RGB pixel with native CUDA,
+checks opaque presentation, source/WGSL comparison and mobile width. Presentation
+uses opaque alpha to display the original premultiplied RGB without multiplying
+it again through canvas compositing. The computed RGBA buffer is unchanged.
 
-- Pass addresses of local `tnear`/`tfar` values into `intersectBox`.
-- Configure the original camera matrix and transfer table, validate complete
-  native and WebGPU ray-marched images, then expose the verified renderer as its
-  own sandbox-linked showcase.
-
-The prerequisite tests do not prove the full volume renderer works. No showcase card
-will claim that until the complete kernel and rendered output are verified.
+This verifies the complete device renderer, not the original desktop OpenGL
+application or a CUDA-versus-WebGPU performance advantage. Camera, density and
+transfer settings are editable JSON; rendering is recomputed on Compile & Run.
