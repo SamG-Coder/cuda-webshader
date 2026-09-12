@@ -266,7 +266,12 @@ class Emitter {
           return this.result(n,'u32',`(${bytes.join(' | ')})`,[...pointer.pre,...index.pre,`let ${offset} = u32(${pointer.pointerCode}) + u32(${index.code}) * 4u;`],{rootSymbol:pointer.rootSymbol});
         }
         if(n.pointerTarget&&this.lookup(n.base.name,n).type.element!==n.pointerTarget)this.fail('Byte pointer dereference must retain its pointee type.',n);if(raw&&n.pointerConstant)this.fail('Cannot modify a const byte pointer.',n);
-        const base = this.expr(n.base, true), index = this.expr(n.index);
+        const base = this.expr(n.base, raw);
+        if(this.structs.get(base.type)?.methods?.some(m=>m.name==='operator[]')){
+          if(raw)this.fail('Read-only class indexing cannot be used as a writable reference.',n);
+          const base=n.base,index=n.index;delete n.base;delete n.index;Object.assign(n,{kind:'call',callee:{kind:'member',base,member:'operator[]',token:n.token},args:[index]});return this.call(n);
+        }
+        const index = this.expr(n.index);
         if(base.rootSymbol?.kind==='pointer-array'){
           const slots=base.rootSymbol,root=slots.pointerRoot;if(!root)this.fail('Pointer array must be assigned a shared-array address before use.',n);
           if(!['i32','u32'].includes(index.type))this.fail('Pointer array indices must be 32-bit integers.',n);
@@ -313,6 +318,14 @@ class Emitter {
         }
         const literal=n.value.kind==='unary'&&['+','-'].includes(n.value.op)?n.value.value:n.value;if(n.target==='f32'&&literal.kind==='literal'&&/[.eE]/.test(literal.value)&&!/^0[xX]/.test(literal.value)&&!/[fFuU]$/.test(literal.value)){const rounded=Math.fround(Number(literal.value));if(!Number.isFinite(rounded))this.fail('Explicit float literal conversion overflows f32.',literal);literal.value=String(rounded)+'f';}const value = this.expr(n.value); return this.result(n, n.target, this.convert(value.code, value.type, n.target, n), value.pre); }
       case 'unary': {
+        if(['+','-'].includes(n.op)){
+          const value=this.expr(n.value),method=this.structs.get(value.type)?.methods?.find(m=>m.name==='operator'+n.op);
+          if(method){
+            if(raw)this.fail('Read-only class unary operators cannot be used as writable references.',n);
+            if(method.selfReference){n.classIdentity=n.value;return this.result(n,value.type,value.code,value.pre,{rootSymbol:value.rootSymbol});}
+            const base=n.value,op=n.op;delete n.value;delete n.op;Object.assign(n,{kind:'call',callee:{kind:'member',base,member:'operator'+op,token:n.token},args:[]});return this.call(n);
+          }
+        }
         if (['++', '--'].includes(n.op)){if(n.value.kind!=='id')this.fail('Expression increments require named local scalars or references.',n);const value=this.expr(n.value,true);if(!['local','reference'].includes(value.rootSymbol?.kind))this.fail('Expression increments require named local scalars or references.',n);const update=this.effect(n),tmp='cw_update_'+this.temp++,snapshot=`let ${tmp}: ${value.type} = ${value.code};`;return this.result(n,value.type,tmp,n.prefix?[...update,snapshot]:[snapshot,...update]);}
         if (n.op === '&' || n.op === '*') this.fail('Pointers are supported only as kernel buffer parameters and &buffer[index] atomic targets.', n);
         let value = this.expr(n.value);if(narrow(value.type))value={...value,type:'i32',code:`i32(${value.code})`};
@@ -649,6 +662,11 @@ class Emitter {
     if (s.constant) this.fail(`Cannot write through const '${s.name}'.`, n);
     if (s.kind === 'uniform') this.fail('Scalar kernel parameters are read-only in this subset. Copy the parameter to a local variable first.', n);
   }
+  aggregateCopy(type,path){
+    if(isArray(type))return `${typeName(type)}(${Array.from({length:type.length},(_,i)=>this.aggregateCopy(type.element,`${path}[${i}i]`)).join(', ')})`;
+    if(this.structs.has(type))return `${type}(${this.structs.get(type).fields.map(f=>this.aggregateCopy(f.resolvedType,`${path}.cw_field_${f.name}`)).join(', ')})`;
+    return path;
+  }
   effect(n) {
     if(n.kind==='sequence')return n.expressions.flatMap(e=>this.effect(e));
     if (n.kind === 'assign') {
@@ -682,6 +700,7 @@ class Emitter {
         return [...left.pre,...index.pre,...offset.pre,`${slots.code}[${index.code}] = ${this.convert(offset.code,offset.type,'i32',n)};`];
       }
       const target = this.expr(n.left, true); this.writable(target, n.left); let value = this.expr(n.right);let packedPre;if(target.packedAtomic){n.packedAtomicAssignment=true;const tmp='cw_byte_value_'+this.temp++;packedPre=[...value.pre,`let ${tmp}: ${typeName(value.type)} = ${value.code};`,...target.pre];value={...value,code:tmp,pre:[]};}
+      if(n.op==='='&&this.structs.has(target.type)&&value.type===target.type){const snapshot='cw_value_copy_'+this.temp++;n.type=target.type;return [...target.pre,...value.pre,`let ${snapshot} = ${value.code};`,`${target.code} = ${this.aggregateCopy(target.type,snapshot)};`];}
       if(target.packedPairComponents){
         if(n.op!=='='||value.type!=='cw_uchar2')this.fail('Packed pair stores require a whole uchar2 assignment.',n);
         this.packedAtomicUsed=true;const temp='cw_pair_store_'+this.temp++;n.type='cw_uchar2';
@@ -764,6 +783,12 @@ class Emitter {
     if (n.shared) {
       if (this.shared.some(x => x.code === code)) this.fail('Shared array names must be unique.', n);
       this.shared.push(symbol); return [];
+    }
+    if(init&&this.structs.has(type)&&init.type===type){
+      // Explicit aggregate construction preserves value-copy semantics when
+      // backend lowering materializes dynamically indexed array fields.
+      const snapshot='cw_value_copy_'+this.temp++;
+      return [...init.pre,`let ${snapshot} = ${init.code};`,`${n.constant?'let':'var'} ${code}: ${type} = ${this.aggregateCopy(type,snapshot)};`];
     }
     return [...(init?.pre || []), `${n.constant ? 'let' : 'var'} ${code}: ${typeName(type)}${init ? ` = ${this.convert(init.code, init.type, type, n)}` : ''};`];
   }

@@ -15,19 +15,28 @@ export function parseValueClass(p) {
     while(['__host__','__device__','inline','__forceinline__'].includes(p.peek().value)){if(p.take().value==='__device__')device=true;}
     const constructor=p.is(name)&&p.peek(1).value==='(';
     const spec=constructor?{type:record.type}:p.type();
-    const member=p.name();
-    if(member==='operator')p.fail('Class operator overloads are not yet supported.',start);
+    let member=p.name(),operator=null;
+    if(member==='operator'){
+      operator=p.take().value;
+      if(operator==='['){p.take(']');operator='[]';}
+      if(!['+','-','[]'].includes(operator))p.fail('This class operator overload is not yet supported.',start);
+      member='operator'+operator;
+    }
     if(p.is('(')) {
-      if(!device||spec.pointer||spec.reference||spec.shared||spec.external)p.fail('Value-class methods require device value returns; reference returns are unsupported.',start);
+      const selfReference=spec.reference&&spec.constant&&spec.type===record.type;
+      if(selfReference&&!['+','-'].includes(operator))p.fail('Const self-reference returns currently require a unary class operator.',start);
+      if(!device||spec.pointer||spec.reference&&!selfReference||spec.shared||spec.external)p.fail('Value-class methods require value returns or a const self reference.',start);
       p.take('(');const params=[];
       if(!p.is(')'))do{const t=p.peek(),type=p.type(),param=p.name();if(type.pointer||type.reference||type.shared||type.external)p.fail('Value-class method parameters currently require values.',t);params.push({kind:'param',token:t,name:param,...type});}while(p.match(','));
       p.take(')');const constant=!!p.match('const');
       if(constructor&&constant)p.fail('Constructors cannot be const.',start);
       if(functions.length>=128)p.fail('At most 128 methods per value class are supported.',start);
       if(!constructor&&!constant)p.fail('Mutable class methods are not yet supported.',start);
-      const body=p.block(),helper=constructor?'cw_ctor_'+name:'cw_method_'+name+'_'+member;
-      if(constructor)record.constructors.push(helper);else record.methods.push({name:member,helper});
-      functions.push({kind:'function',token:start,name:helper,qualifier:'__device__',result:spec.type,params,body,classOwner:name,classConstructor:constructor,classMethod:constructor?null:member});
+      if(operator&&params.length!==(operator==='[]'?1:0))p.fail('Supported class operators are unary +/-, or single-index access.',start);
+      const body=p.block(),helper=constructor?'cw_ctor_'+name:'cw_method_'+name+'_'+(operator?{'+':'positive','-':'negative','[]':'index'}[operator]:member);
+      if(selfReference){const ret=body.body[0];if(body.body.length!==1||ret?.kind!=='return'||ret.value?.kind!=='unary'||ret.value.op!=='*'||ret.value.value?.kind!=='id'||ret.value.value.name!=='this')p.fail('Const reference methods currently require exactly return *this.',start);}
+      if(constructor)record.constructors.push(helper);else record.methods.push({name:member,helper,selfReference});
+      functions.push({kind:'function',token:start,name:helper,qualifier:'__device__',result:spec.type,params,body,classOwner:name,classConstructor:constructor,classMethod:constructor?null:member,classSelfReference:selfReference});
       p.match(';');
     } else {
       if(device||spec.pointer||spec.reference||spec.shared||spec.external||spec.constant||spec.type.startsWith('cw_struct_')||['void','texture3d','surface2d','thread-block','cw_extent','cw_size64'].includes(spec.type))p.fail('Value-class fields require plain scalar/vector values.',start);
@@ -45,6 +54,7 @@ export function parseValueClass(p) {
     const inspect=n=>{if(!n||typeof n!=='object')return;if(n.kind==='decl'&&(fields.has(n.name)||n.name===self))p.fail('Value-class method locals cannot shadow fields or generated receiver storage.',n.token);if(n.kind==='id'&&n.name===self)p.fail('Reserved value-class receiver name.',n.token);for(const [key,v]of Object.entries(n))if(key!=='token')Array.isArray(v)?v.forEach(inspect):inspect(v);};inspect(fn.body);
     const rewrite=n=>{
       if(!n||typeof n!=='object')return n;
+      if(fn.classSelfReference&&n.kind==='unary'&&n.op==='*'&&n.value?.name==='this')return {kind:'id',token:n.token,name:self};
       if(n.kind==='id'&&fields.has(n.name)&&!locals.has(n.name))return {kind:'member',token:n.token,base:{kind:'id',token:n.token,name:self},member:n.name};
       if(fn.classConstructor&&n.kind==='return'){if(n.value)p.fail('Constructors cannot return an explicit value.',n.token);n.value={kind:'id',name:self,token:n.token};return n;}
       for(const [key,v]of Object.entries(n))if(key!=='token')n[key]=Array.isArray(v)?v.map(rewrite):rewrite(v);

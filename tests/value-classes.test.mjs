@@ -22,3 +22,12 @@ test('Value classes reject unsupported access, mutable methods and const mutatio
 test('Resolved value-class method recursion is rejected',()=>{
  assert.throws(()=>compile('class V{public:float e;__device__ V(float x){e=x;}__device__ float get() const{V other(1.0f);return other.get();}};__global__ void k(float*out){V v(1.0f);out[0]=v.get();}'),/Recursive/);
 });
+const operators=source.replace(' float e[3];',` __device__ const vec3& operator+() const{return *this;}
+ __device__ vec3 operator-() const{return vec3(-e[0],-e[1],-e[2]);}
+ __device__ float operator[](int i) const{return e[i];}
+ float e[3];`);
+test('Const self, unary negation and indexing preserve class operator values',()=>{
+ const c=compile(operators+'__global__ void k(float*out){vec3 v(2.0f,-3.0f,4.0f);vec3 a=+v;vec3 b=-v;out[0]=a.x();out[1]=b.y();out[2]=v[2];out[3]=(-v)[1];}',{workgroupSize:[1,1,1]}),out=new Float32Array(4);
+ executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[2,3,4,3]);
+ for(const statement of ['v[0]=1.0f;','(+v).e[0]=1.0f;'])assert.throws(()=>compile(operators+'__global__ void k(){vec3 v(1.0f,2.0f,3.0f);'+statement+'}'),/Read-only/);
+});

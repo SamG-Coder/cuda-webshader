@@ -62,6 +62,7 @@ class Context {
     throw new Error(`Expression ${n.kind} is not an lvalue.`);
   }
   *eval(n){
+    if(n.classIdentity)return yield* this.eval(n.classIdentity);
     if(n.packedWordLocal)return (yield* this.ref(n.packedWordLocal)).get()>>>0;
     if(n.packedWordBytes){const p=n.packedWordBytes,base=this.env.get(p.pointerBaseSymbol)?.value,offset=(p.pointerOffset?yield* this.eval(p.pointerOffset):0)+4*(yield* this.eval(n.index));let word=0;for(let i=0;i<4;i++)word|=base.get(offset+i)<<(i*8);return word>>>0;}
     if(n.kind==='sequence'){let result;for(const expression of n.expressions)result=yield* this.eval(expression);return result;}
