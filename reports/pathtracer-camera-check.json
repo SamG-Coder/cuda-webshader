@@ -1,0 +1,12 @@
+{
+  "name": "Original CUDA camera and cuRAND XORWOW match native",
+  "pass": true,
+  "cameras": 512,
+  "randomIntegers": 4608,
+  "randomIntegersExact": true,
+  "uniformFloatsExact": true,
+  "floatValues": 11776,
+  "maxAbsoluteError": 3.814697265625e-06,
+  "fullPathtracerSupported": false,
+  "wallMs": 99.18000000715256
+}

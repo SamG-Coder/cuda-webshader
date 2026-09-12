@@ -1,0 +1,14 @@
+{
+  "sourceRevision": "ab140b12d4923b75270831baabab5e4d4209f305",
+  "nativeLibrary": "CUDA 13.3 cuRAND XORWOW",
+  "nativeCameraHeader": ".local/raytracing-cuda/camera.h",
+  "originalCameraHeaderSHA256": "be997bfe4eda77fb010d65846b284216dc21d924ce0b70fbfbd1859a957a64ff",
+  "sha256": {
+    "tests/pathtracer-camera-class.cuh": "126273cfa6f4ec555ff11d7587b7ebc044efa12401a13d035c3842f420df2951",
+    "tests/pathtracer-camera-kernels.cuh": "7cb6a206d6e2595ff5ee23236d8afc57e673e2cba6c26af56175ff277a874369",
+    "tests/pathtracer-camera-native.cu": "c3c98676b307f9612c881d419e3bc9491b532c4f8131b6209aab06533dff7b1d",
+    "reports/pathtracer-camera-native.bin": "e64b3b791f4b7a05c5d5342f2a7c1c490fe09eae2c0243058bca978d21585d28",
+    "reports/pathtracer-camera-native-bits.bin": "814ffc012a2250f3c6508e861272b8c0d47e0273272c93b0b3f0f797c6cdbdd6",
+    "src/compiler/curand-xorwow.js": "d7c4d9e72303b01faf4ec66b8557b272617bad3c40737ddf10ea2529a0f089ed"
+  }
+}

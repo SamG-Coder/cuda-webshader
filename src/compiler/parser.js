@@ -1,3 +1,4 @@
+import {CURAND_XORWOW_SOURCE} from './curand-xorwow.js';
 /** A deliberately bounded CUDA C frontend. No eval, regex transpilation, or source-specific rewrites. */
 import {parseValueClass,finishValueClasses,parseExternalValueMethod} from './value-classes.js';
 import {forwardingMacro,expressionMacro} from './macros.js';
@@ -427,4 +428,10 @@ export class Parser {
     return value;
   }
 }
-export function parse(source, options = {}) { return new Parser(source, options.defines).parse(); }
+export function parse(source, options = {}) {
+ const libraries=options.libraries||[];
+ if(!Array.isArray(libraries)||libraries.some(n=>n!=='curand-xorwow')||new Set(libraries).size!==libraries.length)throw new CompileError('Supported libraries: curand-xorwow (once).');
+ const parser=new Parser(source,options.defines);
+ if(libraries.includes('curand-xorwow'))parser.tokens=[...tokenize(CURAND_XORWOW_SOURCE).filter(t=>t.kind!=='eof').map(t=>({...t,library:'curand-xorwow'})),...parser.tokens];
+ return parser.parse();
+}

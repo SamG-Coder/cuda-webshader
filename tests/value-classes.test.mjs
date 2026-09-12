@@ -106,3 +106,27 @@ test('Original hitable_list captures persistent buffer origins across entries',(
  for(const a of artifacts){assert.deepEqual(a.metadata.objectHeap.imports.map(i=>[i.name,i.targets]),[['objects',['sphere']],['world',['hitable_list']]]);assert.deepEqual(a.metadata.objectHeap,artifacts[0].metadata.objectHeap);}
  assert.throws(()=>compile(text,{entry:'trace_list'}),/persistent object arenas/);
 });
+
+
+test('Grouped class fields and mutable value returns preserve receiver updates',()=>{
+ const s='class V{public:int x,y;__device__ V(int a){x=a;y=2;}__device__ int next(){x+=y;return x;}};__global__ void k(int*out){V v(1);out[0]=v.next();out[1]=v.next();out[2]=v.x;}';
+ const a=compile(s,{workgroupSize:[1,1,1]}),out=new Int32Array(3);executeCPU(a,{out},{},[1]);assert.deepEqual([...out],[3,5,5]);
+ assert.throws(()=>compile(s.replace('int x,y','int x,x')),/duplicate/);
+ assert.throws(()=>compile(s.replace('V v(1)','const V v(1)')),/mutable/);
+});
+
+test('Local record pointers preserve state through class methods and forwarded helpers',()=>{
+ const s='struct S{unsigned int x;};__device__ unsigned int next(S*s){s->x+=3;return s->x;}__device__ unsigned int forward(S*s){return next(s);}class V{public:int x;__device__ V(){x=1;}__device__ unsigned int get(S*s){return forward(s);}};__global__ void k(unsigned int*out){S s;s.x=1;V v;out[0]=v.get(&s);out[1]=s.x;}';
+ const a=compile(s,{workgroupSize:[1,1,1]}),out=new Uint32Array(2);executeCPU(a,{out},{},[1]);assert.deepEqual([...out],[4,4]);
+ assert.throws(()=>compile(s.replace('return next(s)','return next(s+1)')),/Local pointers/);
+});
+
+test('XORWOW compatibility is explicit and rejects unsupported initialization modes',()=>{
+ const s='__global__ void k(unsigned int*out){curandState state;curand_init(1984u,0,0,&state);out[0]=curand(&state);}';
+ const options={libraries:['curand-xorwow'],workgroupSize:[1,1,1]};
+ const a=compile(s,options);assert.equal(a.metadata.libraries[0].seedBits,32);
+ assert.throws(()=>compile(s));
+ for(const replacement of ['1984u,1,0','1984u,0,1','1984u,threadIdx.x,0','-1,0,0'])assert.throws(()=>compile(s.replace('1984u,0,0',replacement),options),/XORWOW/);
+ assert.throws(()=>compile(s,{libraries:['unknown']}),/Supported libraries/);
+ const camera=['value-class','camera-class','camera-kernels'].map(n=>readFileSync(new URL('./pathtracer-'+n+'.cuh',import.meta.url),'utf8')).join('\n');assert.ok(compile(camera,{...options,entry:'check_camera'}).wgsl.includes('tan('));
+});

@@ -1,0 +1,1 @@
+512 cameras; 4608 RNG integers and 11776 uniform/camera float outputs

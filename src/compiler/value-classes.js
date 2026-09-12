@@ -31,11 +31,10 @@ export function parseValueClass(p) {
       if(selfReference&&!['+','-'].includes(operator))p.fail('Const self-reference returns currently require a unary class operator.',start);
       if(!device||spec.pointer||spec.reference&&!selfReference&&!indexedReference&&!mutableSelf||spec.shared||spec.external)p.fail('Value-class methods require value returns or supported receiver/array references.',start);
       p.take('(');const params=[];
-      if(!p.is(')'))do{const t=p.peek(),type=p.type(),param=p.name();if(type.pointer&&type.type.startsWith('cw_objectptr_')){type.pointer=false;type.type=type.type.replace('cw_objectptr_','cw_objectlist_');(p.objectListTypes??=new Set()).add(type.type);}if(type.pointer||type.shared||type.external)p.fail('Value-class method parameters require values or const references.',t);params.push({kind:'param',token:t,name:param,...type});}while(p.match(','));
+      if(!p.is(')'))do{const t=p.peek(),type=p.type(),param=p.name();if(type.pointer&&type.type.startsWith('cw_objectptr_')){type.pointer=false;type.type=type.type.replace('cw_objectptr_','cw_objectlist_');(p.objectListTypes??=new Set()).add(type.type);}if(type.pointer&&!type.type.startsWith('cw_struct_')||type.shared||type.external)p.fail('Value-class method parameters require values, references or record pointers.',t);params.push({kind:'param',token:t,name:param,...type});}while(p.match(','));
       p.take(')');const constant=!!p.match('const');
       if(constructor&&constant)p.fail('Constructors cannot be const.',start);
       if(functions.length>=128)p.fail('At most 128 methods per value class are supported.',start);
-      if(!constructor&&!constant&&!indexedReference&&!mutableSelf&&spec.type!=='void')p.fail('Mutable methods currently require void or self-reference returns.',start);
       if(operator&&params.length!==(['[]','+=','-=','*=','/='].includes(operator)?1:0))p.fail('Class operators require zero unary arguments or one index/compound argument.',start);
       if(p.match('=')){if(!virtual||constructor||p.take().value!=='0')p.fail('Only pure virtual = 0 declarations are supported.',start);p.take(';');(record.abstractMethods??=[]).push({name:member,result:spec.type,params,constant});continue;}
       const initializers=[];
@@ -53,10 +52,15 @@ export function parseValueClass(p) {
     } else {
       if(spec.pointer&&spec.type.startsWith('cw_objectptr_')){spec.pointer=false;spec.type=spec.type.replace('cw_objectptr_','cw_objectlist_');(p.objectListTypes??=new Set()).add(spec.type);}
       if(device||spec.pointer||spec.reference||spec.shared||spec.external||spec.constant||['void','texture3d','surface2d','thread-block','cw_extent','cw_size64'].includes(spec.type))p.fail('Value-class fields require plain scalar/vector values.',start);
-      const dimensions=[];while(p.match('[')){dimensions.push(p.expression(2));p.take(']');}p.take(';');
-      if(dimensions.length>1||record.fields.length>=64||record.fields.some(f=>f.name===member))p.fail('Invalid or duplicate value-class field.',start);
-      if(spec.type.startsWith('cw_struct_')){const nested=[...p.structs.values()].find(r=>r.type===spec.type);if(!nested?.complete||dimensions.length)p.fail('Nested class fields require a previously completed class and no array dimensions.',start);}
-      record.fields.push({name:member,type:spec.type,dimensions,token:start});
+      do {
+        const dimensions=[];while(p.match('[')){dimensions.push(p.expression(2));p.take(']');}
+        if(dimensions.length>1||record.fields.length>=64||record.fields.some(f=>f.name===member))p.fail('Invalid or duplicate value-class field.',start);
+        if(spec.type.startsWith('cw_struct_')){const nested=[...p.structs.values()].find(r=>r.type===spec.type);if(!nested?.complete||dimensions.length)p.fail('Nested class fields require a previously completed class and no array dimensions.',start);}
+        record.fields.push({name:member,type:spec.type,dimensions,token:start});
+        if(!p.match(','))break;
+        member=p.name();
+      } while(true);
+      p.take(';');
     }
   }
   p.take('}');p.take(';');

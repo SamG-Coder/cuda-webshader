@@ -204,3 +204,33 @@ distance and the untouched miss record. Cleanup clears every pointer. The GPU
 trace binds only its output; the arena retains both scene buffers. The original
 list and sphere function bodies are unchanged. Camera, cuRAND and complete
 material scattering still need integration before the full scene can be shown.
+
+
+## Original camera and XORWOW stage
+
+The complete original camera.h device definitions now compile and execute,
+including random_in_unit_disk and non-const get_ray. The parser accepts grouped
+class fields, mutable methods returning values, and unambiguous numeric
+constructor conversions. Local record pointers can be forwarded through device
+helpers and class methods without losing state updates. CUDA tan lowers to WGSL
+tan under the existing float32 arithmetic model.
+
+An explicit `libraries: ['curand-xorwow']` compilation option supplies a small
+compatibility implementation of curandState, curand_init, curand and
+curand_uniform. It supports uint32 seeds and compile-time zero subsequence and
+offset, exactly the initialization mode used by the original final chapter.
+Unsupported initialization modes are compilation errors. This is not the whole
+cuRAND API, its native state ABI, or support for 64-bit seeds. The compiler-owned
+state keeps the six XORWOW words needed by these operations. The original CUDA
+program and native harness use the installed real cuRAND library.
+
+Across 512 cameras (varying field of view, image coordinates and aperture), all
+4,608 RNG integers match native CUDA exactly, including a draw after lens
+sampling that verifies the state consumed by rejection sampling. All 4,096
+uniform float values match exactly. The total 11,776 float outputs additionally
+cover ray origins, ray directions and camera basis vectors; maximum absolute
+error is 0.000003814697265625 (tolerance 0.00002 for camera arithmetic).
+Seeds include zero and UINT32_MAX. Every original camera method body is intact.
+These results establish camera and RNG behaviour in a local-value harness;
+persistent camera access, material scattering and the full scene still require
+integration before a new sandbox showcase is valid.
