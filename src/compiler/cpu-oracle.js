@@ -93,6 +93,10 @@ class Context {
       const old=args[0].get(),value=name==='atomicAdd'?old+args[1]:name==='atomicMin'?Math.min(old,args[1]):name==='atomicMax'?Math.max(old,args[1]):args[1];args[0].set(value);return old;
     }
     if(['float','int','uint','bool'].includes(name))return convert(args[0],n.type);
+    if(name==='make_float3'&&Array.isArray(args[0]))return args[0].slice(0,3);
+    if(name==='make_float4'&&Array.isArray(args[0]))return [...args[0],args[1]];
+    if(name==='dot'||name==='normalize'){const sum=args[0].reduce((sum,a,i)=>f(sum+f(a*(name==='dot'?args[1][i]:a))),0);return name==='dot'?sum:args[0].map(a=>f(a/Math.sqrt(sum)));}
+    if(['fminf','fmaxf'].includes(name)&&Array.isArray(args[0]))return args[0].map((a,i)=>f(name==='fminf'?Math.min(a,args[1][i]):Math.max(a,args[1][i])));
     if(/^make_(float|uint|int)[234]$/.test(name))return (args.length===1?Array(vectorLength(n.type)).fill(args[0]):args).map(v=>convert(v,vectorElement(n.type)));
     if(name==='__fdividef')return f(args[0]/args[1]);
     if(name==='__saturatef')return f(Number.isNaN(args[0])?0:Math.max(0,Math.min(1,args[0])));

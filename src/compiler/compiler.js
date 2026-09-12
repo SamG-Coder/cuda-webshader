@@ -293,10 +293,14 @@ class Emitter {
     }
     if (casts[name]) { if (args.length !== 1) this.fail('Scalar casts require one argument.', n); return this.result(n, casts[name], this.convert(args[0].code, args[0].type, casts[name], n), pre); }
     if (/^make_(float|uint|int)[234]$/.test(name)) {
+      if(name==='make_float3'&&args.length===1&&args[0].type==='vec4<f32>')return this.result(n,'vec3<f32>',`${args[0].code}.xyz`,pre);
+      if(name==='make_float4'&&args.length===2&&args[0].type==='vec3<f32>'&&args[1].type==='f32')return this.result(n,'vec4<f32>',`vec4<f32>(${args[0].code}, ${args[1].code})`,pre);
       const count = Number(name.at(-1)); if (args.length !== count && args.length !== 1) this.fail(`${name} needs ${count} arguments.`, n);
       const element=name.startsWith('make_uint')?'u32':name.startsWith('make_int')?'i32':'f32';
       return this.result(n, `vec${count}<${element}>`, `vec${count}<${element}>(${args.map(a => this.convert(a.code, a.type, element, n)).join(', ')})`, pre);
     }
+    if(name==='dot'||name==='normalize'){const type=args[0]?.type;if(args.length!==(name==='dot'?2:1)||!vectorLength(type)||vectorElement(type)!=='f32'||(name==='dot'&&args[1].type!==type))this.fail(name+' requires matching float vectors.',n);return this.result(n,name==='dot'?'f32':type,`${name}(${args.map(a=>a.code).join(', ')})`,pre);}
+    if(['fminf','fmaxf'].includes(name)&&args.some(a=>vectorLength(a.type))){const type=args[0]?.type;if(args.length!==2||!vectorLength(type)||vectorElement(type)!=='f32'||args[1].type!==type)this.fail(name+' requires matching float vectors.',n);return this.result(n,type,`${name==='fminf'?'min':'max'}(${args.map(a=>a.code).join(', ')})`,pre);}
     if(name==='__fdividef'){if(args.length!==2)this.fail('__fdividef requires two arguments.',n);return this.result(n,'f32',`(${args.map(a=>this.convert(a.code,a.type,'f32',n)).join(' / ')})`,pre);}
     if(name==='sqrt'){if(args.length!==1||args[0].type!=='f32')this.fail('sqrt supports the single float overload only; double/integer overloads are unavailable.',n);return this.result(n,'f32',`sqrt(${args[0].code})`,pre);}
     if(name==='__saturatef'){if(n.args.length!==1)this.fail('__saturatef requires one float argument.',n);const a=args[0];if(a.type!=='f32')this.fail('__saturatef requires a float argument.',n);return this.result(n,'f32',`clamp(${a.code}, 0.0f, 1.0f)`,a.pre);}
@@ -352,6 +356,7 @@ class Emitter {
         }
       }
       const target = this.expr(n.left, true); this.writable(target, n.left); const value = this.expr(n.right);
+      if(n.op!=='='&&vectorLength(target.type)){const op=n.op.slice(0,-1);if(n.left.kind!=='id'||vectorElement(target.type)!=='f32'||!['+','-','*','/'].includes(op)||![target.type,'f32'].includes(value.type))this.fail('Vector compound assignments require a named float vector and matching vector or float scalar.',n);const rhs=value.type===target.type?value.code:`${target.type}(${value.code})`;n.operandType=target.type;n.type=target.type;return [...target.pre,...value.pre,`${target.code} = ${target.code} ${op} ${rhs};`];}
       let code = this.convert(value.code, value.type, target.type, n);
       if (n.op !== '=') {
         const op = n.op.slice(0, -1); if (target.atomic) this.fail('Use explicit atomicAdd/Min/Max/Exch rather than compound assignments to atomic arrays.', n);

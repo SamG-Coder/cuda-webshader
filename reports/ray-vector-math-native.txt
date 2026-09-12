@@ -1,0 +1,1 @@
+PASS native CUDA helper_math ray operations; max error 0
