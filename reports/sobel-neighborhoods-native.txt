@@ -1,0 +1,5 @@
+PASS original ComputeSobel: scale=-1, 4099 neighborhoods and guard bytes.
+PASS original ComputeSobel: scale=0, 4099 neighborhoods and guard bytes.
+PASS original ComputeSobel: scale=0.25, 4099 neighborhoods and guard bytes.
+PASS original ComputeSobel: scale=1, 4099 neighborhoods and guard bytes.
+PASS original ComputeSobel: scale=4, 4099 neighborhoods and guard bytes.

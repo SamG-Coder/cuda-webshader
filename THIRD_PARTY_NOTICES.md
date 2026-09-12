@@ -114,3 +114,12 @@ original device functions and BSD-3-Clause notice from CUDA Samples commit
 `showcases/box-filter/teapot1024.ppm` is the sample's unchanged image under the
 same NVIDIA license. Native captures derive from those assets. The compiler,
 JSON launch setup and test harnesses are original MIT project code.
+
+### NVIDIA SobelFilter
+
+`tests/sobel-compute.cuh` retains the original `ComputeSobel` device function
+and BSD-3-Clause notice from CUDA Samples commit
+`5443602d89ed99aede2e4b7bf329daddeadb320e`,
+`cpp/5_Domain_Specific/SobelFilter/SobelFilter_kernels.cu`.
+The neighbourhood captures derive from this helper; wrappers, compiler support
+and validation harnesses are original MIT project code.

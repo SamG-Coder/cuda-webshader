@@ -1,0 +1,4 @@
+PASS 1x1 pitch=4: stores, helper compound updates, rebasing, wraparound and guard bytes.
+PASS 3x5 pitch=6: stores, helper compound updates, rebasing, wraparound and guard bytes.
+PASS 31x9 pitch=34: stores, helper compound updates, rebasing, wraparound and guard bytes.
+PASS 61x65 pitch=64: stores, helper compound updates, rebasing, wraparound and guard bytes.

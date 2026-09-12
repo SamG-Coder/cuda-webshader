@@ -12,6 +12,7 @@ export function packScalars(metadata, values, target = new ArrayBuffer(metadata.
     let v = Object.hasOwn(values,p.name)?values[p.name]:p.origin==='constant'?p.defaultValue:undefined;
     if(p.sourceType==='bool'){if(![true,false,0,1].includes(v))throw new TypeError(`Scalar '${p.name}' must be a boolean or 0/1.`);v=Number(v);}
     if (typeof v !== 'number' || !Number.isFinite(v)) throw new TypeError(`Scalar '${p.name}' must be finite.`);
+    if(['cw_short','cw_ushort'].includes(p.sourceType)&&(!Number.isInteger(v)||v<(p.sourceType==='cw_short'?-32768:0)||v>(p.sourceType==='cw_short'?32767:65535)))throw new RangeError(`${p.name} is outside its 16-bit range.`);
     if (p.type === 'u32') { if (!Number.isInteger(v) || v < 0 || v > 0xffffffff) throw new RangeError(`${p.name} is not a u32.`); }
     else if (p.type === 'i32') { if (!Number.isInteger(v) || v < -2147483648 || v > 2147483647) throw new RangeError(`${p.name} is not an i32.`); }
     else if (!Number.isFinite(Math.fround(v))) throw new RangeError(`${p.name} overflows f32.`);

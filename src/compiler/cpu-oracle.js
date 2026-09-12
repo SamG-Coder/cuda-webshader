@@ -9,6 +9,8 @@ function convert(value,type){
   if(type==='cw_size64')return BigInt.asUintN(64,BigInt(value));
   if(type==='cw_extent')return structuredClone(value);
   if(typeof type==='string'&&type.startsWith('cw_struct_'))return structuredClone(value);
+  if(type==='cw_short')return (Number(value)<<16)>>16;
+  if(type==='cw_ushort')return Number(value)&65535;
   if(type==='cw_uchar')return Number(value)&255;
   if(type==='cw_uchar4')return Number(value)>>>0;
   if(type==='f32')return f(value);if(type==='u32')return Number(value)>>>0;if(type==='i32')return Number(value)|0;if(type==='bool')return !!value;
@@ -117,6 +119,7 @@ class Context {
     if(name==='__fdividef')return f(args[0]/args[1]);
     if(name==='__saturatef')return f(Number.isNaN(args[0])?0:Math.max(0,Math.min(1,args[0])));
     if(name==='sqrt')return f(Math.sqrt(args[0]));
+    if(name==='abs')return Math.abs(args[0])|0;
     const unary={sinf:Math.sin,cosf:Math.cos,tanf:Math.tan,sqrtf:Math.sqrt,rsqrtf:x=>1/Math.sqrt(x),expf:Math.exp,__expf:Math.exp,exp2f:x=>2**x,logf:Math.log,__logf:Math.log,log2f:Math.log2,fabs:Math.abs,fabsf:Math.abs,floorf:Math.floor,ceilf:Math.ceil,truncf:Math.trunc};
     if(unary[name])return f(unary[name](args[0]));
     if(['fminf','fmaxf','min','max','powf','atan2f','fmaf'].includes(name)){
@@ -161,7 +164,7 @@ export function executeCPU(artifact,buffers,scalars,workgroups,{instructionBudge
     if(p.symbol.components){const element=vectorElement(p.type),value=p.symbol.components.map(name=>{const v=scalars[name];if(!Number.isFinite(v)||element==='f32'&&!Number.isFinite(Math.fround(v))||element==='u32'&&(!Number.isInteger(v)||v<0||v>0xffffffff)||element==='i32'&&(!Number.isInteger(v)||v<-2147483648||v>2147483647))throw Error('Invalid vector component '+name);return convert(v,element);});baseEnv.set(p.symbol,{value});continue;}
     if(p.type==='cw_extent'){const value={};for(const field of ['width','height','depth']){const v=scalars[p.name+'.'+field];if(!Number.isInteger(v)||v<0||v>0xffffffff)throw Error('Invalid cudaExtent component '+field);value[field]=BigInt(v);}baseEnv.set(p.symbol,{value});continue;}
     if(p.pointer){if(p.type==='cw_uchar'&&!(buffers[p.name] instanceof Uint8Array))throw Error('Byte CPU buffers require Uint8Array.');if(!ArrayBuffer.isView(buffers[p.name]))throw new Error(`Missing CPU buffer ${p.name}.`);baseEnv.set(p.symbol,{value:new BufferView(buffers[p.name],p.type)});}
-    else{if(p.type==='bool'&&![true,false,0,1].includes(scalars[p.name]))throw new Error(`Invalid Boolean scalar ${p.name}.`);if(p.type==='cw_uchar4'&&(!Number.isInteger(scalars[p.name])||scalars[p.name]<0||scalars[p.name]>0xffffffff))throw new Error(`Invalid packed scalar ${p.name}.`);if(!Number.isFinite(scalars[p.name])&&!(p.type==='bool'&&typeof scalars[p.name]==='boolean'))throw new Error(`Missing/invalid scalar ${p.name}.`);baseEnv.set(p.symbol,{value:convert(scalars[p.name],p.type)});}
+    else{if(['cw_short','cw_ushort'].includes(p.type)&&(!Number.isInteger(scalars[p.name])||scalars[p.name]<(p.type==='cw_short'?-32768:0)||scalars[p.name]>(p.type==='cw_short'?32767:65535)))throw Error('Short launch value out of range.');if(p.type==='bool'&&![true,false,0,1].includes(scalars[p.name]))throw new Error(`Invalid Boolean scalar ${p.name}.`);if(p.type==='cw_uchar4'&&(!Number.isInteger(scalars[p.name])||scalars[p.name]<0||scalars[p.name]>0xffffffff))throw new Error(`Invalid packed scalar ${p.name}.`);if(!Number.isFinite(scalars[p.name])&&!(p.type==='bool'&&typeof scalars[p.name]==='boolean'))throw new Error(`Missing/invalid scalar ${p.name}.`);baseEnv.set(p.symbol,{value:convert(scalars[p.name],p.type)});}
   }
   const shared=[];for(const fn of artifact.ast.functions)walk(fn.body,n=>{if(n.kind==='decl'&&n.shared&&n.symbol&&!shared.some(d=>d.symbol===n.symbol))shared.push(n);});
   let groups=0,barriers=0;

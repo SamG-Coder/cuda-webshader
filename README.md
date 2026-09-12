@@ -487,3 +487,9 @@ Original NVIDIA kernels classify a 16³ field, compact voxels and generate 2,080
 ### NVIDIA box filter
 
 [Blur NVIDIA’s original teapot image in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=box-filter). The original CUDA row and column kernels use a sliding window and keep the packed intermediate image on the GPU. The default 1024² image uses radius 14; edit both radius settings to try another size. Eight complete colour captures match native within one channel level, and all four scalar entries are verified too. [Setup and supported scope](showcases/box-filter/README.md).
+
+SobelFilter is the next candidate in progress. Its unchanged `ComputeSobel`
+helper now matches native CUDA on hardware WebGPU, supported by packed byte
+stores and short-integer values. The full image kernels still require texture,
+pointer-cast and shared-memory work before a showcase is available.
+[Validation and remaining compiler gaps](reports/sobel-progress.md).

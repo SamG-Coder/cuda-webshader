@@ -1,0 +1,4 @@
+PASS short values a=32766 b=65534
+PASS short values a=-32768 b=0
+PASS short values a=-1 b=65535
+PASS short values a=0 b=32768

@@ -15,6 +15,7 @@ const TYPES = new Set(['float', 'int', 'uint', 'unsigned', 'bool', 'void', 'floa
 const QUALIFIERS = new Set(['const', '__shared__', '__restrict__', '__restrict', 'restrict','extern']);
 const MAP = { float: 'f32', int: 'i32', uint: 'u32', bool: 'bool', void: 'void', float2: 'vec2<f32>', float3: 'vec3<f32>', float4: 'vec4<f32>' };
 TYPES.add('uchar');MAP.uchar='cw_uchar';
+TYPES.add('short');MAP.short='cw_short';TYPES.add('ushort');MAP.ushort='cw_ushort';
 TYPES.add('uchar4');MAP.uchar4='cw_uchar4';
 TYPES.add('cudaExtent');MAP.cudaExtent='cw_extent';
 TYPES.add('cudaTextureObject_t');MAP.cudaTextureObject_t='texture3d';
@@ -110,7 +111,8 @@ export class Parser {
       if(!this.typeTraits.has(name))this.fail(`Unknown type trait '${name}'.`,tok);
       this.take('<');const argument=this.name();this.take('>');this.take('::');const member=this.name();
       type={kind:'trait-type',name,argument,member};
-    }else if (tok.value === 'unsigned') { if(this.match('char'))type='cw_uchar';else{this.match('int'); type = 'u32';} } else type = this.structs.has(tok.value)?this.structs.get(tok.value).type:this.templateTypeNames?.has(tok.value)?'template:'+tok.value:(this.typeAliases.get(tok.value)||builtinType(tok.value));
+    }else if (tok.value === 'unsigned') { if(this.match('char'))type='cw_uchar';else if(this.match('short')){this.match('int');type='cw_ushort';}else{this.match('int'); type = 'u32';} } else type = this.structs.has(tok.value)?this.structs.get(tok.value).type:this.templateTypeNames?.has(tok.value)?'template:'+tok.value:(this.typeAliases.get(tok.value)||builtinType(tok.value));
+    if(tok.value==='short')this.match('int');
     if(!type&&this.deferredType(tok.value))type='unsupported:'+tok.value;
     if (!type) this.fail(`Unsupported type '${tok.value}'. Use float, int, unsigned int, bool or float2/3/4.`, tok);
     if (this.match('const')) constant = true;
