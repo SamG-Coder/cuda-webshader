@@ -5,7 +5,7 @@
   "results": [
     {
       "compiled": false,
-      "error": "Unknown identifier 'cooperative_groups::thread_block_tile'. (338:5)\n    cg::thread_block_tile<32> tile32 = cg::tiled_partition<32>(cta);\r\n    ^"
+      "error": "Static tile memory synchronization requires predicated workgroup phases. (402:13)\n            cg::sync(tile32);\r\n            ^"
     }
   ]
 }

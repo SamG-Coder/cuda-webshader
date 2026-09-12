@@ -7,8 +7,10 @@
     "description": "",
     "features": [
       "core-features-and-limits",
-      "timestamp-query",
-      "float32-filterable"
+      "subgroup-size-control",
+      "float32-filterable",
+      "subgroups",
+      "timestamp-query"
     ],
     "timestampQuery": true,
     "limits": {

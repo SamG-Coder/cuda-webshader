@@ -225,3 +225,29 @@ partial/nested/empty lists, const arrays and warpSize in max(). All 665 unit and
 The original quadtree now reaches cooperative_groups::thread_block_tile<32>.
 Its tiled collectives and full recursive execution remain before a runnable
 quadtree showcase can be added.
+
+## Fixed 32-lane subgroup collectives
+
+The compiler parses static thread_block_tile<32> declarations and translates
+thread_rank, any, ballot, shfl and shfl_up. Kernels explicitly request subgroup
+size 32, with CUDA thread indices derived from subgroup ID and subgroup lane ID.
+This avoids assuming a relationship between WebGPU physical local indices and
+subgroup indices. Runtime checks require subgroups, subgroup-size-control,
+subgroup_id and subgroup_uniformity support. __popc maps to a 32-bit bit count.
+
+The browser rejected vote-controlled loops as non-uniform even in a minimal
+reproducer. The compiler now recognizes direct any-controlled loops, rejects
+early exits and conditional/nested collectives in their body or step, and places
+an unsuppressed subgroup operation before the loop to validate uniform entry.
+Only the proven loop has subgroup_uniformity diagnostics disabled. A negative
+GPU case verifies that half-tile entry is still rejected. General subgroup
+validation stays enabled; tile synchronization is never discarded.
+
+Four tiles/128 lanes check 640 values: votes, lane shuffles, prefix scan and
+different iteration counts per tile. Native CUDA and WebGPU both match the same
+expected values. All 669 unit and 219 real NVIDIA GPU tests pass, plus Bezier and
+path-tracer sandbox regressions. The complete original quadtree still stops at
+cg::sync(tile32): predicated workgroup phases and recursive execution remain.
+
+Specification reference: https://www.w3.org/TR/WGSL/ (subgroup builtins, subgroup
+index mapping, subgroup size control and uniformity diagnostics).

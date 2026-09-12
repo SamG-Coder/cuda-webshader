@@ -119,6 +119,7 @@ class Context {
       else args.push(n.groupArgs?.[i]?null:yield* (n.referenceArgs?.[i]?this.ref(a):this.eval(a)));
     }
     if(['sincosf','__sincosf'].includes(name)){const phase=f(args[0]),s=f(Math.sin(phase)),c=f(Math.cos(phase));args[1].set(s);args[2].set(c);return;}
+    if(name==='__popc'){let x=args[0]>>>0,count=0;while(x){x=(x&(x-1))>>>0;count++;}return count;}
     if(name==='__ffs'){const x=args[0]|0;return x===0?0:32-Math.clz32(x&-x);}
     if(name==='__mul24')return Math.imul((args[0]<<8)>>8,(args[1]<<8)>>8);
     if(name==='__umul24')return Math.imul(args[0]&0xffffff,args[1]&0xffffff)>>>0;
@@ -174,6 +175,7 @@ class Context {
   }
 }
 export function executeCPU(artifact,buffers,scalars,workgroups,{instructionBudget=1_000_000}={}){
+  if(artifact.metadata.nativeTiles)throw Error('Native tile collectives require GPU execution.');
   if(artifact.metadata.objectHeap?.persistent)throw Error('Persistent object arenas require GPU execution; the CPU oracle has no cross-dispatch arena.');
   for(const c of artifact.metadata.scalarConstraints||[]){const v=scalars[c.name];if(!Number.isInteger(v)||v<c.minimum||v%c.multipleOf!==0)throw new RangeError(`${c.name} must be a nonnegative multiple of ${c.multipleOf} for full-workgroup execution.`);}
   buffers={...buffers};for(const [alias,target]of Object.entries(artifact.metadata.bufferAliases||{})){if(Object.hasOwn(buffers,alias)&&buffers[alias]!==buffers[target])throw Error('Declared CPU buffer alias must use the canonical resource.');buffers[alias]=buffers[target];}

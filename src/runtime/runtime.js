@@ -46,7 +46,7 @@ export class GpuRuntime {
     if (!globalThis.navigator?.gpu && !options.device) throw new Error('WebGPU is required. Open this project on localhost or HTTPS in a WebGPU-capable browser. WebGL cannot run these kernels.');
     const adapter = options.adapter || (!options.device ? await navigator.gpu.requestAdapter({powerPreference:'high-performance'}) : null);
     if (!adapter && !options.device) throw new Error('No WebGPU adapter is available. Check the browser GPU settings and graphics driver.');
-    const features = ['timestamp-query','core-features-and-limits','float32-filterable'].filter(f => adapter?.features.has(f));
+    const features = ['timestamp-query','core-features-and-limits','float32-filterable','subgroups','subgroup-size-control'].filter(f => adapter?.features.has(f));
     const requiredLimits = adapter ? {
       maxStorageBuffersPerShaderStage: Math.min(adapter.limits.maxStorageBuffersPerShaderStage,16),
       maxComputeInvocationsPerWorkgroup: Math.min(adapter.limits.maxComputeInvocationsPerWorkgroup, 1024),
@@ -229,6 +229,8 @@ export class GpuRuntime {
   async kernel(sourceOrArtifact,options={}) {
     this.assertAlive();const artifact=typeof sourceOrArtifact==='string'?compile(sourceOrArtifact,options):sourceOrArtifact;
     validateWorkgroup(artifact.metadata,this.device.limits);
+    for(const feature of artifact.metadata.requiredFeatures||[])if(!this.device.features.has(feature))throw Error('Kernel requires WebGPU feature '+feature);
+    for(const feature of artifact.metadata.requiredWgslFeatures||[])if(!navigator.gpu?.wgslLanguageFeatures?.has(feature))throw Error('Kernel requires WGSL feature '+feature);
     // Use complete source/ABI, not an unchecked short hash, as the cache key.
     const key=artifact.wgsl+'\n'+JSON.stringify(artifact.metadata)+'\n'+JSON.stringify(artifact.children?.map(c=>({queueId:c.queueId,wgsl:c.artifact.wgsl,metadata:c.artifact.metadata})));
     if(this.pipelineCache.has(key)){this.stats.pipelineCacheHits++;return this.pipelineCache.get(key);}

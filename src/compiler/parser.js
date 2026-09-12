@@ -362,6 +362,9 @@ export class Parser {
       this.take(')');this.take(';');if(left.kind!=='id')this.fail('PTX output requires a named 32-bit integer register.',token);return {kind:'expr',token,value:{kind:'assign',op:'=',token,left,right:{kind:'ptx-sad4',token,args,outputName:left.name}}};
     }
     if(this.match('do')){const body=this.statement();this.take('while');this.take('(');const condition=this.expression();this.take(')');this.take(';');return {kind:'do',token,body,condition};}
+    if(this.groupNamespaces.has(token.value)&&this.peek(1).value==='::'&&this.peek(2).value==='thread_block_tile'){
+      this.qualifiedName();this.take('<');this.take('32');this.take('>');const name=this.name();this.take('=');const factory=this.qualifiedName();this.take('<');this.take('32');this.take('>');this.take('(');const parent=this.name();this.take(')');this.take(';');if(factory!=='cooperative_groups::tiled_partition')this.fail('Static tiles require tiled_partition<32>(block).',token);return {kind:'thread-warp',token,name,parent};
+    }
     if(this.groupNamespaces.has(token.value)&&this.peek(1).value==='::'&&this.peek(2).value==='thread_group'){
       this.qualifiedName();const name=this.name();this.take('=');const factory=this.qualifiedName();this.take('(');const parent=this.name();this.take(',');const size=this.expression(2);this.take(')');this.take(';');if(factory!=='cooperative_groups::tiled_partition')this.fail('thread_group requires tiled_partition(block, size).',token);return {kind:'thread-tile',token,name,parent,size};
     }
