@@ -96,7 +96,7 @@ class Emitter {
         for(const fn of ast.functions.filter(f=>f.qualifier==='__global__'))walk(fn.body,n=>{if(n.kind==='object-new'&&n.name===record.name)for(const f of fields){const arg=n.args[f.index],imported=this.objectImports.find(i=>arg?.kind==='id'&&i.name===arg.name&&fn.params.some(p=>p.name===arg.name));if(imported){const origins=record.listOrigins[f.field]??=[];if(!origins.includes(imported.id))origins.push(imported.id);}}});
       }
     }
-    const storageLayout=type=>{if(isArray(type)){const e=storageLayout(type.element),stride=Math.ceil(e.size/e.align)*e.align;return {align:e.align,size:stride*type.length};}if(this.structs.has(type)){let size=0,align=4;for(const f of this.structs.get(type).fields){const v=storageLayout(f.resolvedType);align=Math.max(align,v.align);size=Math.ceil(size/v.align)*v.align+v.size;}return {align,size:Math.ceil(size/align)*align};}const width=vectorLength(type);if(width)return {align:width===2?8:16,size:width*4};if(['f32','i32','u32','cw_uchar','cw_uchar2','cw_uchar4','cw_short','cw_ushort'].includes(type)||(String(type).startsWith('cw_objectptr_')||String(type).startsWith('cw_objectlist_')))return {align:4,size:4};this.fail('Persistent object fields require host-shareable scalar, vector or record values.',kernel);};
+    const storageLayout=type=>{if(isArray(type)){const e=storageLayout(type.element),stride=Math.ceil(e.size/e.align)*e.align;return {align:e.align,size:stride*type.length};}if(this.structs.has(type)){let size=0,align=4;for(const f of this.structs.get(type).fields){const v=storageLayout(f.resolvedType);align=Math.max(align,v.align);size=Math.ceil(size/v.align)*v.align+v.size;}return {align,size:Math.ceil(size/align)*align};}const width=vectorLength(type);if(width)return {align:width===2?8:16,size:width*4};if(['f32','i32','u32','cw_uchar','cw_uchar2','cw_uchar4','cw_short','cw_ushort'].includes(type)||(String(type).startsWith('cw_objectptr_')||String(type).startsWith('cw_objectlist_')||String(type).startsWith('cw_deviceptr_')))return {align:4,size:4};this.fail('Persistent object fields require host-shareable scalar, vector or record values.',kernel);};
     this.storageLayout=storageLayout;
     for(const heap of this.objectHeaps.values()){heap.aliveCode=heap.code+'_alive';if(this.persistentObjects){const layout=storageLayout(heap.type);heap.binding=this.objectHeaps.size?heap.tag-1:0;heap.byteLength=Math.ceil((heap.capacity*4)/layout.align)*layout.align+layout.size*heap.capacity;heap.recordLayout=JSON.stringify([...this.structs.values()].map(s=>({type:s.type,fields:s.fields.map(f=>({name:f.name,type:f.resolvedType}))})));heap.variable=heap.code+'_storage';heap.code=heap.variable+'.objects';heap.aliveCode=heap.variable+'.alive';}}
     this.overloads=new Map();for(const f of ast.functions)if(f.overloadName){const list=this.overloads.get(f.overloadName)||[];list.push(f);this.overloads.set(f.overloadName,list);}
@@ -184,8 +184,8 @@ class Emitter {
   }
   convert(code, from, to, n) {
     if(String(from).startsWith('cw_objectptr_')&&String(to).startsWith('cw_objectptr_')&&this.structs.get('cw_struct_'+from.slice(13))?.base===to.slice(13))return code;
-    if(to==='bool'&&String(from).startsWith('cw_objectptr_'))return `(${code} != 0u)`;
-    if(String(to).startsWith('cw_objectptr_')&&['0i','0u','0'].includes(code)&&['i32','u32'].includes(from))return '0u';
+    if(to==='bool'&&(String(from).startsWith('cw_objectptr_')||String(from).startsWith('cw_deviceptr_')))return `(${code} != 0u)`;
+    if((String(to).startsWith('cw_objectptr_')||String(to).startsWith('cw_deviceptr_'))&&['0i','0u','0'].includes(code)&&['i32','u32'].includes(from))return '0u';
     if(to==='bool'&&isArray(from)&&from.length===null&&n){return 'true';} // All runtime storage bindings are required and non-null.
     if(from==='cw_size64'||to==='cw_size64')this.extentUsed=true;
     if(to==='cw_size64'&&['i32','u32','bool'].includes(from))return from==='i32'?`vec2<u32>(u32(${code}), select(0u, 4294967295u, ${code} < 0i))`:from==='bool'?`vec2<u32>(select(0u,1u,${code}),0u)`:`vec2<u32>(${code},0u)`;
@@ -305,6 +305,7 @@ class Emitter {
           const pointerCode=temp,symbol={...root,kind:'buffer-alias',constant:slots.constant||root.constant,sharedPointer:root.code,offsetCode:pointerCode};
           return this.result(n,arrayOf(slots.elementType),root.code,[...base.pre,...index.pre,`let ${temp}: i32 = ${slots.code}[${index.code}];`],{rootSymbol:symbol,pointerCode});
         }
+        if(String(base.type).startsWith('cw_deviceptr_'))this.fail('Device pointer field dereference requires device heap allocation support.',n);
         if(n.dereference&&!['buffer','buffer-alias'].includes(base.rootSymbol?.kind))this.fail('Dereference requires a storage-buffer pointer.',n);
         if (!isArray(base.type) || !['i32', 'u32'].includes(index.type)) this.fail('Indexing requires an array and a 32-bit integer index.', n);
         const offset=base.code===base.rootSymbol?.code?base.rootSymbol.offsetCode:undefined;let indexCode=offset?`(${offset} + ${this.convert(index.code,index.type,'i32',n)})`:index.code;
@@ -380,6 +381,10 @@ class Emitter {
       }
       case 'binary': {
         let a = this.expr(n.left), b = this.expr(n.right);if(narrow(a.type))a={...a,type:'i32',code:`i32(${a.code})`};if(narrow(b.type))b={...b,type:'i32',code:`i32(${b.code})`};
+        if([a.type,b.type].some(t=>String(t).startsWith('cw_deviceptr_'))){
+          if(!['==','!='].includes(n.op))this.fail('Device pointer fields currently support identity comparison and copying only.',n);
+          const type=String(a.type).startsWith('cw_deviceptr_')?a.type:b.type;n.operandType=type;return this.result(n,'bool',`(${this.convert(a.code,a.type,type,n)} ${n.op} ${this.convert(b.code,b.type,type,n)})`,[...a.pre,...b.pre]);
+        }
         if([a.type,b.type].some(t=>String(t).startsWith('cw_objectptr_'))){
           if(!['==','!='].includes(n.op))this.fail('Object references support only identity equality; allocation and dereference are not yet supported.',n);
           const type=String(a.type).startsWith('cw_objectptr_')?a.type:b.type,ac=this.convert(a.code,a.type,type,n),bc=this.convert(b.code,b.type,type,n);n.operandType=type;return this.result(n,'bool',`(${ac} ${n.op} ${bc})`,[...a.pre,...b.pre]);
@@ -925,6 +930,7 @@ class Emitter {
     const bindings = [], scalars = [], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
     for(const type of this.ast.objectListTypes||[])header.push(`alias ${type} = u32;`);
     for(const imported of this.objectImports)header.push(`@group(1) @binding(${imported.binding}) var<storage, read_write> cw_import_${imported.id}: array<${imported.type}>;`);
+    for(const type of this.ast.devicePointerTypes||[])header.push(`alias ${type} = u32;`);
     for(const type of this.ast.objectPointerTypes||[])header.push(`alias ${type} = u32;`);
     for(const s of this.structs.values())header.push(`struct ${s.type} {`,...s.fields.map(f=>`  cw_field_${f.name}: ${typeName(f.resolvedType)},`),'}');
     const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t==='f32'?'u32':t}>`;

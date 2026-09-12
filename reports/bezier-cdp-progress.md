@@ -47,3 +47,20 @@ after all 256 original curves execute through the compiler and match the native
 captures, with preview output drawn from the resulting GPU buffers.
 
 NVIDIA source is BSD-3-Clause; the capture/probe code is MIT project code.
+
+## Typed pointer-field records
+
+The original `BezierLine` declaration now parses. Scalar/float-vector pointer
+fields retain their element type and lower to opaque 32-bit identities. Record
+copies, null assignments, boolean conversion, and same-type equality are
+supported. Cross-type assignment, integer fabrication, pointer arithmetic and
+dereference remain rejected. This is a representation milestone, not device
+allocation support.
+
+The WebGPU Bezier record stride is explicitly 32 bytes (24 bytes of control
+points, a 4-byte identity, and a 4-byte count). It is not the native 64-bit CUDA
+pointer ABI and must not be populated by copying native struct bytes. A real
+NVIDIA test copies 256 records, checks all 2,048 words, clears each original
+pointer independently, and verifies null comparisons including high-bit opaque
+identities. The next complete-source rejection is the `void **` output cast in
+`cudaMalloc`; allocation and child launches still need implementation.
