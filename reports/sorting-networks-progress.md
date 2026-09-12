@@ -1,0 +1,11 @@
+# Complete NVIDIA sorting networks verification
+
+Target the complete original bitonic pipeline, not only the already imported global merge kernel. Preserve its one-million-element input, native in-place dispatches, 1024-element shared tiles and 512-thread shared kernels. The original `main.cpp` runs every power-of-two array length from 64 through 1,048,576; additional ascending tests complement the default descending direction.
+
+The pinned unchanged native program builds and passes key/value validation for every length. See `sorting-networks-native.txt`. A capture harness repeats all 15 lengths in both directions using the original bitonic host wrapper, original `srand(2001)` input and original device functions. Native key and value captures are in `.local/sorting-captures`; their full-file SHA-256 values are in `sorting-native-hashes.json`. Every case sorts all 1,048,576 pairs. Hashes avoid publishing 240 MiB of repetitive captures while comparing every output bit, including equal-key value order.
+
+Local real-NVIDIA WebGPU now matches all 30 key/value capture pairs. See `sorting-networks-check.json`. No original CUDA body was changed. The implementation retains in-place merge passes by explicitly mapping source pointer parameters to their destination binding through the compiler's `bufferAliases` option. Generated WGSL uses one storage variable for each physical buffer, with independent pointer offsets for each CUDA parameter. Runtime binding rejects contradictory alias resources.
+
+Compiler work also allows bounded nested expression macros (up to eight levels, retaining the AST size limit and recursion rejection) and shared-array reference specialization using captured element indices. This preserves helper read/write ordering even when references address the same element and avoids multiple aliased WGSL pointer parameters.
+
+The sandbox now exposes the complete default descending sort, with the original million keys on the left and sorted keys on the right. Every key/value output matches the native capture hashes and every one of the 2,097,152 preview pixels is checked. Pipeline compilation includes the alias map in its cache key and rejects resource mappings that contradict it. The native odd-even merge source remains a separate future candidate; this showcase covers the entire bitonic path.

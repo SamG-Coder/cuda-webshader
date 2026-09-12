@@ -1,3 +1,4 @@
+import {checkSortingNetworks} from './sorting-networks-gpu.js';
 import {checkSobol} from './sobol-gpu.js';
 import {checkQuasirandom} from './quasirandom-gpu.js';
 import {checkDxtCompress} from './dxt-compress-gpu.js';
@@ -235,6 +236,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Original fluids pitched kernels match native CUDA',()=>checkFluidsPitched(runtime));
   await run('2048-point real FFT axes match native cuFFT',()=>checkLargeFFT(runtime));
   await run('Sincos and first-set-bit intrinsics match native CUDA',()=>checkSincos(runtime));
+  await run('Complete NVIDIA bitonic sorting matches native CUDA',()=>checkSortingNetworks(runtime));
   await run('Full Sobol sequence matches native CUDA',()=>checkSobol(runtime));
   await run('Full quasirandom sequence matches native CUDA',()=>checkQuasirandom(runtime));
   await run('DXT full image matches native CUDA',()=>checkDxtCompress(runtime));

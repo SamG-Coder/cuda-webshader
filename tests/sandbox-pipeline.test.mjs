@@ -87,3 +87,8 @@ test('Large scalar pipeline buffers retain per-buffer and total byte limits',()=
  assert.equal(validatePipeline(p),41612800);
  for(const change of [q=>q.buffers.values.records=16777217,q=>q.buffers.positions.records=4194305,q=>{q.buffers.a={type:'f32',records:16777216,fill:'zero'};q.buffers.b={type:'f32',records:16777216,fill:'zero'};}]){const q=structuredClone(p);change(q);assert.throws(()=>validatePipeline(q));}
 });
+
+test('Pipeline alias compilation rejects bindings that contradict the canonical resource',async()=>{
+ const {compile}=await import('../src/compiler/compiler.js'),source='__global__ void k(uint*a,uint*b){a[0]=b[0];}',rootArtifact=compile(source,{workgroupSize:[1,1,1]}),plan={buffers:{a:{type:'u32',records:1,fill:'zero'},other:{type:'u32',records:1,fill:'zero'}},steps:[{entry:'k',block:[1,1,1],groups:[1,1,1],bufferAliases:{b:'a'},bindings:{a:'a',b:'other'}}],preview:{kind:'image',buffer:'a',width:1,height:1,format:'rgba8'}};
+ let calls=0;await assert.rejects(executePipeline({plan,source,defines:{},rootArtifact,runtime:{},resources:[],textureResources:[],compiler:{compile:async(s,o)=>{calls++;assert.deepEqual(o.bufferAliases,{b:'a'});return {artifact:compile(s,o)};}}}),/Pipeline buffer alias/);assert.equal(calls,1);
+});

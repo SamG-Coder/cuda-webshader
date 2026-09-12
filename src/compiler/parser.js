@@ -83,7 +83,7 @@ export function tokenize(source, defines = {}) {
       } else {
         const chain=[];let target=value;const seen=new Set();
         while(forwarders.has(target)&&!seen.has(target)&&chain.length<32){seen.add(target);const f=forwarders.get(target);chain.push(f);target=f.target;}
-        tokens.push({...token, kind: 'word', value,...(expressions.has(value)?{expressionMacro:{...expressions.get(value),defines:(numericMacroSnapshot??=Object.fromEntries(macros)),forbidden:[...expressions.keys(),...forwarders.keys()]}}:{}),...(chain.length?{forward:{chain,target,tooDeep:forwarders.has(target)&&!seen.has(target),recursive:seen.has(target),numericTarget:macros.has(target)}}:{})});
+        tokens.push({...token, kind: 'word', value,...(expressions.has(value)?{expressionMacro:{...expressions.get(value),defines:(numericMacroSnapshot??=Object.fromEntries(macros)),definitions:[...expressions.values()].map(m=>'#define '+m.name+'('+m.params.join(',')+') '+m.body).concat([...forwarders.values()].map(m=>{const args=Array.from({length:m.arity},(_,i)=>'cw_arg'+i).join(',');return '#define '+m.name+'('+args+') '+m.target+'('+args+')';}))}}:{}),...(chain.length?{forward:{chain,target,tooDeep:forwarders.has(target)&&!seen.has(target),recursive:seen.has(target),numericTarget:macros.has(target)}}:{})});
       }
       advance(value); continue;
     }
@@ -369,8 +369,8 @@ export class Parser {
   }
   expandExpressionMacro(macro,args,token){
     if(args.length!==macro.params.length)this.fail('Wrong argument count for expression macro '+macro.name,token);
-    const parser=new Parser([...Object.entries(macro.defines).map(([name,value])=>'#define '+name+' '+value),macro.body].join('\n'));parser.functionNames=new Set(this.functionNames);parser.typeAliases=new Map(this.typeAliases);
-    if(parser.tokens.some(t=>t.kind==='word'&&macro.forbidden.includes(t.value)))this.fail('Nested or recursive expression macros are unsupported.',token);
+    const stack=this.expressionMacroStack||[];if(stack.includes(macro.name)||stack.length>=8)this.fail('Recursive or excessively deep expression macro expansion is unsupported.',token);
+    const parser=new Parser([...Object.entries(macro.defines).map(([name,value])=>'#define '+name+' '+value),...(macro.definitions||[]),macro.body].join('\n'));parser.functionNames=new Set(this.functionNames);parser.typeAliases=new Map(this.typeAliases);parser.expressionMacroStack=[...stack,macro.name];
     const expression=parser.expression();if(parser.peek().kind!=='eof')this.fail('Expression macro must contain one expression.',token);
     const copy=(node,substitute)=>{if(!node||typeof node!=='object')return node;if(node.kind&&++this.expandedMacroNodes>65536)this.fail('Expression macro expansion exceeds 65,536 AST nodes.',token);if(substitute&&node.kind==='id'&&macro.params.includes(node.name))return copy(args[macro.params.indexOf(node.name)],false);if(Array.isArray(node))return node.map(n=>copy(n,substitute));return Object.fromEntries(Object.entries(node).map(([key,value])=>[key,key==='token'?(substitute?token:value):copy(value,substitute)]));};return copy(expression,true);
   }

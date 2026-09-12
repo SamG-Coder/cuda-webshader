@@ -1,0 +1,203 @@
+{
+  "passed": true,
+  "aliasEdgeChecks": true,
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "timestamp-query",
+      "float32-filterable"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "results": [
+    {
+      "direction": 0,
+      "arrayLength": 64,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 128,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 256,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 512,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 1024,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 2048,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 4096,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 8192,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 16384,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 32768,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 65536,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 131072,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 262144,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 524288,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 0,
+      "arrayLength": 1048576,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 64,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 128,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 256,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 512,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 1024,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 2048,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 4096,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 8192,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 16384,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 32768,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 65536,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 131072,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 262144,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 524288,
+      "elements": 1048576,
+      "nativeMatch": true
+    },
+    {
+      "direction": 1,
+      "arrayLength": 1048576,
+      "elements": 1048576,
+      "nativeMatch": true
+    }
+  ]
+}

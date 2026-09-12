@@ -255,6 +255,7 @@ export class Invocation {
     this.kernel=kernel;this.runtime=kernel.runtime;this.runtime.assertAlive();this.version=0;this.values={};
     this.uniformData=new ArrayBuffer(kernel.artifact.metadata.uniformSize);this.buffers={...buffers};
     const meta=kernel.artifact.metadata,entries=[],seen=new Map(),known=new Set([...meta.bindings,...(meta.textures||[]),...(meta.surfaces||[])].map(b=>b.name));
+    for(const [alias,target]of Object.entries(meta.bufferAliases||{})){known.add(alias);if(Object.hasOwn(buffers,alias)&&buffers[alias]!==buffers[target])throw new Error('Declared buffer alias '+alias+' must use the same resource as '+target);}
     for(const name of Object.keys(buffers))if(!known.has(name))throw new Error(`Unknown buffer '${name}'.`);
     for(const b of meta.bindings){
       const resource=buffers[b.name];this.runtime.checkResource(resource);if(!resource.gpuBuffer)throw Error('Binding '+b.name+' requires a buffer.');

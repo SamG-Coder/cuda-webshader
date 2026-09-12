@@ -1,0 +1,1846 @@
+{
+  "pipeline": {
+    "buffers": {
+      "inputKeys": {
+        "type": "u32",
+        "records": 1048576,
+        "fill": "binary-u32",
+        "source": "showcases/bitonic-sort/input-keys.bin"
+      },
+      "inputValues": {
+        "type": "u32",
+        "records": 1048576,
+        "fill": "zero"
+      },
+      "keys": {
+        "type": "u32",
+        "records": 1048576,
+        "fill": "zero"
+      },
+      "values": {
+        "type": "u32",
+        "records": 1048576,
+        "fill": "zero"
+      },
+      "image": {
+        "type": "u32",
+        "records": 2097152,
+        "fill": "zero"
+      }
+    },
+    "steps": [
+      {
+        "entry": "initializeSortValues",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          8192,
+          1,
+          1
+        ],
+        "bindings": {
+          "values": "inputValues"
+        },
+        "scalars": {
+          "N": 1048576
+        }
+      },
+      {
+        "entry": "bitonicSortShared1",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          1024,
+          1,
+          1
+        ],
+        "bindings": {
+          "d_SrcKey": "inputKeys",
+          "d_SrcVal": "inputValues",
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 2048,
+          "dir": 0,
+          "stride": 1024
+        }
+      },
+      {
+        "entry": "bitonicMergeShared",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          1024,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 2048,
+          "dir": 0
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 4096,
+          "dir": 0,
+          "stride": 2048
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 4096,
+          "dir": 0,
+          "stride": 1024
+        }
+      },
+      {
+        "entry": "bitonicMergeShared",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          1024,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 4096,
+          "dir": 0
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 8192,
+          "dir": 0,
+          "stride": 4096
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 8192,
+          "dir": 0,
+          "stride": 2048
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 8192,
+          "dir": 0,
+          "stride": 1024
+        }
+      },
+      {
+        "entry": "bitonicMergeShared",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          1024,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 8192,
+          "dir": 0
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 16384,
+          "dir": 0,
+          "stride": 8192
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 16384,
+          "dir": 0,
+          "stride": 4096
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 16384,
+          "dir": 0,
+          "stride": 2048
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 16384,
+          "dir": 0,
+          "stride": 1024
+        }
+      },
+      {
+        "entry": "bitonicMergeShared",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          1024,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 16384,
+          "dir": 0
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 32768,
+          "dir": 0,
+          "stride": 16384
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 32768,
+          "dir": 0,
+          "stride": 8192
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 32768,
+          "dir": 0,
+          "stride": 4096
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 32768,
+          "dir": 0,
+          "stride": 2048
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 32768,
+          "dir": 0,
+          "stride": 1024
+        }
+      },
+      {
+        "entry": "bitonicMergeShared",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          1024,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 32768,
+          "dir": 0
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 65536,
+          "dir": 0,
+          "stride": 32768
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 65536,
+          "dir": 0,
+          "stride": 16384
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 65536,
+          "dir": 0,
+          "stride": 8192
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 65536,
+          "dir": 0,
+          "stride": 4096
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 65536,
+          "dir": 0,
+          "stride": 2048
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 65536,
+          "dir": 0,
+          "stride": 1024
+        }
+      },
+      {
+        "entry": "bitonicMergeShared",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          1024,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 65536,
+          "dir": 0
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 131072,
+          "dir": 0,
+          "stride": 65536
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 131072,
+          "dir": 0,
+          "stride": 32768
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 131072,
+          "dir": 0,
+          "stride": 16384
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 131072,
+          "dir": 0,
+          "stride": 8192
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 131072,
+          "dir": 0,
+          "stride": 4096
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 131072,
+          "dir": 0,
+          "stride": 2048
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 131072,
+          "dir": 0,
+          "stride": 1024
+        }
+      },
+      {
+        "entry": "bitonicMergeShared",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          1024,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 131072,
+          "dir": 0
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 262144,
+          "dir": 0,
+          "stride": 131072
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 262144,
+          "dir": 0,
+          "stride": 65536
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 262144,
+          "dir": 0,
+          "stride": 32768
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 262144,
+          "dir": 0,
+          "stride": 16384
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 262144,
+          "dir": 0,
+          "stride": 8192
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 262144,
+          "dir": 0,
+          "stride": 4096
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 262144,
+          "dir": 0,
+          "stride": 2048
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 262144,
+          "dir": 0,
+          "stride": 1024
+        }
+      },
+      {
+        "entry": "bitonicMergeShared",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          1024,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 262144,
+          "dir": 0
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 524288,
+          "dir": 0,
+          "stride": 262144
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 524288,
+          "dir": 0,
+          "stride": 131072
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 524288,
+          "dir": 0,
+          "stride": 65536
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 524288,
+          "dir": 0,
+          "stride": 32768
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 524288,
+          "dir": 0,
+          "stride": 16384
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 524288,
+          "dir": 0,
+          "stride": 8192
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 524288,
+          "dir": 0,
+          "stride": 4096
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 524288,
+          "dir": 0,
+          "stride": 2048
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 524288,
+          "dir": 0,
+          "stride": 1024
+        }
+      },
+      {
+        "entry": "bitonicMergeShared",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          1024,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 524288,
+          "dir": 0
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 1048576,
+          "dir": 0,
+          "stride": 524288
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 1048576,
+          "dir": 0,
+          "stride": 262144
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 1048576,
+          "dir": 0,
+          "stride": 131072
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 1048576,
+          "dir": 0,
+          "stride": 65536
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 1048576,
+          "dir": 0,
+          "stride": 32768
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 1048576,
+          "dir": 0,
+          "stride": 16384
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 1048576,
+          "dir": 0,
+          "stride": 8192
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 1048576,
+          "dir": 0,
+          "stride": 4096
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 1048576,
+          "dir": 0,
+          "stride": 2048
+        }
+      },
+      {
+        "entry": "bitonicMergeGlobal",
+        "block": [
+          256,
+          1,
+          1
+        ],
+        "groups": [
+          2048,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 1048576,
+          "dir": 0,
+          "stride": 1024
+        }
+      },
+      {
+        "entry": "bitonicMergeShared",
+        "block": [
+          512,
+          1,
+          1
+        ],
+        "groups": [
+          1024,
+          1,
+          1
+        ],
+        "bufferAliases": {
+          "d_SrcKey": "d_DstKey",
+          "d_SrcVal": "d_DstVal"
+        },
+        "bindings": {
+          "d_DstKey": "keys",
+          "d_DstVal": "values"
+        },
+        "scalars": {
+          "arrayLength": 1048576,
+          "size": 1048576,
+          "dir": 0
+        }
+      },
+      {
+        "entry": "previewSort",
+        "block": [
+          128,
+          1,
+          1
+        ],
+        "groups": [
+          16384,
+          1,
+          1
+        ],
+        "bindings": {
+          "original": "inputKeys",
+          "sorted": "keys",
+          "image": "image"
+        }
+      }
+    ],
+    "preview": {
+      "kind": "image",
+      "buffer": "image",
+      "width": 2048,
+      "height": 1024,
+      "format": "gray-i32",
+      "range": [
+        0,
+        32767
+      ]
+    }
+  }
+}

@@ -88,8 +88,12 @@ class Emitter {
     }
     this.helpers = ast.functions.filter(f => f.qualifier === '__device__'&&!f.params.some(p=>p.pointer));
     this.pointerHelpers=new Map();this.referenceHelpers=new Map();this.bufferSymbols=new Map();
+    this.bufferAliases=options.bufferAliases??{};
+    if(typeof this.bufferAliases!=='object'||Array.isArray(this.bufferAliases))this.fail('bufferAliases must map pointer names to canonical pointer names.',kernel);
+    for(const [alias,target]of Object.entries(this.bufferAliases)){const a=kernel.params.find(p=>p.name===alias),b=kernel.params.find(p=>p.name===target);if(typeof target!=='string'||alias===target||Object.hasOwn(this.bufferAliases,target)||!a?.pointer||!b?.pointer||a.type!==b.type)this.fail('Buffer aliases require distinct same-type pointer parameters and no chains.',kernel);}
     this.usage = analyse([kernel], kernel.params);this.usage.atomic=this.usage.atomicBindings;
     for(const kind of ['reads','writes','atomic'])for(const name of bufferUsage?.[kind]||[])this.usage[kind].add(name);
+    for(const kind of ['reads','writes','atomic'])for(const [alias,target]of Object.entries(this.bufferAliases))if(this.usage[kind].has(alias))this.usage[kind].add(target);
     for(const p of kernel.params)if(p.pointer&&p.type==='cw_uchar'&&this.usage.writes.has(p.name))this.usage.atomic.add(p.name);
     this.usage.storageBarrier=[...this.usage.writes].some(n=>this.usage.reads.has(n));
     this.initialBufferUsage=Object.fromEntries(['reads','writes','atomic'].map(k=>[k,new Set(this.usage[k])]));
@@ -226,7 +230,7 @@ class Emitter {
         if(type==='cw_uchar'&&base.rootSymbol?.rootBufferName){const temp='cw_byte_index_'+this.temp++,word=`${base.code}[${temp} >> 2u]`,shift=`((${temp} & 3u) * 8u)`,read=base.atomicRoot?`atomicLoad(&${word})`:word;return this.result(n,type,`((${read} >> ${shift}) & 255u)`,[...base.pre,...index.pre,`let ${temp} = u32(${indexCode});`],{rootSymbol:base.rootSymbol,...(raw&&base.atomicRoot?{packedBase:word,packedShiftCode:shift,packedAtomic:true}:{})});}
         const atomic = base.atomicRoot && !isArray(type);
         const addressPre=[];if(atomic&&raw&&type==='cw_uchar4'){const temp='cw_pixel_index_'+this.temp++;addressPre.push(`let ${temp} = ${indexCode};`);code=`${base.code}[${temp}]`;}
-        return this.result(n, type, atomic && !raw ? (base.rootSymbol?.volatileShared&&type==='f32'?`bitcast<f32>(atomicLoad(&${code}))`:`atomicLoad(&${code})`) : code, [...base.pre, ...index.pre,...capturePre,...addressPre], {rootSymbol: base.rootSymbol, atomicRoot: base.atomicRoot, atomic});
+        return this.result(n, type, atomic && !raw ? (base.rootSymbol?.volatileShared&&type==='f32'?`bitcast<f32>(atomicLoad(&${code}))`:`atomicLoad(&${code})`) : code, [...base.pre, ...index.pre,...capturePre,...addressPre], {rootSymbol: base.rootSymbol, atomicRoot: base.atomicRoot, atomic,...(base.rootSymbol?.kind==='shared'&&n.base.kind==='id'&&!isArray(type)?{sharedReferenceIndexCode:indexCode}:{})});
       }
       case 'member': {
         if (n.base.kind === 'id' && ['threadIdx', 'blockIdx', 'blockDim', 'gridDim'].includes(n.base.name)) {
@@ -383,13 +387,14 @@ class Emitter {
   }
   bindReferenceHelper(helper,args,n){
     const spaces=helper.params.map((p,i)=>p.reference?(args[i].rootSymbol?.kind==='shared'||args[i].rootSymbol?.referenceSpace==='workgroup'?'workgroup':'function'):null);
-    if(spaces.every((space,i)=>space===null||space===(helper.params[i].referenceSpace||'function')))return helper;
-    const origin=helper.referenceOrigin||helper.name,key=JSON.stringify([origin,spaces]);
+    if(spaces.every((space,i)=>space===null||space===(helper.params[i].referenceSpace||'function'))&&helper.params.every((p,i)=>!p.reference||args[i].sharedReferenceIndexCode===undefined&&!args[i].rootSymbol?.sharedReferenceRoot))return helper;
+    const candidates=helper.params.map((p,i)=>p.reference?(args[i].sharedReferenceIndexCode!==undefined?args[i].rootSymbol.code:args[i].rootSymbol?.sharedReferenceRoot||null):null),roots=candidates.map((root,i)=>root&&(candidates.filter(r=>r===root).length>1||args[i].rootSymbol?.sharedReferenceRoot)?root:null);
+    const origin=helper.referenceOrigin||helper.name,key=JSON.stringify([origin,spaces,roots]);
     if(!this.referenceHelpers.has(key)){
       if(this.referenceHelpers.size>=128)this.fail('At most 128 helper reference specializations are supported.',n);
       const base=this.functions.get(origin)||helper;walk(base.body,node=>{if(node.kind==='decl'&&node.shared)this.fail('Reference address-space specialization of helpers with shared declarations is unsupported.',node);});
       const clone=structuredClone(base);let name='cw_reference_helper_'+this.referenceHelpers.size;while(this.functions.has(name))name+='_';clone.name=name;clone.referenceOrigin=origin;
-      spaces.forEach((space,i)=>{if(space)clone.params[i].referenceSpace=space;});this.referenceHelpers.set(key,clone);this.functions.set(name,clone);this.helpers.push(clone);this.ast.functions.push(clone);
+      spaces.forEach((space,i)=>{if(space)clone.params[i].referenceSpace=space;if(roots[i])clone.params[i].boundReferenceShared=roots[i];});this.referenceHelpers.set(key,clone);this.functions.set(name,clone);this.helpers.push(clone);this.ast.functions.push(clone);
     }
     return this.referenceHelpers.get(key);
   }
@@ -549,6 +554,7 @@ class Emitter {
     const references=new Set();n.constRefTemporaries=[];n.localPointerArgs=helper.params.map(p=>!!p.localPointer);n.referenceArgs=helper.params.map(p=>!!p.reference);n.groupArgs=helper.params.map(p=>p.type==='thread-block');n.pointerArgs=helper.params.map(p=>!!p.pointer);
     const codes=args.map((a,i)=>{const p=helper.params[i];if(p.type==='texture3d'){const shape=textureShape(p.textureSampling),symbol=a.rootSymbol;if(symbol?.kind!=='texture'||symbol.dimension!==shape.dimension||symbol.format!==shape.format)this.fail('Texture helper argument requires the same inferred sampling format.',n.args[i]);return symbol.code+', '+symbol.sampler+(symbol.linearFetch?', '+symbol.lengthCode:'')+(['tex2D','tex2Dfloat2','tex2Dfloat4','tex3D','tex3Dfloat4'].includes(p.textureSampling)?', '+symbol.coordinateScale+', '+symbol.pixelPoint:'');}if(p.localPointer){if(references.has(a.rootSymbol))this.fail('Aliased local pointer/reference arguments are unsupported.',n.args[i]);references.add(a.rootSymbol);return a.pointerCode;}if(p.pointer)return a.pointerCode;if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
       const node=n.args[i],s=a.rootSymbol;
+      if(p.boundReferenceShared){if(s?.atomic||a.type!==p.type||!p.constant&&s?.constant)this.fail('Shared reference requires a matching non-atomic array element.',node);const index=a.sharedReferenceIndexCode??s?.sharedReferenceIndexCode;if(index===undefined)this.fail('Shared reference index is unavailable.',node);return `i32(${index})`;}
       if(s?.kind==='shared'&&s.atomic)this.fail('Atomic shared values cannot bind ordinary references.',node);
       if(p.constant){if(node.kind==='member'&&node.base.type==='cw_uchar4'&&p.type==='cw_uchar'){const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: cw_uchar = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}if(s?.rootBufferName)this.fail('Const references to storage elements are unsupported; copy the value to a local first.',node);if(a.type!==p.type||!(numeric(p.type)||p.type==='cw_uchar4'||vectorLength(p.type)||this.structs.has(p.type)))this.fail('Const references require the exact scalar, vector or struct type.',node);if(s&&references.has(s))this.fail('Aliased reference arguments are unsupported.',node);if(s)references.add(s);if(s?.kind==='reference')return s.pointerCode;if(s?.kind==='shared'){if(!['id','index'].includes(node.kind))this.fail('Shared references require whole scalars/vectors or array elements.',node);return '&'+a.code;}if(s?.kind==='local'&&!s.constant&&['id','member'].includes(node.kind))return '&'+a.code;const temp='cw_const_ref_'+this.temp++;pre.push(`var ${temp}: ${p.type} = ${a.code};`);n.constRefTemporaries[i]=true;return '&'+temp;}
       if(!['id','index'].includes(node.kind)||!s||!['local','reference','shared'].includes(s.kind)||s.constant||isArray(a.type)||!(numeric(a.type)||vectorLength(a.type))||a.type!==p.type)this.fail('Reference arguments require a mutable scalar/vector or array element in local or shared memory, of the exact type.',node);
@@ -716,7 +722,7 @@ class Emitter {
   emit() {
     this.checkRecursion();
     if (this.kernel.result !== 'void') this.fail('__global__ kernels must return void.', this.kernel);
-    const textures=[],surfaces=[],bufferCount=this.kernel.params.filter(p=>p.pointer).length;
+    const textures=[],surfaces=[],bufferCount=this.kernel.params.filter(p=>p.pointer&&!Object.hasOwn(this.bufferAliases,p.name)).length;
     const bindings = [], scalars = [], header = [`// CUDA WebShader ${COMPILER_VERSION}. Generated from kernel ${this.kernel.name}.`];
     for(const s of this.structs.values())header.push(`struct ${s.type} {`,...s.fields.map(f=>`  cw_field_${f.name}: ${typeName(f.resolvedType)},`),'}');
     const sharedAtomicType = t => isArray(t) ? `array<${sharedAtomicType(t.element)}, ${t.length}>` : `atomic<${t==='f32'?'u32':t}>`;
@@ -744,14 +750,14 @@ class Emitter {
         if(['cw_short','cw_ushort'].includes(p.type))this.fail('Short storage pointers need a packed 16-bit ABI; only short values are supported.',p);
         if(this.structs.has(p.type))this.fail('Struct buffer layout is not supported; use local struct values.',p);
         if (p.type === 'bool' || vectorLength(p.type)===3) this.fail('bool* and three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
-        const atomic = this.usage.atomic.has(p.name), readOnly = p.constant || !this.usage.writes.has(p.name);
+        const canonical=Object.hasOwn(this.bufferAliases,p.name)?this.bufferAliases[p.name]:p.name,atomic=this.usage.atomic.has(canonical),readOnly=!this.usage.writes.has(canonical);
         if (p.constant && this.usage.writes.has(p.name)) this.fail(`Cannot write through const buffer '${p.name}'.`, p);
         if (atomic && !['i32', 'u32','cw_uchar4','cw_uchar'].includes(p.type)) this.fail('Only 32-bit integer atomics are supported.', p);
         const binding = bindings.length;
-        bindings.push({name: p.name, elementType: p.type, stride: p.type==='cw_uchar'?1:typeStride(p.type), binding, readOnly, atomic});
-        const symbol = {name: p.name, rootBufferName:p.name, type: arrayOf(p.type), code: `b_${p.name}`, constant: p.constant, atomic, kind: 'buffer',...(shiftedPointers(this.kernel).has(p.name)?{offsetCode:'cw_pointer_'+p.name}:{})};
+        if(canonical===p.name)bindings.push({name: p.name, elementType: p.type, stride: p.type==='cw_uchar'?1:typeStride(p.type), binding, readOnly, atomic});
+        const symbol = {name: p.name, rootBufferName:canonical, type: arrayOf(p.type), code: `b_${canonical}`, constant: p.constant, atomic, kind: 'buffer',...(shiftedPointers(this.kernel).has(p.name)?{offsetCode:'cw_pointer_'+p.name}:{})};
         this.add(p.name, symbol, p, true); p.symbol = symbol;this.bufferSymbols.set(p.name,symbol);
-        header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type}>` : p.type==='cw_uchar'?'u32':p.type}>;`);
+        if(canonical===p.name)header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type}>` : p.type==='cw_uchar'?'u32':p.type}>;`);
       } else {
         if ((!numeric(p.type)&&!['bool','cw_uchar4'].includes(p.type))||p.type==='cw_uchar') this.fail('Scalar kernel parameters must be float, int, unsigned int, bool or packed uchar4. Put other vectors in buffers.', p);
         let defaultMetadata={};if(p.defaultValue!==undefined){let value=p.defaultValue.kind==='id'?Number(p.defaultValue.name==='true'):constantValue(p.defaultValue);if(!Number.isFinite(value)||p.type==='i32'&&(Math.trunc(value)<-2147483648||Math.trunc(value)>2147483647)||p.type==='u32'&&(Math.trunc(value)<0||Math.trunc(value)>4294967295))this.fail('Kernel default is outside its supported scalar range.',p);value=p.type==='f32'?Math.fround(value):p.type==='bool'?Number(!!value):p.type==='u32'?value>>>0:value|0;if(!Number.isFinite(value))this.fail('Kernel default overflows its scalar type.',p);defaultMetadata={defaultValue:value};}
@@ -774,10 +780,11 @@ class Emitter {
         if(p.pointer){const base=p.boundShared?this.shared.find(s=>s.code===p.boundShared):this.bufferSymbols.get(p.boundBuffer);if(!base)this.fail('Helper buffer pointer was not specialized.',p);p.symbol=this.add(p.name,{...base,...(p.boundShared?{sharedPointer:p.boundShared}:{}),name:p.name,kind:'buffer-alias',constant:p.constant||p.boundConstant,offsetCode:'cw_buffer_offset_'+helper.params.indexOf(p)},p);continue;}
         if(p.type==='thread-block'){if(p.reference)this.fail('thread_block helper parameters must be passed by value.',p);p.symbol=this.add(p.name,{name:p.name,type:p.type,kind:'thread-block',constant:true},p);continue;}
         if(p.reference&&!numeric(p.type)&&!vectorLength(p.type)&&!(p.constant&&(p.type==='cw_uchar4'||vectorLength(p.type)||this.structs.has(p.type))))this.fail('Helper references require numeric scalars or vectors.',p);
+        if(p.boundReferenceShared){const index='v_'+p.name,code=p.boundReferenceShared+'['+index+']';p.symbol=this.add(p.name,{name:p.name,type:p.type,code,pointerCode:'&'+code,sharedReferenceRoot:p.boundReferenceShared,sharedReferenceIndexCode:index,referenceSpace:'workgroup',constant:p.constant,atomic:false,kind:'reference'},p);continue;}
         p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined,...(p.reference?{referenceSpace:p.referenceSpace||'function'}:{}), constant:p.constant, atomic: false, kind: p.reference?'reference':'local'}, p);
       }
       const body = this.body(helper.body);
-      helperLines.push(`fn f_${helper.name}(${[...helper.params.filter(p=>p.type!=='thread-block').map(p => p.type==='texture3d'?`cw_texture_${p.name}: texture_${textureShape(p.textureSampling).dimension.replace('-','_')}<${['fetch_uint','tex2Duchar','tex2Duint'].includes(p.textureSampling)?'u32':'f32'}>, cw_sampler_${p.name}: sampler${p.textureSampling.startsWith('fetch_')?`, cw_length_${p.name}: u32`:''}${['tex2D','tex2Dfloat2','tex2Dfloat4','tex3D','tex3Dfloat4'].includes(p.textureSampling)?`, cw_scale_${p.name}: vec${p.textureSampling.startsWith('tex3D')?3:2}<f32>, cw_point_${p.name}: f32`:''}`:p.pointer?`cw_buffer_arg_${helper.params.indexOf(p)}: i32`:`${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.reference?`ptr<${p.referenceSpace||'function'}, ${p.type}>`:p.type}`),'cw_thread: vec3<u32>','cw_block: vec3<u32>','cw_grid: vec3<u32>'].join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>p.pointer).map(p=>`var cw_buffer_offset_${helper.params.indexOf(p)}: i32 = cw_buffer_arg_${helper.params.indexOf(p)};`)),...indent(helper.params.filter(p=>p.type!=='thread-block'&&p.type!=='texture3d'&&!p.pointer&&!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
+      helperLines.push(`fn f_${helper.name}(${[...helper.params.filter(p=>p.type!=='thread-block').map(p => p.type==='texture3d'?`cw_texture_${p.name}: texture_${textureShape(p.textureSampling).dimension.replace('-','_')}<${['fetch_uint','tex2Duchar','tex2Duint'].includes(p.textureSampling)?'u32':'f32'}>, cw_sampler_${p.name}: sampler${p.textureSampling.startsWith('fetch_')?`, cw_length_${p.name}: u32`:''}${['tex2D','tex2Dfloat2','tex2Dfloat4','tex3D','tex3Dfloat4'].includes(p.textureSampling)?`, cw_scale_${p.name}: vec${p.textureSampling.startsWith('tex3D')?3:2}<f32>, cw_point_${p.name}: f32`:''}`:p.pointer?`cw_buffer_arg_${helper.params.indexOf(p)}: i32`:`${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.boundReferenceShared?'i32':p.reference?`ptr<${p.referenceSpace||'function'}, ${p.type}>`:p.type}`),'cw_thread: vec3<u32>','cw_block: vec3<u32>','cw_grid: vec3<u32>'].join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>p.pointer).map(p=>`var cw_buffer_offset_${helper.params.indexOf(p)}: i32 = cw_buffer_arg_${helper.params.indexOf(p)};`)),...indent(helper.params.filter(p=>p.type!=='thread-block'&&p.type!=='texture3d'&&!p.pointer&&!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
     }};
     emitHelpers();
     this.scopes = kernelScope; this.currentFunction = this.kernel;
@@ -848,7 +855,7 @@ class Emitter {
     const storageSize = this.shared.reduce((n, s) => n + Math.ceil(typeStride(s.type) / 16) * 16, 0);
     let usesPackedBytes=(this.ast.structs||[]).some(s=>s.fields.some(f=>['cw_uchar','cw_uchar4'].includes(f.type)));walk(this.ast,n=>{if(['cw_uchar','cw_uchar4'].includes(n.type)||['cw_uchar','cw_uchar4'].includes(n.result))usesPackedBytes=true;});let usesShort=false;walk(this.ast,n=>{if(['cw_short','cw_ushort'].includes(n.type)||['cw_short','cw_ushort'].includes(n.result))usesShort=true;});if(usesShort)header.unshift('alias cw_short = i32;','alias cw_ushort = u32;');if(usesPackedBytes)header.unshift('alias cw_uchar = u32;','alias cw_uchar4 = u32;');
     const wgsl = [...header, '', ...helperLines, '', `@compute @workgroup_size(${this.workgroupSize.join(', ')})`, 'fn main(', '  @builtin(local_invocation_id) cw_thread: vec3<u32>,', '  @builtin(workgroup_id) cw_block: vec3<u32>,', '  @builtin(num_workgroups) cw_grid: vec3<u32>', ') {', ...indent(main), '}', ''].join('\n');
-    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {workgroupSize: this.workgroupSize, bindings, scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2+surfaces.length : null,...(textures.length?{textures}:{}),...(textureScales.length?{textureScales}:{}),...(textureLengths.length?{textureLengths}:{}),...(surfaces.length?{surfaces}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
+    return {version: COMPILER_VERSION, name: this.kernel.name, entryPoint: 'main', wgsl, metadata: {workgroupSize: this.workgroupSize, bindings,...(Object.keys(this.bufferAliases).length?{bufferAliases:{...this.bufferAliases}}:{}), scalars, uniformSize, uniformBinding: uniformSize ? bindings.length+textures.length*2+surfaces.length : null,...(textures.length?{textures}:{}),...(textureScales.length?{textureScales}:{}),...(textureLengths.length?{textureLengths}:{}),...(surfaces.length?{surfaces}:{}), workgroupStorageBytes: storageSize,...(this.dynamicSharedUsed?{dynamicSharedMemoryBytes:this.dynamicSharedBytes}:{}), barrier: this.usage.storageBarrier ? 'workgroup-and-storage' : 'workgroup'}, ast: this.ast, kernel: this.kernel};
   }
 }
 function resolveTraitTypes(fn, ast, parameter, argument) {

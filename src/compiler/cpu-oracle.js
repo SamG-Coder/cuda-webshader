@@ -162,6 +162,7 @@ class Context {
 }
 export function executeCPU(artifact,buffers,scalars,workgroups,{instructionBudget=1_000_000}={}){
   for(const c of artifact.metadata.scalarConstraints||[]){const v=scalars[c.name];if(!Number.isInteger(v)||v<c.minimum||v%c.multipleOf!==0)throw new RangeError(`${c.name} must be a nonnegative multiple of ${c.multipleOf} for full-workgroup execution.`);}
+  buffers={...buffers};for(const [alias,target]of Object.entries(artifact.metadata.bufferAliases||{})){if(Object.hasOwn(buffers,alias)&&buffers[alias]!==buffers[target])throw Error('Declared CPU buffer alias must use the canonical resource.');buffers[alias]=buffers[target];}
   if(!artifact.ast||!artifact.kernel)throw new Error('The CPU oracle needs an in-memory compiled AST, not a serialized WGSL artifact.');
   const grid=Array.isArray(workgroups)?[...workgroups]:[workgroups];while(grid.length<3)grid.push(1);
   if(grid.some(x=>!Number.isInteger(x)||x<0)||grid.length!==3)throw new RangeError('Invalid workgroup shape.');
