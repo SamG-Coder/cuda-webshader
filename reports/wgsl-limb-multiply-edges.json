@@ -1,0 +1,7 @@
+{
+  "pass": true,
+  "pairs": 74353,
+  "independentNonNaNChecks": 74223,
+  "exactGpuBitsIncludingNaNs": true,
+  "softwareAdapterRequested": false
+}
