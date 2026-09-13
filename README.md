@@ -604,6 +604,13 @@ intermediates, avoiding JavaScript recursion without reassociating operations.
 
 ### Experimental Chrono water
 
+The runtime can copy GPU-produced integer counters into kernel parameters with
+`kernel.bind(buffers, scalars, {scalarBuffers: {n: {resource: counter, offset: 0}}})`.
+The counter is copied in queue order before each dispatch, without CPU readback.
+Normal scalar values are still required to initialize the parameter snapshot.
+This supports unconstrained 32-bit integer parameters; narrow integers, booleans,
+parameters with full-workgroup constraints, and surface kernels are rejected.
+
 [Open the Chrono SPH dam-break sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=chrono).
 The editor contains the original Project Chrono CUDA kernels and helpers; all
 15 physics/preparation passes compile from that source. The host adapter

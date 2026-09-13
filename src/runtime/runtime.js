@@ -304,11 +304,18 @@ export class Kernel {
   }
 }
 export class Invocation {
-  constructor(kernel,buffers,scalars,{objectArena,queueOnly=false}={}) {
+  constructor(kernel,buffers,scalars,{objectArena,queueOnly=false,scalarBuffers={}}={}) {
     this.kernel=kernel;this.runtime=kernel.runtime;this.runtime.assertAlive();this.version=0;this.values={};
     this.uniformData=new ArrayBuffer(kernel.artifact.metadata.uniformSize);this.buffers={...buffers};
     if(kernel.artifact.metadata.deviceLaunchQueue?.producerOnly&&kernel.artifact.metadata.deviceLaunchQueue.queues.some(q=>q.caller===kernel.artifact.name)&&!queueOnly)throw Error('This kernel produces child-launch queues only; explicitly bind queueOnly: true until automatic scheduling is supported.');
     const meta=kernel.artifact.metadata,entries=[],seen=new Map(),known=new Set([...meta.bindings,...(meta.textures||[]),...(meta.surfaces||[]),...(meta.objectHeap?.imports||[])].map(b=>b.name));
+    this.scalarBuffers=Object.entries(scalarBuffers).map(([name,{resource,offset=0}])=>{
+      const scalar=meta.scalars.find(s=>s.name===name);
+      if(!scalar||!['u32','i32'].includes(scalar.type)||['bool','cw_short','cw_ushort'].includes(scalar.sourceType)||meta.scalarConstraints?.some(c=>c.name===name)||meta.surfaces?.length)throw Error('GPU scalar requires an unconstrained 32-bit integer parameter without surfaces: '+name);
+      this.runtime.checkResource(resource);
+      if(!resource.gpuBuffer||!(resource.gpuBuffer.usage&GPUBufferUsage.COPY_SRC)||!Number.isSafeInteger(offset)||offset<0||offset%4||offset+4>resource.byteLength)throw Error('Invalid GPU scalar source: '+name);
+      return {resource,sourceOffset:offset,targetOffset:scalar.offset};
+    });
     for(const [alias,target]of Object.entries(meta.bufferAliases||{})){known.add(alias);if(Object.hasOwn(buffers,alias)&&buffers[alias]!==buffers[target])throw new Error('Declared buffer alias '+alias+' must use the same resource as '+target);}
     for(const name of Object.keys(buffers))if(!known.has(name))throw new Error(`Unknown buffer '${name}'.`);
     for(const b of meta.bindings){
@@ -355,6 +362,9 @@ export class ComputeBatch {
         this.data.set(new Uint8Array(invocation.uniformData),offset);this.cursor=offset+meta.uniformSize;this.snapshots.set(invocation,{version:invocation.version,offset});
       }
     }
+    // Queue-ordered copies supply GPU-produced scalar values without CPU readback.
+    // End the previous pass so each dispatch observes its own counter snapshot.
+    if(invocation.scalarBuffers.length){this.endPass();for(const scalar of invocation.scalarBuffers){this.runtime.checkResource(scalar.resource);this.encoder.copyBufferToBuffer(scalar.resource.gpuBuffer,scalar.sourceOffset,this.runtime.uniformBuffer,offset+scalar.targetOffset,4);}}
     const pass=this.beginPass();
     if(this.lastPipeline!==invocation.kernel.pipeline){pass.setPipeline(invocation.kernel.pipeline);this.lastPipeline=invocation.kernel.pipeline;}
     if(this.lastBindGroup!==invocation.bindGroup||this.lastOffset!==offset){pass.setBindGroup(0,invocation.bindGroup,meta.uniformSize?[offset]:[]);this.lastBindGroup=invocation.bindGroup;this.lastOffset=offset;}

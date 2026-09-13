@@ -1,4 +1,5 @@
 import {checkCloneWorker} from './clone-worker-gpu.js';
+import {checkGpuScalars} from './gpu-scalars-gpu.js';
 import {checkChronoLoop} from './chrono-loop-gpu.js';
 import {checkChronoRk2} from './chrono-rk2-gpu.js';
 import {checkChronoEos} from './chrono-eos-gpu.js';
@@ -366,6 +367,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Double sqrt, min/max, local quadratic solve and record scalar references match native CUDA',()=>checkDoubleMath(runtime));
   await run('Module constexpr constants and volatile helper flags match native CUDA',()=>checkModuleConstexpr(runtime));
   await run('Original Chrono XSPH shifting matches native for initialized and nonzero velocities',()=>checkChronoShifting(runtime));
+  await run('GPU-produced integer scalars preserve dispatch snapshots',()=>checkGpuScalars(runtime));
   await run('Chrono pipelined diagnostics preserve state and reject errors',()=>checkChronoLoop(runtime));
   await run('Original Chrono force derivatives and timestep estimates match native',()=>checkChronoRhs(runtime));
   await run('Original Chrono Adami wall pressure matches native CUDA',()=>checkChronoAdami(runtime));
