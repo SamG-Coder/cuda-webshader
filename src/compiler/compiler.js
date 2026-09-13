@@ -1,3 +1,4 @@
+import {pruneConstexpr} from './constexpr.js';
 import {lowerPrintf} from './diagnostics.js';
 import {containsNativeBool,nativeRecordLayout,decodeNativeRecord} from './native-records.js';
 import {lowerNativeTiles,emitNativeTile} from './native-tiles.js';
@@ -1295,6 +1296,7 @@ function instantiateHelperTemplates(ast, kernel) {
     if(done.has(fn))return;
     if(visiting.has(fn))fail('Recursive helper calls are unsupported.',fn);
     visiting.add(fn);
+    pruneConstexpr(fn.body,(message,n)=>fail(message,n));
     resolveTraitTypes(fn,ast);
     walk(fn.body,node=>{
       if(node.kind!=='call'||node.callee.kind!=='id')return;
@@ -1391,12 +1393,14 @@ export function compile(source, options = {},bufferUsage=null) {
     if(kernel.result===placeholder)kernel.result=type;
     walk(kernel.body,n=>{if(['decl','thread-block'].includes(n.kind)&&n.name===name)throw new CompileError('Template parameter shadowing is unsupported.',n.token,source);if(n.type===placeholder)n.type=type;if(n.target===placeholder)n.target=type;if(n.kind==='call'&&n.callee.kind==='id'&&n.callee.name===name)n.callee.name=specialization[2];});
   }else if(specialization){
+    specialization[2]=specialization[2].split(',').map(v=>ast.enumValues?.[v.trim()]?.value??v.trim()).join(',');
     const names=kernel.templateParameters?.length?kernel.templateParameters:[kernel.templateParameter],values=specialization[2].split(',').map(v=>Number(v.trim())),replacements=new Map(names.map((name,i)=>[name,values[i]]));
     if(specialization[2].split(',').some(v=>!/^\d+$/.test(v.trim()))||values.some(value=>!Number.isSafeInteger(value)||value<0||value>2147483647))throw new CompileError('Template arguments must be nonnegative 32-bit signed integers.',kernel.token,source);
     for(const p of kernel.params)if(replacements.has(p.name))throw new CompileError('Template parameter shadowing is unsupported.',p.token,source);
     walk(kernel.body,n=>{if(['decl','thread-block'].includes(n.kind)&&replacements.has(n.name))throw new CompileError('Template parameter shadowing is unsupported.',n.token,source);if(n.kind==='id'&&replacements.has(n.name)){n.kind='literal';n.value=String(replacements.get(n.name));delete n.name;}if(n.templateArgument!==undefined)n.templateArgument=n.templateArgument.replace(/[A-Za-z_]\w*/g,name=>replacements.has(name)?'('+replacements.get(name)+')':name);});
   }
   if(specialization&&kernel.templateKind==='type')walk(kernel.body,n=>{if(n.templateArgument!==undefined)n.templateArgument=n.templateArgument.replace(/[A-Za-z_]\w*/g,name=>name===kernel.templateParameter?specialization[2]:name);});
+  pruneConstexpr(kernel.body,(message,n)=>{throw new CompileError(message,n.token,source);});
   resolveTraitTypes(kernel,ast,kernel.templateParameter,specialization?.[2]);
   lowerDeferredPointers(ast,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});
   lowerConstantRows(ast,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});

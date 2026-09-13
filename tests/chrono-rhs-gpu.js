@@ -1,5 +1,5 @@
 import {checkChronoAdami} from './chrono-adami-gpu.js';
-export async function checkChronoRhs(runtime,{diagnostic=false,nativeBoundaryInput=false}={}){
+export async function checkChronoRhs(runtime,{diagnostic=false,nativeBoundaryInput=false,afterForces}={}){
  const load=path=>fetch(new URL(path,import.meta.url)),source=await(await load('chrono-rhs.cu')).text(),params=await(await load('../reports/chrono-params.json')).json(),native=await(await load('../reports/chrono-rhs-native.bin')).arrayBuffer();
  const prerequisites=await checkRhsPrerequisites(runtime);
  const kernel=await runtime.kernel(source,{entry:'CfdCalcRHS_D',defines:{__CUDA_ARCH__:1},workgroupSize:[128]});let result;
@@ -11,6 +11,7 @@ export async function checkChronoRhs(runtime,{diagnostic=false,nativeBoundaryInp
    if(nativeBoundaryInput){const snapshot=await(await load('../reports/chrono-adami-native.bin')).arrayBuffer();importedRho=runtime.createBuffer(new Uint8Array(snapshot.slice(0,n*16)));importedVel=runtime.createBuffer(new Uint8Array(snapshot.slice(n*16,n*28)));o.importedRho=importedRho;o.importedVel=importedVel;}
    const before={...runtime.stats};runtime.batch().dispatch(kernel.bind(Object.fromEntries(Object.entries({...o,sortedPosRad:b.sortedPosRad,sortedVelMas:importedVel||vel,sortedRhoPreMu:importedRho||rho,numNeighborsPerPart:b.offsets,neighborList:neighbors}).filter(([key])=>!['importedRho','importedVel'].includes(key))),{...params,numActive:n}),[Math.ceil(n/128)]).submit();await runtime.idle();
    if(runtime.stats.readbackBytes!==before.readbackBytes||runtime.stats.dataBytesUploaded!==before.dataBytesUploaded)throw Error('Unexpected CPU transfer in RHS');
+   if(afterForces)await afterForces({buffers:b,neighbors,rho,vel,count:n,forces:o});
    const sections=[];let offset=0,compared=0,mismatches=0;
    for(const [name,words,integer]of [['sortedDerivVelRho',n*4,false],['sortedFreeSurfaceIdD',n,true],['sortedPosDivergence',n,false],['courantViscousTimeStep',n,false],['accelerationTimeStep',n,false],['error_flag',1,true]]){
     const Type=integer?Uint32Array:Float32Array,actual=await runtime.read(o[name],Type),expected=new Type(native,offset,words);let maximumError=0,failed=0;const examples=[],components=Array.from({length:name==='sortedDerivVelRho'?4:1},()=>({maximumError:0,index:0,actual:0,expected:0}));

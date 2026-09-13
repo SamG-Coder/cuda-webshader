@@ -1,0 +1,33 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell"
+  },
+  "markers": 30327,
+  "compared": 181964,
+  "maximumError": 1.1920928955078125e-7,
+  "nonzero": 50193,
+  "nativeMatched": true,
+  "method": "XSPH",
+  "initializedStateAndSyntheticVelocity": true,
+  "tolerances": {
+    "absolute": 0.00001,
+    "relative": 0.0002
+  },
+  "intermediateReadbackBytes": 0,
+  "cpuPhysics": false,
+  "fullSolverAdvanced": false,
+  "cases": [
+    {
+      "mode": "native initialized state",
+      "nonzero": 0,
+      "maximumError": 0
+    },
+    {
+      "mode": "synthetic velocity validation",
+      "nonzero": 50193,
+      "maximumError": 1.1920928955078125e-7
+    }
+  ],
+  "forcesCompared": 242617
+}

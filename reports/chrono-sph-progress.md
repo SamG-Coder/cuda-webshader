@@ -1,10 +1,10 @@
-# Chrono SPH dam-break port: GPU preparation, boundaries and forces
+# Chrono SPH dam-break port: GPU preparation, boundaries, forces and shifting
 
 This is an in-progress compiler port, not a runnable water showcase.
 The GPU chain now connects activity selection, normalized compaction, original
 marker IDs, grid sorting, original property reordering, cell ranges and neighbour
-lists, Adami wall-pressure evaluation and CFD force derivatives. Particle shifting
-and time integration are still pending.
+lists, Adami wall-pressure evaluation, CFD force derivatives and original XSPH
+particle shifting. Time integration is still pending.
 
 Upstream: https://github.com/projectchrono/chrono at
 `a92c6f72f422fbcafe0b37125d4070cb6a3b5803`.
@@ -553,3 +553,33 @@ These are numerical tolerances, not a bitwise-force equivalence claim or a
 long-duration accuracy claim. A native-matched full integration step and later
 trajectory comparisons remain necessary. Particle shifting and RK2 integration
 are still required before adding a running Chrono water showcase.
+
+## Original XSPH shifting
+
+The unchanged `Calc_Shifting_D` and `ShiftingAccumulateNeighborContrib` templates
+from pinned `SphForceWCSPH.cu` compile with scoped enum template arguments and
+compile-time `if constexpr` branch selection. Discarded branches are removed
+before helper template instantiation. Conditions currently support bounded
+signed integer/boolean constants, comparisons, arithmetic, bitwise operators
+and short-circuit logical operators; runtime conditions fail explicitly.
+Enum template parameters currently require a signed 32-bit underlying type.
+All five upstream shifting variants compile; numerical GPU validation here
+covers XSPH, the method actually selected by the unchanged dam-break demo
+(`ShiftingMethod::XSPH`, numeric value 2).
+
+`tests/chrono-shifting-native.cu` executes original Adami, force and XSPH kernels
+with the captured native configuration. `tests/chrono-shifting-gpu.js` connects
+XSPH to the live GPU chain before force-validation readbacks. The initialized
+state agrees exactly and produces zero shifting velocity. A second validation
+case supplies deterministic nonzero velocities to both implementations; it is
+synthetic test input, not a simulation step or replacement physics. That case
+produces 50,193 nonzero components with maximum absolute error
+1.1920928955078125e-7. Both cases cover 181,964 float/flag words in total,
+with absolute tolerance 1e-5 plus relative tolerance 2e-4, exact zero error flags,
+and no original kernel diagnostic messages. See `chrono-shifting-gpu.json`.
+
+No CPU transfers occur within the shifting dispatch. The synthetic input upload
+and validation reads are outside that assertion. The original kernel bodies
+remain unchanged; the new fixture includes their original Real3 `*=` and
+`IsFinite` dependencies. The water still requires original time integration and
+multi-step native comparison before it can be a showcase.
