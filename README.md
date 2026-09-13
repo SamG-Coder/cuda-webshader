@@ -628,3 +628,12 @@ one simulated second still takes about 109 seconds. See the
 [timing and correctness report](reports/chrono-runtime-speed.json). Reproduce
 the profiled loop with `node scripts/profile-chrono-loop.mjs 10000 output.json`
 on Windows with Edge and a real NVIDIA adapter.
+
+The interactive preview now advances simulation independently of display frames
+and presents at up to 30 fps. Every physics step still runs with the original
+timestep. A separate 1600×1000 sandbox benchmark with rendering enabled improved
+from 76.9 to 98.5 steps/s (1.28×), measured in real NVIDIA Edge over ten seconds
+after warm-up. These headless-browser measurements are not a guarantee of the
+same throughput in a visible browser window. The preview reports live steps/s
+and simulated-time/wall-time speed. See [preview measurements](reports/chrono-preview-speed.json);
+run `node scripts/bench-chrono-preview.mjs output.json` to reproduce.

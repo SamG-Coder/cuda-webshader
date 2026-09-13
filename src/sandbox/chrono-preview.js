@@ -16,7 +16,20 @@ export async function chronoPreview({owner,container,runtime,source,compiler,onA
  const advance=async()=>{const prepared=await rebuild(original,steps*.0001);try{neighbors=prepared.neighborEntries;await step(original,prepared);steps++;}finally{prepared.dispose();}};
  log('All editor CUDA passes compiled. Advancing the first RK2 step…');
  const beforeRead=runtime.stats.readbackBytes;await advance();const controlReadbackBytes=runtime.stats.readbackBytes-beforeRead;const inspection=await runtime.read(original.pos,Float32Array,128*4);log('First RK2 step complete. Rendering shared GPU buffers…');view.render();
- view.renderer.setAnimationLoop(()=>{if(owner.running&&!owner.framePromise&&!failed){owner.framePromise=advance().catch(error=>{failed=true;owner.running=false;log(error.message,'error');}).finally(()=>{owner.framePromise=null;});}view.render();const info=document.getElementById('preview-info');if(info)info.textContent=`Chrono SPH · ${steps.toLocaleString()} steps · ${(steps*dt).toFixed(4)} simulated seconds · ${neighbors.toLocaleString()} neighbours · colour = pressure`;});
+ // Readbacks yield to the browser between steps. Keep a single sequential pump
+ // alive instead of waiting for a display frame to schedule every physics step.
+ const pump=async()=>{while(owner.running&&!failed)await advance();};
+ let frames=1,lastRender=-Infinity,lastMeasure=performance.now(),measuredSteps=steps,rate=0;
+ view.renderer.setAnimationLoop(now=>{
+  if(owner.running&&!owner.framePromise&&!failed){owner.framePromise=pump().catch(error=>{failed=true;owner.running=false;log(error.message,'error');}).finally(()=>{owner.framePromise=null;});}
+  // Rendering every simulation step competes with compute on the same device.
+  // Present at 30 fps while the solver runs at its own pace, retaining every step.
+  if(now-lastRender<1000/30)return;
+  lastRender=now;view.render();frames++;
+  const elapsed=performance.now()-lastMeasure;
+  if(elapsed>=1000){rate=(steps-measuredSteps)*1000/elapsed;measuredSteps=steps;lastMeasure=performance.now();}
+  const info=document.getElementById('preview-info');if(info)info.textContent=`Chrono SPH · ${steps.toLocaleString()} steps · ${(steps*dt).toFixed(4)} simulated seconds · ${rate.toFixed(0)} steps/s · ${(rate*dt).toFixed(3)}× real time · ${neighbors.toLocaleString()} neighbours · colour = pressure`;
+ });
  log('Original Chrono kernels running from editor source. Fixed step 0.0001 s; activity and neighbours rebuild each step. This experimental port runs slower than real time.','success');
- return {count:16731,inspection,controlReadbackBytes,get simulationSteps(){return steps;},get animationFrames(){return steps;},get steps(){return steps;},get simulatedSeconds(){return steps*dt;},buffers:original,settle:async()=>{await owner.framePromise;}};
+ return {count:16731,inspection,controlReadbackBytes,get simulationSteps(){return steps;},get animationFrames(){return frames;},get steps(){return steps;},get simulatedSeconds(){return steps*dt;},buffers:original,settle:async()=>{await owner.framePromise;}};
 }

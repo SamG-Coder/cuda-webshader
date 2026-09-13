@@ -1,0 +1,29 @@
+{
+  "workload": "Actual sandbox animation, original editor CUDA, 1600x1000, real NVIDIA, Edge headless",
+  "before": {
+    "steps": 769,
+    "elapsedMs": 10002.435000002384,
+    "stepsPerSecond": 76.8812794084457,
+    "simulatedSecondsPerWallSecond": 0.007688127940844572,
+    "stopped": 795,
+    "device": "nvidia",
+    "viewport": [
+      1600,
+      1000
+    ]
+  },
+  "after": {
+    "steps": 985,
+    "elapsedMs": 10002.949999988079,
+    "stepsPerSecond": 98.47095106955187,
+    "simulatedSecondsPerWallSecond": 0.009847095106955186,
+    "stopped": 1011,
+    "device": "nvidia",
+    "viewport": [
+      1600,
+      1000
+    ]
+  },
+  "speedup": 1.280818319195849,
+  "note": "Single 10-second steady-state runs after compilation and 25 warm-up steps. Rendering enabled. Display presentation capped at 30 fps after optimization. CUDA kernels, timestep and all simulation passes unchanged. Results depend on browser and display workload."
+}
