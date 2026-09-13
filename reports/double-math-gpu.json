@@ -1,0 +1,17 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell"
+  },
+  "pairs": 8817,
+  "results": 26451,
+  "bitExactExceptNaNPayloads": true,
+  "compiled": {
+    "bytesCompared": 2580,
+    "nativeExact": true,
+    "quadraticCases": 129,
+    "recordCases": 129
+  },
+  "integrationKernelCompiled": true,
+  "integrationKernelExecuted": false
+}

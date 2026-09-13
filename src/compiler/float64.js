@@ -177,4 +177,40 @@ fn cw_d_div(a: cw_f64,b: cw_f64) -> cw_f64 {
   if(any(remainder != vec2<u32>(0u))) { q.x |= 1u; }
   return cw_d_pack(sign,e,q);
 }
+
+// Restoring square root: 56 root bits include guard/round/sticky for binary64.
+fn cw_d_sqrt(a: cw_f64) -> cw_f64 {
+  if(cw_d_nan(a)) { return vec2<u32>(0u,2146959360u); }
+  if(cw_d_zero(a)) { return a; }
+  if((a.y & 2147483648u) != 0u) { return vec2<u32>(0u,2146959360u); }
+  if(cw_d_inf(a)) { return a; }
+  let p = cw_d_parts(a);
+  let odd = p.exponent & 1i;
+  let shift = 58i + odd;
+  var root = vec2<u32>(0u);
+  var remainder = vec2<u32>(0u);
+  for(var i=55i; i>=0i; i--) {
+    var pair=0u;
+    for(var j=0i; j<2i; j++) {
+      let bit=2i*i+j-shift;
+      if(bit>=0i && bit<53i) { pair |= ((p.significand[u32(bit)/32u] >> (u32(bit)%32u)) & 1u) << u32(j); }
+    }
+    remainder=cw_d_shl(remainder,2u); remainder.x |= pair;
+    var trial=cw_d_shl(root,2u); trial.x |= 1u;
+    root=cw_d_shl(root,1u);
+    if(!cw_d_uless(remainder,trial)) { remainder=cw_d_usub(remainder,trial); root.x |= 1u; }
+  }
+  if(any(remainder!=vec2<u32>(0u))) { root.x |= 1u; }
+  return cw_d_pack(0u,(p.exponent-odd)/2i,root);
+}
+fn cw_d_fmin(a: cw_f64,b: cw_f64) -> cw_f64 {
+  if(cw_d_nan(a)) { return b; } if(cw_d_nan(b)) { return a; }
+  if(cw_d_zero(a) && cw_d_zero(b)) { return vec2<u32>(0u,(a.y | b.y) & 2147483648u); }
+  return select(b,a,cw_d_lt(a,b));
+}
+fn cw_d_fmax(a: cw_f64,b: cw_f64) -> cw_f64 {
+  if(cw_d_nan(a)) { return b; } if(cw_d_nan(b)) { return a; }
+  if(cw_d_zero(a) && cw_d_zero(b)) { return vec2<u32>(0u,(a.y & b.y) & 2147483648u); }
+  return select(a,b,cw_d_lt(a,b));
+}
 `;

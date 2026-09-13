@@ -22,7 +22,7 @@ test('Double launch words reject missing and out-of-range input transactionally'
   assert.throws(()=>packScalars(a.metadata,values,target));
   assert.ok(new Uint8Array(target).every(v=>v===0xa5));
  }
- for(const s of ['__global__ void k(double* p){}','__global__ void k(double& p){}','__global__ void k(double p=0.0){}','__global__ void k(){double p=0.0;}','struct C {size_t n;};__global__ void k(C* c){c[0].n=1;}'])assert.throws(()=>compile(s));
+ for(const s of ['__global__ void k(double* p){}','__global__ void k(double& p){}','__global__ void k(double p=0.0){}','__global__ void k(){double p[2];}','struct C {size_t n;};__global__ void k(C* c){c[0].n=1;}'])assert.throws(()=>compile(s));
 });
 test('Binary64 constant records remain numbers in the independent CPU oracle',()=>{
  const a=compile('struct P {double x;};__constant__ P p;__global__ void k(float* o){o[0]=(float)(p.x-1.0);}',{workgroupSize:[1]});

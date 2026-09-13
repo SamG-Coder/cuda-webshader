@@ -121,7 +121,7 @@ export class Parser {
     return 'cooperative_groups::'+this.name();
   }
   deferredType(name){return this.deferUnsupportedTypes&&/^double[234]?$/.test(name);}
-  startsType() { return this.peek().value==='volatile'||this.typeAliases.has(this.peek().value)||this.structs.has(this.peek().value)||TYPES.has(this.peek().value) || this.deferredType(this.peek().value) || this.peek().value==='typename' || this.typeTraits.has(this.peek().value) || this.templateTypeNames?.has(this.peek().value) || QUALIFIERS.has(this.peek().value); }
+  startsType() { return this.peek().value==='double'||this.peek().value==='volatile'||this.typeAliases.has(this.peek().value)||this.structs.has(this.peek().value)||TYPES.has(this.peek().value) || this.deferredType(this.peek().value) || this.peek().value==='typename' || this.typeTraits.has(this.peek().value) || this.templateTypeNames?.has(this.peek().value) || QUALIFIERS.has(this.peek().value); }
   type({recordField=false,parameter=false}={}) {
     const volatileParameter=parameter&&this.match('volatile');
     let constant = false, shared = false,external=false;
@@ -133,7 +133,7 @@ export class Parser {
       if(!this.typeTraits.has(name))this.fail(`Unknown type trait '${name}'.`,tok);
       this.take('<');const argument=this.name();this.take('>');this.take('::');const member=this.name();
       type={kind:'trait-type',name,argument,member};
-    }else if (tok.value === 'unsigned') { if(this.match('char'))type='cw_uchar';else if(this.match('short')){this.match('int');type='cw_ushort';}else{this.match('int'); type = 'u32';} } else type = this.structs.has(tok.value)?this.structs.get(tok.value).type:this.templateTypeNames?.has(tok.value)?'template:'+tok.value:((recordField||parameter)&&tok.value==='double'?'cw_f64':this.typeAliases.get(tok.value)||builtinType(tok.value));
+    }else if (tok.value === 'unsigned') { if(this.match('char'))type='cw_uchar';else if(this.match('short')){this.match('int');type='cw_ushort';}else{this.match('int'); type = 'u32';} } else type = this.structs.has(tok.value)?this.structs.get(tok.value).type:this.templateTypeNames?.has(tok.value)?'template:'+tok.value:(tok.value==='double'?'cw_f64':this.typeAliases.get(tok.value)||builtinType(tok.value));
     if(tok.value==='short')this.match('int');
     if(!type&&this.deferredType(tok.value))type='unsupported:'+tok.value;
     if (!type) this.fail(`Unsupported type '${tok.value}'. Use float, int, unsigned int, bool or float2/3/4.`, tok);
@@ -454,7 +454,7 @@ export class Parser {
     if (['+', '-', '!', '~', '&', '++', '--', '*'].includes(token.value)) { this.take(); return {kind: 'unary', token, op: token.value, value: this.unary(), prefix: true}; }
     if(this.is('(')&&this.peek(1).value==='void'&&this.peek(2).value==='*'&&this.peek(3).value==='*'&&this.peek(4).value===')'){for(let i=0;i<5;i++)this.take();return {kind:'allocation-output',token,value:this.unary()};}
     if(this.is('(')&&this.peek(1).value==='char'&&this.peek(2).value==='*'&&this.peek(3).value===')'){this.take('(');this.take('char');this.take('*');this.take(')');return {kind:'pointer-cast',token,target:'byte-address',constant:false,value:this.unary()};}
-    if (this.is('(') && this.peek(2).value!=='(' && (this.structs.has(this.peek(1).value)||this.typeAliases.has(this.peek(1).value)||TYPES.has(this.peek(1).value) || this.deferredType(this.peek(1).value) || this.peek(1).value==='typename' || this.typeTraits.has(this.peek(1).value) || this.templateTypeNames?.has(this.peek(1).value) || this.peek(1).value === 'const' || this.peek(1).value === 'volatile')) { this.take('('); const volatilePointer=this.match('volatile'); const type = this.type(); if(volatilePointer&&(!type.pointer||!['i32','u32'].includes(type.type)))this.fail('Volatile casts require integer pointers.',token); if(type.reference)this.fail('Reference casts are unsupported.'); this.take(')'); return {kind:type.pointer?'pointer-cast':'cast',token,target:type.type,constant:type.constant,volatilePointer,value:this.unary()}; }
+    if (this.is('(') && this.peek(2).value!=='(' && (this.peek(1).value==='double'||this.structs.has(this.peek(1).value)||this.typeAliases.has(this.peek(1).value)||TYPES.has(this.peek(1).value) || this.deferredType(this.peek(1).value) || this.peek(1).value==='typename' || this.typeTraits.has(this.peek(1).value) || this.templateTypeNames?.has(this.peek(1).value) || this.peek(1).value === 'const' || this.peek(1).value === 'volatile')) { this.take('('); const volatilePointer=this.match('volatile'); const type = this.type(); if(volatilePointer&&(!type.pointer||!['i32','u32'].includes(type.type)))this.fail('Volatile casts require integer pointers.',token); if(type.reference)this.fail('Reference casts are unsupported.'); this.take(')'); return {kind:type.pointer?'pointer-cast':'cast',token,target:type.type,constant:type.constant,volatilePointer,value:this.unary()}; }
     let value;
     if (token.kind === 'number') { this.take(); value = {kind: 'literal', token, value: token.value}; }
     else if(token.kind==='string'){this.take();value={kind:'string',token,value:token.value};}

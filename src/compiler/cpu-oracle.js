@@ -141,12 +141,13 @@ class Context {
     if(/^make_(float|uint|int)[234]$/.test(name))return (args.length===1?Array(vectorLength(n.type)).fill(args[0]):args).map(v=>convert(v,vectorElement(n.type)));
     if(name==='__fdividef')return f(args[0]/args[1]);
     if(name==='__saturatef')return f(Number.isNaN(args[0])?0:Math.max(0,Math.min(1,args[0])));
-    if(name==='sqrt')return f(Math.sqrt(args[0]));
+    if(name==='sqrt')return convert(Math.sqrt(args[0]),n.type);
     if(name==='rintf'){const x=args[0],lo=Math.floor(x),fraction=x-lo,result=fraction>.5||fraction===.5&&lo%2!==0?lo+1:lo;return result===0&&x<0?-0:result;}
     if(name==='roundf'){const x=args[0],whole=Math.trunc(x);return f(Math.abs(x-whole)>=.5?whole+(x>=0?1:-1):whole);}
     if(name==='abs')return convert(Math.abs(args[0]),n.type);
     const unary={sinf:Math.sin,cosf:Math.cos,tanf:Math.tan,tan:Math.tan,sqrtf:Math.sqrt,rsqrtf:x=>1/Math.sqrt(x),exp:Math.exp,expf:Math.exp,__expf:Math.exp,exp2f:x=>2**x,logf:Math.log,__logf:Math.log,log2f:Math.log2,fabs:Math.abs,fabsf:Math.abs,floorf:Math.floor,ceilf:Math.ceil,truncf:Math.trunc};
     if(unary[name])return f(unary[name](args[0]));
+    if(['fmin','fmax'].includes(name)&&n.type==='cw_f64'){if(Number.isNaN(args[0]))return args[1];if(Number.isNaN(args[1]))return args[0];}
     if(['fmin','fmax','fminf','fmaxf','min','max','powf','pow','atan2f','fmaf'].includes(name)){
       const value=name==='fmaf'?args[0]*args[1]+args[2]:['fmin','fminf','min'].includes(name)?Math.min(...args):['fmax','fmaxf','max'].includes(name)?Math.max(...args):['powf','pow'].includes(name)?Math.pow(...args):Math.atan2(...args);
       return convert(value,n.type);

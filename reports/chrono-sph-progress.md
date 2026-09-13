@@ -609,3 +609,35 @@ uses double min/max and square root. That helper is retained even though the
 selected dam-break configuration is CFD rather than CRM; it has not been stubbed
 or replaced. Full RK2 integration and multi-step trajectory validation remain
 outstanding.
+
+## Original integration kernel compiles on the GPU
+
+`tests/chrono-integration.cu` now contains the unchanged original `EulerStep_D`,
+`PositionEulerStep`, `VelocityEulerStep`, `DensityEulerStep`, `TauEulerStep` and
+`Eos` functions, their scalar/vector dependencies and the original `CH_1_3`
+constant. The int32_t ABI alias is explicitly supplied by the fixture. Creation
+of the full WebGPU integration pipeline succeeds on real NVIDIA hardware.
+This is compilation/validation evidence only: the integration kernel has not
+been dispatched as part of an RK2 time step yet.
+
+The compiler now supports local scalar doubles and C-style/static casts to
+that type. Double arrays, local pointers/references and shared double storage
+remain rejected. Double `sqrt`, `fmin` and `fmax` use the existing integer-limb
+binary64 representation. Square root uses a 56-digit restoring algorithm and
+guard/round/sticky rounding; it does not convert through float. Zero signs,
+infinities, negative inputs and NaNs are handled explicitly. The 8,817 native
+input pairs produce 26,451 results matching bitwise except for NaN payloads.
+`double-math-input.bin`, `double-math-native.bin` and `double-math-gpu.json`
+record the native/GPU evidence.
+
+The original helper also needs references to float members of storage records.
+These now preserve the storage root, index and field path. A separate compiled
+CUDA fixture checks the quadratic solve, distinct-field updates and aliased
+const/mutable references to one field. Its 129 cases match native CUDA across
+2,580 bytes exactly, including a coefficient large enough that a float-square
+intermediate would overflow. The double arithmetic has CPU-oracle coverage;
+the mutable record reference cases are validated on real GPU hardware against
+native CUDA. No original Chrono physics was replaced or bypassed.
+
+Next: connect the original RK2 half-step and full-step sequence, its boundary
+updates and midpoint force/shifting evaluation, then compare trajectories.

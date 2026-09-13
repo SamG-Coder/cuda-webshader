@@ -19,5 +19,5 @@ test('Extent addition, subtraction and float conversion preserve unsigned size s
  executeCPU(artifact,{out,low},{'size.width':0,'size.height':1,'size.depth':1},[1]);assert.deepEqual([...out],[Math.fround(Number((1n<<64n)-1n)),1]);assert.equal(low[0],0xffffffff);
 });
 test('Unsupported double storage, integer conversions and double transcendental calls stay explicit',()=>{
- for(const source of ['__global__ void k(){double x=1.0;}','__global__ void k(int* o){o[0]=1.5;}','__global__ void k(float* o){o[0]=sqrt(2.0);}','__global__ void k(float* o){o[0]=0.5%0.25;}'])assert.throws(()=>compile(source));
+ for(const source of ['__global__ void k(){double x[2];}','__global__ void k(int* o){o[0]=1.5;}','__global__ void k(float* o){o[0]=exp(2.0);}','__global__ void k(float* o){o[0]=0.5%0.25;}'])assert.throws(()=>compile(source));
 });
