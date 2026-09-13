@@ -1,0 +1,203 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell"
+  },
+  "stages": [
+    {
+      "path": "chrono-rk2-half-native.bin",
+      "sections": [
+        {
+          "name": "pos",
+          "max": 0,
+          "mismatches": 0,
+          "nonzero": 117396,
+          "examples": [],
+          "components": [
+            {
+              "maximumError": 0,
+              "unequal": 0
+            },
+            {
+              "maximumError": 0,
+              "unequal": 0
+            },
+            {
+              "maximumError": 0,
+              "unequal": 0
+            },
+            {
+              "maximumError": 0,
+              "unequal": 0
+            }
+          ]
+        },
+        {
+          "name": "vel",
+          "max": 1.373291524942033e-8,
+          "mismatches": 0,
+          "nonzero": 49337,
+          "examples": [],
+          "components": [
+            {
+              "maximumError": 1.0108948345077806e-8,
+              "unequal": 12154
+            },
+            {
+              "maximumError": 1.0681151962899094e-8,
+              "unequal": 10510
+            },
+            {
+              "maximumError": 1.373291524942033e-8,
+              "unequal": 13626
+            }
+          ]
+        },
+        {
+          "name": "rho",
+          "max": 0.00390625,
+          "mismatches": 0,
+          "nonzero": 95018,
+          "examples": [],
+          "components": [
+            {
+              "maximumError": 0.0001220703125,
+              "unequal": 253
+            },
+            {
+              "maximumError": 0.00390625,
+              "unequal": 320
+            },
+            {
+              "maximumError": 0,
+              "unequal": 0
+            },
+            {
+              "maximumError": 0,
+              "unequal": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "chrono-rk2-native.bin",
+      "sections": [
+        {
+          "name": "pos",
+          "max": 5.781966837823185e-14,
+          "mismatches": 0,
+          "nonzero": 118917,
+          "examples": [],
+          "components": [
+            {
+              "maximumError": 0,
+              "unequal": 0
+            },
+            {
+              "maximumError": 5.781966837823185e-14,
+              "unequal": 1447
+            },
+            {
+              "maximumError": 0,
+              "unequal": 0
+            },
+            {
+              "maximumError": 0,
+              "unequal": 0
+            }
+          ]
+        },
+        {
+          "name": "vel",
+          "max": 2.9753209673799574e-8,
+          "mismatches": 0,
+          "nonzero": 49366,
+          "examples": [],
+          "components": [
+            {
+              "maximumError": 2.021783984673675e-8,
+              "unequal": 12461
+            },
+            {
+              "maximumError": 2.2172925717711678e-8,
+              "unequal": 10813
+            },
+            {
+              "maximumError": 2.9753209673799574e-8,
+              "unequal": 14074
+            }
+          ]
+        },
+        {
+          "name": "rho",
+          "max": 0.00390625,
+          "mismatches": 0,
+          "nonzero": 95018,
+          "examples": [],
+          "components": [
+            {
+              "maximumError": 0.0001220703125,
+              "unequal": 253
+            },
+            {
+              "maximumError": 0.00390625,
+              "unequal": 320
+            },
+            {
+              "maximumError": 0,
+              "unequal": 0
+            },
+            {
+              "maximumError": 0,
+              "unequal": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [
+    0
+  ],
+  "messages": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "fullStepDispatched": true,
+  "rk2Steps": 1,
+  "nativeMatched": true,
+  "trajectoryValidated": false,
+  "compared": 667196,
+  "dt": 0.00009999999747378752,
+  "intermediateReadbackBytes": 0,
+  "tolerances": {
+    "position": {
+      "absolute": 0.000001,
+      "relative": 0.0002
+    },
+    "velocity": {
+      "absolute": 4e-7,
+      "relative": 0.0002
+    },
+    "properties": {
+      "absolute": 0.0002,
+      "relative": 0.00002
+    },
+    "radiusViscosityMarkerTypeAndFlags": "exact"
+  }
+}

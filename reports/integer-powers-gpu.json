@@ -1,0 +1,11 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell"
+  },
+  "cases": 264,
+  "maxUlps": 1,
+  "negativeExponents": true,
+  "signedZeros": true,
+  "nonfiniteCases": true
+}

@@ -1,0 +1,30 @@
+{
+  "markers": 30327,
+  "fluid": 16731,
+  "steps": 1,
+  "nativeBitExact": true,
+  "sections": [
+    {
+      "name": "position",
+      "compared": 66924,
+      "unequal": 0,
+      "maximumError": 0
+    },
+    {
+      "name": "velocity",
+      "compared": 50193,
+      "unequal": 0,
+      "maximumError": 0
+    },
+    {
+      "name": "properties",
+      "compared": 50193,
+      "unequal": 0,
+      "maximumError": 0
+    }
+  ],
+  "sha256": {
+    "application": "7ada8fb009bbdb54d90325123326e0468631cf341e5a5b8d0f96287e472da7bd",
+    "adapter": "9ffc548a9054ce824e114da6bda883e46d1a9ab20d659c5ec9d4b2661aff6842"
+  }
+}

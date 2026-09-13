@@ -791,6 +791,11 @@ class Emitter {
     if(['fabs','floor'].includes(name)&&(args.length!==1||args[0].type!=='f32'))this.fail(name+' supports the CUDA float overload; double precision is unavailable.',n);
     const unary = {sinf: 'sin', cosf: 'cos', tanf: 'tan', tan: 'tan', sqrtf: 'sqrt', rsqrtf: 'inverseSqrt', expf: 'exp', __expf:'exp', exp2f: 'exp2', logf: 'log', __logf:'log', log2f: 'log2', fabs:'abs', fabsf: 'abs', floor: 'floor', floorf: 'floor', ceilf: 'ceil', truncf: 'trunc'};
     if(['fmin','fmax'].includes(name)&&(args.length!==2||args.some(a=>a.type!=='f32')))this.fail(name+' requires two float arguments.',n);
+    if(['pow','powf'].includes(name)){
+      if(args.length!==2)this.fail(name+' requires two arguments.',n);
+      this.float64Used=true;this.integerPowerUsed=true;
+      return this.result(n,'f32',`cw_pow_f32(${args.map(a=>this.convert(a.code,a.type,'f32',n)).join(', ')})`,pre);
+    }
     const binary = {fmin: 'min', fmax: 'max', fminf: 'min', fmaxf: 'max', powf: 'pow', pow: 'pow', atan2f: 'atan2'};
     if (unary[name] || binary[name] || name === 'fmaf') {
       const count = unary[name] ? 1 : binary[name] ? 2 : 3;
@@ -1222,6 +1227,22 @@ class Emitter {
     if(this.integerIntrinsics.has('__umul24'))helperLines.unshift('fn cw_umul24(a: u32, b: u32) -> u32 { return (a & 16777215u) * (b & 16777215u); }');
     // A float32 significand times a 16-bit integer fits exactly in 40 bits.
     // Integer limbs preserve the original double product before truncating to a byte.
+    if(this.integerPowerUsed)helperLines.push(`
+fn cw_pow_f32(base: f32, exponent: f32) -> f32 {
+  if(exponent >= -64.0f && exponent <= 64.0f && exponent == trunc(exponent)) {
+    var count=u32(abs(exponent));
+    var value=cw_d_from_f32(base);var product=cw_d_from_u32(1u);
+    loop {
+      if(count == 0u) { break; }
+      if((count & 1u) != 0u) { product=cw_d_mul(product,value); }
+      count >>= 1u;
+      if(count != 0u) { value=cw_d_mul(value,value); }
+    }
+    if(exponent < 0.0f) { product=cw_d_div(cw_d_from_u32(1u),product); }
+    return cw_d_to_f32(product);
+  }
+  return pow(base,exponent);
+}`);
     if(this.float64Used)helperLines.unshift(FLOAT64_WGSL);
     if(this.sizeMultiplyUsed)helperLines.unshift(`fn cw_size_multiply(a: vec2<u32>, b: vec2<u32>) -> vec2<u32> {
   let a0 = a.x & 65535u; let a1 = a.x >> 16u;

@@ -1,10 +1,12 @@
-# Chrono SPH dam-break port: GPU preparation, boundaries, forces and shifting
+# Chrono SPH dam-break port: first original RK2 step validated
 
 This is an in-progress compiler port, not a runnable water showcase.
 The GPU chain now connects activity selection, normalized compaction, original
 marker IDs, grid sorting, original property reordering, cell ranges and neighbour
-lists, Adami wall-pressure evaluation, CFD force derivatives and original XSPH
-particle shifting. Time integration is still pending.
+lists, Adami wall-pressure evaluation, CFD force derivatives, original XSPH
+particle shifting and one complete original RK2 step. Repeated stepping with
+neighbour rebuilding, longer trajectories and a visible sandbox preview remain
+pending.
 
 Upstream: https://github.com/projectchrono/chrono at
 `a92c6f72f422fbcafe0b37125d4070cb6a3b5803`.
@@ -641,3 +643,76 @@ native CUDA. No original Chrono physics was replaced or bypassed.
 
 Next: connect the original RK2 half-step and full-step sequence, its boundary
 updates and midpoint force/shifting evaluation, then compare trajectories.
+
+## First complete original RK2 step
+
+`tests/chrono-rk2-gpu.js` now dispatches the original XSPH kernel, half-step
+`EulerStep_D`, periodic Y boundary kernel, midpoint Adami boundary evaluation,
+CFD force evaluation, XSPH shifting, full-step `EulerStep_D` and periodic Y
+boundary update. Inputs come from the validated live GPU preparation and force
+chain. State copies remain on the GPU; there are no CPU uploads or readbacks
+between the first RK2 dispatch and the completed full step. Numerical validation
+reads happen afterwards. The fixed-wall CFD configuration is retained, including
+its original 0.0001-second step and XSPH shifting. No CRM physics was stubbed.
+
+Native captures contain the half-step and full-step state, covering 667,196
+float/flag words in total. Position tolerance is absolute 1e-6 plus relative
+2e-4; velocity is 4e-7 plus 2e-4; properties are 2e-4 plus 2e-5. Smoothing radius,
+viscosity, marker types and error flags must match exactly. These limits were
+set before diagnosing the failure and were not widened to accept it. Both
+states now pass. Half-step positions are exact; the largest full-step position
+difference is 5.781966837823185e-14, velocity difference is
+2.9753209673799574e-8, and property difference is 0.00390625 (the existing
+boundary-input rounding difference). Original diagnostic buffers and error
+flags are clear. See `chrono-rk2-gpu.json`.
+
+### Pressure mismatch and compiler fix
+
+The first attempted step failed pressure and final-velocity comparisons. With
+identical captured inputs, the original Eos produced identical density ratios
+and coefficients on CUDA and WebGPU, but WGSL `pow` differed for 10,637 markers.
+The largest power difference, 4.76837158203125e-7, became 0.681396484375 in
+pressure after subtracting 1 and applying the coefficient. Native powers matched
+an independent double-precision calculation for every captured input.
+`chrono-eos-before.json` preserves that diagnostic result.
+
+The compiler now evaluates runtime integer float powers in [-64,64] through
+binary64 multiplication/division and rounds the result back to float. Other
+exponents retain the existing WGSL pow path. No Chrono expression was changed.
+The original Eos now matches CUDA exactly across all 30,327 captured inputs,
+including ratio, power, pressure and coefficient. Additional runtime exponent
+tests cover 264 cases, including negative exponents, signed zeros, subnormals,
+infinities and NaNs; results differ by at most one float ULP from native CUDA,
+with matching infinity/sign behavior. This is not a claim of correctly rounded
+pow for every possible float input or improved noninteger-exponent accuracy.
+
+### Actual native application comparison
+
+`tests/chrono-rk2-application.cpp` preserves the original initialization, calls
+`sysFSI.DoStepDynamics(step_size)` once, then captures the original application
+state through its public accessors. The separate kernel adapter's output maps
+back through the validated sorted-to-original indices. All 167,310 compared
+fluid values match the actual native application exactly: position/radius,
+velocity, density, pressure and viscosity for 16,731 fluid particles.
+`chrono-rk2-application-comparison.json` records the counts and input hashes.
+Boundary records are not included in this application comparison because the
+application's original-array update copies the fluid state; the GPU/native
+kernel comparison separately covers all 30,327 sorted markers.
+
+To reproduce after preparing the existing native initialization references:
+
+```powershell
+node scripts/prepare-chrono-rk2-reference.mjs
+nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-rk2-native.cu -o .local/chrono-rk2-native.exe
+.local/chrono-rk2-native.exe
+node scripts/build-chrono-rk2-application.mjs
+.local/chrono-build/bin/chrono-rk2-application.exe
+node scripts/compare-chrono-rk2-application.mjs
+nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-eos-native.cu -o .local/chrono-eos-native.exe
+.local/chrono-eos-native.exe
+```
+
+This proves one RK2 step. The native configuration requires neighbour rebuilding
+every step (`num_proximity_search_steps = 1`), so freezing the initial neighbour
+list is not a valid shortcut to a moving showcase. Repeated preparation, original
+state updates and trajectory comparison are next.

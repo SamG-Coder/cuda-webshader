@@ -1,0 +1,35 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell"
+  },
+  "n": 30327,
+  "sections": [
+    {
+      "name": "ratio",
+      "unequal": 0,
+      "max": 0,
+      "examples": []
+    },
+    {
+      "name": "pow",
+      "unequal": 0,
+      "max": 0,
+      "examples": []
+    },
+    {
+      "name": "pressure",
+      "unequal": 0,
+      "max": 0,
+      "examples": []
+    },
+    {
+      "name": "B",
+      "unequal": 0,
+      "max": 0,
+      "examples": []
+    }
+  ],
+  "nativeOracleMismatch": 0,
+  "gpuOracleMismatch": 0
+}
