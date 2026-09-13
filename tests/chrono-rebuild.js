@@ -13,8 +13,11 @@ export async function createChronoRebuild(runtime,params,n){
  const activity=await runtime.kernel(await(await load('chrono-activity.cu')).text(),{entry:'UpdateActivityD',workgroupSize:[128]});
  const compactSource=await(await load('chrono-compact.cu')).text();
  const normalize=await runtime.kernel(compactSource,{entry:'normalizeActivity',workgroupSize:[128]}),fill=await runtime.kernel(compactSource,{entry:'fillActiveListD',workgroupSize:[128]});
- return async function rebuild(original,time){
-  const owned=[],alloc=bytes=>{const b=runtime.createBuffer(bytes);owned.push(b);return b;};
+ const pool=[];let cursor=0,leased=false,generation=0;
+ const alloc=input=>{const data=ArrayBuffer.isView(input)?input:null,size=data?data.byteLength:input,index=cursor++;let buffer=pool[index];if(buffer&&buffer.byteLength!==size){runtime.destroyBuffer(buffer);buffer=null;}if(!buffer)pool[index]=buffer=runtime.createBuffer(size);if(data)runtime.write(buffer,data);return buffer;};
+ const rebuild=async function(original,time){
+  if(leased)throw Error('Release the previous neighbour state before rebuilding');leased=true;cursor=0;const ticket=++generation;
+  const clear=runtime.device.createCommandEncoder();for(const buffer of pool)clear.clearBuffer(buffer.gpuBuffer);runtime.device.queue.submit([clear.finish()]);
   const buffers={posRadD:original.pos,rhoPreMuD:original.rho,velMasD:original.vel,ad_body_D:alloc(104),ad_node1D_D:alloc(104),ad_node2D_D:alloc(104),pos_bodies_D:alloc(12),pos_nodes1D_D:alloc(12),pos_nodes2D_D:alloc(12),activityIdentifierD:alloc(n*4),extendedActivityIdD:alloc(n*4)};
   const bits=new ArrayBuffer(8);new DataView(bits).setFloat64(0,time,true);const words=new Uint32Array(bits);
   const positive=alloc(n*4),prefix=alloc(n*4),activeList=alloc(n*4),total=alloc(4);
@@ -24,14 +27,16 @@ export async function createChronoRebuild(runtime,params,n){
    runtime.batch().dispatch(fill.bind({prefixSum:prefix,extendedActivityIdD:buffers.extendedActivityIdD,activeListD:activeList},{numAllMarkers:n}),[Math.ceil(n/128)]).submit();
    const selected=(await runtime.read(total,Uint32Array))[0];
    const result=await search(buffers,activeList,selected);
-   const dispose=result.dispose;result.dispose=()=>{dispose();for(const b of owned)runtime.destroyBuffer(b);};
+   result.dispose=()=>{if(ticket===generation)leased=false;};
    return result;
-  }catch(error){for(const b of owned)runtime.destroyBuffer(b);throw error;}
+  }catch(error){rebuild.dispose();throw error;}
  };
+ rebuild.dispose=()=>{for(const buffer of pool)runtime.destroyBuffer(buffer);pool.length=0;leased=false;};
+ return rebuild;
  async function search(buffers,activeList,n){
   const p=params,c={n:originalCount};
   const cells=p['constant.paramsD.gridSize.x']*p['constant.paramsD.gridSize.y']*p['constant.paramsD.gridSize.z'];
-  const b={hashes:runtime.createBuffer(Math.max(n,1)*4),indices:runtime.createBuffer(Math.max(n,1)*4),sortedPosRad:runtime.createBuffer(Math.max(n,1)*16),unused:runtime.createBuffer(12),sortedVel:runtime.createBuffer(Math.max(n,1)*12),sortedRho:runtime.createBuffer(Math.max(n,1)*16),sortedActivity:runtime.createBuffer(Math.max(n,1)*4),map:runtime.createBuffer(new Uint32Array(c.n).fill(0xffffffff)),stress1:runtime.createBuffer(12),stress2:runtime.createBuffer(12),stress3:runtime.createBuffer(12),diagnostics:runtime.createBuffer((2+diagnostic.capacity*diagnostic.strideWords)*4),start:runtime.createBuffer(cells*4),end:runtime.createBuffer(cells*4),counts:runtime.createBuffer((n+1)*4),offsets:runtime.createBuffer((n+1)*4),total:runtime.createBuffer(4)};let neighbors;
+  const b={hashes:alloc(Math.max(n,1)*4),indices:alloc(Math.max(n,1)*4),sortedPosRad:alloc(Math.max(n,1)*16),unused:alloc(12),sortedVel:alloc(Math.max(n,1)*12),sortedRho:alloc(Math.max(n,1)*16),sortedActivity:alloc(Math.max(n,1)*4),map:alloc(new Uint32Array(c.n).fill(0xffffffff)),stress1:alloc(12),stress2:alloc(12),stress3:alloc(12),diagnostics:alloc((2+diagnostic.capacity*diagnostic.strideWords)*4),start:alloc(cells*4),end:alloc(cells*4),counts:alloc((n+1)*4),offsets:alloc((n+1)*4),total:alloc(4)};let neighbors;
   const dispatch=(entry,args)=>{if(!n)return;const k=kernels[entry],values=Object.fromEntries(k.artifact.metadata.scalars.map(s=>[s.name,s.origin==='constant'?p[s.name]:n]));runtime.batch().dispatch(k.bind(args,values),[Math.ceil(n/128)]).submit();};
 
   try{
@@ -43,10 +48,10 @@ export async function createChronoRebuild(runtime,params,n){
    const search={sortedPosRad:b.sortedPosRad,sortedRhoPreMu:b.sortedRho,cellStart:b.start,cellEnd:b.end};
    dispatch('neighborSearchNum',{...search,numNeighborsPerPart:b.counts});await runtime.exclusiveScan(b.counts,b.offsets,{count:n+1,total:b.total});
    const total=(await runtime.read(b.total,Uint32Array))[0];
-   neighbors=runtime.createBuffer(Math.max(total,1)*4);dispatch('neighborSearchID',{...search,numNeighborsPerPart:b.offsets,neighborList:neighbors});await runtime.idle();
+   neighbors=alloc(Math.max(total,1)*4);dispatch('neighborSearchID',{...search,numNeighborsPerPart:b.offsets,neighborList:neighbors});await runtime.idle();
    const readback=runtime.stats.readbackBytes-before.readbackBytes;if(readback!==4||runtime.stats.dataBytesUploaded!==before.dataBytesUploaded)throw Error('Unexpected CPU transfer in selected neighbour stages');
-   return {buffers:b,neighbors,count:n,neighborEntries:total,dispose(){for(const v of [...Object.values(b),neighbors])runtime.destroyBuffer(v);}};
+   return {buffers:b,neighbors,count:n,neighborEntries:total,dispose(){leased=false;}};
 
-  }catch(error){for(const v of [...Object.values(b),neighbors])if(v)runtime.destroyBuffer(v);throw error;}
+  }catch(error){throw error;}
  }
 }

@@ -6,10 +6,13 @@ export async function createChronoStep(runtime,params){
  const make=(source,entry)=>runtime.kernel(source,{entry,defines:{__CUDA_ARCH__:1},workgroupSize:[128]});
  const scatter=await make(integration+'\n'+await load('chrono-scatter.cuh'),'CopySortedToOriginalWCSPH_D');
  const euler=await make(integration,'EulerStep_D'),periodic=await make(integration,'ApplyPeriodicBoundaryY_D'),shift=await make(shiftSource,'Calc_Shifting_D<ShiftingMethod::XSPH>'),bc=await make(bcSource,'CfdAdamiBC_D'),rhs=await make(rhsSource,'CfdCalcRHS_D');
- return async function step(original,{buffers:b,neighbors,count:n}){
+ const pool=[];
+ const step=async function(original,{buffers:b,neighbors,count:n}){
   if(!n)return;
   const originalCount=original.pos.byteLength/16;
-  const owned=[],alloc=size=>{const v=runtime.createBuffer(size);owned.push(v);return v;},state=()=>({pos:alloc(n*16),vel:alloc(n*12),rho:alloc(n*16)}),y=state(),tmp=state(),flag=alloc(4),shifting=alloc(n*12),acc=alloc(n*12),tauA=alloc(12),tauB=alloc(12),pc=alloc(12),dtauA=alloc(12),dtauB=alloc(12),deriv=alloc(n*16),surface=alloc(n*4),divergence=alloc(n*4),courant=alloc(n*4),acceleration=alloc(n*4),diags=new Map();
+  let cursor=0;
+  const clear=runtime.device.createCommandEncoder();for(const buffer of pool)clear.clearBuffer(buffer.gpuBuffer);runtime.device.queue.submit([clear.finish()]);
+  const alloc=size=>{const index=cursor++;let buffer=pool[index];if(buffer&&buffer.byteLength!==size){runtime.destroyBuffer(buffer);buffer=null;}if(!buffer)pool[index]=buffer=runtime.createBuffer(size);return buffer;},state=()=>({pos:alloc(n*16),vel:alloc(n*12),rho:alloc(n*16)}),y=state(),tmp=state(),flag=alloc(4),shifting=alloc(n*12),acc=alloc(n*12),tauA=alloc(12),tauB=alloc(12),pc=alloc(12),dtauA=alloc(12),dtauB=alloc(12),deriv=alloc(n*16),surface=alloc(n*4),divergence=alloc(n*4),courant=alloc(n*4),acceleration=alloc(n*4),diags=new Map();
   for(const k of [euler,periodic,shift,bc,rhs,scatter])if(k.artifact.metadata.diagnostics){const d=k.artifact.metadata.diagnostics;diags.set(k,alloc((2+d.capacity*d.strideWords)*4));}
   const bind=(k,data,extra={})=>{const d=k.artifact.metadata.diagnostics;if(d)data={...data,[d.buffer]:diags.get(k)};return k.bind(Object.fromEntries(k.artifact.metadata.bindings.map(x=>{if(!data[x.name])throw Error('Missing '+x.name);return [x.name,data[x.name]]})),{...params,numActive:n,...extra});};
   const shiftBind=(s,div)=>bind(shift,{vel_XSPH_Sorted_D:shifting,sortedPosRad:s.pos,sortedVelMas:s.vel,sortedRhoPreMu:s.rho,numNeighborsPerPart:b.offsets,neighborList:neighbors,sortedPosDivergence:div,error_flag:flag});
@@ -22,15 +25,22 @@ export async function createChronoStep(runtime,params){
    runtime.batch().dispatch(shiftBind(y,divergence),grid).dispatch(eulerBind(tmp,deriv,surface,dt/2),grid).dispatch(periodicBind(tmp),grid).submit();
    runtime.batch().dispatch(bind(bc,{numNeighborsPerPart:b.offsets,neighborList:neighbors,sortedPosRadD:tmp.pos,bceAcc:acc,sortedRhoPresMuD:tmp.rho,sortedVelMasD:tmp.vel,error_flag:flag}),grid)
     .dispatch(bind(rhs,{sortedDerivVelRho:deriv,sortedPosRad:tmp.pos,sortedVelMas:tmp.vel,sortedRhoPreMu:tmp.rho,numNeighborsPerPart:b.offsets,neighborList:neighbors,sortedFreeSurfaceIdD:surface,sortedPosDivergence:divergence,courantViscousTimeStep:courant,accelerationTimeStep:acceleration,error_flag:flag}),grid)
-    .dispatch(shiftBind(tmp,divergence),grid).dispatch(eulerBind(y,deriv,surface,dt),grid).dispatch(periodicBind(y),grid).submit();await runtime.idle();
+    .dispatch(shiftBind(tmp,divergence),grid).dispatch(eulerBind(y,deriv,surface,dt),grid).dispatch(periodicBind(y),grid).submit();
    if(runtime.stats.readbackBytes!==before.readbackBytes||runtime.stats.dataBytesUploaded!==before.dataBytesUploaded)throw Error('CPU transfer during RK2');
    const stresses=Array.from({length:6},(_,i)=>alloc((i<3?n:originalCount)*12)),originalDeriv=alloc(originalCount*16);
    const transferBefore={...runtime.stats};
-   runtime.batch().dispatch(bind(scatter,{sortedPosRad:y.pos,sortedVelMas:y.vel,sortedRhoPresMu:y.rho,sortedTauXxYyZz:stresses[0],sortedTauXyXXzYz:stresses[1],sortedPcEvSv:stresses[2],derivVelRho:deriv,posRadOriginal:original.pos,velMasOriginal:original.vel,rhoPresMuOriginal:original.rho,tauXxYyZzOriginal:stresses[3],tauXyXzYzOriginal:stresses[4],pcEvSvOriginal:stresses[5],derivVelRhoOriginal:originalDeriv,gridMarkerIndex:b.indices},{group:4}),grid).submit();await runtime.idle();
+   runtime.batch().dispatch(bind(scatter,{sortedPosRad:y.pos,sortedVelMas:y.vel,sortedRhoPresMu:y.rho,sortedTauXxYyZz:stresses[0],sortedTauXyXXzYz:stresses[1],sortedPcEvSv:stresses[2],derivVelRho:deriv,posRadOriginal:original.pos,velMasOriginal:original.vel,rhoPresMuOriginal:original.rho,tauXxYyZzOriginal:stresses[3],tauXyXzYzOriginal:stresses[4],pcEvSvOriginal:stresses[5],derivVelRhoOriginal:originalDeriv,gridMarkerIndex:b.indices},{group:4}),grid).submit();
    if(runtime.stats.readbackBytes!==transferBefore.readbackBytes||runtime.stats.dataBytesUploaded!==transferBefore.dataBytesUploaded)throw Error('CPU transfer during original copy-back');
 
-   const errors=(await runtime.read(flag,Uint32Array))[0];if(errors)throw Error('Chrono integration error flag');
-   for(const d of diags.values()){const words=await runtime.read(d,Uint32Array,8);if(words[0]||words[1])throw Error('Chrono integration diagnostic');}
-  }finally{for(const v of owned)runtime.destroyBuffer(v);}
+   // Gather every status word into one readback. Queue ordering guarantees the
+   // copy follows all kernels, so no separate idle wait or per-kernel map is needed.
+   const status=alloc(4+diags.size*8),enc=runtime.device.createCommandEncoder();
+   enc.copyBufferToBuffer(flag.gpuBuffer,0,status.gpuBuffer,0,4);
+   let offset=4;for(const d of diags.values()){enc.copyBufferToBuffer(d.gpuBuffer,0,status.gpuBuffer,offset,8);offset+=8;}
+   runtime.device.queue.submit([enc.finish()]);
+   const errors=await runtime.read(status,Uint32Array);if(errors.some(Boolean))throw Error('Chrono integration diagnostic: '+JSON.stringify([...errors]));
+  }catch(error){step.dispose();throw error;}
  };
+ step.dispose=()=>{for(const buffer of pool)runtime.destroyBuffer(buffer);pool.length=0;};
+ return step;
 }

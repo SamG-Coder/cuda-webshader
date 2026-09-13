@@ -787,3 +787,18 @@ as the one-step adapter; pass `1000 OUTPUT.bin` to its executable. Repeat with
 adapter result was separately checked bit-for-bit against the original
 application. Scratch reuse, fewer synchronization points, longer trajectories
 and sandbox preview remain work in progress.
+
+### Loop synchronization and scratch reuse
+
+The integration status words now share one readback instead of seven separate
+readbacks. Queue ordering replaces the redundant explicit idle waits. Integration
+and rebuild scratch buffers are reused and cleared before each step; neighbour
+search still runs afresh. Both plans expose `dispose()` for their owned scratch.
+
+A real NVIDIA 1000-step comparison produced exactly the same final GPU values
+and every neighbour count as the earlier run. Wall time decreased from
+49869.33 ms to 28422.15 ms (about 1.75x for these two measured runs). Combining
+status reads alone measured 27269.64 ms, so these measurements do not establish
+a separate speed benefit from pooling. They are single-run diagnostic timings,
+not a statistically controlled benchmark. `chrono-loop-optimization.json`
+records the state-equivalence check.
