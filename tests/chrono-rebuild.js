@@ -20,7 +20,7 @@ export async function createChronoRebuild(runtime,params,n,{cudaSource,kernelFac
   const d=k.artifact.metadata.diagnostics;if(d&&!data[d.buffer]){const buffer=alloc((2+d.capacity*d.strideWords)*4);diagnosticBuffers.push(buffer);data={...data,[d.buffer]:buffer};}
   const index=bindingCursor++,scalarBuffers=options?.scalarBuffers??{},scalarKeys=Object.keys(scalars),dataKeys=Object.keys(data);let cached=bindings[index];
   let sameShape=cached&&cached.scalarKeys.length===scalarKeys.length,changedValues=false;
-  if(sameShape)for(let i=0;i<scalarKeys.length;i++){const name=scalarKeys[i];if(name!==cached.scalarKeys[i]){sameShape=false;break;}if(scalars[name]!==cached.invocation.values[name])changedValues=true;}
+  if(sameShape)for(let i=0;i<scalarKeys.length;i++){const name=scalarKeys[i];if(name!==cached.scalarKeys[i]){sameShape=false;break;}if(!Object.is(scalars[name],cached.invocation.values[name]))changedValues=true;}
   const sameCounters=cached&&Object.keys(cached.scalarBuffers).length===Object.keys(scalarBuffers).length&&Object.keys(scalarBuffers).every(name=>cached.scalarBuffers[name]?.resource===scalarBuffers[name].resource&&(cached.scalarBuffers[name]?.offset??0)===(scalarBuffers[name].offset??0));
   if(!cached||cached.kernel!==k||!sameShape||!sameCounters||dataKeys.length!==cached.resourceCount||dataKeys.some(name=>cached.invocation.buffers[name]!==data[name]))bindings[index]=cached={kernel:k,scalarBuffers,scalarKeys,resourceCount:dataKeys.length,invocation:k.bind(data,scalars,options)};
   else if(changedValues)cached.invocation.setScalars(scalars);

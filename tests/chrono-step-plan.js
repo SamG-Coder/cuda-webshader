@@ -12,7 +12,7 @@ export async function createChronoStep(runtime,params,{cudaSource,kernelFactory,
   if(!n)return;
   const originalCount=original.pos.byteLength/16;
   const parameterKeys=Object.keys(params);
-  if(!parameterSnapshot||parameterKeys.length!==Object.keys(parameterSnapshot).length||parameterKeys.some(name=>!Object.hasOwn(parameterSnapshot,name)||params[name]!==parameterSnapshot[name])){parameterSnapshot={...params};parameterVersion++;}
+  if(!parameterSnapshot||parameterKeys.length!==Object.keys(parameterSnapshot).length||parameterKeys.some(name=>!Object.hasOwn(parameterSnapshot,name)||!Object.is(params[name],parameterSnapshot[name]))){parameterSnapshot={...params};parameterVersion++;}
   let cursor=0,bindingCursor=0;
   const clear=runtime.device.createCommandEncoder();for(const buffer of pool)clear.clearBuffer(buffer.gpuBuffer);runtime.device.queue.submit([clear.finish()]);
   const alloc=size=>{const index=cursor++;let buffer=pool[index];if(buffer&&buffer.byteLength!==size){runtime.destroyBuffer(buffer);buffer=null;}if(!buffer)pool[index]=buffer=runtime.createBuffer(size);return buffer;},state=()=>({pos:alloc(n*16),vel:alloc(n*12),rho:alloc(n*16)}),y=state(),tmp=state(),flag=alloc(4),shifting=alloc(n*12),acc=alloc(n*12),tauA=alloc(12),tauB=alloc(12),pc=alloc(12),dtauA=alloc(12),dtauB=alloc(12),deriv=alloc(n*16),surface=alloc(n*4),divergence=alloc(n*4),courant=alloc(n*4),acceleration=alloc(n*4),diags=new Map();
@@ -23,7 +23,7 @@ export async function createChronoStep(runtime,params,{cudaSource,kernelFactory,
    if(!cached||cached.invocation.kernel!==k||cached.parameterVersion!==parameterVersion||extraKeys.length!==Object.keys(cached.extra).length||extraKeys.some(name=>!Object.hasOwn(cached.extra,name))||k.artifact.metadata.bindings.some(x=>cached.invocation.buffers[x.name]!==data[x.name])){
     const resources=Object.fromEntries(k.artifact.metadata.bindings.map(x=>{if(!data[x.name])throw Error('Missing '+x.name);return [x.name,data[x.name]]}));
     bindings[index]=cached={invocation:k.bind(resources,{...parameterSnapshot,numActive:n,...extra}),parameterVersion,n,extra:{...extra}};
-   }else if(cached.n!==n||extraKeys.some(name=>cached.extra[name]!==extra[name])){
+   }else if(cached.n!==n||extraKeys.some(name=>!Object.is(cached.extra[name],extra[name]))){
     cached.invocation.setScalars({...parameterSnapshot,numActive:n,...extra});cached.n=n;cached.extra={...extra};
    }
    return cached.invocation;
