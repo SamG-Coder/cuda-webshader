@@ -735,7 +735,7 @@ class Emitter {
       const element=name.startsWith('make_uint')?'u32':name.startsWith('make_int')?'i32':'f32';
       return this.result(n, `vec${count}<${element}>`, `vec${count}<${element}>(${args.map(a => this.convert(a.code, a.type, element, n)).join(', ')})`, pre);
     }
-    if(name==='length'){if(args.length!==1||!vectorLength(args[0].type)||vectorElement(args[0].type)!=='f32')this.fail('length requires a float vector.',n);return this.result(n,'f32',`length(${args[0].code})`,pre);}
+    if(name==='length'&&!args.some(a=>this.structs.has(a.type))){if(args.length!==1||!vectorLength(args[0].type)||vectorElement(args[0].type)!=='f32')this.fail('length requires a float vector.',n);return this.result(n,'f32',`length(${args[0].code})`,pre);}
     if((name==='dot'||name==='normalize')&&!args.some(a=>this.structs.has(a.type))){const type=args[0]?.type;if(args.length!==(name==='dot'?2:1)||!vectorLength(type)||vectorElement(type)!=='f32'||(name==='dot'&&args[1].type!==type))this.fail(name+' requires matching float vectors.',n);return this.result(n,name==='dot'?'f32':type,`${name}(${args.map(a=>a.code).join(', ')})`,pre);}
     if(['fminf','fmaxf'].includes(name)&&args.some(a=>vectorLength(a.type))){const type=args[0]?.type;if(args.length!==2||!vectorLength(type)||vectorElement(type)!=='f32'||args[1].type!==type)this.fail(name+' requires matching float vectors.',n);return this.result(n,type,`${name==='fminf'?'min':'max'}(${args.map(a=>a.code).join(', ')})`,pre);}
     if(name==='__fdividef'){if(args.length!==2)this.fail('__fdividef requires two arguments.',n);return this.result(n,'f32',`(${args.map(a=>this.convert(a.code,a.type,'f32',n)).join(' / ')})`,pre);}
@@ -811,7 +811,7 @@ class Emitter {
     if(n.kind==='object-delete'||n.kind==='device-launch')return this.expr(n).pre;
     if(n.kind==='sequence')return n.expressions.flatMap(e=>this.effect(e));
     if (n.kind === 'assign') {
-      if(['+=','-=','*=','/='].includes(n.op)){const left=this.expr(n.left,true),method=this.structs.get(left.type)?.methods.find(m=>m.name==='operator'+n.op);if(method){const receiver=n.left,right=n.right;delete n.left;delete n.right;delete n.op;Object.assign(n,{kind:'call',callee:{kind:'member',base:receiver,member:method.name,token:n.token},args:[right]});return this.effect(n);}}
+      if(['+=','-=','*=','/='].includes(n.op)){const left=this.expr(n.left,true),method=this.structs.get(left.type)?.methods?.find(m=>m.name==='operator'+n.op);if(method){const receiver=n.left,right=n.right;delete n.left;delete n.right;delete n.op;Object.assign(n,{kind:'call',callee:{kind:'member',base:receiver,member:method.name,token:n.token},args:[right]});return this.effect(n);}}
       const destinationUpdates=[];walk(n.left,node=>{if(node.kind==='unary'&&['++','--'].includes(node.op))destinationUpdates.push(node);});if(destinationUpdates.length){if(n.op!=='='||n.left.kind!=='index'||destinationUpdates.length!==1)this.fail('Increment/decrement in assignment destinations requires one indexed = store.',n);n.destinationEffects=true;}
       if(n.op==='='&&n.right.kind==='assign'){let current=n;while(current.kind==='assign'){if(current.op!=='='||current.left.kind!=='id'||!['local','reference'].includes(this.lookup(current.left.name,current.left).kind))this.fail('Chained assignment requires named local variables or references and =.',current);current=current.right;}const inner=this.effect(n.right),target=this.expr(n.left,true);this.writable(target,n.left);const value=this.expr(n.right.left);n.type=target.type;return [...inner,`${target.code} = ${this.convert(value.code,value.type,target.type,n)};`];}
       if(n.left.kind==='id'&&n.op==='='){
@@ -843,6 +843,12 @@ class Emitter {
         return [...left.pre,...index.pre,...offset.pre,`${slots.code}[${index.code}] = ${this.convert(offset.code,offset.type,'i32',n)};`];
       }
       const target = this.expr(n.left, true); this.writable(target, n.left); let value = String(target.type).startsWith('cw_bufferref_')?this.argument(n.right):this.expr(n.right);if(String(target.type).startsWith('cw_bufferref_')&&isArray(value.type)){const captured=bufferReferenceArgument(this,value,target.type,n);value={...value,...captured,type:target.type};}if(n.destinationEffects){if(target.packedAtomic||target.packedBase||target.packedPairComponents||target.scalarVectorComponents)this.fail('Increment/decrement in packed assignment destinations is unsupported.',n);const snapshot='cw_assignment_rhs_'+this.temp++;target.pre=[...value.pre,`let ${snapshot}: ${typeName(value.type)} = ${value.code};`,...target.pre];value={...value,code:snapshot,pre:[]};}let packedPre;if(target.packedAtomic){n.packedAtomicAssignment=true;const tmp='cw_byte_value_'+this.temp++;packedPre=[...value.pre,`let ${tmp}: ${typeName(value.type)} = ${value.code};`,...target.pre];value={...value,code:tmp,pre:[]};}
+      if(['+=','-=','*=','/='].includes(n.op)&&this.structs.has(target.type)){
+        const name='cw_compound_'+{'+':'add','-':'subtract','*':'multiply','/':'divide'}[n.op[0]];
+        if(!this.functions.has(name)&&!this.overloads.has(name))this.fail('No supported free compound operator is declared for '+n.op,n);
+        const left=n.left,right=n.right;delete n.left;delete n.right;delete n.op;
+        Object.assign(n,{kind:'call',callee:{kind:'id',name,token:n.token},args:[left,right]});return this.effect(n);
+      }
       if(n.op==='='&&this.structs.has(target.type)&&value.type===target.type){const snapshot='cw_value_copy_'+this.temp++;n.type=target.type;return [...target.pre,...value.pre,`let ${snapshot} = ${value.code};`,`${target.code} = ${this.aggregateCopy(target.type,snapshot)};`];}
       if(target.packedPairComponents){
         if(n.op!=='='||value.type!=='cw_uchar2')this.fail('Packed pair stores require a whole uchar2 assignment.',n);

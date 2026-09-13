@@ -1,0 +1,22 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell"
+  },
+  "markers": 30327,
+  "mismatches": 0,
+  "firstErrors": [],
+  "compared": 212289,
+  "maxAbsoluteError": 0.00390625,
+  "maxScaledError": 0.00010241568088531494,
+  "absoluteTolerance": 0.00001,
+  "pressureAbsoluteTolerance": 0.0002,
+  "relativeTolerance": 0.00002,
+  "nativeMatched": true,
+  "originalBoundaryKernel": true,
+  "connectedGpuPreparation": true,
+  "boundaryIntermediateReadbackBytes": 0,
+  "cpuPhysics": false,
+  "fullSolverAdvanced": false,
+  "preparationCompared": 1487332
+}

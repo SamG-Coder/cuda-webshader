@@ -131,7 +131,7 @@ class Context {
     if(['float','int','uint','bool','uchar'].includes(name))return convert(args[0],n.type);
     if(name==='make_float3'&&Array.isArray(args[0]))return args[0].slice(0,3);
     if(name==='make_float4'&&Array.isArray(args[0]))return [...args[0],args[1]];
-    if(name==='length')return f(Math.sqrt(args[0].reduce((sum,a)=>f(sum+f(a*a)),0)));
+    if(name==='length'&&!n.userHelper)return f(Math.sqrt(args[0].reduce((sum,a)=>f(sum+f(a*a)),0)));
     if(!n.userHelper&&(name==='dot'||name==='normalize')){const sum=args[0].reduce((sum,a,i)=>f(sum+f(a*(name==='dot'?args[1][i]:a))),0);return name==='dot'?sum:args[0].map(a=>f(a/Math.sqrt(sum)));}
     if(name==='isfinite')return Number.isFinite(args[0]);
     if(['fminf','fmaxf'].includes(name)&&Array.isArray(args[0]))return args[0].map((a,i)=>f(name==='fminf'?Math.min(a,args[1][i]):Math.max(a,args[1][i])));

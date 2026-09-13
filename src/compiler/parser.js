@@ -276,7 +276,7 @@ export class Parser {
       if (result.pointer || result.shared || result.reference || result.external || result.type==='cw_extent') this.fail('Function return pointers/references/shared/extern qualifiers are unsupported.');
       if(this.peek().forward||this.peek().expressionMacro)this.fail('Function-like macros are supported at call sites, not in function declarations.');
       let name = this.name(),freeOperator=null;
-      if(name==='operator'){freeOperator=this.take().value;if(qualifier!=='__device__'||templateKind||!['+','-','*','/'].includes(freeOperator))this.fail('Free operators support non-template device binary arithmetic.',token);name='cw_binary_'+{'+':'add','-':'subtract','*':'multiply','/':'divide'}[freeOperator];}
+      if(name==='operator'){freeOperator=this.take().value;if(qualifier!=='__device__'||templateKind||!['+','-','*','/','+=','-=','*=','/='].includes(freeOperator))this.fail('Free operators support non-template device binary arithmetic.',token);name=(freeOperator.endsWith('=')?'cw_compound_':'cw_binary_')+{'+':'add','-':'subtract','*':'multiply','/':'divide'}[freeOperator[0]];}
       if(qualifier==='__device__'&&this.is('[')){
         if(templateKind||hostQualified||result.constant||!['f32','i32','u32'].includes(result.type))this.fail('Device globals require non-template mutable 32-bit scalar arrays.',token);
         this.take('[');const length=this.expression(2);this.take(']');this.take(';');
@@ -292,7 +292,8 @@ export class Parser {
         params.push({kind: 'param', token, name, ...type,...(defaultValue!==undefined?{defaultValue}:{})});
       } while (this.match(','));
       this.take(')');
-      if(freeOperator&&(params.length!==2||!params.some(p=>String(p.type).startsWith('cw_struct_')||/^vec[234]</.test(p.type))||params.some(p=>p.pointer||p.reference&&!p.constant)))this.fail('Free binary operators require two value or const-reference parameters, including a class or vector value.',token);
+      if(freeOperator?.endsWith('=')){if(result.type!=='void'||params.length!==2||!params[0].reference||params[0].constant||!String(params[0].type).startsWith('cw_struct_')||params.some(p=>p.pointer)||params[1].reference&&!params[1].constant)this.fail('Compound operators require void return, a mutable class reference and a value or const-reference operand.',token);}
+      else if(freeOperator&&(params.length!==2||!params.some(p=>String(p.type).startsWith('cw_struct_')||/^vec[234]</.test(p.type))||params.some(p=>p.pointer||p.reference&&!p.constant)))this.fail('Free binary operators require two value or const-reference parameters, including a class or vector value.',token);
       const body = this.block();
       functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,freeOperator,launchThreads,templateParameter,templateParameters,templateKind,...(specializationArgument!==undefined?{specializationArgument}:{})});
     }

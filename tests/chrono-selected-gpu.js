@@ -1,5 +1,5 @@
 import {checkChronoCompact} from './chrono-compact-gpu.js';
-export async function checkChronoSelected(runtime){
+export async function checkChronoSelected(runtime,{afterNeighbors}={}){
  const load=path=>fetch(new URL(path,import.meta.url));
  const source=await(await load('chrono-search.cu')).text(),params=await(await load('../reports/chrono-params.json')).json(),cases=await(await load('../reports/chrono-selected-native.json')).json(),native=await(await load('../reports/chrono-selected-native.bin')).arrayBuffer();
  if(cases.length!==14||cases.at(-1).offset+cases.at(-1).sections.reduce((a,b)=>a+b,0)*4!==native.byteLength)throw Error('Incomplete selected-neighbour reference');
@@ -27,6 +27,7 @@ export async function checkChronoSelected(runtime){
    if(JSON.stringify(ref.sections)!==JSON.stringify([n,n,cells,cells,n+1,n+1,total,n*4,c.n,n*3,n*4,n]))throw Error('Selected-neighbour section sizes differ');
    neighbors=runtime.createBuffer(Math.max(total,1)*4);dispatch('neighborSearchID',{...search,numNeighborsPerPart:b.offsets,neighborList:neighbors});await runtime.idle();
    const readback=runtime.stats.readbackBytes-before.readbackBytes;if(readback!==4||runtime.stats.dataBytesUploaded!==before.dataBytesUploaded)throw Error('Unexpected CPU transfer in selected neighbour stages');intermediateReadbackBytes+=readback;
+   if(afterNeighbors)await afterNeighbors({caseInfo:c,buffers:b,neighbors,count:n});
    let offset=ref.offset;for(const [i,buffer] of [b.hashes,b.indices,b.start,b.end,b.counts,b.offsets,neighbors,b.sortedPosRad,b.map,b.sortedVel,b.sortedRho,b.sortedActivity].entries()){
     const words=ref.sections[i];if(!words)continue;const actual=await runtime.read(buffer,Uint32Array),expected=new Uint32Array(native,offset,words);
     for(let j=0;j<words;j++){if(actual[j]!==expected[j])throw Error(`Selected neighbour case ${c.mode}, section ${i}, word ${j}: ${actual[j]} != ${expected[j]}`);compared++;}offset+=words*4;

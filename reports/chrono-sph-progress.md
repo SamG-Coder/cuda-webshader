@@ -1,9 +1,10 @@
-# Chrono SPH dam-break port: native reference, neighbours and activity selection
+# Chrono SPH dam-break port: GPU preparation and Adami boundaries
 
 This is an in-progress compiler port, not a runnable water showcase.
 The GPU chain now connects activity selection, normalized compaction, original
-marker IDs, grid sorting, original property reordering, cell ranges and neighbour lists. Pressure, forces and
-time integration are still pending.
+marker IDs, grid sorting, original property reordering, cell ranges and neighbour
+lists. Adami wall-pressure evaluation is connected and numerically checked. Forces,
+particle shifting and time integration are still pending.
 
 Upstream: https://github.com/projectchrono/chrono at
 `a92c6f72f422fbcafe0b37125d4070cb6a3b5803`.
@@ -479,3 +480,32 @@ The unchanged Adami boundary signature now compiles past the error flag. Includi
 its original Real3 math dependencies exposes the next frontend gap: the free
 compound-assignment overload `operator+=(Real3&, Real3)`. Boundary physics and
 simulation time advancement remain unverified and unavailable as a showcase.
+
+## Original Adami boundary calculation connected
+
+`CfdAdamiBC_D`, its smoothing and inverse-EOS helpers, and its Real3 math bodies
+now compile unchanged. Free void compound-assignment operators accept a mutable
+class reference and a value/const-reference operand. User-defined `length` for a
+record follows the original helper instead of the vector-only WGSL builtin.
+
+The real NVIDIA GPU test calls the complete preparation chain, copies its sorted
+properties and velocities on the GPU to retain the preparation reference, then
+runs Adami with live neighbour offsets/IDs and positions. Fixed-wall acceleration
+is zero for this dam-break fixture. There are no intermediate array uploads or
+readbacks during this boundary calculation. Native CUDA uses the matching
+preparation snapshot in `chrono-adami-input.bin`; the original native kernel
+updates 902 boundary records and leaves all 16,731 fluid records unchanged.
+
+All 212,289 floating values match with relative tolerance 2e-5 and absolute
+1e-5, except pressure uses absolute 2e-4. Fluid properties, viscosity and marker
+type are checked exactly. Maximum absolute difference is 0.00390625 at larger
+pressure magnitude; these results are numerical agreement, not bitwise equality.
+The initially failing near-zero pressure belongs to sorted marker 23513: native
+approximately -0.09500281 versus WebGPU -0.09510522. The independent double
+reference is -0.09508536, from opposing contributions +980.000061 and -980.095146.
+`scripts/diagnose-chrono-adami-cancellation.mjs` reproduces this cancellation
+analysis. CUDA `--fmad=false` changed some values but did not remove this one
+near-zero discrepancy; the accepted reference remains the default native build.
+
+This is a verified boundary stage, not a complete time step. CFD force derivatives,
+configured particle shifting and RK2 integration remain before a water showcase.

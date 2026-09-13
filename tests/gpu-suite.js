@@ -1,3 +1,4 @@
+import {checkChronoAdami} from './chrono-adami-gpu.js';
 import {checkBoolStorage} from './bool-storage-gpu.js';
 import {checkSwitch} from './switch-gpu.js';
 import {checkChronoReorder} from './chrono-reorder-gpu.js';
@@ -349,6 +350,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Original Chrono neighbour cells and particle mapping support partial blocks',()=>checkChronoNeighbors(runtime));
   await run('Original Chrono scoped enums and boolean parameter records match native CUDA',()=>checkChronoTypes(runtime));
   await run('Original Chrono grid hashing matches native dam-break inputs and boundary cases',()=>checkChronoHash(runtime));
+  await run('Original Chrono Adami wall pressure matches native CUDA',()=>checkChronoAdami(runtime));
   await run('CUDA byte-stride bool buffers and volatile flags match native',()=>checkBoolStorage(runtime));
   await run('C++ switch fall-through and nested control match native CUDA',()=>checkSwitch(runtime));
   await run('Original Chrono property reordering and diagnostics match native CUDA',()=>checkChronoReorder(runtime));

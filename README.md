@@ -590,3 +590,7 @@ CUDA `bool*` buffers use packed one-byte elements in 32-bit WebGPU storage words
 Writes preserve neighbouring bytes with atomic compare/exchange; volatile bool
 kernel pointers use atomic loads as well. Upload boolean data as `Uint8Array`
 with 0/1 values. This does not provide a grid-wide synchronization primitive.
+
+Free `void operator+=`, `-=`, `*=` and `/=` overloads support a mutable record
+reference plus a value or const-reference operand. Record-specific `length`
+helpers are resolved as user functions, preserving the source math.
