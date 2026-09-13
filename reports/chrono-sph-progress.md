@@ -1,10 +1,10 @@
-# Chrono SPH dam-break port: GPU preparation and Adami boundaries
+# Chrono SPH dam-break port: GPU preparation, boundaries and forces
 
 This is an in-progress compiler port, not a runnable water showcase.
 The GPU chain now connects activity selection, normalized compaction, original
 marker IDs, grid sorting, original property reordering, cell ranges and neighbour
-lists. Adami wall-pressure evaluation is connected and numerically checked. Forces,
-particle shifting and time integration are still pending.
+lists, Adami wall-pressure evaluation and CFD force derivatives. Particle shifting
+and time integration are still pending.
 
 Upstream: https://github.com/projectchrono/chrono at
 `a92c6f72f422fbcafe0b37125d4070cb6a3b5803`.
@@ -509,3 +509,47 @@ near-zero discrepancy; the accepted reference remains the default native build.
 
 This is a verified boundary stage, not a complete time step. CFD force derivatives,
 configured particle shifting and RK2 integration remain before a water showcase.
+
+## Original CFD force kernel connected
+
+`CfdCalcRHS_D` and its original helper bodies now compile and execute. The complete
+source includes gradient/laplacian corrections and the symbolic 6x6 inverse; those
+correction options are disabled in the captured native demo configuration. They
+were compiled, but their numerical results are not covered by this default-case
+comparison. Active settings include cubic-spline smoothing, laminar viscosity and
+delta-SPH. No physics branch was replaced with a stub or a different equation.
+
+The compiler changes cover unary record operators, CUDA float math overloads,
+`__inline__`, mixed storage/local-array pointer helper calls, and iterative emission
+of long arithmetic chains. Local array specialization preserves array length and
+reference identity through helper forwarding. A separate native/GPU fixture checks
+128 exact output words, local arrays of lengths 8 and 12, scalar pointer forwarding,
+and a 900-term cancellation expression whose original evaluation order matters.
+
+The connected comparison uses GPU-produced neighbours and boundary properties,
+then checks all 242,617 output words: acceleration/density derivatives, free-surface
+IDs, position divergence, Courant and acceleration timestep estimates, and the error
+flag. No intermediate CPU transfer is used by the force calculation. Original
+invalid-derivative diagnostics remain active and no messages were reported.
+
+The numerical limits are specific to this initialized-state comparison:
+- Acceleration components: absolute 4e-4 plus relative 2e-4.
+- Density derivative: absolute 1e-2 plus relative 2e-4.
+- Position divergence: absolute 1e-5 plus relative 2e-5.
+- Acceleration timestep: absolute 1e-5 plus relative 3e-3.
+- Free-surface IDs, Courant timestep and error flags: exact.
+
+Observed connected maxima are approximately 2.75e-4 in acceleration, 8.56e-3
+in density derivative, 1.67e-6 in divergence and 3.04e-3 in acceleration timestep.
+The isolated comparison supplies bit-identical native boundary properties; its
+maximum density-derivative error falls below 9.51e-6. This separates amplification
+of boundary-density roundoff by delta-SPH from arithmetic inside the force kernel.
+Independent float64 diagnostics for representative worst components show net
+accelerations near zero formed from contributions with absolute sums around
+577–754. Both native CUDA and WebGPU differ slightly from that higher-precision
+reference. `diagnose-chrono-rhs-roundoff.py` reproduces these diagnostics.
+
+These are numerical tolerances, not a bitwise-force equivalence claim or a
+long-duration accuracy claim. A native-matched full integration step and later
+trajectory comparisons remain necessary. Particle shifting and RK2 integration
+are still required before adding a running Chrono water showcase.

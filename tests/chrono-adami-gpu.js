@@ -1,5 +1,5 @@
 import {checkChronoSelected} from './chrono-selected-gpu.js';
-export async function checkChronoAdami(runtime,{diagnostic=false}={}){
+export async function checkChronoAdami(runtime,{diagnostic=false,afterBoundary}={}){
  const load=path=>fetch(new URL(path,import.meta.url));
  const source=await(await load('chrono-adami.cu')).text(),params=await(await load('../reports/chrono-params.json')).json(),native=await(await load('../reports/chrono-adami-native.bin')).arrayBuffer();
  const kernel=await runtime.kernel(source,{entry:'CfdAdamiBC_D',workgroupSize:[128]});let result;
@@ -9,6 +9,7 @@ export async function checkChronoAdami(runtime,{diagnostic=false}={}){
   try{
    const before={...runtime.stats};runtime.batch().copy(b.sortedRho,rho).copy(b.sortedVel,vel).dispatch(kernel.bind({numNeighborsPerPart:b.offsets,neighborList:neighbors,sortedPosRadD:b.sortedPosRad,bceAcc:acc,sortedRhoPresMuD:rho,sortedVelMasD:vel,error_flag:flag},{...params,numActive:n}),[Math.ceil(n/128)]).submit();await runtime.idle();
    if(runtime.stats.readbackBytes!==before.readbackBytes||runtime.stats.dataBytesUploaded!==before.dataBytesUploaded)throw Error('Unexpected CPU transfer during boundary calculation');
+   if(afterBoundary)await afterBoundary({buffers:b,neighbors,rho,vel,count:n});
    let offset=0,compared=0,maxAbsoluteError=0,maxScaledError=0,mismatches=0;const firstErrors=[];
    for(const [buffer,words]of [[rho,n*4],[vel,n*3]]){const actual=await runtime.read(buffer,Float32Array),expected=new Float32Array(native,offset,words);
     for(let i=0;i<words;i++){const error=Math.abs(actual[i]-expected[i]),pressure=offset===0&&i%4===1,exact=offset===0&&(expected[i-i%4+3]<-.5||i%4===2||i%4===3),absolute=pressure?2e-4:1e-5;if(!Number.isFinite(actual[i])||!Number.isFinite(expected[i])||(exact?actual[i]!==expected[i]:error>absolute+2e-5*Math.abs(expected[i]))){mismatches++;if(firstErrors.length<8)firstErrors.push({word:offset/4+i,actual:actual[i],expected:expected[i],error});}maxAbsoluteError=Math.max(maxAbsoluteError,error);maxScaledError=Math.max(maxScaledError,error/Math.max(1,Math.abs(expected[i])));compared++;}offset+=words*4;

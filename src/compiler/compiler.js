@@ -225,6 +225,23 @@ class Emitter {
   }
   result(n, type, code, pre = [], extra = {}) { n.type = type; return {type, code, pre, ...extra}; }
   expr(n, raw = false, captureIndex = false) {
+    if(this.expressionCache?.has(n))return this.expressionCache.get(n);
+    if(!raw&&n?.kind==='binary'&&!['&&','||'].includes(n.op)){
+      const chain=[];let leaf=n;
+      while(leaf?.kind==='binary'&&!['&&','||'].includes(leaf.op)){chain.push(leaf);leaf=leaf.left;}
+      if(chain.length>32){
+        const cache=this.expressionCache??=new Map(),owned=[];const save=(node,value)=>{owned.push([node,cache.has(node),cache.get(node)]);cache.set(node,value);};
+        let value=this.expr(leaf);save(leaf,value);
+        try{for(let i=chain.length-1;i>=0;i--){const node=chain[i];value=this.exprNode(node,false,false);
+          if(['f32','i32','u32'].includes(value.type)){const name='cw_expression_'+this.temp++;value={...value,code:name,pre:[...value.pre,`let ${name}: ${value.type} = ${value.code};`]};}
+          save(node,value);
+        }return value;}finally{for(const [node,present,previous]of owned.reverse()){if(present)cache.set(node,previous);else cache.delete(node);}}
+      }
+    }
+    return this.exprNode(n,raw,captureIndex);
+  }
+  exprNode(n, raw = false, captureIndex = false) {
+
     if (!n) this.fail('Missing expression.', this.kernel);
     switch (n.kind) {
       case 'initializer': {
@@ -393,6 +410,13 @@ class Emitter {
             const base=n.value,op=n.op;delete n.value;delete n.op;Object.assign(n,{kind:'call',callee:{kind:'member',base,member:'operator'+op,token:n.token},args:[]});return this.call(n);
           }
         }
+        if(['+','-'].includes(n.op)){
+          const value=this.expr(n.value),name='cw_unary_'+(n.op==='+'?'plus':'minus');
+          if(this.structs.has(value.type)&&(this.functions.has(name)||this.overloads.has(name))){
+            if(raw)this.fail('Free unary operator results are not writable references.',n);
+            const argument=n.value;delete n.value;delete n.op;Object.assign(n,{kind:'call',callee:{kind:'id',name,token:n.token},args:[argument]});return this.call(n);
+          }
+        }
         if (['++', '--'].includes(n.op)){if(n.value.kind!=='id')this.fail('Expression increments require named local scalars or references.',n);const value=this.expr(n.value,true);if(!['local','reference'].includes(value.rootSymbol?.kind))this.fail('Expression increments require named local scalars or references.',n);const update=this.effect(n),tmp='cw_update_'+this.temp++,snapshot=`let ${tmp}: ${value.type} = ${value.code};`;return this.result(n,value.type,tmp,n.prefix?[...update,snapshot]:[snapshot,...update]);}
         if (n.op === '&' || n.op === '*') this.fail('Pointers are supported only as kernel buffer parameters and &buffer[index] atomic targets.', n);
         let value = this.expr(n.value);if(narrow(value.type))value={...value,type:'i32',code:`i32(${value.code})`};
@@ -504,6 +528,10 @@ class Emitter {
     if(base?.kind==='id'&&!['true','false','NULL','nullptr'].includes(base.name)){
       const symbol=this.lookup(base.name,base);
       if(symbol.kind==='thread-block'&&n.kind==='id'){n.symbol=symbol;return {type:'thread-block',code:'',pre:[],rootSymbol:symbol};}
+      if(['local','reference'].includes(symbol.kind)&&isArray(symbol.type)&&!isArray(symbol.type.element)){
+        if(n.kind!=='id'||symbol.constant)this.fail('Local array helper pointers require a whole mutable array.',n);
+        const value=this.expr(n);return this.result(n,symbol.type,value.code,value.pre,{rootSymbol:symbol,localArrayPointer:true,pointerCode:symbol.kind==='reference'?symbol.pointerCode:'&'+symbol.code});
+      }
       if(symbol.kind==='shared'&&isArray(symbol.type)&&!isArray(symbol.type.element)){
         if(symbol.atomic)this.fail('Shared helper pointers do not support atomic arrays.',n);
         const node=parts.offset,offset=node?this.expr(node):{type:'i32',code:'0i',pre:[]};
@@ -525,6 +553,7 @@ class Emitter {
     const uses=analyse([helper],helper.params),roots=[];
     for(const [i,p]of helper.params.entries())if(p.pointer){
       const a=args[i],symbol=a?.rootSymbol,root=symbol?.rootBufferName;
+      if(a?.localArrayPointer){if(a.type.element!==p.type)this.fail('Local array element type must match the helper pointer.',n.args[i]);roots.push([i,'@array:'+a.type.length,false]);continue;}
       if(a?.localPointer){if(a.type.element!==p.type)this.fail('Local pointer type must exactly match the helper parameter.',n.args[i]);roots.push([i,'@local',false]);continue;}
       if(symbol?.sharedPointer){if(!isArray(a.type)||a.type.element!==p.type)this.fail('Shared pointer type must exactly match the helper parameter.',n.args[i]);if(symbol.constant&&!p.constant)this.fail('Cannot discard const through a shared helper pointer.',n.args[i]);roots.push([i,'@shared:'+symbol.sharedPointer,!!symbol.constant]);continue;}
       if(!root||!isArray(a.type)||a.type.element!==p.type)this.fail('Helper pointers require a same-type storage buffer or buffer offset.',n.args[i]);
@@ -548,7 +577,7 @@ class Emitter {
       walk(clone.body,node=>{if(node.kind==='object-deref'&&node.value?.kind==='id'&&localNames.has(node.value.name)){const name=node.value.name;delete node.value;node.kind='id';node.name=name;}});
       const inspect=(node,parent)=>{if(!node||typeof node!=='object')return;if(node.kind==='decl'&&localNames.has(node.name))this.fail('Shadowed local pointer parameters are unsupported.',node);if(node.kind==='id'&&localNames.has(node.name)&&!(parent?.kind==='unary'&&parent.op==='&'&&parent.forwardedLocalAddress)&&!(parent?.kind==='member'&&parent.base===node&&this.structs.has(clone.params.find(p=>p.name===node.name)?.type))&&!(parent?.kind==='index'&&parent.base===node&&parent.index.kind==='literal'&&Number(parent.index.value.replace(/[uU]$/,''))===0))this.fail('Local pointers support only dereference or index zero; arithmetic and escapes are unsupported.',node);for(const [key,value]of Object.entries(node))if(!['token','type'].includes(key)){if(Array.isArray(value))value.forEach(v=>inspect(v,node));else if(value&&typeof value==='object')inspect(value,node);}};inspect(clone.body,null);
       walk(clone.body,node=>{if(node.kind==='index'&&node.base.kind==='id'&&localNames.has(node.base.name)){const name=node.base.name;delete node.base;delete node.index;delete node.dereference;node.kind='id';node.name=name;}});
-      for(const [i,root,constant]of roots){if(root==='@local'){clone.params[i].pointer=false;clone.params[i].reference=true;clone.params[i].localPointer=true;}else{if(root.startsWith('@shared:'))clone.params[i].boundShared=root.slice(8);else clone.params[i].boundBuffer=root;clone.params[i].boundConstant=constant;}}
+      for(const [i,root,constant]of roots){if(root.startsWith('@array:')){clone.params[i].type=arrayOf(clone.params[i].type,Number(root.slice(7)));clone.params[i].pointer=false;clone.params[i].reference=true;clone.params[i].localArray=true;}else if(root==='@local'){clone.params[i].pointer=false;clone.params[i].reference=true;clone.params[i].localPointer=true;}else{if(root.startsWith('@shared:'))clone.params[i].boundShared=root.slice(8);else clone.params[i].boundBuffer=root;clone.params[i].boundConstant=constant;}}
       this.pointerHelpers.set(key,clone);this.functions.set(name,clone);this.helpers.push(clone);this.ast.functions.push(clone);
     }
     return this.pointerHelpers.get(key);
@@ -743,11 +772,13 @@ class Emitter {
     if(name==='sqrt'){if(args.length!==1||args[0].type!=='f32')this.fail('sqrt supports the single float overload only; double/integer overloads are unavailable.',n);return this.result(n,'f32',`sqrt(${args[0].code})`,pre);}
     if(['rint','rintf'].includes(name)){if(args.length!==1||args[0].type!=='f32')this.fail(name+' requires one float argument.',n);this.roundEvenUsed=true;return this.result(n,'f32',`cw_round_even(${args[0].code})`,pre);}
     if(name==='roundf'){if(args.length!==1||args[0].type!=='f32')this.fail('roundf requires one float argument.',n);this.roundAwayUsed=true;return this.result(n,'f32',`cw_round_away(${args[0].code})`,pre);}
+    if(name==='abs'&&args.length===1&&args[0].type==='f32')return this.result(n,'f32',`abs(${args[0].code})`,pre);
     if(name==='abs'){if(args.length!==1||!(args[0].type==='i32'||narrow(args[0].type)))this.fail('abs requires a signed integer or promoted narrow integer.',n);return this.result(n,'i32',`abs(${this.convert(args[0].code,args[0].type,'i32',n)})`,pre);}
     if(name==='__saturatef'){if(n.args.length!==1)this.fail('__saturatef requires one float argument.',n);const a=args[0];if(a.type!=='f32')this.fail('__saturatef requires a float argument.',n);return this.result(n,'f32',`clamp(${a.code}, 0.0f, 1.0f)`,a.pre);}
     if(['fabs','floor'].includes(name)&&(args.length!==1||args[0].type!=='f32'))this.fail(name+' supports the CUDA float overload; double precision is unavailable.',n);
     const unary = {sinf: 'sin', cosf: 'cos', tanf: 'tan', tan: 'tan', sqrtf: 'sqrt', rsqrtf: 'inverseSqrt', expf: 'exp', __expf:'exp', exp2f: 'exp2', logf: 'log', __logf:'log', log2f: 'log2', fabs:'abs', fabsf: 'abs', floor: 'floor', floorf: 'floor', ceilf: 'ceil', truncf: 'trunc'};
-    const binary = {fminf: 'min', fmaxf: 'max', powf: 'pow', pow: 'pow', atan2f: 'atan2'};
+    if(['fmin','fmax'].includes(name)&&(args.length!==2||args.some(a=>a.type!=='f32')))this.fail(name+' requires two float arguments.',n);
+    const binary = {fmin: 'min', fmax: 'max', fminf: 'min', fmaxf: 'max', powf: 'pow', pow: 'pow', atan2f: 'atan2'};
     if (unary[name] || binary[name] || name === 'fmaf') {
       const count = unary[name] ? 1 : binary[name] ? 2 : 3;
       if (args.length !== count) this.fail(`${name} requires ${count} arguments.`, n);
@@ -782,7 +813,7 @@ class Emitter {
     if(reaches(helper.name,caller))this.fail('Recursive helper calls are unsupported.',n);
     n.callee.name=helper.name;n.callName=helper.name;n.userHelper=true;
     const references=new Map();n.constRefTemporaries=[];n.localPointerArgs=helper.params.map(p=>!!p.localPointer);n.referenceArgs=helper.params.map(p=>!!p.reference);n.groupArgs=helper.params.map(p=>p.type==='thread-block');n.pointerArgs=helper.params.map(p=>!!p.pointer);
-    const codes=args.map((a,i)=>{const p=helper.params[i];if(p.type==='texture3d'){const shape=textureShape(p.textureSampling),symbol=a.rootSymbol;if(symbol?.kind!=='texture'||symbol.dimension!==shape.dimension||symbol.format!==shape.format)this.fail('Texture helper argument requires the same inferred sampling format.',n.args[i]);return symbol.code+', '+symbol.sampler+(symbol.linearFetch?', '+symbol.lengthCode:'')+(['tex2D','tex2Dfloat2','tex2Dfloat4','tex3D','tex3Dfloat4'].includes(p.textureSampling)?', '+symbol.coordinateScale+', '+symbol.pixelPoint:'');}if(p.localPointer){if(references.has(a.rootSymbol))this.fail('Aliased local pointer/reference arguments are unsupported.',n.args[i]);references.set(a.rootSymbol,false);return a.pointerCode;}if(p.pointer)return a.pointerCode;if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(String(p.type).startsWith('cw_objectlist_')&&isArray(a.type)){const imported=a.rootSymbol?.objectImport;if(!imported||imported.type!==p.type.replace('cw_objectlist_','cw_objectptr_'))this.fail('Captured list arguments require a registered object pointer buffer.',n.args[i]);return `${imported.id*1048576}u + u32(${a.pointerCode||'0i'})`;}if(String(p.type).startsWith('cw_bufferref_')&&isArray(a.type)){const captured=bufferReferenceArgument(this,a,p.type,n);pre.push(...captured.pre.slice(a.pre.length));return captured.code;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
+    const codes=args.map((a,i)=>{const p=helper.params[i];if(p.type==='texture3d'){const shape=textureShape(p.textureSampling),symbol=a.rootSymbol;if(symbol?.kind!=='texture'||symbol.dimension!==shape.dimension||symbol.format!==shape.format)this.fail('Texture helper argument requires the same inferred sampling format.',n.args[i]);return symbol.code+', '+symbol.sampler+(symbol.linearFetch?', '+symbol.lengthCode:'')+(['tex2D','tex2Dfloat2','tex2Dfloat4','tex3D','tex3Dfloat4'].includes(p.textureSampling)?', '+symbol.coordinateScale+', '+symbol.pixelPoint:'');}if(p.localArray){if(references.has(a.rootSymbol))this.fail('Aliased local array arguments are unsupported.',n.args[i]);references.set(a.rootSymbol,false);return a.pointerCode;}if(p.localPointer){if(references.has(a.rootSymbol))this.fail('Aliased local pointer/reference arguments are unsupported.',n.args[i]);references.set(a.rootSymbol,false);return a.pointerCode;}if(p.pointer)return a.pointerCode;if(p.type==='thread-block'){if(a.type!=='thread-block'||a.rootSymbol?.kind!=='thread-block')this.fail('thread_block arguments require a block handle.',n.args[i]);return null;}if(String(p.type).startsWith('cw_objectlist_')&&isArray(a.type)){const imported=a.rootSymbol?.objectImport;if(!imported||imported.type!==p.type.replace('cw_objectlist_','cw_objectptr_'))this.fail('Captured list arguments require a registered object pointer buffer.',n.args[i]);return `${imported.id*1048576}u + u32(${a.pointerCode||'0i'})`;}if(String(p.type).startsWith('cw_bufferref_')&&isArray(a.type)){const captured=bufferReferenceArgument(this,a,p.type,n);pre.push(...captured.pre.slice(a.pre.length));return captured.code;}if(!p.reference)return this.convert(a.code,a.type,p.type,n);
       const node=n.args[i],s=a.rootSymbol;
       if(p.boundReferenceStorage){if(a.type!==p.type||!p.constant&&s?.constant)this.fail('Persistent reference requires a mutable object of the same type.',node);const index=a.storageReferenceIndexCode??s?.storageReferenceIndexCode;if(index===undefined)this.fail('Persistent object index is unavailable.',node);return `i32(${index})`;}
       if(p.boundReferenceShared){if(s?.atomic||a.type!==p.type||!p.constant&&s?.constant)this.fail('Shared reference requires a matching non-atomic array element.',node);const index=a.sharedReferenceIndexCode??s?.sharedReferenceIndexCode;if(index===undefined)this.fail('Shared reference index is unavailable.',node);return `i32(${index})`;}
@@ -1145,13 +1176,13 @@ class Emitter {
         if(p.type==='texture3d'){if(p.pointer||p.reference)this.fail('Texture helper parameters must be passed by value.',p);const {dimension,format}=textureShape(p.textureSampling);p.symbol=this.add(p.name,{name:p.name,type:p.type,code:'cw_texture_'+p.name,sampler:'cw_sampler_'+p.name,coordinateScale:'cw_scale_'+p.name,pixelPoint:'cw_point_'+p.name,...(p.textureSampling.startsWith('fetch_')?{linearFetch:p.textureSampling.slice(6),lengthCode:'cw_length_'+p.name}:{}),dimension,format,kind:'texture',constant:true},p);continue;}
         if(p.pointer){const base=p.boundShared?this.shared.find(s=>s.code===p.boundShared):this.bufferSymbols.get(p.boundBuffer);if(!base)this.fail('Helper buffer pointer was not specialized.',p);p.symbol=this.add(p.name,{...base,...(p.boundShared?{sharedPointer:p.boundShared}:{}),name:p.name,kind:'buffer-alias',constant:p.constant||p.boundConstant,offsetCode:'cw_buffer_offset_'+helper.params.indexOf(p)},p);continue;}
         if(p.type==='thread-block'){if(p.reference)this.fail('thread_block helper parameters must be passed by value.',p);p.symbol=this.add(p.name,{name:p.name,type:p.type,kind:'thread-block',constant:true},p);continue;}
-        if(p.reference&&!numeric(p.type)&&!vectorLength(p.type)&&!this.structs.has(p.type)&&!(p.constant&&(['cw_uchar2','cw_uchar4'].includes(p.type)||vectorLength(p.type)||this.structs.has(p.type))))this.fail('Helper references require numeric scalars or vectors.',p);
+        if(p.reference&&!p.localArray&&!numeric(p.type)&&!vectorLength(p.type)&&!this.structs.has(p.type)&&!(p.constant&&(['cw_uchar2','cw_uchar4'].includes(p.type)||vectorLength(p.type)||this.structs.has(p.type))))this.fail('Helper references require numeric scalars or vectors.',p);
         if(p.boundReferenceStorage){const index='v_'+p.name,code=p.boundReferenceStorage+'['+index+']'+(p.boundReferencePath||'');p.symbol=this.add(p.name,{name:p.name,type:p.type,code,pointerCode:'&'+code,storageReferenceRoot:p.boundReferenceStorage,storageReferencePath:p.boundReferencePath||'',storageReferenceIndexCode:index,referenceSpace:'storage',constant:p.constant,atomic:false,kind:'reference'},p);continue;}
         if(p.boundReferenceShared){const index='v_'+p.name,code=p.boundReferenceShared+'['+index+']';p.symbol=this.add(p.name,{name:p.name,type:p.type,code,pointerCode:'&'+code,sharedReferenceRoot:p.boundReferenceShared,sharedReferenceIndexCode:index,referenceSpace:'workgroup',constant:p.constant,atomic:false,kind:'reference'},p);continue;}
         p.symbol = this.add(p.name, {name: p.name, type: p.type, code: p.reference?`(*v_${p.name})`:`v_${p.name}`,pointerCode:p.reference?`v_${p.name}`:undefined,...(p.reference?{referenceSpace:p.referenceSpace||'function'}:{}), constant:p.constant, atomic: false, kind: p.reference?'reference':'local'}, p);
       }
       const body = this.body(helper.body);
-      helperLines.push(`fn f_${helper.name}(${[...helper.params.filter(p=>p.type!=='thread-block').map(p => p.type==='texture3d'?`cw_texture_${p.name}: texture_${textureShape(p.textureSampling).dimension.replace('-','_')}<${['fetch_uint','tex2Duchar','tex2Duchar2','tex2Duint'].includes(p.textureSampling)?'u32':'f32'}>, cw_sampler_${p.name}: sampler${p.textureSampling.startsWith('fetch_')?`, cw_length_${p.name}: u32`:''}${['tex2D','tex2Dfloat2','tex2Dfloat4','tex3D','tex3Dfloat4'].includes(p.textureSampling)?`, cw_scale_${p.name}: vec${p.textureSampling.startsWith('tex3D')?3:2}<f32>, cw_point_${p.name}: f32`:''}`:p.pointer?`cw_buffer_arg_${helper.params.indexOf(p)}: i32`:`${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.boundReferenceShared||p.boundReferenceStorage?'i32':p.reference?`ptr<${p.referenceSpace||'function'}, ${p.type}>`:p.type}`),'cw_thread: vec3<u32>','cw_block: vec3<u32>','cw_grid: vec3<u32>'].join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>p.pointer).map(p=>`var cw_buffer_offset_${helper.params.indexOf(p)}: i32 = cw_buffer_arg_${helper.params.indexOf(p)};`)),...indent(helper.params.filter(p=>p.type!=='thread-block'&&p.type!=='texture3d'&&!p.pointer&&!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
+      helperLines.push(`fn f_${helper.name}(${[...helper.params.filter(p=>p.type!=='thread-block').map(p => p.type==='texture3d'?`cw_texture_${p.name}: texture_${textureShape(p.textureSampling).dimension.replace('-','_')}<${['fetch_uint','tex2Duchar','tex2Duchar2','tex2Duint'].includes(p.textureSampling)?'u32':'f32'}>, cw_sampler_${p.name}: sampler${p.textureSampling.startsWith('fetch_')?`, cw_length_${p.name}: u32`:''}${['tex2D','tex2Dfloat2','tex2Dfloat4','tex3D','tex3Dfloat4'].includes(p.textureSampling)?`, cw_scale_${p.name}: vec${p.textureSampling.startsWith('tex3D')?3:2}<f32>, cw_point_${p.name}: f32`:''}`:p.pointer?`cw_buffer_arg_${helper.params.indexOf(p)}: i32`:`${p.reference||p.constant?'v_':'cw_arg_'}${p.name}: ${p.boundReferenceShared||p.boundReferenceStorage?'i32':p.reference?`ptr<${p.referenceSpace||'function'}, ${typeName(p.type)}>`:p.type}`),'cw_thread: vec3<u32>','cw_block: vec3<u32>','cw_grid: vec3<u32>'].join(', ')})${helper.result === 'void' ? '' : ` -> ${helper.result}`} {`,...indent(helper.params.filter(p=>p.pointer).map(p=>`var cw_buffer_offset_${helper.params.indexOf(p)}: i32 = cw_buffer_arg_${helper.params.indexOf(p)};`)),...indent(helper.params.filter(p=>p.type!=='thread-block'&&p.type!=='texture3d'&&!p.pointer&&!p.reference&&!p.constant).map(p=>`var v_${p.name}: ${p.type} = cw_arg_${p.name};`)), ...indent(body), '}');
     }};
     emitHelpers();
     this.scopes = kernelScope; this.currentFunction = this.kernel;

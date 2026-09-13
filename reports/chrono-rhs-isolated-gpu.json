@@ -1,0 +1,153 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell"
+  },
+  "tolerances": {
+    "acceleration": {
+      "absolute": 0.0004,
+      "relative": 0.0002
+    },
+    "densityDerivative": {
+      "absolute": 0.01,
+      "relative": 0.0002
+    },
+    "positionDivergence": {
+      "absolute": 0.00001,
+      "relative": 0.00002
+    },
+    "accelerationTimeStep": {
+      "absolute": 0.00001,
+      "relative": 0.003
+    },
+    "courantAndFlags": "exact"
+  },
+  "markers": 30327,
+  "compared": 242617,
+  "mismatches": 0,
+  "sections": [
+    {
+      "name": "sortedDerivVelRho",
+      "words": 121308,
+      "maximumError": 0.000274658203125,
+      "failed": 0,
+      "examples": [],
+      "components": [
+        {
+          "maximumError": 0.000194549560546875,
+          "index": 20216,
+          "actual": -0.0016722679138183594,
+          "expected": -0.0018668174743652344
+        },
+        {
+          "maximumError": 0.000213623046875,
+          "index": 37925,
+          "actual": -0.0001087188720703125,
+          "expected": -0.0003223419189453125
+        },
+        {
+          "maximumError": 0.000274658203125,
+          "index": 29510,
+          "actual": 0.0642862319946289,
+          "expected": 0.0640115737915039
+        },
+        {
+          "maximumError": 0.000009506940841674805,
+          "index": 29919,
+          "actual": 0.004217669367790222,
+          "expected": 0.004208162426948547
+        }
+      ]
+    },
+    {
+      "name": "sortedFreeSurfaceIdD",
+      "words": 30327,
+      "maximumError": 0,
+      "failed": 0,
+      "examples": [],
+      "components": [
+        {
+          "maximumError": 0,
+          "index": 0,
+          "actual": 0,
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "name": "sortedPosDivergence",
+      "words": 30327,
+      "maximumError": 0.0000016689300537109375,
+      "failed": 0,
+      "examples": [],
+      "components": [
+        {
+          "maximumError": 0.0000016689300537109375,
+          "index": 8927,
+          "actual": 3.0601272583007812,
+          "expected": 3.0601255893707275
+        }
+      ]
+    },
+    {
+      "name": "courantViscousTimeStep",
+      "words": 30327,
+      "maximumError": 0,
+      "failed": 0,
+      "examples": [],
+      "components": [
+        {
+          "maximumError": 0,
+          "index": 0,
+          "actual": 0,
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "name": "accelerationTimeStep",
+      "words": 30327,
+      "maximumError": 0.0030368566513061523,
+      "failed": 0,
+      "examples": [],
+      "components": [
+        {
+          "maximumError": 0.0030368566513061523,
+          "index": 4727,
+          "actual": 1.3768210411071777,
+          "expected": 1.3798578977584839
+        }
+      ]
+    },
+    {
+      "name": "error_flag",
+      "words": 1,
+      "maximumError": 0,
+      "failed": 0,
+      "examples": [],
+      "components": [
+        {
+          "maximumError": 0,
+          "index": 0,
+          "actual": 0,
+          "expected": 0
+        }
+      ]
+    }
+  ],
+  "nativeMatched": true,
+  "connectedBoundary": false,
+  "intermediateReadbackBytes": 0,
+  "cpuPhysics": false,
+  "fullSolverAdvanced": false,
+  "boundaryCompared": 212289,
+  "prerequisites": {
+    "nativeExact": true,
+    "compared": 128,
+    "longExpressionTerms": 900,
+    "localArraySizes": [
+      8,
+      12
+    ]
+  }
+}

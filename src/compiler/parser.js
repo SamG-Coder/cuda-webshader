@@ -235,7 +235,7 @@ export class Parser {
           if(templateKind!=='type')this.fail('Shared-memory conversion wrappers require one type parameter.',token);
           const conversions=[];
           while(!this.is('}')){
-            this.take('__device__');while(['inline','__forceinline__'].includes(this.peek().value))this.take();
+            this.take('__device__');while(['inline','__inline__','__forceinline__'].includes(this.peek().value))this.take();
             this.take('operator');const constant=this.match('const');this.take(templateParameter);this.take('*');this.take('(');this.take(')');const methodConst=this.match('const');
             this.take('{');this.take('extern');this.take('__shared__');const storage=this.type();const storageName=this.name();this.take('[');this.take(']');this.take(';');
             if(!['i32','u32','f32'].includes(storage.type)||storage.pointer||storage.reference||storage.constant)this.fail('Shared wrapper backing storage must be an unsized 32-bit scalar array.',token);
@@ -257,7 +257,7 @@ export class Parser {
       }
       this.deferUnsupportedTypes=templateKind==='specialization';
       if(this.match('namespace')){const alias=this.name();this.take('=');const target=this.name();this.take(';');if(target!=='cooperative_groups'||this.groupNamespaces.has(alias))this.fail('Only distinct aliases of cooperative_groups are supported.',token);this.groupNamespaces.add(alias);continue;}
-      let hostQualified=false;while (['static','inline', '__forceinline__','__host__'].includes(this.peek().value)) {if(this.take().value==='__host__')hostQualified=true;}
+      let hostQualified=false;while (['static','inline','__inline__', '__forceinline__','__host__'].includes(this.peek().value)) {if(this.take().value==='__host__')hostQualified=true;}
       let launchThreads=null;
       const launchBounds=()=>{this.take('__launch_bounds__');this.take('(');const t=this.take();if(t.kind!=='number'||!/^[0-9]+[uU]?$/.test(t.value))this.fail('Launch bounds require a positive integer thread count.',t);launchThreads=Number(t.value.replace(/[uU]$/,''));if(launchThreads<1||launchThreads>1024)this.fail('Launch bounds thread count must be in [1,1024].',t);this.take(')');};
       if(this.is('__launch_bounds__'))launchBounds();
@@ -266,7 +266,7 @@ export class Parser {
       if(templateParameters.length>1&&qualifier!=='__device__'&&templateKind!=='int')this.fail('Multiple template type parameters are supported on device helpers only.',token);
       if(templateParameter&&!['__global__','__device__'].includes(qualifier))this.fail('Templates are supported only on kernels and device helpers.',token);
       if (!['__global__', '__device__'].includes(qualifier)) this.fail('Only __global__ kernels and __device__ helper functions are accepted. Host CUDA APIs, structs, templates and PTX are not supported.', token);
-      while (['static','inline', '__forceinline__','__host__'].includes(this.peek().value)) {if(this.take().value==='__host__')hostQualified=true;}
+      while (['static','inline','__inline__', '__forceinline__','__host__'].includes(this.peek().value)) {if(this.take().value==='__host__')hostQualified=true;}
       if(hostQualified&&qualifier!=='__device__')this.fail('__host__ is supported only alongside __device__ helpers.',token);
       if(this.is('__launch_bounds__')){if(launchThreads!==null)this.fail('Duplicate launch bounds.');launchBounds();}
       if(launchThreads!==null&&qualifier!=='__global__')this.fail('Launch bounds apply only to kernels.',token);
@@ -292,7 +292,8 @@ export class Parser {
         params.push({kind: 'param', token, name, ...type,...(defaultValue!==undefined?{defaultValue}:{})});
       } while (this.match(','));
       this.take(')');
-      if(freeOperator?.endsWith('=')){if(result.type!=='void'||params.length!==2||!params[0].reference||params[0].constant||!String(params[0].type).startsWith('cw_struct_')||params.some(p=>p.pointer)||params[1].reference&&!params[1].constant)this.fail('Compound operators require void return, a mutable class reference and a value or const-reference operand.',token);}
+      if(['+','-'].includes(freeOperator)&&params.length===1){if(params[0].pointer||!String(params[0].type).startsWith('cw_struct_'))this.fail('Free unary operators require a class value or reference.',token);name='cw_unary_'+(freeOperator==='+'?'plus':'minus');this.functionNames.add(name);}
+      else if(freeOperator?.endsWith('=')){if(result.type!=='void'||params.length!==2||!params[0].reference||params[0].constant||!String(params[0].type).startsWith('cw_struct_')||params.some(p=>p.pointer)||params[1].reference&&!params[1].constant)this.fail('Compound operators require void return, a mutable class reference and a value or const-reference operand.',token);}
       else if(freeOperator&&(params.length!==2||!params.some(p=>String(p.type).startsWith('cw_struct_')||/^vec[234]</.test(p.type))||params.some(p=>p.pointer||p.reference&&!p.constant)))this.fail('Free binary operators require two value or const-reference parameters, including a class or vector value.',token);
       const body = this.block();
       functions.push({kind: 'function', token, name, qualifier, result: result.type, params, body,freeOperator,launchThreads,templateParameter,templateParameters,templateKind,...(specializationArgument!==undefined?{specializationArgument}:{})});

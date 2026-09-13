@@ -1,0 +1,34 @@
+[
+  {
+    "marker": 5054,
+    "component": 0,
+    "doubleReference": -0.0018775423339443265,
+    "native": -0.0018668174743652344,
+    "webgpu": -0.0016722679138183594,
+    "sumAbsoluteContributions": 754.1200376637778
+  },
+  {
+    "marker": 9481,
+    "component": 1,
+    "doubleReference": -8.971149444736426e-05,
+    "native": -0.0003223419189453125,
+    "webgpu": -0.0001087188720703125,
+    "sumAbsoluteContributions": 576.5260607561165
+  },
+  {
+    "marker": 7377,
+    "component": 2,
+    "doubleReference": 0.06404027847855787,
+    "native": 0.0640115737915039,
+    "webgpu": 0.0642862319946289,
+    "sumAbsoluteContributions": 675.26607067375
+  },
+  {
+    "marker": 7479,
+    "component": 3,
+    "doubleReference": 0.004210691529618893,
+    "native": 0.004208162426948547,
+    "webgpu": 0.004217669367790222,
+    "sumAbsoluteContributions": 19.782821078834
+  }
+]

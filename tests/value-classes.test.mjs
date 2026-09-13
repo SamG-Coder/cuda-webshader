@@ -57,7 +57,7 @@ test('External mutable methods and compound class operators update the receiver'
 test('Original device vec3 definitions support free operators and readonly self dot products',()=>{
  const full=readFileSync(new URL('./pathtracer-value-class.cuh',import.meta.url),'utf8');
  const c=compile(full+'__global__ void k(float*out){vec3 a(2.0f,4.0f,8.0f),b(1.0f,2.0f,4.0f);vec3 sum=a+b,delta=a-b,product=a*b,ratio=a/b,scaled=2.0f*a,other=a*2.0f,half=a/2.0f;out[0]=sum.x();out[1]=delta.y();out[2]=product.z();out[3]=ratio.x();out[4]=scaled.y();out[5]=other.z();out[6]=half.x();out[7]=dot(a,a);vec3 normal=unit_vector(vec3(3.0f,0.0f,4.0f));out[8]=normal.x();}',{workgroupSize:[1,1,1]}),out=new Float32Array(9);executeCPU(c,{out},{},[1]);assert.deepEqual([...out],[3,2,32,2,8,16,1,84,Math.fround(0.6)]);
- assert.throws(()=>compile(source+'__device__ vec3 operator+(vec3 a){return a;}__global__ void k(){}'),/two/);
+ const unary=compile(source+'__device__ vec3 operator+(vec3 a){return vec3(a.x()+1.f,a.y()+2.f,a.z()+3.f);}__global__ void k(float*out){vec3 a(2.f,4.f,8.f);vec3 b=+a;out[0]=b.x();out[1]=b.z();}',{workgroupSize:[1]});const values=new Float32Array(2);executeCPU(unary,{out:values},{},[1]);assert.deepEqual([...values],[3,11]);
  assert.throws(()=>compile(source+'__device__ vec3 operator+(vec3 &a,vec3 b){return b;}__global__ void k(){}'),/const-reference/);
 });
 

@@ -92,6 +92,9 @@ class Context {
         const value=yield* this.eval(n.value);return n.op==='!'?!value:convert(n.op==='-'?-value:n.op==='~'?~value:value,n.type);
       }
       case 'binary':{
+        const chain=[];let leaf=n;
+        while(leaf?.kind==='binary'&&!['&&','||'].includes(leaf.op)){chain.push(leaf);leaf=leaf.left;}
+        if(chain.length>32){let value=yield* this.eval(leaf);for(let i=chain.length-1;i>=0;i--){this.tick();const node=chain[i];value=binary(node.op,value,yield* this.eval(node.right),node.operandType||node.type);}return value;}
         const a=yield* this.eval(n.left);if(n.op==='&&'&&!a)return false;if(n.op==='||'&&a)return true;
         const b=yield* this.eval(n.right);return binary(n.op,a,b,n.operandType||n.type);
       }
@@ -141,11 +144,11 @@ class Context {
     if(name==='sqrt')return f(Math.sqrt(args[0]));
     if(name==='rintf'){const x=args[0],lo=Math.floor(x),fraction=x-lo,result=fraction>.5||fraction===.5&&lo%2!==0?lo+1:lo;return result===0&&x<0?-0:result;}
     if(name==='roundf'){const x=args[0],whole=Math.trunc(x);return f(Math.abs(x-whole)>=.5?whole+(x>=0?1:-1):whole);}
-    if(name==='abs')return Math.abs(args[0])|0;
+    if(name==='abs')return convert(Math.abs(args[0]),n.type);
     const unary={sinf:Math.sin,cosf:Math.cos,tanf:Math.tan,tan:Math.tan,sqrtf:Math.sqrt,rsqrtf:x=>1/Math.sqrt(x),exp:Math.exp,expf:Math.exp,__expf:Math.exp,exp2f:x=>2**x,logf:Math.log,__logf:Math.log,log2f:Math.log2,fabs:Math.abs,fabsf:Math.abs,floorf:Math.floor,ceilf:Math.ceil,truncf:Math.trunc};
     if(unary[name])return f(unary[name](args[0]));
-    if(['fminf','fmaxf','min','max','powf','pow','atan2f','fmaf'].includes(name)){
-      const value=name==='fmaf'?args[0]*args[1]+args[2]:['fminf','min'].includes(name)?Math.min(...args):['fmaxf','max'].includes(name)?Math.max(...args):['powf','pow'].includes(name)?Math.pow(...args):Math.atan2(...args);
+    if(['fmin','fmax','fminf','fmaxf','min','max','powf','pow','atan2f','fmaf'].includes(name)){
+      const value=name==='fmaf'?args[0]*args[1]+args[2]:['fmin','fminf','min'].includes(name)?Math.min(...args):['fmax','fmaxf','max'].includes(name)?Math.max(...args):['powf','pow'].includes(name)?Math.pow(...args):Math.atan2(...args);
       return convert(value,n.type);
     }
     const helper=this.artifact.ast.functions.find(x=>x.name===name);

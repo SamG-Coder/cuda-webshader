@@ -594,3 +594,10 @@ with 0/1 values. This does not provide a grid-wide synchronization primitive.
 Free `void operator+=`, `-=`, `*=` and `/=` overloads support a mutable record
 reference plus a value or const-reference operand. Record-specific `length`
 helpers are resolved as user functions, preserving the source math.
+
+Device helpers can receive whole mutable local arrays by pointer, with specialization
+by element type and array length; nested forwarding and scalar pointer arguments
+are supported. Local array offsets and aliased array arguments remain unsupported.
+Free unary `+`/`-` record operators and CUDA float `abs`, `fmin`, `fmax` overloads
+are recognized. Long arithmetic chains are emitted iteratively with ordered
+intermediates, avoiding JavaScript recursion without reassociating operations.
