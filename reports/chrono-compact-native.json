@@ -1,0 +1,16 @@
+[
+{"mode":0,"n":30327,"total":30327,"offset":0,"baselinePrefixMismatches":0,"baselineWriteCollisions":0,"baselineTotal":30327},
+{"mode":1,"n":198,"total":180,"offset":849156,"baselinePrefixMismatches":183,"baselineWriteCollisions":1,"baselineTotal":179},
+{"mode":2,"n":198,"total":180,"offset":854412,"baselinePrefixMismatches":183,"baselineWriteCollisions":1,"baselineTotal":179},
+{"mode":3,"n":198,"total":114,"offset":859668,"baselinePrefixMismatches":183,"baselineWriteCollisions":1,"baselineTotal":113},
+{"mode":4,"n":198,"total":114,"offset":863868,"baselinePrefixMismatches":183,"baselineWriteCollisions":1,"baselineTotal":113},
+{"mode":5,"n":198,"total":114,"offset":868068,"baselinePrefixMismatches":183,"baselineWriteCollisions":1,"baselineTotal":113},
+{"mode":6,"n":198,"total":114,"offset":872268,"baselinePrefixMismatches":0,"baselineWriteCollisions":0,"baselineTotal":114},
+{"mode":7,"n":198,"total":114,"offset":876468,"baselinePrefixMismatches":183,"baselineWriteCollisions":1,"baselineTotal":113},
+{"mode":8,"n":198,"total":114,"offset":880668,"baselinePrefixMismatches":0,"baselineWriteCollisions":0,"baselineTotal":114},
+{"mode":9,"n":198,"total":114,"offset":884868,"baselinePrefixMismatches":183,"baselineWriteCollisions":1,"baselineTotal":113},
+{"mode":10,"n":198,"total":114,"offset":889068,"baselinePrefixMismatches":0,"baselineWriteCollisions":0,"baselineTotal":114},
+{"mode":11,"n":198,"total":114,"offset":893268,"baselinePrefixMismatches":183,"baselineWriteCollisions":1,"baselineTotal":113},
+{"mode":12,"n":198,"total":114,"offset":897468,"baselinePrefixMismatches":0,"baselineWriteCollisions":0,"baselineTotal":114},
+{"mode":13,"n":198,"total":0,"offset":901668,"baselinePrefixMismatches":0,"baselineWriteCollisions":0,"baselineTotal":0}
+]

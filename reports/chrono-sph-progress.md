@@ -269,3 +269,56 @@ nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-activi
 
 Validation for activity selection: 699 unit tests and 230 real NVIDIA GPU tests
 passed, including the existing Sobel, neighbour, quadtree and rendering checks.
+
+
+## Activity scan and compaction: native defect and explicit adaptation
+
+The original `ActivityScanOp` is retained unchanged in
+`tests/chrono-activity-scan.cuh`. It computes `op(a,b) = a + max(b,0)` and is not
+associative over activity flags containing -1. For example,
+`op(op(1,-1),1) = 2`, while `op(1,op(-1,1)) = 1`. Parallel scans require an
+associative operator; see NVIDIA's [DeviceScan contract](https://nvidia.github.io/cccl/unstable/cub/api/structcub_1_1DeviceScan.html).
+
+On this CUDA 13.3 / NVIDIA Blackwell toolchain, running the unchanged native scan
+on the activity fixtures produces 1,464 wrong prefix values in eight of the
+14 cases. Each affected case has one duplicate write offset among selected
+markers and a final count smaller by one. The original initialized dam-break
+case has only positive flags and passes. The baseline prefix arrays, counts,
+and collision diagnostics are retained in `chrono-compact-native.bin` and
+`chrono-compact-native.json`. This is an upstream scan-domain problem, not an
+observed defect in the translated activity kernel. The defective native compact
+writes are not executed; collisions are established by inspecting native prefix
+positions for markers the unchanged `fillActiveListD` would write.
+
+The host adaptation is explicit: a GPU kernel maps inactive activity flags to
+zero before the scan. The native reference then invokes the unchanged original
+scan functor on those normalized values, where it is associative. WebGPU uses
+the existing unsigned exclusive scan on the same normalized values. This does
+not claim to reproduce the faulty negative-flag baseline or silently alter the
+original functor. The original `fillActiveListD` still receives the original
+activity flags, and only writes markers whose flag is 1.
+
+The validation pipeline now executes original `UpdateActivityD` -> normalize
+extended flags -> GPU exclusive scan -> original `fillActiveListD` -> gather
+selected positions. Activity flags stay on the GPU between stages. Only the
+four-byte selected count is read to size and launch the gathered output, matching
+the native host's need for a selected count. There are no intermediate array
+uploads or CPU physics. The zero-selected case is included. Native-normalized
+prefixes, full compact index buffers (including untouched tail slots), and
+selected position words match exactly across all 14 cases. The original
+activity outputs are also rechecked after the pipeline.
+
+Remaining: connect selected positions and their original marker IDs to neighbour
+construction, then implement the complete property/force/integration sequence.
+The water solver is still not ready for a showcase.
+
+Reproduce with the existing activity references and a Visual Studio developer shell:
+
+```text
+nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-compact-native.cu -o .local/chrono-compact-native.exe
+.local/chrono-compact-native.exe
+```
+
+Validation: 700 unit tests, 231 real NVIDIA GPU tests, and 193,110 exact
+native-normalized compaction values passed. Fourteen cases read a total of
+56 intermediate bytes, with no intermediate array uploads.

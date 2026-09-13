@@ -1,3 +1,4 @@
+import {checkChronoCompact} from './chrono-compact-gpu.js';
 import {checkChronoActivity} from './chrono-activity-gpu.js';
 import {checkChronoCounterTime} from './chrono-counter-time-gpu.js';
 import {checkCapturedPoints} from './captured-points-gpu.js';
@@ -344,6 +345,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Original Chrono neighbour cells and particle mapping support partial blocks',()=>checkChronoNeighbors(runtime));
   await run('Original Chrono scoped enums and boolean parameter records match native CUDA',()=>checkChronoTypes(runtime));
   await run('Original Chrono grid hashing matches native dam-break inputs and boundary cases',()=>checkChronoHash(runtime));
+  await run('Chrono normalized activity compaction matches native CUDA',()=>checkChronoCompact(runtime));
   await run('Original Chrono activity selection matches native CUDA',()=>checkChronoActivity(runtime));
   await run('Chrono 64-bit counters and double launch times match native CUDA',()=>checkChronoCounterTime(runtime));
   await run('Original Chrono neighbour lists match native CUDA for fluid and boundary markers',()=>checkChronoSearch(runtime));

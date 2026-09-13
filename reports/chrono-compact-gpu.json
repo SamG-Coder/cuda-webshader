@@ -1,0 +1,36 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "subgroup-size-control",
+      "float32-filterable",
+      "subgroups",
+      "timestamp-query"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "date": "2026-09-12T23:59:41.830Z",
+  "name": "Chrono normalized activity compaction matches native CUDA",
+  "pass": true,
+  "cases": 14,
+  "compared": 193110,
+  "nativeNormalizedExact": true,
+  "upstreamScanMismatchCases": 8,
+  "upstreamPrefixMismatches": 1464,
+  "upstreamWriteCollisions": 8,
+  "explicitPositiveFlagNormalization": true,
+  "activityKernelNativeExact": true,
+  "intermediateReadbackBytes": 56,
+  "cpuPhysics": false,
+  "neighborsConnected": false,
+  "wallMs": 626.5699999928474
+}

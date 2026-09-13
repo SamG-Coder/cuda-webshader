@@ -239,6 +239,11 @@ The quadtree showcase and `tests/quadtree-cdp-device.cuh` retain NVIDIA's origin
 
 ## Project Chrono kernels and type declarations
 
+`tests/chrono-compact.cu` retains the original `fillActiveListD` from
+`SphCollisionSystem.cu`; `tests/chrono-activity-scan.cuh` retains the original
+`ActivityScanOp` from `SphFluidDynamics.cu` (Copyright (c) 2014
+projectchrono.org). The explicit normalization/gather adapters and harness
+are MIT code.
 `tests/chrono-activity.cu` retains the original `ActiveDomain`, `Counters`,
 `UpdateActivityD`, `checkActivityD`, `inAABB`, marker predicate and selected
 vector constructors (Copyright (c) 2014 projectchrono.org) from

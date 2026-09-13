@@ -1,4 +1,4 @@
-export async function checkChronoActivity(runtime){
+export async function checkChronoActivity(runtime,{afterDispatch}={}){
  const load=path=>fetch(new URL(path,import.meta.url));
  const source=await(await load('chrono-activity.cu')).text(),params=await(await load('../reports/chrono-params.json')).json();
  const cases=await(await load('../reports/chrono-activity-native.json')).json();
@@ -18,6 +18,7 @@ export async function checkChronoActivity(runtime){
   for(const [i,axis] of [...'xyz'].entries())scalars['constant.paramsD.'+axis+'_periodic']=!!c.periodic[i];
   try{
    runtime.batch().dispatch(kernel.bind(buffers,scalars),[Math.ceil(n/128)]).submit();
+   if(afterDispatch)await afterDispatch({caseInfo:c,buffers});
    let offset=c.outputOffset;
    for(const name of ['activityIdentifierD','extendedActivityIdD','velMasD']){
     const actual=await runtime.read(buffers[name],Uint32Array),expected=new Uint32Array(reference,offset,actual.length);
