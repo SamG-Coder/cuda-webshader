@@ -1,0 +1,11 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell"
+  },
+  "nativeExact": true,
+  "bytesCompared": 2148,
+  "constantUniforms": 0,
+  "volatileHelperFlags": 65,
+  "paddingBytesUnchanged": 3
+}

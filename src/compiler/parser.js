@@ -1,3 +1,4 @@
+import {evaluateModuleConstant} from './module-constexpr.js';
 import {parseScopedEnum} from './scoped-enums.js';
 import {CURAND_XORWOW_SOURCE} from './curand-xorwow.js';
 /** A deliberately bounded CUDA C frontend. No eval, regex transpilation, or source-specific rewrites. */
@@ -184,7 +185,19 @@ export class Parser {
     while (this.peek().kind !== 'eof') {
       const token = this.peek();
       if(this.is('enum')){parseScopedEnum(this);continue;}
-      if(this.match('static')&&!['__constant__','__global__','__device__'].includes(this.peek().value))this.fail('Static module declarations require CUDA constant storage or a device function.',token);
+      if(this.match('static')&&!['constexpr','__constant__','__global__','__device__'].includes(this.peek().value))this.fail('Static module declarations require CUDA constant storage or a device function.',token);
+      if(this.match('constexpr')){
+        const spec=this.type({parameter:true}),name=this.name();
+        if(spec.pointer||spec.reference||spec.constant||spec.shared||spec.external||!['cw_f64','f32','i32','u32'].includes(spec.type))this.fail('Module constexpr requires a plain numeric scalar.',token);
+        if(constantGlobals.some(g=>g.name===name)||functions.some(f=>f.name===name)||deviceGlobals.some(g=>g.name===name)||sharedGlobals.some(g=>g.name===name)||this.typeAliases.has(name)||TYPES.has(name))this.fail('Duplicate module constexpr name.',token);
+        this.take('=');const init=this.expression(2);this.take(';');
+        const evaluated=evaluateModuleConstant(init,constantGlobals,(message,n)=>this.fail(message,n.token));
+        let value=evaluated.value;
+        if(spec.type==='f32')value=Math.fround(value);
+        if(['i32','u32'].includes(spec.type)){value=Math.trunc(value);if(value<(spec.type==='i32'?-2147483648:0)||value>(spec.type==='i32'?2147483647:4294967295))this.fail('Module constexpr conversion is outside its integer range.',token);}
+        if(!Number.isFinite(value))this.fail('Module constexpr value must be finite.',token);
+        constantGlobals.push({kind:'constant-global',token,name,type:spec.type,dimensions:[],init,constexprValue:value});continue;
+      }
       let templateParameter=null,templateKind=null,templateParameters=[];this.templateTypeNames=new Set();this.templateParameterName=null;this.deferUnsupportedTypes=false;
       if(this.is('class')&&this.peek(2).value===';'){this.take();const name=this.name();this.take(';');if(builtinType(name)||this.typeAliases.has(name)||this.typeTraits.has(name)||this.structs.size>=64)this.fail('Invalid or excessive forward class declaration.',token);if(!this.structs.has(name))this.structs.set(name,{name,type:'cw_struct_'+name,fields:[],methods:[],forward:true});continue;}
       if(this.is('class')){if(builtinType(this.peek(1).value))this.fail('Class name conflicts with a built-in type.');functions.push(...parseValueClass(this));continue;}
@@ -286,7 +299,7 @@ export class Parser {
       if(this.typeAliases.has(name))this.fail('Functions cannot shadow a type alias.',token);this.functionNames.add(name);let specializationArgument;
       if(templateKind==='specialization')specializationArgument=this.templateArgument();
       this.take('('); const params = [];
-      if (!this.is(')')) do { const token = this.peek(), type = this.type({parameter:qualifier==='__global__'}), name = this.name();if(this.match('[')){const size=this.take();if(size.kind!=='number'||!/^\d+[uU]?$/.test(size.value)||Number(size.value.replace(/[uU]$/,''))<1||Number(size.value.replace(/[uU]$/,''))>65536||type.pointer||type.reference)this.fail('Array parameters require one positive fixed dimension.',size);this.take(']');type.pointer=true;}if(type.type==='cw_f64'&&(type.pointer||type.reference))this.fail('Unsupported type: double pointers and references require a storage ABI.',token);const defaultValue=this.match('=')?this.expression(2):undefined;
+      if (!this.is(')')) do { const token = this.peek(), type = this.type({parameter:true}), name = this.name();if(this.match('[')){const size=this.take();if(size.kind!=='number'||!/^\d+[uU]?$/.test(size.value)||Number(size.value.replace(/[uU]$/,''))<1||Number(size.value.replace(/[uU]$/,''))>65536||type.pointer||type.reference)this.fail('Array parameters require one positive fixed dimension.',size);this.take(']');type.pointer=true;}if(type.type==='cw_f64'&&(type.pointer||type.reference))this.fail('Unsupported type: double pointers and references require a storage ABI.',token);const defaultValue=this.match('=')?this.expression(2):undefined;
         if(this.typeAliases.has(name))this.fail('Parameters cannot shadow a type alias.',token);if(defaultValue!==undefined){const literal=defaultValue.kind==='unary'&&['+','-'].includes(defaultValue.op)?defaultValue.value:defaultValue;if(!['__device__','__global__'].includes(qualifier)||templateKind==='specialization')this.fail('Default arguments belong on primary device or kernel definitions only.',token);if(type.pointer||type.reference||(!['f32','i32','u32','bool','cw_uchar'].includes(type.type)&&!String(type.type).startsWith('template:')))this.fail('Default arguments require scalar value parameters.',token);if(literal.kind!=='literal'&&!(literal===defaultValue&&literal.kind==='id'&&['true','false'].includes(literal.name)))this.fail('Default arguments support numeric or boolean literals with an optional numeric sign.',defaultValue.token);}
         else if(params.some(p=>p.defaultValue!==undefined))this.fail('Parameters after a default argument must also have defaults.',token);
         params.push({kind: 'param', token, name, ...type,...(defaultValue!==undefined?{defaultValue}:{})});

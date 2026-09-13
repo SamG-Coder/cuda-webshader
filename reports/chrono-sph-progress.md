@@ -583,3 +583,29 @@ and validation reads are outside that assertion. The original kernel bodies
 remain unchanged; the new fixture includes their original Real3 `*=` and
 `IsFinite` dependencies. The water still requires original time integration and
 multi-step native comparison before it can be a showcase.
+
+## Integration compiler prerequisites: module constants and helper flags
+
+The original `CH_1_3` declaration (`static constexpr double CH_1_3 = 1.0 / 3.0`)
+now parses and retains its double precision. Module `constexpr` declarations
+support numeric scalar arithmetic and references to earlier module constants;
+float expressions round at float precision and double expressions at double
+precision. Values are embedded in shader code, are read-only and add no launch
+uniforms. Local variables can shadow their names normally. Unsupported calls,
+nonconstant references, invalid arithmetic and out-of-range values fail explicitly.
+This is bounded scalar constant initialization, not general C++ constexpr
+function evaluation or array support.
+
+Volatile bool pointers can now be forwarded into original device helpers.
+Storage reads retain atomic loads and packed writes retain byte neighbours;
+local/shared volatile helper pointers remain unsupported. The MIT fixture
+`tests/module-constexpr.cu` and its native harness compare 2,148 bytes exactly,
+including 65 flag writes and three untouched padding bytes. The report is
+`module-constexpr-gpu.json`. This prerequisite does not advance the solver.
+
+The next confirmed blocker is the local `double ad` declaration in the original
+`TauEulerStep` helper called by `EulerStep_D`. Its robust quadratic solve also
+uses double min/max and square root. That helper is retained even though the
+selected dam-break configuration is CFD rather than CRM; it has not been stubbed
+or replaced. Full RK2 integration and multi-step trajectory validation remain
+outstanding.

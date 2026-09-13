@@ -158,6 +158,15 @@ class Emitter {
     if(this.globalSymbols.has(name)&&this.globalSymbols.get(name).kind==='buffer')return this.globalSymbols.get(name);
     const global=this.ast.constantGlobals.find(g=>g.name===name);
     if(global){
+      if(global.constexprValue!==undefined){
+        if(!global.symbol){const value=global.constexprValue;let code;
+          if(global.type==='cw_f64'){const bits=new DataView(new ArrayBuffer(8));bits.setFloat64(0,value,true);this.float64Used=true;code=`vec2<u32>(${bits.getUint32(0,true)}u, ${bits.getUint32(4,true)}u)`;}
+          else if(global.type==='f32'){const bits=new DataView(new ArrayBuffer(4));bits.setFloat32(0,value,true);code=`bitcast<f32>(${bits.getUint32(0,true)}u)`;}
+          else code=global.type==='u32'?`${value}u`:`i32(${value})`;
+          global.symbol={name,type:global.type,code,constant:true,kind:'constant-global',constexprValue:value};
+        }
+        return global.symbol;
+      }
       if(this.structs.has(global.type)||vectorLength(global.type)||global.dimensions.length===2){
         if(!this.globalSymbols.has(name)){const initial=[];if(global.init){if(!vectorLength(global.type)||global.dimensions.length||global.init.kind!=='initializer'||global.init.items.length>vectorLength(global.type))this.fail('Constant vector initialization requires a flat scalar list; initialized aggregate arrays and structs are unsupported.',global);const element=vectorElement(global.type);for(const item of global.init.items){const literal=item.kind==='unary'&&['+','-'].includes(item.op)?item.value:item;if(literal.kind!=='literal')this.fail('Constant vector components require numeric literals.',item);const value=constantValue(item);if(!Number.isFinite(value)||element==='f32'&&!Number.isFinite(Math.fround(value))||element==='i32'&&(!Number.isInteger(value)||value<-2147483648||value>2147483647)||element==='u32'&&(!Number.isInteger(value)||value<0||value>4294967295))this.fail('Constant vector component is outside its scalar range.',item);initial.push(element==='f32'?Math.fround(value):value);}}if(this.structs.has(global.type)&&global.dimensions.length)this.fail('Constant struct arrays are unsupported.',global);let aggregateType=global.type;if(global.dimensions.length){let total=1;for(const dim of [...global.dimensions].reverse()){const length=constantValue(dim);total*=length;if(!Number.isInteger(length)||length<1||total>256)this.fail('Constant aggregate arrays require 1..256 total elements.',global);aggregateType=arrayOf(aggregateType,length);}}const leaves=[];
           const build=(type,path)=>{if(type==='cw_f64'||type==='cw_size64'){if(type==='cw_f64')this.float64Used=true;else this.extentUsed=true;const low=build('u32',path+'.lo'),high=build('u32',path+'.hi');return {code:`vec2<u32>(${low.code}, ${high.code})`,shape:{kind:'wide',type,items:[low.shape,high.shape]}};}if(this.structs.has(type)){const fields=this.structs.get(type).fields.map(f=>[f.name,build(f.resolvedType,path+'.'+f.name)]);return {code:`${type}(${fields.map(([,v])=>v.code).join(', ')})`,shape:{kind:'struct',fields:fields.map(([name,v])=>[name,v.shape])}};}if(isArray(type)||vectorLength(type)){const count=isArray(type)?type.length:vectorLength(type),element=isArray(type)?type.element:vectorElement(type),items=Array.from({length:count},(_,i)=>build(element,path+(isArray(type)?'['+i+']':'.'+'xyzw'[i])));return {code:`${typeName(type)}(${items.map(v=>v.code).join(', ')})`,shape:{kind:'array',items:items.map(v=>v.shape)}};}if(!numeric(type)&&type!=='bool'||leaves.length>=(vectorLength(global.type)?1024:256))this.fail('Constant aggregates exceed the supported component limit.',global);const field='cw_struct_constant_'+this.ast.constantGlobals.indexOf(global)+'_'+leaves.length;leaves.push({name:path,...(type==='bool'?{type:'u32',sourceType:'bool'}:uniformScalar(type)),origin:'constant',field,defaultValue:initial[leaves.length]??0});return {code:type==='bool'?'(cw_params.'+field+' != 0u)':'cw_params.'+field,shape:{kind:'scalar',name:path,type}};};
@@ -554,6 +563,7 @@ class Emitter {
     const uses=analyse([helper],helper.params),roots=[];
     for(const [i,p]of helper.params.entries())if(p.pointer){
       const a=args[i],symbol=a?.rootSymbol,root=symbol?.rootBufferName;
+      if(p.volatileParameter&&!root)this.fail('Volatile helper pointers require storage buffers.',n.args[i]);
       if(a?.localArrayPointer){if(a.type.element!==p.type)this.fail('Local array element type must match the helper pointer.',n.args[i]);roots.push([i,'@array:'+a.type.length,false]);continue;}
       if(a?.localPointer){if(a.type.element!==p.type)this.fail('Local pointer type must exactly match the helper parameter.',n.args[i]);roots.push([i,'@local',false]);continue;}
       if(symbol?.sharedPointer){if(!isArray(a.type)||a.type.element!==p.type)this.fail('Shared pointer type must exactly match the helper parameter.',n.args[i]);if(symbol.constant&&!p.constant)this.fail('Cannot discard const through a shared helper pointer.',n.args[i]);roots.push([i,'@shared:'+symbol.sharedPointer,!!symbol.constant]);continue;}
@@ -562,7 +572,7 @@ class Emitter {
       roots.push([i,root,!!symbol.constant]);
       if(uses.reads.has(p.name))this.usage.reads.add(root);
       if(uses.writes.has(p.name))this.usage.writes.add(root);
-      if(uses.atomicBindings.has(p.name)||p.type==='cw_uchar'&&uses.writes.has(p.name)){this.usage.atomic.add(root);this.bufferSymbols.get(root).atomic=true;}
+      if(uses.atomicBindings.has(p.name)||p.volatileParameter||['cw_uchar','bool'].includes(p.type)&&uses.writes.has(p.name)){this.usage.atomic.add(root);this.bufferSymbols.get(root).atomic=true;}
     }
     this.usage.storageBarrier=[...this.usage.writes].some(x=>this.usage.reads.has(x));
     const key=JSON.stringify([helper.name,roots]);
