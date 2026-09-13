@@ -462,3 +462,5 @@ __global__ void findCellStartEndD(uint* cellStartD,        // output: cell start
 // MIT data preparation wrappers; distance and search code above is unchanged.
 __global__ void hashMarkers(const Real4* positions,uint* hashes,uint* indices,uint n){uint i=blockIdx.x*blockDim.x+threadIdx.x;if(i<n){hashes[i]=calcGridHash(calcGridPos(mR3(positions[i])));indices[i]=i;}}
 __global__ void gatherMarkers(const Real4* positions,const uint* indices,Real4* sortedPosRad,uint n){uint i=blockIdx.x*blockDim.x+threadIdx.x;if(i<n)sortedPosRad[i]=positions[indices[i]];}
+// MIT selection adapter: preserve original marker IDs through the existing grid helpers.
+__global__ void hashSelected(const Real4* positions,const uint* activeList,uint* hashes,uint* indices,uint n){uint i=blockIdx.x*blockDim.x+threadIdx.x;if(i<n){uint original=activeList[i];hashes[i]=calcGridHash(calcGridPos(mR3(positions[original])));indices[i]=original;}}

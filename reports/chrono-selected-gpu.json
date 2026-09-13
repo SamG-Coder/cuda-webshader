@@ -1,0 +1,35 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "subgroup-size-control",
+      "float32-filterable",
+      "timestamp-query",
+      "subgroups"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "date": "2026-09-13T00:06:48.690Z",
+  "name": "Chrono selected markers feed native-matched neighbour construction",
+  "pass": true,
+  "cases": 14,
+  "compared": 1199815,
+  "neighborEntries": 807171,
+  "nativeNormalizedExact": true,
+  "originalMarkerIdsPreserved": true,
+  "activityAndCompactionVerified": true,
+  "intermediateReadbackBytes": 112,
+  "cpuPhysics": false,
+  "neighborsConnected": true,
+  "fullSolverAdvanced": false,
+  "wallMs": 2069.1449999809265
+}

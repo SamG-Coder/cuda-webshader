@@ -1,5 +1,5 @@
 import {checkChronoActivity} from './chrono-activity-gpu.js';
-export async function checkChronoCompact(runtime){
+export async function checkChronoCompact(runtime,{afterCompact}={}){
  const load=path=>fetch(new URL(path,import.meta.url));
  const source=await(await load('chrono-compact.cu')).text(),cases=await(await load('../reports/chrono-compact-native.json')).json(),native=await(await load('../reports/chrono-compact-native.bin')).arrayBuffer();
  const kernels={};for(const entry of ['normalizeActivity','fillActiveListD','gatherSelected'])kernels[entry]=await runtime.kernel(source,{entry,workgroupSize:[128]});
@@ -17,6 +17,7 @@ export async function checkChronoCompact(runtime){
    if(count)runtime.batch().dispatch(kernels.gatherSelected.bind({positions:buffers.posRadD,activeList:list,selected},{n:count}),[Math.ceil(count/128)]).submit();
    await runtime.idle();
    const readback=runtime.stats.readbackBytes-before.readbackBytes;if(readback!==4||runtime.stats.dataBytesUploaded!==before.dataBytesUploaded)throw Error('Unexpected CPU transfer in activity compaction');intermediateReadbackBytes+=readback;
+   if(afterCompact)await afterCompact({caseInfo:c,buffers,activeList:list,count});
    let offset=ref.offset+n*4; // Original faulty native scan is retained separately, never substituted as the corrected reference.
    for(const [buffer,words] of [[prefix,n],[list,n],[selected,count*4]]){
     if(!words)continue;const actual=await runtime.read(buffer,Uint32Array),expected=new Uint32Array(native,offset,words);

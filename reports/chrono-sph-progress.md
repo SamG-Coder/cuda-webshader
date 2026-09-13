@@ -1,6 +1,9 @@
 # Chrono SPH dam-break port: native reference, neighbours and activity selection
 
 This is an in-progress compiler port, not a runnable water showcase.
+The GPU chain now connects activity selection, normalized compaction, original
+marker IDs, grid sorting, cell ranges and neighbour lists. Pressure, forces and
+time integration are still pending.
 
 Upstream: https://github.com/projectchrono/chrono at
 `a92c6f72f422fbcafe0b37125d4070cb6a3b5803`.
@@ -322,3 +325,49 @@ nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-compac
 Validation: 700 unit tests, 231 real NVIDIA GPU tests, and 193,110 exact
 native-normalized compaction values passed. Fourteen cases read a total of
 56 intermediate bytes, with no intermediate array uploads.
+
+
+## Selected markers connected to neighbour construction
+
+The pipeline now continues directly from the GPU-produced active list into grid
+hashing, sorting, position gathering, original cell-range construction, original
+neighbour counts, neighbour offset scan and original neighbour ID construction.
+The hash adapter retains original marker IDs, so gathering after the sort reads
+from the original position buffer even when compaction removed markers.
+
+`tests/chrono-selected-native.cuh`, invoked by the native compaction harness,
+consumes the device compact list and positions without copying those arrays to
+the CPU between stages. `tests/chrono-selected-gpu.js` does the same after the
+original activity kernel and explicit positive-flag normalization. Both use the
+existing original grid helpers and neighbour kernels. Hash/gather entry points
+remain explicit MIT data-adapter kernels: the complete upstream `calcHashD`
+entry point's diagnostic `printf` paths and volatile boolean error flag are not
+claimed as supported by this milestone.
+
+All 14 cases match in 1,199,815 hash, original-index, cell-range, count, offset,
+neighbour-ID and sorted-position words. They contain 807,171 neighbour entries
+in total. The initialized dam-break case retains all 30,327 markers and its
+794,643 neighbours; controlled cases retain 180, 114 or zero markers. Controlled
+cases use a consistent 10-by-10-by-10 grid with 0.2 cell widths in their 2-unit
+box, while the initialized case retains captured Chrono parameters.
+
+Only the selected-marker and neighbour counts return to the CPU for allocation:
+eight bytes per case, 112 bytes across all cases. Validation readbacks happen
+after the associated stages and are excluded from that transfer measurement.
+There are no intermediate array uploads or CPU physics. The activity and
+compaction references are also rechecked after the neighbour chain runs.
+
+Reproduce the combined native references with:
+
+```text
+nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-compact-native.cu -o .local/chrono-compact-native.exe
+.local/chrono-compact-native.exe
+```
+
+Remaining before a water showcase: complete the original error/diagnostic paths,
+reorder all needed marker properties (not just positions), and run the pressure,
+force and time-integration stages against the native solver. This chain is
+preprocessing for the solver and does not advance fluid motion.
+
+Validation for the connected chain: 700 unit tests, 232 real NVIDIA GPU tests,
+and compile checks passed.

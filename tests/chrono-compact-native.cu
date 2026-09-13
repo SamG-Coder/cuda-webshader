@@ -10,6 +10,7 @@
 #include "chrono-activity-scan.cuh"
 #include "chrono-compact.cu"
 static void check(cudaError_t e){if(e!=cudaSuccess){fprintf(stderr,"%s\n",cudaGetErrorString(e));exit(1);}}
+#include "chrono-selected-native.cuh"
 template<class T>void write(std::ofstream& f,const std::vector<T>& v){f.write((const char*)v.data(),v.size()*sizeof(T));}
 int main(){
  std::ifstream activity("reports/chrono-activity-native.bin",std::ios::binary),inputs("reports/chrono-activity-input.bin",std::ios::binary);
@@ -33,6 +34,7 @@ int main(){
   thrust::device_vector<float4> pos(positions),selected(total?total:1);if(total){gatherSelected<<<(total+127)/128,128>>>(thrust::raw_pointer_cast(pos.data()),thrust::raw_pointer_cast(list.data()),thrust::raw_pointer_cast(selected.data()),total);check(cudaGetLastError());}check(cudaDeviceSynchronize());
   std::vector<float4> gathered(total);thrust::copy(selected.begin(),selected.begin()+total,gathered.begin());
   int at=0;for(int i=0;i<n;i++)if(flags[i]>0&&compact[at++]!=(uint)i)return 4;
+  selectedNeighbors(mode,pos,list,total);
   const auto offset=(long long)output.tellp();write(output,baseline);write(output,prefix);write(output,compact);write(output,gathered);
   json<<(mode?",\n":"")<<"{\"mode\":"<<mode<<",\"n\":"<<n<<",\"total\":"<<total<<",\"offset\":"<<offset<<",\"baselinePrefixMismatches\":"<<mismatches<<",\"baselineWriteCollisions\":"<<collisions<<",\"baselineTotal\":"<<baseline.back()+(flags.back()>0)<<"}";
  }
