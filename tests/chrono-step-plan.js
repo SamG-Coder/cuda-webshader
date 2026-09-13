@@ -6,15 +6,28 @@ export async function createChronoStep(runtime,params,{cudaSource,kernelFactory,
  const make=(source,entry)=>(kernelFactory??((s,o)=>runtime.kernel(s,o)))(source,{entry,defines:{__CUDA_ARCH__:1},workgroupSize:[128]});
  const scatter=await make(cudaSource??(integration+'\n'+await load('chrono-scatter.cuh')),'CopySortedToOriginalWCSPH_D');
  const euler=await make(integration,'EulerStep_D'),periodic=await make(integration,'ApplyPeriodicBoundaryY_D'),shift=await make(shiftSource,'Calc_Shifting_D<ShiftingMethod::XSPH>'),bc=await make(bcSource,'CfdAdamiBC_D'),rhs=await make(rhsSource,'CfdCalcRHS_D');
- const pool=[];
+ const pool=[],bindings=[];
+ let parameterSnapshot=null,parameterVersion=0;
  const step=async function(original,{buffers:b,neighbors,count:n,diagnosticBuffers:preparationDiagnostics=[]}){
   if(!n)return;
   const originalCount=original.pos.byteLength/16;
-  let cursor=0;
+  const parameterKeys=Object.keys(params);
+  if(!parameterSnapshot||parameterKeys.length!==Object.keys(parameterSnapshot).length||parameterKeys.some(name=>!Object.hasOwn(parameterSnapshot,name)||params[name]!==parameterSnapshot[name])){parameterSnapshot={...params};parameterVersion++;}
+  let cursor=0,bindingCursor=0;
   const clear=runtime.device.createCommandEncoder();for(const buffer of pool)clear.clearBuffer(buffer.gpuBuffer);runtime.device.queue.submit([clear.finish()]);
   const alloc=size=>{const index=cursor++;let buffer=pool[index];if(buffer&&buffer.byteLength!==size){runtime.destroyBuffer(buffer);buffer=null;}if(!buffer)pool[index]=buffer=runtime.createBuffer(size);return buffer;},state=()=>({pos:alloc(n*16),vel:alloc(n*12),rho:alloc(n*16)}),y=state(),tmp=state(),flag=alloc(4),shifting=alloc(n*12),acc=alloc(n*12),tauA=alloc(12),tauB=alloc(12),pc=alloc(12),dtauA=alloc(12),dtauB=alloc(12),deriv=alloc(n*16),surface=alloc(n*4),divergence=alloc(n*4),courant=alloc(n*4),acceleration=alloc(n*4),diags=new Map();
   for(const k of [euler,periodic,shift,bc,rhs,scatter])if(k.artifact.metadata.diagnostics){const d=k.artifact.metadata.diagnostics;diags.set(k,alloc((2+d.capacity*d.strideWords)*4));}
-  const bind=(k,data,extra={})=>{const d=k.artifact.metadata.diagnostics;if(d)data={...data,[d.buffer]:diags.get(k)};return k.bind(Object.fromEntries(k.artifact.metadata.bindings.map(x=>{if(!data[x.name])throw Error('Missing '+x.name);return [x.name,data[x.name]]})),{...params,numActive:n,...extra});};
+  const bind=(k,data,extra={})=>{
+   const d=k.artifact.metadata.diagnostics;if(d)data={...data,[d.buffer]:diags.get(k)};
+   const index=bindingCursor++,extraKeys=Object.keys(extra);let cached=bindings[index];
+   if(!cached||cached.invocation.kernel!==k||cached.parameterVersion!==parameterVersion||extraKeys.length!==Object.keys(cached.extra).length||extraKeys.some(name=>!Object.hasOwn(cached.extra,name))||k.artifact.metadata.bindings.some(x=>cached.invocation.buffers[x.name]!==data[x.name])){
+    const resources=Object.fromEntries(k.artifact.metadata.bindings.map(x=>{if(!data[x.name])throw Error('Missing '+x.name);return [x.name,data[x.name]]}));
+    bindings[index]=cached={invocation:k.bind(resources,{...parameterSnapshot,numActive:n,...extra}),parameterVersion,n,extra:{...extra}};
+   }else if(cached.n!==n||extraKeys.some(name=>cached.extra[name]!==extra[name])){
+    cached.invocation.setScalars({...parameterSnapshot,numActive:n,...extra});cached.n=n;cached.extra={...extra};
+   }
+   return cached.invocation;
+  };
   const shiftBind=(s,div)=>bind(shift,{vel_XSPH_Sorted_D:shifting,sortedPosRad:s.pos,sortedVelMas:s.vel,sortedRhoPreMu:s.rho,numNeighborsPerPart:b.offsets,neighborList:neighbors,sortedPosDivergence:div,error_flag:flag});
   const eulerBind=(s,d,surf,dt)=>bind(euler,{posRadD:s.pos,velMasD:s.vel,rhoPresMuD:s.rho,tauXxYyZzD:tauA,tauXyXzYzD:tauB,pcEvSvD:pc,vel_XSPH_D:shifting,derivVelRhoD:d,derivTauXxYyZzD:dtauA,derivTauXyXzYzD:dtauB,freeSurfaceIdD:surf,activityIdentifierSortedD:b.sortedActivity,error_flag:flag},{dT:dt});
   const periodicBind=s=>bind(periodic,{posRadD:s.pos,rhoPresMuD:s.rho});
@@ -43,6 +56,6 @@ export async function createChronoStep(runtime,params,{cudaSource,kernelFactory,
    const errors=await runtime.read(status,Uint32Array);if(errors.some(Boolean))throw Error('Chrono integration diagnostic: '+JSON.stringify([...errors]));
   }catch(error){step.dispose();throw error;}
  };
- step.dispose=()=>{for(const buffer of pool)runtime.destroyBuffer(buffer);pool.length=0;};
+ step.dispose=()=>{bindings.length=0;for(const buffer of pool)runtime.destroyBuffer(buffer);pool.length=0;};
  return step;
 }

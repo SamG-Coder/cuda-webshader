@@ -14,11 +14,20 @@ export async function createChronoRebuild(runtime,params,n,{cudaSource,kernelFac
  const activity=await make(cudaSource??await(await load('chrono-activity.cu')).text(),{entry:'UpdateActivityD',workgroupSize:[128]});
  const compactSource=cudaSource??await(await load('chrono-compact.cu')).text();
  const normalize=await make(compactSource,{entry:'normalizeActivity',workgroupSize:[128]}),fill=await make(compactSource,{entry:'fillActiveListD',workgroupSize:[128]});
- const pool=[];let cursor=0,leased=false,generation=0,diagnosticBuffers=[];
+ const pool=[],bindings=[];let cursor=0,bindingCursor=0,leased=false,generation=0,diagnosticBuffers=[];
  const alloc=(input,grow=false)=>{const data=ArrayBuffer.isView(input)?input:null,size=data?data.byteLength:input,index=cursor++;let buffer=pool[index];if(buffer&&(grow?buffer.byteLength<size:buffer.byteLength!==size)){runtime.destroyBuffer(buffer);buffer=null;}if(!buffer)pool[index]=buffer=runtime.createBuffer(grow?2**Math.ceil(Math.log2(Math.max(size,4))):size);if(data)runtime.write(buffer,data);return buffer;};
- const bind=(k,data,scalars,options)=>{const d=k.artifact.metadata.diagnostics;if(d&&!data[d.buffer]){const buffer=alloc((2+d.capacity*d.strideWords)*4);diagnosticBuffers.push(buffer);data={...data,[d.buffer]:buffer};}return k.bind(data,scalars,options);};
+ const bind=(k,data,scalars,options)=>{
+  const d=k.artifact.metadata.diagnostics;if(d&&!data[d.buffer]){const buffer=alloc((2+d.capacity*d.strideWords)*4);diagnosticBuffers.push(buffer);data={...data,[d.buffer]:buffer};}
+  const index=bindingCursor++,scalarBuffers=options?.scalarBuffers??{},scalarKeys=Object.keys(scalars),dataKeys=Object.keys(data);let cached=bindings[index];
+  let sameShape=cached&&cached.scalarKeys.length===scalarKeys.length,changedValues=false;
+  if(sameShape)for(let i=0;i<scalarKeys.length;i++){const name=scalarKeys[i];if(name!==cached.scalarKeys[i]){sameShape=false;break;}if(scalars[name]!==cached.invocation.values[name])changedValues=true;}
+  const sameCounters=cached&&Object.keys(cached.scalarBuffers).length===Object.keys(scalarBuffers).length&&Object.keys(scalarBuffers).every(name=>cached.scalarBuffers[name]?.resource===scalarBuffers[name].resource&&(cached.scalarBuffers[name]?.offset??0)===(scalarBuffers[name].offset??0));
+  if(!cached||cached.kernel!==k||!sameShape||!sameCounters||dataKeys.length!==cached.resourceCount||dataKeys.some(name=>cached.invocation.buffers[name]!==data[name]))bindings[index]=cached={kernel:k,scalarBuffers,scalarKeys,resourceCount:dataKeys.length,invocation:k.bind(data,scalars,options)};
+  else if(changedValues)cached.invocation.setScalars(scalars);
+  return cached.invocation;
+ };
  const rebuild=async function(original,time,{previousStatus}={}){
-  if(leased)throw Error('Release the previous neighbour state before rebuilding');leased=true;cursor=0;diagnosticBuffers=[];const ticket=++generation;
+  if(leased)throw Error('Release the previous neighbour state before rebuilding');leased=true;cursor=0;bindingCursor=0;diagnosticBuffers=[];const ticket=++generation;
   const clear=runtime.device.createCommandEncoder();for(const buffer of pool)clear.clearBuffer(buffer.gpuBuffer);runtime.device.queue.submit([clear.finish()]);
   const buffers={posRadD:original.pos,rhoPreMuD:original.rho,velMasD:original.vel,ad_body_D:alloc(104),ad_node1D_D:alloc(104),ad_node2D_D:alloc(104),pos_bodies_D:alloc(12),pos_nodes1D_D:alloc(12),pos_nodes2D_D:alloc(12),activityIdentifierD:alloc(n*4),extendedActivityIdD:alloc(n*4)};
   const bits=new ArrayBuffer(8);new DataView(bits).setFloat64(0,time,true);const words=new Uint32Array(bits);
@@ -39,7 +48,7 @@ export async function createChronoRebuild(runtime,params,n,{cudaSource,kernelFac
    return result;
   }catch(error){rebuild.dispose();throw error;}
  };
- rebuild.dispose=()=>{for(const buffer of pool)runtime.destroyBuffer(buffer);pool.length=0;leased=false;};
+ rebuild.dispose=()=>{bindings.length=0;for(const buffer of pool)runtime.destroyBuffer(buffer);pool.length=0;leased=false;};
  return rebuild;
  async function search(buffers,activeList,n,activeCount,previousStatus){
   // With a GPU count, allocate/dispatch for the original capacity. Unchanged

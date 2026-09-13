@@ -1,6 +1,7 @@
 import {checkCloneWorker} from './clone-worker-gpu.js';
 import {checkGpuScalars} from './gpu-scalars-gpu.js';
 import {checkChronoActiveCount} from './chrono-active-count-gpu.js';
+import {checkChronoBindings} from './chrono-bindings-gpu.js';
 import {checkChronoLoop} from './chrono-loop-gpu.js';
 import {checkChronoRk2} from './chrono-rk2-gpu.js';
 import {checkChronoEos} from './chrono-eos-gpu.js';
@@ -370,6 +371,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Original Chrono XSPH shifting matches native for initialized and nonzero velocities',()=>checkChronoShifting(runtime));
   await run('GPU-produced integer scalars preserve dispatch snapshots',()=>checkGpuScalars(runtime));
   await run('GPU active counts preserve partial and empty Chrono neighbour sets',()=>checkChronoActiveCount(runtime));
+  await run('Chrono cached bindings match fresh bindings after input changes',()=>checkChronoBindings(runtime));
   await run('Chrono pipelined diagnostics preserve state and reject errors',()=>checkChronoLoop(runtime));
   await run('Original Chrono force derivatives and timestep estimates match native',()=>checkChronoRhs(runtime));
   await run('Original Chrono Adami wall pressure matches native CUDA',()=>checkChronoAdami(runtime));

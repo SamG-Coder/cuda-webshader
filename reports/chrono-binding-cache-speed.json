@@ -1,0 +1,38 @@
+{
+  "workload": "Original Chrono CUDA, real NVIDIA Edge",
+  "steps": 3000,
+  "beforeMs": 13084.399999976158,
+  "afterMs": 12590.634999990463,
+  "speedup": 1.0392168464883678,
+  "sameState": true,
+  "sameCounts": true,
+  "beforeHash": "af6f205dea115853700d86c1ce6473abcb6241b62f941ac62fa77058ee78c351",
+  "afterHash": "af6f205dea115853700d86c1ce6473abcb6241b62f941ac62fa77058ee78c351",
+  "beforeBindGroups": 87018,
+  "afterBindGroups": 27029,
+  "previewBefore": {
+    "steps": 2406,
+    "elapsedMs": 10000.95499998331,
+    "stepsPerSecond": 240.57702489452407,
+    "simulatedSecondsPerWallSecond": 0.024057702489452406,
+    "stopped": 2434,
+    "device": "nvidia",
+    "viewport": [
+      1600,
+      1000
+    ]
+  },
+  "previewAfter": {
+    "steps": 2418,
+    "elapsedMs": 10000.774999976158,
+    "stepsPerSecond": 241.7812619527751,
+    "simulatedSecondsPerWallSecond": 0.02417812619527751,
+    "stopped": 2444,
+    "device": "nvidia",
+    "viewport": [
+      1600,
+      1000
+    ]
+  },
+  "note": "Clean comparisons rerun after the user closed a competing GPU tab. Single-run headless measurements; preview includes rendering at 1600x1000. Preview difference is too small to claim a meaningful improvement. CUDA source, compiler and timestep unchanged. The direct-readback experiment was discarded."
+}

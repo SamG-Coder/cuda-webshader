@@ -672,3 +672,12 @@ Partially active and empty marker sets also match the original host path.
 The freshly measured original native Chrono application took 14.24 seconds;
 the web loop is therefore about 3× slower at this workload. It remains slower
 than real time. See [GPU-count measurements and native timing notes](reports/chrono-gpu-count-speed.json).
+
+The host also reuses bindings and packed parameters for unchanged pass inputs,
+invalidating them when resources, parameters or GPU counter bindings change.
+A clean 3,000-step comparison took 13.08 seconds before and 12.59 after (about
+4% faster), with exact state and neighbour-count agreement. Binding creation
+fell from 87,018 to 27,029. Preview throughput was effectively unchanged at
+240.6 versus 241.8 steps/s; that difference is within run-to-run variation.
+These measurements were repeated after closing a competing GPU tab. See
+[binding-cache measurements](reports/chrono-binding-cache-speed.json).
