@@ -183,12 +183,12 @@ export class GpuRuntime {
       staging.unmap();this.stats.readbackBytes+=size;return {data,width,height,slice};
     }finally{staging.destroy();}
   }
-  async sortPairs(keys,values,{count,keyType='u32'}={}) {
+  async sortPairs(keys,values,{count,keyType='u32',waitForCompletion=true}={}) {
     this.assertAlive();if(!['u32','f32'].includes(keyType))throw Error('Pair sort keyType must be u32 or f32.');const source=keyType==='f32'?SORT_FLOAT_SOURCE:SORT_SOURCE;for(const r of [keys,values]){this.checkResource(r);if(!r.gpuBuffer)throw Error('Pair sort requires storage buffers.');}
     if(keys.gpuBuffer===values.gpuBuffer)throw Error('Pair sort key and value buffers must be distinct.');
     if(!Number.isInteger(count)||count<1||count>1048576||count*4>keys.byteLength||count*4>values.byteLength)throw new RangeError('Pair sort count must fit both buffers and be in [1,1048576].');
-    const padded=2**Math.ceil(Math.log2(count)),prepare=await this.kernel(source,{entry:'sortPrepare',workgroupSize:[128,1,1]}),stage=await this.kernel(source,{entry:'sortStage',workgroupSize:[128,1,1]}),finish=await this.kernel(source,{entry:'sortFinish',workgroupSize:[128,1,1]}),pairs=this.createBuffer(padded*8),order=this.createBuffer(padded*4),batch=this.batch({label:'stable '+keyType+' pair sort'});
-    try{const groups=[Math.ceil(padded/128),1,1];batch.dispatch(prepare.bind({keys,values,pairs,order},{count,padded}),groups);for(let size=2;size<=padded;size*=2)for(let stride=size/2;stride>=1;stride/=2)batch.dispatch(stage.bind({pairs,order},{count:padded,size,stride}),groups);batch.dispatch(finish.bind({pairs,keys,values},{count}),[Math.ceil(count/128),1,1]);batch.submit();await this.idle();}
+    const padded=2**Math.ceil(Math.log2(count)),[prepare,stage,finish]=await this.fixedKernels('sort-'+keyType,async()=>{const result=[];for(const entry of ['sortPrepare','sortStage','sortFinish'])result.push(await this.kernel(source,{entry,workgroupSize:[128,1,1]}));return result;}),pairs=this.createBuffer(padded*8),order=this.createBuffer(padded*4),batch=this.batch({label:'stable '+keyType+' pair sort'});
+    try{const groups=[Math.ceil(padded/128),1,1];batch.dispatch(prepare.bind({keys,values,pairs,order},{count,padded}),groups);for(let size=2;size<=padded;size*=2)for(let stride=size/2;stride>=1;stride/=2)batch.dispatch(stage.bind({pairs,order},{count:padded,size,stride}),groups);batch.dispatch(finish.bind({pairs,keys,values},{count}),[Math.ceil(count/128),1,1]);batch.submit();if(waitForCompletion)await this.idle();}
     finally{if(!batch.ended)batch.discard();this.destroyBuffer(pairs);this.destroyBuffer(order);}
   }
   async inverseFFT2D(input,output,{width,height}={}) {return this.complexFFT2D(input,output,{width,height,inverse:true});}
@@ -215,18 +215,24 @@ export class GpuRuntime {
       this.batch().dispatch(finish.bind({input:b,output},{width,height,...(inverse?{stride:realStride}:{})}),[Math.ceil((inverse?width:packed)*height/128),1,1]).submit();await this.idle();
     }finally{this.destroyBuffer(a);this.destroyBuffer(b);}
   }
-  async exclusiveScan(input,output,{count,total}={}) {
+  async exclusiveScan(input,output,{count,total,waitForCompletion=true}={}) {
     this.assertAlive();for(const resource of [input,output,...(total?[total]:[])]){this.checkResource(resource);if(!resource.gpuBuffer)throw Error('Exclusive scan requires storage buffers.');}
     if(!Number.isSafeInteger(count)||count<1||count>1048576||count*4>input.byteLength||count*4>output.byteLength||total&&total.byteLength<4)throw new RangeError('Exclusive scan count must fit the buffers and be in [1,1048576].');
     const buffers=[input,output,...(total?[total]:[])];if(new Set(buffers.map(r=>r.gpuBuffer)).size!==buffers.length)throw Error('Exclusive scan input, output and total must not alias.');
-    const blocks=await this.kernel(SCAN_SOURCE,{entry:'scanBlocks',workgroupSize:[256,1,1]}),add=await this.kernel(SCAN_SOURCE,{entry:'addScanOffsets',workgroupSize:[256,1,1]}),scratch=[],batch=this.batch({label:'exclusive uint scan'});
+    const [blocks,add]=await this.fixedKernels('scan',async()=>{const result=[];for(const entry of ['scanBlocks','addScanOffsets'])result.push(await this.kernel(SCAN_SOURCE,{entry,workgroupSize:[256,1,1]}));return result;}),scratch=[],batch=this.batch({label:'exclusive uint scan'});
     try{
       const record=(source,destination,n)=>{const groups=Math.ceil(n/512),totals=this.createBuffer(groups*4);scratch.push(totals);batch.dispatch(blocks.bind({input:source,output:destination,totals},{count:n}),[groups,1,1]);
         if(groups===1)return totals;const offsets=this.createBuffer(groups*4);scratch.push(offsets);const sum=record(totals,offsets,groups);batch.dispatch(add.bind({output:destination,offsets},{count:n}),[Math.ceil(n/256),1,1]);return sum;};
-      const sum=record(input,output,count);if(total)batch.copy(sum,total,{byteLength:4});batch.submit();await this.idle();
+      const sum=record(input,output,count);if(total)batch.copy(sum,total,{byteLength:4});batch.submit();if(waitForCompletion)await this.idle();
     }finally{if(!batch.ended)batch.discard();for(const r of scratch)this.destroyBuffer(r);}
   }
   createObjectArena(){this.assertAlive();return new ObjectArena(this);}
+  async fixedKernels(key,build){
+    // Cache only the runtime's fixed helpers; arbitrary editor source still compiles normally.
+    this._fixedKernels??=new Map();
+    if(!this._fixedKernels.has(key)){const pending=build();this._fixedKernels.set(key,pending);pending.catch(()=>this._fixedKernels.delete(key));}
+    return this._fixedKernels.get(key);
+  }
   async kernel(sourceOrArtifact,options={}) {
     this.assertAlive();const artifact=typeof sourceOrArtifact==='string'?compile(sourceOrArtifact,options):sourceOrArtifact;
     validateWorkgroup(artifact.metadata,this.device.limits);
@@ -261,7 +267,7 @@ export class GpuRuntime {
   }
   batch(options={}) {this.assertAlive();return new ComputeBatch(this,options);}
   async idle() {this.assertAlive();await this.device.queue.onSubmittedWorkDone();}
-  dispose() {if(this.disposed)return;this.disposed=true;for(const t of this.textures){t.gpuTexture.destroy();t.destroyed=true;}this.textures.clear();for(const b of this.buffers){b.gpuBuffer.destroy();b.destroyed=true;}this.buffers.clear();this.uniformBuffer.destroy();this.pipelineCache.clear();this.batchMemory=[];this.device.removeEventListener('uncapturederror',this.errorListener);if(this.ownsDevice)this.device.destroy();}
+  dispose() {if(this.disposed)return;this.disposed=true;for(const t of this.textures){t.gpuTexture.destroy();t.destroyed=true;}this.textures.clear();for(const b of this.buffers){b.gpuBuffer.destroy();b.destroyed=true;}this.buffers.clear();this.uniformBuffer.destroy();this.pipelineCache.clear();this._fixedKernels?.clear();this.batchMemory=[];this.device.removeEventListener('uncapturederror',this.errorListener);if(this.ownsDevice)this.device.destroy();}
 }
 export class Kernel {
   constructor(runtime,artifact,pipeline,layout,messages,objectLayout=null){this.objectLayout=objectLayout;this.runtime=runtime;this.artifact=artifact;this.pipeline=pipeline;this.layout=layout;this.messages=messages;}

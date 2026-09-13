@@ -617,3 +617,14 @@ trajectories differ from native CUDA, with differences comparable to changing
 native fused-arithmetic settings; this is not a claim of exact long-run agreement
 or experimental fluid-benchmark validation. See
 [the progress and comparison notes](reports/chrono-sph-progress.md).
+
+Runtime scheduling optimizations reduced a 10,000-step headless run on the RTX
+5080 from **283.9 seconds to 108.7 seconds (2.61× faster)**. All particle-state
+values and all neighbour counts matched the previous WebGPU run exactly. The
+runtime now caches its fixed scan/sort kernels and the host queues dependent
+GPU work without unnecessary completion waits. The CUDA source and compiler
+are unchanged. These are single-run timings without rendering, not display FPS;
+one simulated second still takes about 109 seconds. See the
+[timing and correctness report](reports/chrono-runtime-speed.json). Reproduce
+the profiled loop with `node scripts/profile-chrono-loop.mjs 10000 output.json`
+on Windows with Edge and a real NVIDIA adapter.

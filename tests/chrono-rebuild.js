@@ -25,7 +25,7 @@ export async function createChronoRebuild(runtime,params,n,{cudaSource,kernelFac
   const positive=alloc(n*4),prefix=alloc(n*4),activeList=alloc(n*4),total=alloc(4);
   try{
    runtime.batch().dispatch(bind(activity,buffers,{...params,has_ad:false,'time.lo':words[0],'time.hi':words[1],'constant.countersD.numAllMarkers.lo':n,'constant.countersD.numFluidMarkers.lo':16731}),[Math.ceil(n/128)]).dispatch(bind(normalize,{activity:buffers.extendedActivityIdD,positive},{n}),[Math.ceil(n/128)]).submit();
-   await runtime.exclusiveScan(positive,prefix,{count:n,total});
+   await runtime.exclusiveScan(positive,prefix,{count:n,total,waitForCompletion:false});
    runtime.batch().dispatch(bind(fill,{prefixSum:prefix,extendedActivityIdD:buffers.extendedActivityIdD,activeListD:activeList},{numAllMarkers:n}),[Math.ceil(n/128)]).submit();
    const selected=(await runtime.read(total,Uint32Array))[0];
    const result=await search(buffers,activeList,selected);
@@ -43,14 +43,14 @@ export async function createChronoRebuild(runtime,params,n,{cudaSource,kernelFac
 
   try{
    const before={...runtime.stats};
-   dispatch('hashSelected',{positions:buffers.posRadD,activeList,hashes:b.hashes,indices:b.indices});if(n)await runtime.sortPairs(b.hashes,b.indices,{count:n});
+   dispatch('hashSelected',{positions:buffers.posRadD,activeList,hashes:b.hashes,indices:b.indices});if(n)await runtime.sortPairs(b.hashes,b.indices,{count:n,waitForCompletion:false});
    dispatch('OriginalToSortedD',{mapOriginalToSorted:b.map,gridMarkerIndex:b.indices});
    dispatch('reorderDataD',{gridMarkerIndexD:b.indices,sortedPosRadD:b.sortedPosRad,sortedVelMasD:b.sortedVel,sortedRhoPreMuD:b.sortedRho,sortedTauXxYyZzD:b.stress1,sortedTauXyXzYzD:b.stress2,sortedPcEvSvD:b.stress3,activityIdentifierSortedD:b.sortedActivity,posRadD:buffers.posRadD,velMasD:buffers.velMasD,rhoPresMuD:buffers.rhoPreMuD,tauXxYyZzD:b.unused,tauXyXzYzD:b.unused,pcEvSvD:b.unused,activityIdentifierOriginalD:buffers.activityIdentifierD,[diagnostic.buffer]:b.diagnostics});
    dispatch('findCellStartEndD',{cellStartD:b.start,cellEndD:b.end,gridMarkerHashD:b.hashes,gridMarkerIndexD:b.indices});
    const search={sortedPosRad:b.sortedPosRad,sortedRhoPreMu:b.sortedRho,cellStart:b.start,cellEnd:b.end};
-   dispatch('neighborSearchNum',{...search,numNeighborsPerPart:b.counts});await runtime.exclusiveScan(b.counts,b.offsets,{count:n+1,total:b.total});
+   dispatch('neighborSearchNum',{...search,numNeighborsPerPart:b.counts});await runtime.exclusiveScan(b.counts,b.offsets,{count:n+1,total:b.total,waitForCompletion:false});
    const total=(await runtime.read(b.total,Uint32Array))[0];
-   neighbors=alloc(Math.max(total,1)*4);dispatch('neighborSearchID',{...search,numNeighborsPerPart:b.offsets,neighborList:neighbors});await runtime.idle();
+   neighbors=alloc(Math.max(total,1)*4);dispatch('neighborSearchID',{...search,numNeighborsPerPart:b.offsets,neighborList:neighbors});
    const readback=runtime.stats.readbackBytes-before.readbackBytes;if(readback!==4||runtime.stats.dataBytesUploaded!==before.dataBytesUploaded)throw Error('Unexpected CPU transfer in selected neighbour stages');
    return {buffers:b,neighbors,count:n,neighborEntries:total,diagnosticBuffers:[...diagnosticBuffers,b.diagnostics],dispose(){leased=false;}};
 

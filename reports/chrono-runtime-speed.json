@@ -1,0 +1,37 @@
+{
+  "workload": "Chrono headless WebGPU loop, original CUDA kernels, no rendering",
+  "steps": 1000,
+  "simulatedSeconds": 0.1,
+  "beforeMs": 28422.15499997139,
+  "afterMs": 11224.975000023842,
+  "speedup": 2.5320461738142868,
+  "sameParticleState": true,
+  "sameNeighborCounts": true,
+  "stateSha256Before": "8a307b51e5402cf70ac8455e2c76cec7897653e2e1be4abc5f820f23fe9db839",
+  "stateSha256After": "8a307b51e5402cf70ac8455e2c76cec7897653e2e1be4abc5f820f23fe9db839",
+  "profile": {
+    "kernelCalls": 5,
+    "kernelMs": 41.0450000166893,
+    "sortMs": 520.8899989128113,
+    "scanMs": 104.69499826431274,
+    "rebuildMs": 7395.269999444485,
+    "stepMs": 3810.0450003147125
+  },
+  "note": "Single-run elapsed timings; kernel/sort/scan profiler intervals overlap and are not additive.",
+  "longRun": {
+    "steps": 10000,
+    "beforeMs": 283865.1749999523,
+    "afterMs": 108685.42500001192,
+    "speedup": 2.611805354765105,
+    "sameState": true,
+    "sameNeighbors": true
+  },
+  "gpuTimestampDiagnostic": {
+    "steps": 100,
+    "elapsedMs": 1292.5800000429153,
+    "computePassMs": 134.41433599999982,
+    "sameState": true,
+    "sameNeighborCounts": true,
+    "note": "Separate instrumented 100-step run. Compute timestamps exclude copies, uploads, CPU work, queue gaps and readback waits; multi-dispatch passes are grouped under their first kernel name."
+  }
+}
