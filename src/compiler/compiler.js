@@ -140,7 +140,7 @@ class Emitter {
     const globalUsage=analyse(ast.functions.map(f=>({...f,params:f.params.map(p=>({...p,pointer:false}))})),this.deviceParams);for(const kind of ['reads','writes'])for(const name of globalUsage[kind])this.usage[kind].add(name);for(const name of globalUsage.atomicBindings)this.usage.atomic.add(name);
     for(const kind of ['reads','writes','atomic'])for(const name of bufferUsage?.[kind]||[])this.usage[kind].add(name);
     for(const kind of ['reads','writes','atomic'])for(const [alias,target]of Object.entries(this.bufferAliases))if(this.usage[kind].has(alias))this.usage[kind].add(target);
-    for(const p of kernel.params)if(p.pointer&&p.type==='cw_uchar'&&this.usage.writes.has(p.name))this.usage.atomic.add(p.name);
+    for(const p of kernel.params)if(p.pointer&&(['cw_uchar','bool'].includes(p.type)&&this.usage.writes.has(p.name)||p.volatileParameter))this.usage.atomic.add(p.name);
     this.usage.storageBarrier=[...this.usage.writes].some(n=>this.usage.reads.has(n));
     this.initialBufferUsage=Object.fromEntries(['reads','writes','atomic'].map(k=>[k,new Set(this.usage[k])]));
     this.workgroupSize = [...(options.workgroupSize || [128, 1, 1])];
@@ -349,7 +349,7 @@ class Emitter {
           const pre=[...base.pre,...index.pre,...capturePre,`let ${indexName} = u32(${indexCode}) * ${layout.size}u;`,`var ${codeName}: ${type} = ${decodeNativeRecord(layout,base.code,indexName)};`];
           return this.result(n,type,codeName,pre,{rootSymbol:{name:codeName,type,code:codeName,constant:true,kind:'local'}});
         }
-        if(type==='cw_uchar'&&base.rootSymbol?.rootBufferName){const temp='cw_byte_index_'+this.temp++,word=`${base.code}[${temp} >> 2u]`,shift=`((${temp} & 3u) * 8u)`,read=base.atomicRoot?`atomicLoad(&${word})`:word;return this.result(n,type,`((${read} >> ${shift}) & 255u)`,[...base.pre,...index.pre,...capturePre,`let ${temp} = u32(${indexCode});`],{rootSymbol:base.rootSymbol,...(raw&&base.atomicRoot?{packedBase:word,packedShiftCode:shift,packedAtomic:true}:{})});}
+        if(['cw_uchar','bool'].includes(type)&&base.rootSymbol?.rootBufferName){const temp='cw_byte_index_'+this.temp++,word=`${base.code}[${temp} >> 2u]`,shift=`((${temp} & 3u) * 8u)`,read=base.atomicRoot?`atomicLoad(&${word})`:word;return this.result(n,type,type==='bool'?`(((${read} >> ${shift}) & 255u) != 0u)`:`((${read} >> ${shift}) & 255u)`,[...base.pre,...index.pre,...capturePre,`let ${temp} = u32(${indexCode});`],{rootSymbol:base.rootSymbol,...(raw&&base.atomicRoot?{packedBase:word,packedShiftCode:shift,packedAtomic:true}:{})});}
         const atomic = base.atomicRoot && !isArray(type);
         const addressPre=[];if(atomic&&raw&&type==='cw_uchar4'){const temp='cw_pixel_index_'+this.temp++;addressPre.push(`let ${temp} = ${indexCode};`);code=`${base.code}[${temp}]`;}
         return this.result(n, type, atomic && !raw ? (base.rootSymbol?.volatileShared&&type==='f32'?`bitcast<f32>(atomicLoad(&${code}))`:`atomicLoad(&${code})`) : code, [...base.pre, ...index.pre,...capturePre,...addressPre], {rootSymbol: base.rootSymbol, atomicRoot: base.atomicRoot, atomic,...((this.structs.has(type)||['f32','i32','u32'].includes(type)&&!atomic)&&['buffer','buffer-alias'].includes(base.rootSymbol?.kind)?{storageReferenceRoot:base.code,storageReferenceIndexCode:indexCode}:{}),...(base.rootSymbol?.kind==='shared'&&n.base.kind==='id'&&!isArray(type)?{sharedReferenceIndexCode:indexCode}:{})});
@@ -870,7 +870,7 @@ class Emitter {
         n.operandType = type;
       }
       n.type = target.type;
-      if(target.packedAtomic){this.packedAtomicUsed=true;return [...packedPre,`cw_store_byte(&${target.packedBase}, ${target.packedShiftCode??target.packedShift+'u'}, u32(${code}));`];}
+      if(target.packedAtomic){this.packedAtomicUsed=true;return [...packedPre,`cw_store_byte(&${target.packedBase}, ${target.packedShiftCode??target.packedShift+'u'}, ${target.type==='bool'?`select(0u, 1u, ${code})`:`u32(${code})`});`];}
       if(target.packedBase)return [...target.pre,...value.pre,`${target.packedBase} = (${target.packedBase} & ${(~(255<<target.packedShift))>>>0}u) | ((u32(${code}) & 255u) << ${target.packedShift}u);`];
       if(target.bufferReferenceTargets)return [...target.pre,...value.pre,...target.bufferReferenceTargets.map(t=>`if(${t.guard}) { ${t.code} = ${code}; }`)];
       if(target.devicePointerGuard)return [...target.pre,...value.pre,`if(${target.devicePointerGuard}) { ${target.code} = ${code}; }`];
@@ -1098,15 +1098,15 @@ class Emitter {
           }else{const layout=this.storageLayout(p.type);p.storageStride=Math.ceil(layout.size/layout.align)*layout.align;}
         }
         if(p.type==='cw_uchar2')this.fail('Use byte storage with uchar2 pointer views; direct uchar2 buffer parameters are unsupported.',p);
-        if (p.type === 'bool' || vectorLength(p.type)===3) this.fail('bool* and three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
-        const canonical=Object.hasOwn(this.bufferAliases,p.name)?this.bufferAliases[p.name]:p.name,atomic=this.usage.atomic.has(canonical),readOnly=!this.usage.writes.has(canonical);
+        if (vectorLength(p.type)===3) this.fail('Three-component vector pointers have incompatible CUDA/WGSL layouts. Use 32-bit scalars or two/four-component vectors.', p);
+        const canonical=Object.hasOwn(this.bufferAliases,p.name)?this.bufferAliases[p.name]:p.name,atomic=this.usage.atomic.has(canonical),readOnly=!this.usage.writes.has(canonical)&&!atomic;
         if (p.constant && this.usage.writes.has(p.name)) this.fail(`Cannot write through const buffer '${p.name}'.`, p);
-        if (atomic && !['i32', 'u32','cw_uchar4','cw_uchar'].includes(p.type)) this.fail('Only 32-bit integer atomics are supported.', p);
+        if (atomic && !['i32', 'u32','cw_uchar4','cw_uchar','bool'].includes(p.type)) this.fail('Only 32-bit integer atomics are supported.', p);
         const binding = bindings.length;
-        if(canonical===p.name)bindings.push({name: p.name, elementType: p.type, stride: p.storageStride||(p.type==='cw_uchar'?1:typeStride(p.type)), binding, readOnly, atomic,...(p.nativeLayout?{storageType:'u32',nativeLayout:p.nativeLayout}:{}),...(p.origin?{origin:p.origin,count:p.count,minBindingSize:p.count*(p.storageStride||typeStride(p.type)),...(p.fields?{fields:p.fields,storageType:'u32'}:{})}:{})});
+        if(canonical===p.name)bindings.push({name: p.name, elementType: p.type, stride: p.storageStride||(['cw_uchar','bool'].includes(p.type)?1:typeStride(p.type)), binding, readOnly, atomic,...(p.type==='bool'?{storageType:'u32',packedBoolean:true,volatile:!!p.volatileParameter}:{}),...(p.nativeLayout?{storageType:'u32',nativeLayout:p.nativeLayout}:{}),...(p.origin?{origin:p.origin,count:p.count,minBindingSize:p.count*(p.storageStride||typeStride(p.type)),...(p.fields?{fields:p.fields,storageType:'u32'}:{})}:{})});
         const symbol = {name: p.name, rootBufferName:canonical, type: arrayOf(p.type), code: `b_${canonical}`, constant: p.constant, atomic, kind: 'buffer',...(p.nativeLayout?{nativeLayout:p.nativeLayout}:{}),...(p.origin?{deviceGlobal:true}:{}),...(!p.origin&&(shiftedPointers(this.kernel).has(p.name)||this.launchConsumer?.buffers.some(b=>b.name===p.name))?{offsetCode:'cw_pointer_'+p.name}:{})};
         if(p.origin)this.globalSymbols.set(p.name,symbol);else this.add(p.name, symbol, p, true); p.symbol = symbol;if(p.origin)(p.origin==='constant-struct-storage'?this.ast.constantGlobals:this.ast.deviceGlobals).find(g=>g.name===p.name).symbol=symbol;this.bufferSymbols.set(p.name,symbol);
-        if(canonical===p.name)header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type}>` : p.type==='cw_uchar'||p.nativeLayout?'u32':p.type}>;`);
+        if(canonical===p.name)header.push(`@group(0) @binding(${binding}) var<storage, ${readOnly ? 'read' : 'read_write'}> b_${p.name}: array<${atomic ? `atomic<${p.type==='bool'?'u32':p.type}>` : ['cw_uchar','bool'].includes(p.type)||p.nativeLayout?'u32':p.type}>;`);
       } else {
         if ((!numeric(p.type)&&!['bool','cw_uchar4'].includes(p.type))||p.type==='cw_uchar') this.fail('Scalar kernel parameters must be float, int, unsigned int, bool or packed uchar4. Put other vectors in buffers.', p);
         let defaultMetadata={};if(p.defaultValue!==undefined){let value=p.defaultValue.kind==='id'?Number(p.defaultValue.name==='true'):constantValue(p.defaultValue);if(!Number.isFinite(value)||p.type==='i32'&&(Math.trunc(value)<-2147483648||Math.trunc(value)>2147483647)||p.type==='u32'&&(Math.trunc(value)<0||Math.trunc(value)>4294967295))this.fail('Kernel default is outside its supported scalar range.',p);value=p.type==='f32'?Math.fround(value):p.type==='bool'?Number(!!value):p.type==='u32'?value>>>0:value|0;if(!Number.isFinite(value))this.fail('Kernel default overflows its scalar type.',p);defaultMetadata={defaultValue:value};}

@@ -122,6 +122,7 @@ export class Parser {
   deferredType(name){return this.deferUnsupportedTypes&&/^double[234]?$/.test(name);}
   startsType() { return this.peek().value==='volatile'||this.typeAliases.has(this.peek().value)||this.structs.has(this.peek().value)||TYPES.has(this.peek().value) || this.deferredType(this.peek().value) || this.peek().value==='typename' || this.typeTraits.has(this.peek().value) || this.templateTypeNames?.has(this.peek().value) || QUALIFIERS.has(this.peek().value); }
   type({recordField=false,parameter=false}={}) {
+    const volatileParameter=parameter&&this.match('volatile');
     let constant = false, shared = false,external=false;
     while (QUALIFIERS.has(this.peek().value)) { const q = this.take().value; constant ||= q === 'const'; shared ||= q === '__shared__';external ||= q==='extern'; }
     const tok = this.take(); let type;
@@ -142,7 +143,8 @@ export class Parser {
     while (['__restrict__', '__restrict', 'restrict'].includes(this.peek().value)) this.take();
     if(pointer&&(this.structs.get(tok.value)?.valueClass||this.structs.get(tok.value)?.forward)){type='cw_objectptr_'+tok.value;pointer=!!this.match('*');(this.objectPointerTypes??=new Set()).add(type);}
     if(this.is('*'))this.fail('Only class pointer arrays support a second pointer level.');
-    return {type, constant, shared, pointer,reference,external};
+    if(volatileParameter&&(type!=='bool'||!pointer||reference||shared||external))this.fail('Volatile kernel parameters currently require bool pointers.',tok);
+    return {type, constant, shared, pointer,reference,external,...(volatileParameter?{volatileParameter:true}:{})};
   }
   zipFunctorAhead(){
     if(!this.is('struct')||this.peek(2).value!=='{')return false;

@@ -19,7 +19,7 @@ for(const values of [{n:-1},{n:1.5},{n:4294967296},{n:NaN},{n:Infinity},{n:'12'}
 const bad=[
  ['double pointer','__global__ void k(double* x){}',/Unsupported type/],
  ['float3 ABI','__global__ void k(float3* x){}',/incompatible/],
- ['bool ABI','__global__ void k(bool* x){}',/incompatible/],
+ ['volatile scalar ABI','__global__ void k(volatile bool x){}',/Volatile kernel/],
  ['double storage',wrap('double x=0.5;output[0]=x;'),/Expected|unsupported/],
  ['float atomics',wrap('atomicAdd(&output[0],1.0f);'),/integer atomics/],
  ['dynamic shared',wrap('extern __shared__ float a[];'),/sharedMemoryBytes/],

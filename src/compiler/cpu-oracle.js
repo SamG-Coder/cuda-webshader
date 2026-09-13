@@ -21,7 +21,7 @@ function zero(type,structs=[]){const spec=structs.find(s=>s.type===type);if(spec
 class BufferView {
   constructor(data,type,offset=0){this.data=data;this.type=type;this.offset=offset;this.records=Array.isArray(data);this.width=this.records?1:vectorLength(type)||1;this.length=data.length/this.width;if(!Number.isInteger(this.length))throw new Error('Buffer record count is not integral.');}
   check(i){if(!Number.isInteger(i)||i+this.offset<0||i+this.offset>=this.length)throw new RangeError(`CPU oracle detected out-of-bounds access at ${i}, offset ${this.offset}, length ${this.length}.`);}
-  get(i){this.check(i);i+=this.offset;return this.records?structuredClone(this.data[i]):this.width===1?this.data[i]:Array.from(this.data.subarray(i*this.width,(i+1)*this.width));}
+  get(i){this.check(i);i+=this.offset;return this.records?structuredClone(this.data[i]):this.width===1?(this.type==='bool'?!!this.data[i]:this.data[i]):Array.from(this.data.subarray(i*this.width,(i+1)*this.width));}
   set(i,v){this.check(i);i+=this.offset;if(this.width===1)this.data[i]=convert(v,this.type);else this.data.set(convert(v,this.type),i*this.width);}
 }
 function binary(op,a,b,type){
@@ -198,7 +198,7 @@ export function executeCPU(artifact,buffers,scalars,workgroups,{instructionBudge
     if(p.type==='cw_f64'){const bits=new DataView(new ArrayBuffer(8));for(const [i,word] of ['lo','hi'].entries()){const v=scalars[p.name+'.'+word];if(!Number.isInteger(v)||v<0||v>0xffffffff)throw Error('Double parameter words must fit u32.');bits.setUint32(i*4,v,true);}baseEnv.set(p.symbol,{value:bits.getFloat64(0,true)});continue;}
     if(p.type==='cw_size64'){const v=scalars[p.name];if(!Number.isInteger(v)||v<0||v>0xffffffff)throw Error('size_t launch value must fit u32.');baseEnv.set(p.symbol,{value:BigInt(v)});continue;}
     if(p.type==='cw_extent'){const value={};for(const field of ['width','height','depth']){const v=scalars[p.name+'.'+field];if(!Number.isInteger(v)||v<0||v>0xffffffff)throw Error('Invalid cudaExtent component '+field);value[field]=BigInt(v);}baseEnv.set(p.symbol,{value});continue;}
-    if(p.pointer){if(['device-global','constant-global'].includes(p.kind)&&buffers[p.name]?.byteLength<artifact.metadata.bindings.find(b=>b.name===p.name).minBindingSize)throw Error('Device global buffer too small.');if(p.type==='cw_uchar'&&!(buffers[p.name] instanceof Uint8Array))throw Error('Byte CPU buffers require Uint8Array.');if(!ArrayBuffer.isView(buffers[p.name]))throw new Error(`Missing CPU buffer ${p.name}.`);const binding=artifact.metadata.bindings.find(b=>b.name===p.name);let data=buffers[p.name];if(binding?.nativeLayout){
+    if(p.pointer){if(['device-global','constant-global'].includes(p.kind)&&buffers[p.name]?.byteLength<artifact.metadata.bindings.find(b=>b.name===p.name).minBindingSize)throw Error('Device global buffer too small.');if(['cw_uchar','bool'].includes(p.type)&&!(buffers[p.name] instanceof Uint8Array))throw Error('Byte CPU buffers require Uint8Array.');if(!ArrayBuffer.isView(buffers[p.name]))throw new Error(`Missing CPU buffer ${p.name}.`);const binding=artifact.metadata.bindings.find(b=>b.name===p.name);let data=buffers[p.name];if(binding?.nativeLayout){
       const view=new DataView(data.buffer,data.byteOffset,data.byteLength);
       if(data.byteLength%binding.stride)throw Error('Native record buffer has incomplete records.');
       const read=(layout,offset)=>{

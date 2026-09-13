@@ -465,3 +465,17 @@ case scopes, returns, nested loops/switches and outer-loop continue.
 The original boundary fixture now parses past those helpers and stops at its
 `volatile bool* error_flag` parameter. This identifies the next ABI/parser gap;
 the boundary calculation has not yet executed through WebGPU.
+
+## Packed boolean error flags
+
+The compiler now accepts original `volatile bool*` kernel parameters and preserves
+CUDA's one-byte bool storage stride. Boolean stores normalize to 0/1 and atomically
+update only their byte, preserving adjacent marker flags and allocation padding.
+Volatile bool reads use atomic loads. The native/GPU fixture covers 1,025 lanes,
+eight repeated dispatches, indexed reads/writes, a dereferenced single error flag,
+and untouched guard bytes. The CPU oracle requires Uint8Array for these buffers.
+
+The unchanged Adami boundary signature now compiles past the error flag. Including
+its original Real3 math dependencies exposes the next frontend gap: the free
+compound-assignment overload `operator+=(Real3&, Real3)`. Boundary physics and
+simulation time advancement remain unverified and unavailable as a showcase.

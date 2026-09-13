@@ -585,3 +585,8 @@ labels, default cases, fall-through, and nested loop/switch control. Case-local
 declarations must be enclosed in braces; at most 64 labels are accepted. Generated
 WGSL repeats reachable case suffixes because WGSL does not implicitly fall through
 ([WGSL switch specification](https://www.w3.org/TR/WGSL/#switch-statement)).
+
+CUDA `bool*` buffers use packed one-byte elements in 32-bit WebGPU storage words.
+Writes preserve neighbouring bytes with atomic compare/exchange; volatile bool
+kernel pointers use atomic loads as well. Upload boolean data as `Uint8Array`
+with 0/1 values. This does not provide a grid-wide synchronization primitive.
