@@ -2,7 +2,7 @@
 
 This is an in-progress compiler port, not a runnable water showcase.
 The GPU chain now connects activity selection, normalized compaction, original
-marker IDs, grid sorting, cell ranges and neighbour lists. Pressure, forces and
+marker IDs, grid sorting, original property reordering, cell ranges and neighbour lists. Pressure, forces and
 time integration are still pending.
 
 Upstream: https://github.com/projectchrono/chrono at
@@ -419,3 +419,36 @@ node scripts/prepare-chrono-reorder-messages.mjs
 
 Validation: 703 unit tests and 233 real NVIDIA GPU tests passed, including
 21,756 native-exact property words and the native diagnostic messages.
+
+## Connected native marker properties
+
+The dam-break case now starts from `GetProperties()` and `GetVelocities()` captured
+immediately after the unchanged native demo initialization. The earlier activity
+fixture used placeholder density/pressure/viscosity (1000/0/0.001), which sufficed
+for marker-type selection but was unsuitable as fluid-solver input. The actual
+capture has density 1000–1003.822021484375, pressure 0–38220, and viscosity 5.
+`prepare-chrono-property-reference.mjs` checks capture size, finite values,
+parameter equality and exact position equality before preparing the fixtures.
+The public properties API supplies three components; the host fixture restores
+only the fourth marker-type component from this demo's initialized ordering:
+16,731 fluid markers (-1), then 13,596 fixed boundary markers (0).
+
+The connected GPU chain now runs the unchanged `OriginalToSortedD` and
+`reorderDataD`, consuming live activity-stage velocity, property and activity
+buffers. Neighbour kernels receive the resulting sorted property buffer. Native
+CUDA consumes its corresponding activity reference outputs. Both preserve the
+original global marker IDs and leave inactive inverse-map entries at UINT_MAX.
+The native-only `chrono-selected-reorder.cuh` retains the original functions;
+the browser uses the already tested original reorder and neighbour source files.
+
+Across 14 cases, all 1,487,332 output words agree exactly with native CUDA,
+including sorted positions, velocities, properties, activity and the inverse map.
+The 807,171 neighbour entries are unchanged. Intermediate allocation readback
+remains eight bytes per case (112 total), with no intermediate array uploads or
+CPU physics. Original reorder diagnostics are empty for these finite inputs.
+This connected fixture asserts CFD; separate tests cover CRM stress reordering.
+
+The next native solver operation for this captured configuration is Adami boundary
+conditions, then CFD derivatives and particle shifting (enabled in this demo).
+Pressure/force evaluation and RK2 time integration are not yet connected, and
+this remains an in-progress port rather than a runnable water showcase.

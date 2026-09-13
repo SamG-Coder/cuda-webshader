@@ -350,6 +350,10 @@ std::vector<Real4> markers(allPositions.size());
 if(cudaMemcpy(markers.data(),view.pos_rad,markers.size()*sizeof(Real4),cudaMemcpyDeviceToHost)!=cudaSuccess)return 1;
 std::ofstream markerFile(".local/chrono-marker-posrad.bin",std::ios::binary);markerFile.write((const char*)markers.data(),markers.size()*sizeof(Real4));markerFile.close();
 std::ofstream markerInfo(".local/chrono-marker-info.json");markerInfo << "{\"markers\":" << markers.size() << ",\"fluid\":" << view.num_fluid_markers << "}";markerInfo.close();
+const auto properties=sysSPH.GetProperties();const auto velocities=sysSPH.GetVelocities();
+if(properties.size()!=markers.size()||velocities.size()!=markers.size())return 2;
+std::ofstream propertyFile(".local/chrono-marker-properties.bin",std::ios::binary);propertyFile.write((const char*)properties.data(),properties.size()*sizeof(Real3));propertyFile.close();
+std::ofstream velocityFile(".local/chrono-marker-velocities.bin",std::ios::binary);velocityFile.write((const char*)velocities.data(),velocities.size()*sizeof(Real3));velocityFile.close();
 std::cout << "Captured " << markers.size() << " markers, including " << view.num_fluid_markers << " fluid markers\n";
 return 0;
 }

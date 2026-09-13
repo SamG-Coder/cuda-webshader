@@ -22,7 +22,7 @@ int main(){
  for(int mode=0;mode<14;mode++){
   const int n=mode==0?30327:198;ChFsiParamsSPH p=actual;Counters counts{};counts.numAllMarkers=n;counts.numFluidMarkers=mode==0?16731:99;
   std::vector<Real4> positions(n),rho(n);std::vector<Real3> velocities(n);
-  if(mode==0){std::ifstream f("reports/chrono-search-input.bin",std::ios::binary);f.read((char*)positions.data(),n*sizeof(Real4));if(!f)return 3;for(int i=0;i<n;i++)rho[i]={1000,0,.001f,i<16731?-1.f:0.f};}
+  if(mode==0){std::ifstream f("reports/chrono-search-input.bin",std::ios::binary);f.read((char*)positions.data(),n*sizeof(Real4));if(!f)return 3;std::ifstream r("reports/chrono-marker-rhopremu.bin",std::ios::binary),v("reports/chrono-marker-velocities.bin",std::ios::binary);r.read((char*)rho.data(),n*sizeof(Real4));v.read((char*)velocities.data(),n*sizeof(Real3));if(!r||!v)return 3;}
   else{p.worldOrigin={-1,-1,-1};p.boxDims={2,2,2};p.free_flow_duration=.5f;p.x_periodic=p.y_periodic=p.z_periodic=false;
    for(int i=0;i<n;i++){const int axis=(i/11)%3,kind=i/33;Real3 xyz{0,0,0};if(axis==0)xyz.x=coords[i%11];if(axis==1)xyz.y=coords[i%11];if(axis==2)xyz.z=coords[i%11];positions[i]={xyz.x,xyz.y,xyz.z,.1f};rho[i]={1000,0,.001f,float(kind-3)};velocities[i]={float(i+1),float(-i-1),.25f};}
   }
