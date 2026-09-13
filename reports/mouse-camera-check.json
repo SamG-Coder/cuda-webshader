@@ -1,0 +1,14 @@
+{
+  "pass": true,
+  "width": 1200,
+  "height": 800,
+  "samplesPerPixel": 10,
+  "resetInToolbarMatchesClear": true,
+  "defaultUnchecked": true,
+  "originalCudaBodiesUnchanged": true,
+  "dragChangesGpuOutput": true,
+  "wheelChangesGpuOutput": true,
+  "disabledDragIgnored": true,
+  "resetBitExact": true,
+  "softwareAdapterRequested": false
+}
