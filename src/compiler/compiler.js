@@ -1,3 +1,4 @@
+import {lowerPrintf} from './diagnostics.js';
 import {containsNativeBool,nativeRecordLayout,decodeNativeRecord} from './native-records.js';
 import {lowerNativeTiles,emitNativeTile} from './native-tiles.js';
 import {lowerReturnPhases} from './return-phases.js';
@@ -717,6 +718,8 @@ class Emitter {
     const casts = {uchar:'cw_uchar',float: 'f32', int: 'i32', uint: 'u32', bool: 'bool'};
     if(name==='float'&&n.args.length===1){const value=this.expr({kind:'cast',target:'f32',value:n.args[0],token:n.token});return this.result(n,'f32',value.code,value.pre);}
     const args = n.args.map(a => this.argument(a)), pre = args.flatMap(a => a.pre);
+    if(n.printfIntegerArguments&&args.some(a=>!['i32','u32','cw_short','cw_ushort','cw_uchar','bool'].includes(a.type)))this.fail('Diagnostic integer formats require integer arguments.',n);
+    if(name==='isfinite'){if(args.length!==1||args[0].type!=='f32')this.fail('isfinite currently supports one float argument.',n);return this.result(n,'bool',`((bitcast<u32>(${args[0].code}) & 2139095040u) != 2139095040u)`,pre);}
     if(name==='__mul24'||name==='__umul24'){
       if(args.length!==2||args.some(a=>!['i32','u32'].includes(a.type)))this.fail(`${name} requires two 32-bit integer arguments.`,n);
       const signed=name==='__mul24',type=signed?'i32':'u32';
@@ -1298,7 +1301,7 @@ function instantiateHelperTemplates(ast, kernel) {
   }};
 }
 export function compile(source, options = {},bufferUsage=null) {
-  const ast = parse(source, options), kernels = ast.functions.filter(f => f.qualifier === '__global__');
+  const ast = parse(source, options);lowerPrintf(ast,options);const kernels = ast.functions.filter(f => f.qualifier === '__global__');
   if(options.valueBuffers!==undefined){
     if(!Array.isArray(options.valueBuffers)||new Set(options.valueBuffers).size!==options.valueBuffers.length)throw new CompileError('valueBuffers requires unique kernel parameter names.');
     for(const name of options.valueBuffers){const params=kernels.flatMap(f=>f.params.filter(p=>p.name===name));if(!params.length)throw new CompileError('Unknown value buffer '+name);for(const p of params){const record=ast.structs.find(r=>'cw_objectptr_'+r.name===p.type);if(p.pointer||!record?.valueClass)throw new CompileError('Value buffers require a concrete class pointer parameter.',p.token,source);p.type=record.type;p.pointer=true;}}
@@ -1345,6 +1348,7 @@ export function compile(source, options = {},bufferUsage=null) {
   const overloadGroups=new Map();for(const f of ast.functions)if(f.specializationArgument===undefined){const group=overloadGroups.get(f.name)||[];group.push(f);overloadGroups.set(f.name,group);}let overloadIndex=0;const occupied=new Set(ast.functions.map(f=>f.name));for(const [name,group]of overloadGroups)if(group.length>1){if(group.some(f=>f.qualifier!=='__device__'||f.templateParameter))throw new CompileError('Overloads support non-template device helpers only.',group[0].token,source);const signatures=new Set();for(const f of group){const signature=JSON.stringify(f.params.map(p=>[p.type,p.pointer,p.reference,(p.pointer||p.reference)&&p.constant]));if(signatures.has(signature))throw new CompileError('Duplicate function signature '+name,f.token,source);signatures.add(signature);let unique='cw_overload_'+overloadIndex+++'_'+name;while(occupied.has(unique))unique+='_';occupied.add(unique);f.overloadName=name;f.name=unique;}}
   const templates=instantiateHelperTemplates(ast,kernel);
   const emitter=new Emitter(ast,kernel,options,templates,bufferUsage),result=emitter.emit();if(options.libraries?.length)result.metadata.libraries=options.libraries.map(name=>({name,seedBits:64,subsequence:0,offset:0,stateLayout:'compiler-owned',operations:['curand_init','curand','curand_uniform']}));
+  if(ast.diagnostics)result.metadata.diagnostics=ast.diagnostics;
   emitter.checkRecursion(); // Class calls have now resolved to concrete helpers.
   if(tiledGroups)result.metadata.tiledGroups='predicated-first-tile';
   if(returnPhases)result.metadata.predicatedReturns=true;

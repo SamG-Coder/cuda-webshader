@@ -568,3 +568,14 @@ initial conditions and rendering. See [validation and support boundaries](report
 ### NVIDIA custom and fused FFT convolution
 
 [Custom FFT convolution](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fft-custom) and [fused FFT convolution](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fft-fused) run the other two original convolutionFFT2D paths at 2000 × 2000. Both use 1024 × 2048 complex transforms, unchanged NVIDIA device kernels and GPU-only texture transfers. Full results match native CUDA at approximately 2.02e-7 relative L2 error. [Pipeline details and validation](showcases/fft-convolution-custom/README.md).
+
+
+GPU diagnostic capture supports standalone `printf` calls with literal `%u`, `%d`
+and `%%` formats and at most eight integer arguments. Compile with
+`diagnosticCapacity` (default 64), allocate the buffer named in
+`artifact.metadata.diagnostics.buffer` using its binding's `minBindingSize`, and
+clear it before each run. After GPU completion, pass its `Uint32Array` readback
+to `decodeDiagnostics` from `src/compiler/diagnostics.js` to obtain messages and
+attempted/dropped counts. This is bounded diagnostic capture, not host stdout;
+float/string formatting and printf return values are unsupported. Float
+`isfinite` is supported, including infinity and NaN classification.

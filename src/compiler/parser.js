@@ -77,7 +77,7 @@ export function tokenize(source, defines = {}) {
       if (!macros.has(m[1])){macros.set(m[1], m[2]);numericMacroSnapshot=null;} advance(directive); continue;
     }
     if(!enabled){advance(rest.split('\n')[0]);continue;}
-    if(rest[0]==='"') {const literal=rest.match(/^"[^"\n\r\\]*"/);if(!literal)throw new CompileError('Unsupported or unterminated string literal.',token,source);tokens.push({...token,kind:'string',value:literal[0]});advance(literal[0]);continue;}
+    if(rest[0]==='"') {const literal=rest.match(/^"(?:[^"\n\r\\]|\\[nrt"\\])*"/);if(!literal)throw new CompileError('Unsupported or unterminated string literal.',token,source);tokens.push({...token,kind:'string',value:literal[0]});advance(literal[0]);continue;}
     const number = rest.match(NUM);
     if (number) { tokens.push({...token, kind: 'number', value: number[0].replace(/(?:[uU][lL]|[lL][uU])$/,'u')}); advance(number[0]); continue; }
     const word = rest.match(WORD);
@@ -423,6 +423,7 @@ export class Parser {
     if (this.is('(') && this.peek(2).value!=='(' && (this.structs.has(this.peek(1).value)||this.typeAliases.has(this.peek(1).value)||TYPES.has(this.peek(1).value) || this.deferredType(this.peek(1).value) || this.peek(1).value==='typename' || this.typeTraits.has(this.peek(1).value) || this.templateTypeNames?.has(this.peek(1).value) || this.peek(1).value === 'const' || this.peek(1).value === 'volatile')) { this.take('('); const volatilePointer=this.match('volatile'); const type = this.type(); if(volatilePointer&&(!type.pointer||!['i32','u32'].includes(type.type)))this.fail('Volatile casts require integer pointers.',token); if(type.reference)this.fail('Reference casts are unsupported.'); this.take(')'); return {kind:type.pointer?'pointer-cast':'cast',token,target:type.type,constant:type.constant,volatilePointer,value:this.unary()}; }
     let value;
     if (token.kind === 'number') { this.take(); value = {kind: 'literal', token, value: token.value}; }
+    else if(token.kind==='string'){this.take();value={kind:'string',token,value:token.value};}
     else if (this.match('(')) { value = this.expression(); this.take(')'); }
     else if(this.zipTuple&&token.value==='cuda'){
       this.take('cuda');this.take('::');this.take('std');this.take('::');this.take('get');this.take('<');const element=this.take();if(!['0','1','2','3'].includes(element.value))this.fail('Zip functors support up to four typed tuple elements.',element);this.take('>');this.take('(');this.take(this.zipTuple);this.take(')');value={kind:'index',token,zipElement:Number(element.value),base:{kind:'id',token,name:'tuple'+element.value},index:{kind:'id',token,name:'cw_zip_index'}};

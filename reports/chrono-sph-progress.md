@@ -371,3 +371,51 @@ preprocessing for the solver and does not advance fluid motion.
 
 Validation for the connected chain: 700 unit tests, 232 real NVIDIA GPU tests,
 and compile checks passed.
+
+
+## Original property reorder and bounded diagnostic capture
+
+`tests/chrono-reorder.cu` retains the original `reorderDataD` and `IsFinite(Real3)`
+functions unchanged, including their diagnostic calls. WebGPU compilation selects
+the original device branch with `defines: { __CUDA_ARCH__: 1 }`; native nvcc
+selects its actual CUDA architecture. The compiler now supports scalar float
+`isfinite` through exponent-bit classification and captures standalone integer
+`printf` diagnostics into an explicit GPU buffer. It does not drop error paths.
+
+The native fixture supplies 521 controlled input records and a noncontiguous
+selection of 259 original IDs. Four cases cover CFD and CRM, each with finite
+inputs and then deliberately non-finite inputs. All 21,756 output words match
+native CUDA exactly, including positions, velocities, density/pressure/viscosity,
+activity, and stress-related fields. CFD leaves the three stress-related outputs
+at their initialized sentinel values; CRM reorders them. Native and WebGPU emit
+the same three diagnostic messages in total. The original text says 'NAN' even
+for the deliberately injected infinity, and that text is preserved.
+
+The kernel uses 15 property/index buffers plus the diagnostic buffer, reaching
+16 storage bindings. Additional GPU validation covers float finite classification,
+signed/unsigned integer formatting, percent escaping, and capture overflow: five
+attempted messages with capacity two yield two records and three dropped events.
+
+Current diagnostic scope is explicit: literal formats with %u, %d and %%, up to
+eight integer arguments, up to 64 format strings, standalone statements only.
+`diagnosticCapacity` defaults to 64 records and accepts 1..65536. Metadata exposes
+the required `cw_printf_storage` buffer and format table; callers allocate and
+clear that buffer and call `decodeDiagnostics` after GPU completion. Capture
+order across lanes is unspecified, and attempted/dropped counters are 32-bit.
+Float formatting, arbitrary strings, and printf return values remain unsupported.
+In particular, full upstream `calcHashD` diagnostic/error-flag support is pending.
+
+This is a standalone original-kernel/property-layout check. Connecting the reordered
+properties to the existing activity/neighbour chain and then force/integration
+stages remains necessary; no water showcase is added yet.
+
+Reproduce in a Visual Studio developer shell:
+
+```text
+nvcc -O3 -std=c++17 -arch=native -Xcompiler /Zc:preprocessor tests/chrono-reorder-native.cu -o .local/chrono-reorder-native.exe
+.local/chrono-reorder-native.exe > .local/chrono-reorder-native.log
+node scripts/prepare-chrono-reorder-messages.mjs
+```
+
+Validation: 703 unit tests and 233 real NVIDIA GPU tests passed, including
+21,756 native-exact property words and the native diagnostic messages.

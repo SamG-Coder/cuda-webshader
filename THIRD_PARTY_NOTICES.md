@@ -239,6 +239,10 @@ The quadtree showcase and `tests/quadtree-cdp-device.cuh` retain NVIDIA's origin
 
 ## Project Chrono kernels and type declarations
 
+`tests/chrono-reorder.cu` retains the original `reorderDataD` and `IsFinite`
+functions from `SphCollisionSystem.cu` and `SphCustomMath.cuh` (Copyright (c)
+2014 projectchrono.org), alongside the previously documented parameter/types.
+The native fixture, diagnostic capture lowering and decoder are MIT code.
 `tests/chrono-compact.cu` retains the original `fillActiveListD` from
 `SphCollisionSystem.cu`; `tests/chrono-activity-scan.cuh` retains the original
 `ActivityScanOp` from `SphFluidDynamics.cu` (Copyright (c) 2014

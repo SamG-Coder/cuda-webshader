@@ -1,3 +1,4 @@
+import {checkChronoReorder} from './chrono-reorder-gpu.js';
 import {checkChronoSelected} from './chrono-selected-gpu.js';
 import {checkChronoCompact} from './chrono-compact-gpu.js';
 import {checkChronoActivity} from './chrono-activity-gpu.js';
@@ -346,6 +347,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Original Chrono neighbour cells and particle mapping support partial blocks',()=>checkChronoNeighbors(runtime));
   await run('Original Chrono scoped enums and boolean parameter records match native CUDA',()=>checkChronoTypes(runtime));
   await run('Original Chrono grid hashing matches native dam-break inputs and boundary cases',()=>checkChronoHash(runtime));
+  await run('Original Chrono property reordering and diagnostics match native CUDA',()=>checkChronoReorder(runtime));
   await run('Chrono selected markers feed native-matched neighbour construction',()=>checkChronoSelected(runtime));
   await run('Chrono normalized activity compaction matches native CUDA',()=>checkChronoCompact(runtime));
   await run('Original Chrono activity selection matches native CUDA',()=>checkChronoActivity(runtime));

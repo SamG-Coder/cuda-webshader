@@ -1,0 +1,7 @@
+CASE 0
+CASE 1
+CASE 2
+Error! reorderDataD_ActiveOnly: posRad is NAN at original index 15
+CASE 3
+Error! reorderDataD_ActiveOnly: posRad is NAN at original index 15
+Error! reorderDataD_ActiveOnly: tauXxYyZz is NAN at original index 261
