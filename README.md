@@ -644,3 +644,13 @@ took 11.38 seconds before and 10.95 seconds after (about 4% faster), with exact
 particle-state and neighbour-count agreement. Preview measurements were 98.5
 and 100.4 steps/s; that small difference is subject to run-to-run variation.
 See [resource reuse measurements](reports/chrono-resource-reuse-speed.json).
+
+Combining each completed step's diagnostic readback with the next rebuild's
+active-count readback reduced a 1,000-step run from 10.95 to 7.41 seconds. The
+preview measured 137.2 steps/s versus 100.4 previously (1.37×). A 10,000-step run
+took 74.05 seconds, with identical particle data and neighbour counts to the
+earlier WebGPU reference. Every diagnostic is checked before the following
+physics step, and every step rebuilds neighbours from current positions.
+These remain single-run, real NVIDIA headless Edge measurements; the simulation
+is still slower than real time. See [combined-readback results](reports/chrono-combined-readback-speed.json).
+Reproduce the scheduled loop with `node scripts/bench-chrono-loop.mjs 10000 output.json`.

@@ -1,5 +1,5 @@
 // MIT orchestration of the original Chrono RK2 kernels.
-export async function createChronoStep(runtime,params,{cudaSource,kernelFactory}={}){
+export async function createChronoStep(runtime,params,{cudaSource,kernelFactory,deferDiagnostics=false}={}){
  if(params['constant.paramsD.physics_problem']!==0||params['constant.paramsD.shifting_method']!==2)throw Error('Chrono step requires CFD with XSPH');
  const load=async p=>await(await fetch(new URL(p,import.meta.url))).text();
  const integration=cudaSource??await load('chrono-rk2.cu'),shiftSource=cudaSource??await load('chrono-shifting.cu'),rhsSource=cudaSource??await load('chrono-rhs.cu'),bcSource=cudaSource??await load('chrono-adami.cu');
@@ -38,6 +38,8 @@ export async function createChronoStep(runtime,params,{cudaSource,kernelFactory}
    enc.copyBufferToBuffer(flag.gpuBuffer,0,status.gpuBuffer,0,4);
    let offset=4;for(const d of allDiagnostics){enc.copyBufferToBuffer(d.gpuBuffer,0,status.gpuBuffer,offset,8);offset+=8;}
    runtime.device.queue.submit([enc.finish()]);
+   // The loop must consume this snapshot before the next step clears its pool.
+   if(deferDiagnostics)return status;
    const errors=await runtime.read(status,Uint32Array);if(errors.some(Boolean))throw Error('Chrono integration diagnostic: '+JSON.stringify([...errors]));
   }catch(error){step.dispose();throw error;}
  };

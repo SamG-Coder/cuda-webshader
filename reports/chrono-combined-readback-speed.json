@@ -1,0 +1,46 @@
+{
+  "workload": "Original CUDA Chrono SPH, real NVIDIA Edge",
+  "shortRun": {
+    "steps": 1000,
+    "beforeMs": 10946.014999985695,
+    "afterMs": 7406.314999997616,
+    "speedup": 1.4779299827227466
+  },
+  "longRun": {
+    "steps": 10000,
+    "simulatedSeconds": 1,
+    "elapsedMs": 74052.33999997377,
+    "sameState": true,
+    "sameCounts": true,
+    "stateSha256": "d85240ced8077e4df74f9879a6cb0eb4163e92189e317be6aa447a941907d872",
+    "referenceSha256": "d85240ced8077e4df74f9879a6cb0eb4163e92189e317be6aa447a941907d872"
+  },
+  "preview": {
+    "before": {
+      "steps": 1004,
+      "elapsedMs": 10000.509999990463,
+      "stepsPerSecond": 100.39487986122282,
+      "simulatedSecondsPerWallSecond": 0.010039487986122283,
+      "stopped": 1031,
+      "device": "nvidia",
+      "viewport": [
+        1600,
+        1000
+      ]
+    },
+    "after": {
+      "steps": 1372,
+      "elapsedMs": 10002.199999988079,
+      "stepsPerSecond": 137.1698226391829,
+      "simulatedSecondsPerWallSecond": 0.01371698226391829,
+      "stopped": 1399,
+      "device": "nvidia",
+      "viewport": [
+        1600,
+        1000
+      ]
+    },
+    "speedup": 1.3663029711156045
+  },
+  "note": "Single-run timings. Headless Edge preview includes rendering at 1600x1000. Diagnostic flags are copied before scratch reuse and checked alongside the next active count before another physics step. Neighbours rebuild every step; no CUDA source or compiler changes."
+}

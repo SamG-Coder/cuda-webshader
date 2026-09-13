@@ -20,11 +20,11 @@
       "maxStorageBufferBindingSize": 268435456
     }
   },
-  "date": "2026-09-13T02:54:24.810Z",
-  "total": 244,
-  "passed": 244,
+  "date": "2026-09-13T03:05:23.030Z",
+  "total": 245,
+  "passed": 245,
   "failed": 0,
-  "wallMs": 53156.264999985695,
+  "wallMs": 51111.56999999285,
   "results": [
     {
       "name": "SAXPY n=0",
@@ -38,7 +38,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 23.264999985694885
+      "wallMs": 23.2049999833107
     },
     {
       "name": "SAXPY n=1",
@@ -52,7 +52,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 1.2300000190734863
+      "wallMs": 1.2900000214576721
     },
     {
       "name": "SAXPY n=2",
@@ -66,7 +66,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 1.725000023841858
+      "wallMs": 1.2799999713897705
     },
     {
       "name": "SAXPY n=63",
@@ -80,7 +80,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 5.689999997615814
+      "wallMs": 3.340000033378601
     },
     {
       "name": "SAXPY n=127",
@@ -94,7 +94,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.939999997615814
+      "wallMs": 1.4150000214576721
     },
     {
       "name": "SAXPY n=128",
@@ -108,7 +108,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.485000014305115
+      "wallMs": 3.399999976158142
     },
     {
       "name": "SAXPY n=129",
@@ -122,7 +122,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.0800000429153442
+      "wallMs": 1.1050000190734863
     },
     {
       "name": "SAXPY n=257",
@@ -136,7 +136,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.7950000166893005
+      "wallMs": 3.505000054836273
     },
     {
       "name": "SAXPY n=1031",
@@ -150,7 +150,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.485000014305115
+      "wallMs": 4.674999952316284
     },
     {
       "name": "float4 SAXPY records=0",
@@ -164,7 +164,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 9.819999992847443
+      "wallMs": 10.694999992847443
     },
     {
       "name": "float4 SAXPY records=1",
@@ -178,7 +178,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.939999997615814
+      "wallMs": 3.600000023841858
     },
     {
       "name": "float4 SAXPY records=31",
@@ -192,7 +192,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.459999978542328
+      "wallMs": 2.959999978542328
     },
     {
       "name": "float4 SAXPY records=128",
@@ -206,7 +206,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.524999976158142
+      "wallMs": 4.490000009536743
     },
     {
       "name": "float4 SAXPY records=129",
@@ -220,7 +220,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.0350000262260437
+      "wallMs": 3.050000011920929
     },
     {
       "name": "float4 SAXPY records=257",
@@ -234,7 +234,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.949999988079071
+      "wallMs": 4.680000007152557
     },
     {
       "name": "matmul_naive 1×1×1",
@@ -248,7 +248,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 13.5450000166893
+      "wallMs": 12.525000035762787
     },
     {
       "name": "matmul_tiled 1×1×1",
@@ -262,7 +262,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 15.324999988079071
+      "wallMs": 15.3299999833107
     },
     {
       "name": "matmul_register 1×1×1",
@@ -276,7 +276,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 23.22000002861023
+      "wallMs": 26.62999999523163
     },
     {
       "name": "matmul_naive 3×5×7",
@@ -290,7 +290,7 @@
           "maxRel": 2.988747068412719e-7
         }
       },
-      "wallMs": 3.449999988079071
+      "wallMs": 3.2800000309944153
     },
     {
       "name": "matmul_tiled 3×5×7",
@@ -304,7 +304,7 @@
           "maxRel": 2.988747068412719e-7
         }
       },
-      "wallMs": 3.8899999856948853
+      "wallMs": 5.089999973773956
     },
     {
       "name": "matmul_register 3×5×7",
@@ -318,7 +318,7 @@
           "maxRel": 2.988747068412719e-7
         }
       },
-      "wallMs": 6.460000038146973
+      "wallMs": 3.7199999690055847
     },
     {
       "name": "matmul_naive 16×16×16",
@@ -332,7 +332,7 @@
           "maxRel": 0.000007962963505512887
         }
       },
-      "wallMs": 2.935000002384186
+      "wallMs": 4.2700000405311584
     },
     {
       "name": "matmul_tiled 16×16×16",
@@ -346,7 +346,7 @@
           "maxRel": 0.000007962963505512887
         }
       },
-      "wallMs": 3.574999988079071
+      "wallMs": 4.759999990463257
     },
     {
       "name": "matmul_register 16×16×16",
@@ -360,7 +360,7 @@
           "maxRel": 0.000007962963505512887
         }
       },
-      "wallMs": 6.2200000286102295
+      "wallMs": 6.444999992847443
     },
     {
       "name": "matmul_naive 17×19×23",
@@ -374,7 +374,7 @@
           "maxRel": 0.00017283374599630626
         }
       },
-      "wallMs": 4.370000004768372
+      "wallMs": 3.425000011920929
     },
     {
       "name": "matmul_tiled 17×19×23",
@@ -388,7 +388,7 @@
           "maxRel": 0.00017283374599630626
         }
       },
-      "wallMs": 4.870000004768372
+      "wallMs": 4.525000035762787
     },
     {
       "name": "matmul_register 17×19×23",
@@ -402,7 +402,7 @@
           "maxRel": 0.00017283374599630626
         }
       },
-      "wallMs": 6.490000009536743
+      "wallMs": 5.7299999594688416
     },
     {
       "name": "matmul_naive 31×9×5",
@@ -416,7 +416,7 @@
           "maxRel": 0.000004401365831844938
         }
       },
-      "wallMs": 3.0049999952316284
+      "wallMs": 4.040000021457672
     },
     {
       "name": "matmul_tiled 31×9×5",
@@ -430,7 +430,7 @@
           "maxRel": 0.000004401365831844938
         }
       },
-      "wallMs": 4.004999995231628
+      "wallMs": 3.9850000143051147
     },
     {
       "name": "matmul_register 31×9×5",
@@ -444,7 +444,7 @@
           "maxRel": 0.000004401365831844938
         }
       },
-      "wallMs": 6.050000011920929
+      "wallMs": 6.939999997615814
     },
     {
       "name": "matmul_naive 0×5×3",
@@ -458,7 +458,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 2.9450000524520874
+      "wallMs": 3
     },
     {
       "name": "matmul_tiled 0×5×3",
@@ -472,7 +472,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.4950000047683716
+      "wallMs": 3.9700000286102295
     },
     {
       "name": "matmul_register 0×5×3",
@@ -486,7 +486,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 5.98499995470047
+      "wallMs": 3.125
     },
     {
       "name": "matmul_naive 5×0×3",
@@ -500,7 +500,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.5100000500679016
+      "wallMs": 1.090000033378601
     },
     {
       "name": "matmul_tiled 5×0×3",
@@ -514,7 +514,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.050000011920929
+      "wallMs": 5.754999995231628
     },
     {
       "name": "matmul_register 5×0×3",
@@ -528,7 +528,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 7.5
+      "wallMs": 5.995000004768372
     },
     {
       "name": "matmul_naive 5×7×0",
@@ -542,7 +542,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.7049999833106995
+      "wallMs": 3
     },
     {
       "name": "matmul_tiled 5×7×0",
@@ -556,7 +556,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.5
+      "wallMs": 5.0200000405311584
     },
     {
       "name": "matmul_register 5×7×0",
@@ -570,7 +570,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 5.985000014305115
+      "wallMs": 4.969999969005585
     },
     {
       "name": "Reduction partials n=0",
@@ -584,7 +584,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 11.125
+      "wallMs": 12.985000014305115
     },
     {
       "name": "Reduction partials n=1",
@@ -598,7 +598,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.2950000166893005
+      "wallMs": 4.01500004529953
     },
     {
       "name": "Reduction partials n=2",
@@ -612,7 +612,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.9950000047683716
+      "wallMs": 3.9799999594688416
     },
     {
       "name": "Reduction partials n=127",
@@ -626,7 +626,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.4699999690055847
+      "wallMs": 1.0550000071525574
     },
     {
       "name": "Reduction partials n=128",
@@ -640,7 +640,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.049999952316284
+      "wallMs": 3.5800000429153442
     },
     {
       "name": "Reduction partials n=129",
@@ -654,7 +654,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.959999978542328
+      "wallMs": 3.365000009536743
     },
     {
       "name": "Reduction partials n=255",
@@ -668,7 +668,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.5049999952316284
+      "wallMs": 2.98499995470047
     },
     {
       "name": "Reduction partials n=256",
@@ -682,7 +682,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.995000004768372
+      "wallMs": 3.9699999690055847
     },
     {
       "name": "Reduction partials n=257",
@@ -696,7 +696,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.5450000166893005
+      "wallMs": 4.009999990463257
     },
     {
       "name": "Reduction partials n=1031",
@@ -710,7 +710,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.9449999928474426
+      "wallMs": 1.1150000095367432
     },
     {
       "name": "Convolution + halo n=0",
@@ -724,7 +724,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 11.960000038146973
+      "wallMs": 12.9200000166893
     },
     {
       "name": "Convolution + halo n=1",
@@ -738,7 +738,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.074999988079071
+      "wallMs": 1.6800000071525574
     },
     {
       "name": "Convolution + halo n=2",
@@ -752,7 +752,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.370000004768372
+      "wallMs": 5.254999995231628
     },
     {
       "name": "Convolution + halo n=3",
@@ -766,7 +766,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.3050000071525574
+      "wallMs": 3.9950000047683716
     },
     {
       "name": "Convolution + halo n=127",
@@ -780,7 +780,7 @@
           "maxRel": 0.000001985454559894215
         }
       },
-      "wallMs": 5.235000014305115
+      "wallMs": 3.98499995470047
     },
     {
       "name": "Convolution + halo n=128",
@@ -794,7 +794,7 @@
           "maxRel": 0.000001985454559894215
         }
       },
-      "wallMs": 3.9950000047683716
+      "wallMs": 4.070000052452087
     },
     {
       "name": "Convolution + halo n=129",
@@ -808,7 +808,7 @@
           "maxRel": 0.000001985454559894215
         }
       },
-      "wallMs": 3.475000023841858
+      "wallMs": 2.0299999713897705
     },
     {
       "name": "Convolution + halo n=259",
@@ -822,7 +822,7 @@
           "maxRel": 0.000002949040578798364
         }
       },
-      "wallMs": 3.6799999475479126
+      "wallMs": 3.8799999952316284
     },
     {
       "name": "Histogram grid-stride n=0",
@@ -836,7 +836,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 12.864999949932098
+      "wallMs": 12.660000026226044
     },
     {
       "name": "Histogram grid-stride n=1",
@@ -850,7 +850,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.7450000047683716
+      "wallMs": 4.310000002384186
     },
     {
       "name": "Histogram grid-stride n=127",
@@ -864,7 +864,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.75
+      "wallMs": 4.074999988079071
     },
     {
       "name": "Histogram grid-stride n=128",
@@ -878,7 +878,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.084999978542328
+      "wallMs": 4.064999997615814
     },
     {
       "name": "Histogram grid-stride n=129",
@@ -892,7 +892,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.4050000309944153
+      "wallMs": 3.8600000143051147
     },
     {
       "name": "Histogram grid-stride n=1031",
@@ -906,7 +906,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.9649999737739563
+      "wallMs": 5.040000021457672
     },
     {
       "name": "Histogram grid-stride n=4099",
@@ -920,7 +920,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 5.300000011920929
+      "wallMs": 4.9549999833106995
     },
     {
       "name": "Transpose 1×1",
@@ -934,7 +934,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 12.535000026226044
+      "wallMs": 13.004999995231628
     },
     {
       "name": "Transpose 7×19",
@@ -948,7 +948,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.9549999833106995
+      "wallMs": 3.939999997615814
     },
     {
       "name": "Transpose 33×35",
@@ -962,7 +962,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.504999995231628
+      "wallMs": 5.030000030994415
     },
     {
       "name": "Transpose 64×9",
@@ -976,7 +976,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.035000026226044
+      "wallMs": 5.944999992847443
     },
     {
       "name": "Transpose 0×5",
@@ -990,7 +990,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 3.4200000166893005
+      "wallMs": 4.975000023841858
     },
     {
       "name": "Transpose 5×0",
@@ -1004,7 +1004,7 @@
           "maxRel": 0
         }
       },
-      "wallMs": 4.105000019073486
+      "wallMs": 1.659999966621399
     },
     {
       "name": "Particle float4 interop n=1, dt=0.016",
@@ -1025,7 +1025,7 @@
           "maxRel": 6.473254873600313e-8
         }
       },
-      "wallMs": 13.495000004768372
+      "wallMs": 15.735000014305115
     },
     {
       "name": "Particle float4 interop n=17, dt=0.016",
@@ -1046,7 +1046,7 @@
           "maxRel": 1.0583948172522589e-7
         }
       },
-      "wallMs": 7.555000007152557
+      "wallMs": 5.330000042915344
     },
     {
       "name": "Particle float4 interop n=129, dt=0.033",
@@ -1067,7 +1067,7 @@
           "maxRel": 0.00001895253120455294
         }
       },
-      "wallMs": 4.224999964237213
+      "wallMs": 9.224999964237213
     },
     {
       "name": "Particle float4 interop n=17, dt=0",
@@ -1088,74 +1088,74 @@
           "maxRel": 0
         }
       },
-      "wallMs": 7.790000021457672
+      "wallMs": 5.335000038146973
     },
     {
       "name": "Two parameter versions in one batch retain their own snapshots",
       "pass": true,
-      "wallMs": 7.449999988079071
+      "wallMs": 8.360000014305115
     },
     {
       "name": "Reusable hierarchical reduction, including empty and singleton inputs",
       "pass": true,
-      "wallMs": 12.8299999833107
+      "wallMs": 14.4549999833107
     },
     {
       "name": "Device helper templates: deduction, specialization, nested types, references and vectors",
       "pass": true,
-      "wallMs": 31.290000021457672
+      "wallMs": 35.07000005245209
     },
     {
       "name": "NVIDIA N-body vector traits resolve in kernel buffers and device helpers",
       "pass": true,
-      "wallMs": 17.764999985694885
+      "wallMs": 15.059999942779541
     },
     {
       "name": "NVIDIA N-body interaction reads constant uniforms with per-dispatch snapshots",
       "pass": true,
-      "wallMs": 21.0799999833107
+      "wallMs": 21.82499998807907
     },
     {
       "name": "Static and dynamic shared helpers coordinate lanes through nested calls",
       "pass": true,
-      "wallMs": 40.99000000953674
+      "wallMs": 39.089999973773956
     },
     {
       "name": "Storage pointer helpers preserve nested offsets, vectors, atomics, aliases and shared storage",
       "pass": true,
-      "wallMs": 46.19999998807907
+      "wallMs": 43.439999997615814
     },
     {
       "name": "Vector aggregate initializers preserve partial zero filling and dependent helper types",
       "pass": true,
-      "wallMs": 15.584999978542328
+      "wallMs": 13.449999988079071
     },
     {
       "name": "Original NVIDIA shared-memory conversion wrapper exchanges float4 tiles",
       "pass": true,
-      "wallMs": 20.860000014305115
+      "wallMs": 18.305000007152557
     },
     {
       "name": "Original NVIDIA N-body advances three steps with an enforced whole-block contract",
       "pass": true,
-      "wallMs": 242.0450000166893
+      "wallMs": 230.46999996900558
     },
     {
       "name": "Original NVIDIA N-body early return remains rejected before a helper barrier",
       "pass": true,
       "expectedRejection": true,
       "reason": "Early return depends on the lane index before a shared-memory barrier.",
-      "wallMs": 6.5950000286102295
+      "wallMs": 5.474999964237213
     },
     {
       "name": "Constant integer arrays retain defaults, high bits and per-dispatch snapshots",
       "pass": true,
-      "wallMs": 10.375
+      "wallMs": 8.570000052452087
     },
     {
       "name": "RGBA 2D linear sampling and transfer helper use distinct coordinate modes",
       "pass": true,
-      "wallMs": 11.955000042915344
+      "wallMs": 11.745000004768372
     },
     {
       "name": "Original NVIDIA Mandelbrot and Julia frames match native CUDA",
@@ -1212,12 +1212,12 @@
           "maxChannelError": 0
         }
       ],
-      "wallMs": 105.12999999523163
+      "wallMs": 111.89999997615814
     },
     {
       "name": "Packed destinations match native CUDA C++17 evaluation ordering",
       "pass": true,
-      "wallMs": 11.824999988079071
+      "wallMs": 12.335000038146973
     },
     {
       "name": "3D surface writes match native CUDA and reject oversized XYZ dispatches",
@@ -1225,7 +1225,7 @@
       "voxels": 256,
       "nativeExact": true,
       "oversizedXYZRejected": true,
-      "wallMs": 9.9200000166893
+      "wallMs": 9
     },
     {
       "name": "Imported device type aliases match native CUDA",
@@ -1237,7 +1237,7 @@
         5,
         4
       ],
-      "wallMs": 10.009999990463257
+      "wallMs": 10.0799999833107
     },
     {
       "name": "Exact double-literal byte scaling matches native rounding boundaries",
@@ -1245,7 +1245,7 @@
       "values": 255,
       "nativeExact": true,
       "floatProductShortcutDifferences": 255,
-      "wallMs": 14.5
+      "wallMs": 11.400000035762787
     },
     {
       "name": "Original NVIDIA static byte conversion matches native at rounding boundaries",
@@ -1253,7 +1253,7 @@
       "values": 767,
       "nativeExact": true,
       "roundedFloatProductDifferences": 0,
-      "wallMs": 14.894999980926514
+      "wallMs": 14.600000023841858
     },
     {
       "name": "cudaExtent size comparisons match native CUDA including signed negatives",
@@ -1261,7 +1261,7 @@
       "comparisons": 168,
       "nativeExact": true,
       "unsigned64Promotion": true,
-      "wallMs": 22.285000026226044
+      "wallMs": 21.82499998807907
     },
     {
       "name": "Float4 constant array helper reads match native CUDA",
@@ -1269,7 +1269,7 @@
       "records": 125,
       "components": 500,
       "nativeExact": true,
-      "wallMs": 68.13999998569489
+      "wallMs": 64.39499998092651
     },
     {
       "name": "Complete implicit marching-cubes GPU pipeline matches native CUDA",
@@ -1304,7 +1304,7 @@
       "nativeIntermediateFixturesUsedAsInputs": false,
       "controlReadbackBytes": 8,
       "intermediateArrayReadbacks": 0,
-      "wallMs": 167.08499997854233
+      "wallMs": 149.0649999976158
     },
     {
       "name": "Hierarchical exclusive scan matches native CUDA",
@@ -1409,7 +1409,7 @@
       ],
       "noIntermediateCPUTransfer": true,
       "threeLevelHierarchy": true,
-      "wallMs": 174.8550000190735
+      "wallMs": 161.46999996900558
     },
     {
       "name": "Original shared marching-cubes triangle generation matches native CUDA",
@@ -1433,7 +1433,7 @@
       "originalSharedKernel": true,
       "nativeScanFixture": true,
       "completeGpuPipeline": false,
-      "wallMs": 24.685000002384186
+      "wallMs": 23.5
     },
     {
       "name": "Full fluids solver compared with native CUDA and cuFFT",
@@ -1570,7 +1570,7 @@
       ],
       "intermediateReadbackBytes": 0,
       "originalKernelsUnchanged": true,
-      "wallMs": 5537.155000030994
+      "wallMs": 4966.40499997139
     },
     {
       "name": "Real FFT packed transforms match native cuFFT",
@@ -1645,7 +1645,7 @@
       ],
       "packedLayout": "height rows of floor(width/2)+1 complex values",
       "inverseNormalization": "none",
-      "wallMs": 414.875
+      "wallMs": 366.2699999809265
     },
     {
       "name": "Original fluids pitched kernels match native CUDA",
@@ -1672,7 +1672,7 @@
       "paddingPreserved": true,
       "misalignmentRejected": true,
       "particleSteps": 5,
-      "wallMs": 56.855000019073486
+      "wallMs": 48.764999985694885
     },
     {
       "name": "2048-point real FFT axes match native cuFFT",
@@ -1715,7 +1715,7 @@
       "maximumAxis": 2048,
       "maximumThreads": 1024,
       "roundtripLimit": 0.000004,
-      "wallMs": 405.05500000715256
+      "wallMs": 452.4249999523163
     },
     {
       "name": "Sincos and first-set-bit intrinsics match native CUDA",
@@ -1730,7 +1730,7 @@
         -51.20000076293945,
         51.22500228881836
       ],
-      "wallMs": 26.125
+      "wallMs": 26.50499999523163
     },
     {
       "name": "Original NVIDIA scalar layered textures match native CUDA",
@@ -1763,7 +1763,7 @@
       "distinctLayerSelection": true,
       "helperTexturePropagation": true,
       "softwareAdapterRequested": false,
-      "wallMs": 64.59499996900558
+      "wallMs": 59.50499999523163
     },
     {
       "name": "Deferred pointer assignments preserve batch and channel offsets",
@@ -1780,7 +1780,7 @@
         "sourceUnchanged": true,
         "fullDefaultPipeline": false
       },
-      "wallMs": 35.325000047683716
+      "wallMs": 32.76500004529953
     },
     {
       "name": "Original full-resolution NV12 conversion matches native CUDA",
@@ -1794,7 +1794,7 @@
       "streamed": true,
       "originalBodiesUnchanged": true,
       "fullNv12ResizePipeline": false,
-      "wallMs": 525.6899999976158
+      "wallMs": 516.0699999928474
     },
     {
       "name": "Original single-frame NV12 resize matches native byte output",
@@ -1808,7 +1808,7 @@
       "nativeExact": true,
       "originalKernelUnchanged": true,
       "fullBatchPipeline": false,
-      "wallMs": 63.77999997138977
+      "wallMs": 58.730000019073486
     },
     {
       "name": "Original CUDA RNG buffers and downcast cleanup match native",
@@ -1822,7 +1822,7 @@
       "freedSphereMaterialPairs": 512,
       "allPoolsEmpty": true,
       "fullPathtracerSupported": false,
-      "wallMs": 204.2249999642372
+      "wallMs": 175.70000004768372
     },
     {
       "name": "Original CUDA materials scatter through virtual dispatch",
@@ -1842,7 +1842,7 @@
       "floatValues": 10240,
       "maxAbsoluteError": 1.1920928955078125e-7,
       "fullPathtracerSupported": false,
-      "wallMs": 2452.8050000071526
+      "wallMs": 2382.339999973774
     },
     {
       "name": "Original CUDA camera and cuRAND XORWOW match native",
@@ -1854,7 +1854,7 @@
       "floatValues": 11776,
       "maxAbsoluteError": 0.000003814697265625,
       "fullPathtracerSupported": false,
-      "wallMs": 97.79499995708466
+      "wallMs": 84.92999994754791
     },
     {
       "name": "Original CUDA hitable_list captures live object buffers",
@@ -1864,7 +1864,7 @@
       "capturedBufferMutation": true,
       "missPreserved": true,
       "fullPathtracerSupported": false,
-      "wallMs": 176.35499995946884
+      "wallMs": 141.37000000476837
     },
     {
       "name": "Persistent CUDA sphere objects survive separate create/trace/free submissions",
@@ -1878,7 +1878,7 @@
       "allFreed": true,
       "persistent": true,
       "fullPathtracerSupported": false,
-      "wallMs": 105.69000005722046
+      "wallMs": 89.83499997854233
     },
     {
       "name": "Path tracer value-class constructors and accessors match native CUDA",
@@ -1888,7 +1888,7 @@
       "nativeExact": true,
       "copyIsolation": true,
       "fullPathtracerSupported": false,
-      "wallMs": 2233.649999976158
+      "wallMs": 2183.320000052452
     },
     {
       "name": "NVIDIA cubemap faces and edge filtering match native CUDA",
@@ -1922,7 +1922,7 @@
       "helperTexturePropagation": true,
       "seamlessExplicitlyRejected": true,
       "softwareAdapterRequested": false,
-      "wallMs": 47.02500003576279
+      "wallMs": 35.339999973773956
     },
     {
       "name": "Complete NVIDIA Walsh convolution matches native CUDA",
@@ -1956,7 +1956,7 @@
       "maxAbsoluteError": 0,
       "bitMismatches": 0,
       "softwareAdapterRequested": false,
-      "wallMs": 230.4399999976158
+      "wallMs": 230.33499997854233
     },
     {
       "name": "Original NVIDIA binomial options match all native outputs",
@@ -1987,7 +1987,7 @@
       "maxAbsoluteError": 1.0460491249205897e-37,
       "allOptionsCompared": true,
       "softwareAdapterRequested": false,
-      "wallMs": 28.919999957084656
+      "wallMs": 23.930000007152557
     },
     {
       "name": "Device globals persist across dispatches and support helper atomics",
@@ -2017,7 +2017,7 @@
       "helperAtomics": 256,
       "undersizedRejected": true,
       "softwareAdapterRequested": false,
-      "wallMs": 11.889999985694885
+      "wallMs": 10.610000014305115
     },
     {
       "name": "Complete NVIDIA odd-even sorting matches native CUDA",
@@ -2224,7 +2224,7 @@
           "nativeMatch": true
         }
       ],
-      "wallMs": 497.4950000047684
+      "wallMs": 452.5
     },
     {
       "name": "Complete NVIDIA bitonic sorting matches native CUDA",
@@ -2432,7 +2432,7 @@
           "nativeMatch": true
         }
       ],
-      "wallMs": 537.0450000166893
+      "wallMs": 482.30500000715256
     },
     {
       "name": "Full Sobol sequence matches native CUDA",
@@ -2498,7 +2498,7 @@
           "mismatches": 0
         }
       ],
-      "wallMs": 176.54000002145767
+      "wallMs": 171.63999998569489
     },
     {
       "name": "Full quasirandom sequence matches native CUDA",
@@ -2553,7 +2553,7 @@
           "mismatches": 0
         }
       ],
-      "wallMs": 121.62000000476837
+      "wallMs": 117.23500001430511
     },
     {
       "name": "DXT full image matches native CUDA",
@@ -2605,7 +2605,7 @@
         0,
         0
       ],
-      "wallMs": 144.37999999523163
+      "wallMs": 130.08499997854233
     },
     {
       "name": "DXT tiled colour stage matches native CUDA",
@@ -2635,7 +2635,7 @@
           "maxError": 0
         }
       ],
-      "wallMs": 117.16499996185303
+      "wallMs": 106.37000000476837
     },
     {
       "name": "DXT endpoint fitting matches native CUDA",
@@ -2675,7 +2675,7 @@
           "nonfiniteMismatches": 0
         }
       ],
-      "wallMs": 87.7049999833107
+      "wallMs": 80.21000003814697
     },
     {
       "name": "rintf matches native bits including halfway ties",
@@ -2684,7 +2684,7 @@
       "nativeBitExact": true,
       "signedZero": true,
       "halfwayTies": true,
-      "wallMs": 14.030000030994415
+      "wallMs": 11.899999976158142
     },
     {
       "name": "Complete custom FFT convolution variants match native CUDA",
@@ -2776,7 +2776,7 @@
           ]
         }
       ],
-      "wallMs": 1876.9950000047684
+      "wallMs": 1835.1349999904633
     },
     {
       "name": "Original custom FFT convolution stages match native CUDA",
@@ -2826,7 +2826,7 @@
           "maxError": 0
         }
       ],
-      "wallMs": 56.855000019073486
+      "wallMs": 49.43000000715256
     },
     {
       "name": "Original full-size FFT convolution matches native CUDA",
@@ -2860,7 +2860,7 @@
       "source": "Original NVIDIA test0 device bodies",
       "input": "Original srand(2010), rand()%16 captured on Windows",
       "passed": true,
-      "wallMs": 549.9449999928474
+      "wallMs": 539.1800000071526
     },
     {
       "name": "GPU copies to multi-row float linear textures match native",
@@ -2872,7 +2872,7 @@
       "partialLastRow": true,
       "sourceOffsetChecked": true,
       "intermediateReadbackBytes": 0,
-      "wallMs": 44.72499996423721
+      "wallMs": 39.299999952316284
     },
     {
       "name": "Raw float linear texture records match native",
@@ -2883,7 +2883,7 @@
       "nativeExact": true,
       "multiRow": true,
       "outOfRangeZero": true,
-      "wallMs": 28.144999980926514
+      "wallMs": 25.794999957084656
     },
     {
       "name": "Complete optical flow matches original native pipeline",
@@ -2916,7 +2916,7 @@
       "warps": 3,
       "solverIterations": 500,
       "intermediateReadbackBytes": 0,
-      "wallMs": 1156.8500000238419
+      "wallMs": 893.5
     },
     {
       "name": "Original optical flow Jacobi matches 500 native iterations",
@@ -3081,7 +3081,7 @@
       ],
       "originalKernelUnchanged": true,
       "iterations": 500,
-      "wallMs": 156.22500002384186
+      "wallMs": 123.33999997377396
     },
     {
       "name": "Original stereo disparity matches native pixels",
@@ -3101,7 +3101,7 @@
         }
       ],
       "originalDeviceBodiesUnchanged": true,
-      "wallMs": 57.45999997854233
+      "wallMs": 54.55999994277954
     },
     {
       "name": "Original NVIDIA inline PTX SAD matches native",
@@ -3109,7 +3109,7 @@
       "components": 4100,
       "nativeExact": true,
       "independentByteSumExact": true,
-      "wallMs": 17.57499998807907
+      "wallMs": 14.52999997138977
     },
     {
       "name": "size_t launch values preserve native 64-bit arithmetic",
@@ -3140,7 +3140,7 @@
       "nativeExact": true,
       "launchValueBits": 32,
       "arithmeticBits": 64,
-      "wallMs": 55.285000026226044
+      "wallMs": 44.410000026226044
     },
     {
       "name": "Original fluids kernels: native projection and bounded texture filtering",
@@ -3232,7 +3232,7 @@
       "originalKernelBodies": true,
       "paddedRows": true,
       "partialWorkgroups": true,
-      "wallMs": 108.84999996423721
+      "wallMs": 91.29000002145767
     },
     {
       "name": "Smoke sandbox pipeline matches native integration and depth sorting",
@@ -3278,7 +3278,7 @@
         "sortStage",
         "sortFinish"
       ],
-      "wallMs": 554.164999961853
+      "wallMs": 481.6200000047684
     },
     {
       "name": "Float key sorting preserves IEEE bits and matches native smoke depths",
@@ -3374,7 +3374,7 @@
         }
       ],
       "softwareAdapterRequested": false,
-      "wallMs": 122.66499996185303
+      "wallMs": 105.56000000238419
     },
     {
       "name": "Original smoke integration and depth match native Thrust",
@@ -3457,7 +3457,7 @@
       ],
       "originalFunctorsUnchanged": true,
       "partialBlockGuards": true,
-      "wallMs": 79.17999994754791
+      "wallMs": 70.19999998807907
     },
     {
       "name": "Original smoke float4 noise sampling matches native CUDA",
@@ -3490,7 +3490,7 @@
       ],
       "originalHelperUnchanged": true,
       "originalNoiseGeneration": true,
-      "wallMs": 68.69999998807907
+      "wallMs": 65.12000000476837
     },
     {
       "name": "Original preintegrated volume tables and ray marching match native CUDA",
@@ -3541,7 +3541,7 @@
         }
       ],
       "originalBodiesUnchanged": true,
-      "wallMs": 397.0649999976158
+      "wallMs": 358.81999999284744
     },
     {
       "name": "Integer-limb binary64 arithmetic matches native CUDA bits",
@@ -3551,7 +3551,7 @@
       "compiledExpressions": 52902,
       "bitExactExceptNaNPayloads": true,
       "softwareAdapterRequested": false,
-      "wallMs": 503.2999999523163
+      "wallMs": 488.9699999690056
     },
     {
       "name": "Original volume transfer integration matches native CUDA",
@@ -3574,7 +3574,7 @@
         }
       ],
       "originalKernelUnchanged": true,
-      "wallMs": 136.0999999642372
+      "wallMs": 124.91500002145767
     },
     {
       "name": "Float4 1D surfaces match native CUDA with checked extents",
@@ -3585,7 +3585,7 @@
       "integerCoordinate": true,
       "unsafeExtentsRejected": 4,
       "noIntermediateCPUTransfer": true,
-      "wallMs": 30.299999952316284
+      "wallMs": 22.62999999523163
     },
     {
       "name": "Original particle functor and collision simulation match 64 native steps",
@@ -3661,7 +3661,7 @@
           "components": 4096
         }
       ],
-      "wallMs": 648.5749999880791
+      "wallMs": 567.1450000405312
     },
     {
       "name": "GPU stable key/value sort preserves unsigned keys and guards",
@@ -3766,7 +3766,7 @@
           "readbackBytes": 0
         }
       ],
-      "wallMs": 120.00499999523163
+      "wallMs": 90.68000000715256
     },
     {
       "name": "Original NVIDIA particle collision stages match native CUDA",
@@ -3891,7 +3891,7 @@
           "components": 1028
         }
       ],
-      "wallMs": 119.15499997138977
+      "wallMs": 103.65000003576279
     },
     {
       "name": "GPU inverse FFT matches independent DFT and preserves guards",
@@ -3919,7 +3919,7 @@
           "intermediateReadbackBytes": 0
         }
       ],
-      "wallMs": 28.3400000333786
+      "wallMs": 20.990000009536743
     },
     {
       "name": "Original NVIDIA ocean stages match native cuFFT pipeline",
@@ -4043,7 +4043,7 @@
           "rmsError": 3.3409243739437965e-8
         }
       ],
-      "wallMs": 134.8100000023842
+      "wallMs": 131.38499999046326
     },
     {
       "name": "Original NVIDIA optimized DCT matches native on padded and full images",
@@ -4130,7 +4130,7 @@
           "guardsIntact": true
         }
       ],
-      "wallMs": 132.27499997615814
+      "wallMs": 119.47499996423721
     },
     {
       "name": "Original NVIDIA floating DCT stages and rounding match native CUDA",
@@ -4190,7 +4190,7 @@
           "guardsIntact": true
         }
       ],
-      "wallMs": 96.54499995708466
+      "wallMs": 91.42500001192093
     },
     {
       "name": "All original NVIDIA imageDenoising kernels match native portrait captures",
@@ -4266,7 +4266,7 @@
           "guardsIntact": true
         }
       ],
-      "wallMs": 300.98499995470047
+      "wallMs": 265.4850000143051
     },
     {
       "name": "Original NVIDIA SobelShared matches native CUDA",
@@ -4309,7 +4309,7 @@
           "guardsIntact": true
         }
       ],
-      "wallMs": 278.9200000166893
+      "wallMs": 245.89500004053116
     },
     {
       "name": "Original NVIDIA Sobel image kernels match native CUDA",
@@ -4388,7 +4388,7 @@
           "guardsIntact": true
         }
       ],
-      "wallMs": 313.875
+      "wallMs": 278.00999999046326
     },
     {
       "name": "Short narrowing, promotion and launch values match native CUDA",
@@ -4396,7 +4396,7 @@
       "nativeExact": true,
       "cases": 4,
       "valuesPerCase": 8,
-      "wallMs": 24.334999978542328
+      "wallMs": 24.34500002861023
     },
     {
       "name": "Original NVIDIA ComputeSobel matches native CUDA across five scales",
@@ -4434,7 +4434,7 @@
           "nativeExact": true
         }
       ],
-      "wallMs": 45.49000000953674
+      "wallMs": 36.05500000715256
     },
     {
       "name": "Packed byte stores preserve neighbouring pixels and match native CUDA",
@@ -4475,7 +4475,7 @@
           "repeatedDispatches": 8
         }
       ],
-      "wallMs": 34.355000019073486
+      "wallMs": 32.07499998807907
     },
     {
       "name": "Original RGBA box filter matches native row and column images",
@@ -4597,7 +4597,7 @@
           "guardsIntact": true
         }
       ],
-      "wallMs": 415.4350000023842
+      "wallMs": 377.64999997615814
     },
     {
       "name": "Original sampled-volume marching cubes matches native CUDA at three isovalues",
@@ -4694,7 +4694,7 @@
           ]
         }
       ],
-      "wallMs": 404.67500001192093
+      "wallMs": 394.9800000190735
     },
     {
       "name": "Shared pointer helpers match native CUDA with aliases and offsets",
@@ -4703,7 +4703,7 @@
       "exact": true,
       "originalCalcNormal": true,
       "sharedAliasingAndForwarding": true,
-      "wallMs": 22.180000007152557
+      "wallMs": 19.09500002861023
     },
     {
       "name": "Shared vector references match native CUDA after synchronization",
@@ -4714,7 +4714,7 @@
       "localAndSharedCalls": true,
       "barrierAndNeighbourReads": true,
       "workgroupStorageBytes": 4096,
-      "wallMs": 25.62000000476837
+      "wallMs": 26.685000002384186
     },
     {
       "name": "Original NVIDIA marching-cubes classification matches native CUDA",
@@ -4744,7 +4744,7 @@
       ],
       "components": 196608,
       "originalKernel": true,
-      "wallMs": 71.43999999761581
+      "wallMs": 57.67500001192093
     },
     {
       "name": "Original NVIDIA interpolation through vector references matches native CUDA",
@@ -4754,7 +4754,7 @@
       "originalNvidiaInterpolation": true,
       "forwardedVectorReferences": true,
       "dynamicLocalArrayElements": true,
-      "wallMs": 23.25
+      "wallMs": 21.274999976158142
     },
     {
       "name": "Vector launch arguments and packed byte reads match native CUDA",
@@ -4769,7 +4769,7 @@
         4
       ],
       "integerWraparound": true,
-      "wallMs": 22.1700000166893
+      "wallMs": 20.60999995470047
     },
     {
       "name": "Linear texture fetch matches native CUDA",
@@ -4781,7 +4781,7 @@
       "multiRow": true,
       "paddedTail": true,
       "negativeAndPastEndIndices": true,
-      "wallMs": 28.280000030994415
+      "wallMs": 21.714999973773956
     },
     {
       "name": "Original NVIDIA volume filter passes match native CUDA",
@@ -4932,7 +4932,7 @@
           "noIntermediateCPUTransfer": true
         }
       ],
-      "wallMs": 1083.214999973774
+      "wallMs": 1044.2300000190735
     },
     {
       "name": "sizeof and byte surface sampling match native CUDA",
@@ -4940,12 +4940,12 @@
       "sizeofResults": 20,
       "byteValues": 256,
       "nativeExact": true,
-      "wallMs": 35.530000030994415
+      "wallMs": 32.830000042915344
     },
     {
       "name": "Concurrent packed byte writers preserve neighbouring channels and match native CUDA",
       "pass": true,
-      "wallMs": 31.655000030994415
+      "wallMs": 31.07499998807907
     },
     {
       "name": "Four native CUDA tiles preserve votes, shuffles and independent loop counts",
@@ -4956,7 +4956,7 @@
       "fixedSubgroupSize": 32,
       "logicalThreadRemapping": true,
       "divergentEntryRejected": true,
-      "wallMs": 18.564999997615814
+      "wallMs": 15.314999997615814
     },
     {
       "name": "Native tile memory phases preserve shared snapshots and inactive lanes",
@@ -4967,7 +4967,7 @@
         2
       ],
       "sharedSnapshots": true,
-      "wallMs": 25.475000023841858
+      "wallMs": 23.335000038146973
     },
     {
       "name": "Local CUDA array initializers preserve ordering and zero-filled elements",
@@ -4976,7 +4976,7 @@
       "checkedValues": 320,
       "nestedZeroFill": true,
       "leftToRight": true,
-      "wallMs": 13.524999976158142
+      "wallMs": 10.995000004768372
     },
     {
       "name": "Original NVIDIA quadtree root partitions all 1024 native points",
@@ -4990,7 +4990,7 @@
       "queuedChildBlocks": 4,
       "nonUniformVariantsRejected": 2,
       "recursiveExecution": false,
-      "wallMs": 268.72000002861023
+      "wallMs": 238.375
     },
     {
       "name": "Original Chrono neighbour cells and particle mapping support partial blocks",
@@ -5012,7 +5012,7 @@
       "partialBlocks": true,
       "inactiveWrites": false,
       "originalKernelBodies": true,
-      "wallMs": 113.22500002384186
+      "wallMs": 115.45500004291534
     },
     {
       "name": "Original Chrono scoped enums and boolean parameter records match native CUDA",
@@ -5023,7 +5023,7 @@
       "compared": 218,
       "nativeEnumsExact": true,
       "largeConstantFields": 121,
-      "wallMs": 45.3299999833107
+      "wallMs": 44.61500000953674
     },
     {
       "name": "Original Chrono grid hashing matches native dam-break inputs and boundary cases",
@@ -5036,7 +5036,7 @@
       "fullParameterRecord": true,
       "real3Stride": 12,
       "doubleFieldPreserved": true,
-      "wallMs": 274.8899999856949
+      "wallMs": 265.38499999046326
     },
     {
       "name": "Compiler worker deep helper cloning",
@@ -5045,7 +5045,7 @@
       "terms": 900,
       "compared": 16,
       "exact": true,
-      "wallMs": 121.68999999761581
+      "wallMs": 107.80500000715256
     },
     {
       "name": "Original Chrono RK2 half-step and full-step match native CUDA",
@@ -5273,7 +5273,7 @@
         ],
         "intermediateReadbackBytes": 0
       },
-      "wallMs": 12839.740000009537
+      "wallMs": 11661.569999992847
     },
     {
       "name": "Original Chrono equation of state matches native CUDA",
@@ -5307,7 +5307,7 @@
       ],
       "nativeOracleMismatch": 0,
       "gpuOracleMismatch": 0,
-      "wallMs": 490.13499999046326
+      "wallMs": 453.52499997615814
     },
     {
       "name": "Runtime integer powers preserve native signs and precision",
@@ -5317,7 +5317,7 @@
       "negativeExponents": true,
       "signedZeros": true,
       "nonfiniteCases": true,
-      "wallMs": 133.9350000023842
+      "wallMs": 113.89499998092651
     },
     {
       "name": "Double sqrt, min/max, local quadratic solve and record scalar references match native CUDA",
@@ -5333,7 +5333,7 @@
       },
       "integrationKernelCompiled": true,
       "integrationKernelExecuted": false,
-      "wallMs": 733.9049999713898
+      "wallMs": 666.8050000071526
     },
     {
       "name": "Module constexpr constants and volatile helper flags match native CUDA",
@@ -5343,7 +5343,7 @@
       "constantUniforms": 0,
       "volatileHelperFlags": 65,
       "paddingBytesUnchanged": 3,
-      "wallMs": 82.16999995708466
+      "wallMs": 88.01499998569489
     },
     {
       "name": "Original Chrono XSPH shifting matches native for initialized and nonzero velocities",
@@ -5375,7 +5375,17 @@
         }
       ],
       "forcesCompared": 242617,
-      "wallMs": 1945.3149999976158
+      "wallMs": 1833.199999988079
+    },
+    {
+      "name": "Chrono pipelined diagnostics preserve state and reject errors",
+      "pass": true,
+      "steps": 3,
+      "exactState": true,
+      "exactNeighbors": true,
+      "concurrentStepRejected": true,
+      "previousDiagnosticRejected": true,
+      "wallMs": 2158.4699999690056
     },
     {
       "name": "Original Chrono force derivatives and timestep estimates match native",
@@ -5527,7 +5537,7 @@
           12
         ]
       },
-      "wallMs": 1563.199999988079
+      "wallMs": 1419.7250000238419
     },
     {
       "name": "Original Chrono Adami wall pressure matches native CUDA",
@@ -5548,7 +5558,7 @@
       "cpuPhysics": false,
       "fullSolverAdvanced": false,
       "preparationCompared": 1487332,
-      "wallMs": 1256
+      "wallMs": 1144.7450000047684
     },
     {
       "name": "CUDA byte-stride bool buffers and volatile flags match native",
@@ -5559,7 +5569,7 @@
       "dispatches": 8,
       "guardBytesPreserved": true,
       "volatileFlags": true,
-      "wallMs": 25.009999990463257
+      "wallMs": 24.585000038146973
     },
     {
       "name": "C++ switch fall-through and nested control match native CUDA",
@@ -5569,7 +5579,7 @@
       "fallThrough": true,
       "nestedBreakAndContinue": true,
       "selectorEvaluatedOnce": true,
-      "wallMs": 19.025000035762787
+      "wallMs": 19.165000021457672
     },
     {
       "name": "Original Chrono property reordering and diagnostics match native CUDA",
@@ -5585,7 +5595,7 @@
       "crmStressReordered": true,
       "nonfiniteDiagnosticsTested": true,
       "diagnosticOverflowTested": true,
-      "wallMs": 125.67500001192093
+      "wallMs": 117.65500003099442
     },
     {
       "name": "Chrono selected markers feed native-matched neighbour construction",
@@ -5602,7 +5612,7 @@
       "originalPropertyReorderConnected": true,
       "nativeInitialProperties": true,
       "fullSolverAdvanced": false,
-      "wallMs": 1263.3899999856949
+      "wallMs": 1184.2350000143051
     },
     {
       "name": "Chrono normalized activity compaction matches native CUDA",
@@ -5618,7 +5628,7 @@
       "intermediateReadbackBytes": 56,
       "cpuPhysics": false,
       "neighborsConnected": false,
-      "wallMs": 425.6550000309944
+      "wallMs": 444.9699999690056
     },
     {
       "name": "Original Chrono activity selection matches native CUDA",
@@ -5637,7 +5647,7 @@
         1
       ],
       "physicsStepAdvanced": false,
-      "wallMs": 168.375
+      "wallMs": 178.50999999046326
     },
     {
       "name": "Chrono 64-bit counters and double launch times match native CUDA",
@@ -5649,7 +5659,7 @@
       "nativeExact": true,
       "counterHighWordsPreserved": true,
       "doubleTimePreserved": true,
-      "wallMs": 311.1500000357628
+      "wallMs": 254.28000003099442
     },
     {
       "name": "Original Chrono neighbour lists match native CUDA for fluid and boundary markers",
@@ -5662,7 +5672,7 @@
       "nativeExact": true,
       "intermediateReadbackBytes": 4,
       "cpuPhysics": false,
-      "wallMs": 262.02999997138977
+      "wallMs": 245.00499999523163
     },
     {
       "name": "Original NVIDIA recursive quadtree matches every native node and output point",
@@ -5691,7 +5701,7 @@
         "controlReadbackBytes": 72,
         "gpuScheduled": true
       },
-      "wallMs": 588.7649999856949
+      "wallMs": 587.6100000143051
     },
     {
       "name": "Recursive GPU queues reject overflow and unfinished generations",
@@ -5700,7 +5710,7 @@
       "arenaReuse": true,
       "overflowRejected": true,
       "generationLimitRejected": true,
-      "wallMs": 65.76500004529953
+      "wallMs": 50.80500000715256
     },
     {
       "name": "Original quadtree storage references preserve node and nested field mutations",
@@ -5711,7 +5721,7 @@
       "indexCapturedOnce": true,
       "nestedMutationPersisted": true,
       "originalClassBodies": true,
-      "wallMs": 50.03999996185303
+      "wallMs": 41.69499999284744
     },
     {
       "name": "Queued offset pointers preserve disjoint child ranges and reject invalid offsets",
@@ -5720,7 +5730,7 @@
       "checkedValues": 40,
       "invalidOffsetsRejected": 2,
       "parentAliasMutationIsolated": true,
-      "wallMs": 43.52499997615814
+      "wallMs": 48.05500000715256
     },
     {
       "name": "Original Parameters pass by value through queued child launches",
@@ -5729,7 +5739,7 @@
       "checkedFields": 160,
       "parentMutationIsolated": true,
       "originalParameters": true,
-      "wallMs": 31.4650000333786
+      "wallMs": 27.0450000166893
     },
     {
       "name": "Queued children use CUDA launch shared-memory allocation",
@@ -5737,21 +5747,21 @@
       "checkedValues": 64,
       "childBlocks": 2,
       "sharedBytesPerBlock": 128,
-      "wallMs": 23.764999985694885
+      "wallMs": 18.30000001192093
     },
     {
       "name": "Volatile compound updates preserve integer and float shared values",
       "pass": true,
       "checkedValues": 96,
       "separateLoadStore": true,
-      "wallMs": 19.05000001192093
+      "wallMs": 16.725000023841858
     },
     {
       "name": "Volatile shared pointer slots exchange values across GPU lanes",
       "pass": true,
       "checkedValues": 128,
       "sharedPointerSlots": 4,
-      "wallMs": 14.550000011920929
+      "wallMs": 13.959999978542328
     },
     {
       "name": "Original quadtree Parameters constructors preserve const recursion limits",
@@ -5759,7 +5769,7 @@
       "threads": 32,
       "constructors": 96,
       "originalParameters": true,
-      "wallMs": 13.450000047683716
+      "wallMs": 12.014999985694885
     },
     {
       "name": "Original quadtree getters retain nested const field references",
@@ -5767,7 +5777,7 @@
       "references": 64,
       "ownerMutationVisible": true,
       "originalBoundingBoxAndNode": true,
-      "wallMs": 13.004999995231628
+      "wallMs": 10.964999973773956
     },
     {
       "name": "Original Points retains captured scalar buffers across GPU submissions",
@@ -5779,7 +5789,7 @@
       "nonzeroOffsets": true,
       "separateSubmissions": true,
       "crossArenaRejected": true,
-      "wallMs": 87.0450000166893
+      "wallMs": 78.47000002861023
     },
     {
       "name": "Private class state and method access preserve CUDA values",
@@ -5788,7 +5798,7 @@
       "privateFields": true,
       "privateMethods": true,
       "sameClassReceiver": true,
-      "wallMs": 10.5
+      "wallMs": 10.264999985694885
     },
     {
       "name": "Complete original Bezier parent and indirect children match native",
@@ -5805,7 +5815,7 @@
       "parentSchedulingSupported": true,
       "launchCountsFromNativeFixture": false,
       "indirectDispatch": true,
-      "wallMs": 140.75999999046326
+      "wallMs": 110.06000000238419
     },
     {
       "name": "Original Bezier parent computes native counts and queues child work",
@@ -5821,7 +5831,7 @@
       "invalidGridRejected": true,
       "allFreed": true,
       "childrenExecuted": false,
-      "wallMs": 34.469999969005585
+      "wallMs": 27.1350000500679
     },
     {
       "name": "Original Bezier child and cleanup match all native curves",
@@ -5833,7 +5843,7 @@
       "allFreed": true,
       "parentSchedulingSupported": false,
       "launchCountsFromNativeFixture": true,
-      "wallMs": 57.55000001192093
+      "wallMs": 50.14999997615814
     },
     {
       "name": "Device allocations persist, match native CUDA and reuse freed slots",
@@ -5849,7 +5859,7 @@
       "capacityFailure": true,
       "zeroByteAllocation": true,
       "boundsIsolation": true,
-      "wallMs": 120.79000002145767
+      "wallMs": 104.30000001192093
     },
     {
       "name": "Bezier pointer records preserve opaque identity and clear independently",
@@ -5859,7 +5869,7 @@
       "opaquePointerBitsPreserved": true,
       "independentClear": true,
       "nativeAbi": false,
-      "wallMs": 22.764999985694885
+      "wallMs": 15.145000040531158
     },
     {
       "name": "CUDA vector free operators dispatch their declared bodies",
@@ -5867,7 +5877,7 @@
       "values": 8,
       "originalNvidiaOperators": true,
       "nonstandardOverloadBodyVerified": true,
-      "wallMs": 10.9549999833107
+      "wallMs": 10.769999980926514
     },
     {
       "name": "Reference chains and sequenced expression updates match native CUDA",
@@ -5875,17 +5885,17 @@
       "valuesMatched": 13,
       "negativeZeroSignPreserved": false,
       "comparison": "Exact numeric values; zero sign recorded separately",
-      "wallMs": 15.990000009536743
+      "wallMs": 12.010000050067902
     },
     {
       "name": "Packed uchar4 and Boolean launch snapshots match native CUDA",
       "pass": true,
-      "wallMs": 10.074999988079071
+      "wallMs": 8.604999959468842
     },
     {
       "name": "Desktop conditional extraction matches both native CUDA branches",
       "pass": true,
-      "wallMs": 14.009999990463257
+      "wallMs": 12.914999961853027
     },
     {
       "name": "Original NVIDIA bilateral filter matches native images and independent reference",
@@ -5919,7 +5929,7 @@
           "maxNativeReferenceError": 1
         }
       ],
-      "wallMs": 659.4250000119209
+      "wallMs": 619.1100000143051
     },
     {
       "name": "Original NVIDIA postProcessGL RGBA texture and shared tile match native images",
@@ -5971,62 +5981,62 @@
           "maxNativeReferenceError": 0
         }
       ],
-      "wallMs": 703.2400000095367
+      "wallMs": 700.2050000429153
     },
     {
       "name": "Indexed shared uchar4 macro and definition branches match native CUDA",
       "pass": true,
-      "wallMs": 13.4549999833107
+      "wallMs": 11.47000002861023
     },
     {
       "name": "Original NVIDIA FDTD3d stencil uses constant coefficients across three volume steps",
       "pass": true,
-      "wallMs": 70.02999997138977
+      "wallMs": 64.4099999666214
     },
     {
       "name": "Pointer shifts preserve float4 stride, negative halo origins, aliases and by-value helper pointers",
       "pass": true,
-      "wallMs": 11.165000021457672
+      "wallMs": 8.625
     },
     {
       "name": "GPU range copy uses byte offsets and preserves surrounding values",
       "pass": true,
-      "wallMs": 2.865000009536743
+      "wallMs": 2.8949999809265137
     },
     {
       "name": "Original NVIDIA recursive Gaussian four-pass RGBA image filter",
       "pass": true,
-      "wallMs": 88.01999998092651
+      "wallMs": 76.125
     },
     {
       "name": "Original NVIDIA simpleTexture3D samples real normalized 3D textures",
       "pass": true,
-      "wallMs": 38.794999957084656
+      "wallMs": 28.00499999523163
     },
     {
       "name": "Ray helper math uses runtime float vectors for normalization and dot products",
       "pass": true,
-      "wallMs": 13.849999964237213
+      "wallMs": 10.3299999833107
     },
     {
       "name": "Local structs and constant camera matrices retain value semantics on GPU",
       "pass": true,
-      "wallMs": 21.7150000333786
+      "wallMs": 17.655000030994415
     },
     {
       "name": "Paired 3D volume and 1D float4 transfer textures sample on NVIDIA hardware",
       "pass": true,
-      "wallMs": 23.009999990463257
+      "wallMs": 21.87999999523163
     },
     {
       "name": "Original NVIDIA volume matrix overloads and const references",
       "pass": true,
-      "wallMs": 14.490000009536743
+      "wallMs": 11.550000011920929
     },
     {
       "name": "Expression macros preserve signed IMAD and argument precedence on GPU",
       "pass": true,
-      "wallMs": 10.879999995231628
+      "wallMs": 10.985000014305115
     },
     {
       "name": "Complete original convolutionTexture matches native CUDA and independent reference",
@@ -6105,22 +6115,22 @@
           "noIntermediateCPUTransfer": true
         }
       ],
-      "wallMs": 281.85000002384186
+      "wallMs": 243.65499997138977
     },
     {
       "name": "Texture helpers forward distinct images and samplers through integer specializations",
       "pass": true,
-      "wallMs": 34.88499999046326
+      "wallMs": 32.049999952316284
     },
     {
       "name": "Volume and transfer textures pass through helper parameters",
       "pass": true,
-      "wallMs": 11.860000014305115
+      "wallMs": 10.959999978542328
     },
     {
       "name": "Unused 2D texture helper retains a valid shader module",
       "pass": true,
-      "wallMs": 7.504999995231628
+      "wallMs": 5.975000023841858
     },
     {
       "name": "Complete original bicubicTexture modes match native CUDA and independent reference",
@@ -6277,27 +6287,27 @@
           "failures": 0
         }
       ],
-      "wallMs": 394.9549999833107
+      "wallMs": 339.31999999284744
     },
     {
       "name": "Packed uchar4 matches native CUDA byte layout and promotions",
       "pass": true,
-      "wallMs": 18.535000026226044
+      "wallMs": 17.060000002384186
     },
     {
       "name": "Helper default arguments match native CUDA including templates and textures",
       "pass": true,
-      "wallMs": 18.935000002384186
+      "wallMs": 17.94000005722046
     },
     {
       "name": "Multiple helper template types match native CUDA including texture forwarding",
       "pass": true,
-      "wallMs": 18.99500000476837
+      "wallMs": 18.02999997138977
     },
     {
       "name": "Integer helper expressions terminate at negative specializations on GPU",
       "pass": true,
-      "wallMs": 22.064999997615814
+      "wallMs": 21.935000002384186
     },
     {
       "name": "Original NVIDIA surface write and texture pipeline matches native CUDA",
@@ -6327,7 +6337,7 @@
       ],
       "allSurfaceTexelsMatchInput": true,
       "oversizedDispatchRejected": true,
-      "wallMs": 94.27500003576279
+      "wallMs": 78.44499999284744
     },
     {
       "name": "Original NVIDIA 2D texture rotation matches native CUDA images",
@@ -6366,7 +6376,7 @@
           "pixels": 262144
         }
       ],
-      "wallMs": 95.02500003576279
+      "wallMs": 102.35500001907349
     },
     {
       "name": "Complete original NVIDIA volume renderer matches native CUDA images",
@@ -6394,32 +6404,32 @@
           "differentPixels": 2
         }
       ],
-      "wallMs": 52.00499999523163
+      "wallMs": 40.314999997615814
     },
     {
       "name": "Original NVIDIA Haar full transform with GPU coefficient range copies",
       "pass": true,
-      "wallMs": 56.42500001192093
+      "wallMs": 48.435000002384186
     },
     {
       "name": "Original NVIDIA separable convolution runs both passes with mutable pointer offsets",
       "pass": true,
-      "wallMs": 55.530000030994415
+      "wallMs": 52.65000003576279
     },
     {
       "name": "GPU rejects divergent entry into a helper barrier",
       "pass": true,
-      "wallMs": 0.7599999904632568
+      "wallMs": 0.8149999976158142
     },
     {
       "name": "SAXPY workgroup specialization 64",
       "pass": true,
-      "wallMs": 10.165000021457672
+      "wallMs": 8.175000011920929
     },
     {
       "name": "SAXPY workgroup specialization 256",
       "pass": true,
-      "wallMs": 8.175000011920929
+      "wallMs": 4.949999988079071
     },
     {
       "name": "Three r186 compute-to-render shared-buffer pixel test",
