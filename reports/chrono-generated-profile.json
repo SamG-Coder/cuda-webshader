@@ -1,0 +1,3777 @@
+{
+  "device": "NVIDIA RTX 5080",
+  "softwareAdapterRequested": false,
+  "caveat": "Diagnostic per-dispatch passes; timestamp quantization and instrumentation affect measurements. Excludes copies/readbacks/host waits.",
+  "results": [
+    {
+      "mode": "trimmed",
+      "steps": 50,
+      "shaders": [
+        {
+          "entry": "hashSelected",
+          "inputCharacters": 24217,
+          "originalCharacters": 166193,
+          "trimmedCharacters": 14690,
+          "selectedCharacters": 14690,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "f_calcGridPos",
+              "characters": 1206,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_reduceGridIndex",
+              "characters": 663,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_calcGridHash",
+              "characters": 1311,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 585,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 4,
+              "aggregateCopies": 0
+            }
+          ]
+        },
+        {
+          "entry": "findCellStartEndD",
+          "inputCharacters": 24217,
+          "originalCharacters": 167091,
+          "trimmedCharacters": 11487,
+          "selectedCharacters": 11487,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "main",
+              "characters": 1419,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 5,
+              "aggregateCopies": 0
+            }
+          ]
+        },
+        {
+          "entry": "neighborSearchNum",
+          "inputCharacters": 24217,
+          "originalCharacters": 211053,
+          "trimmedCharacters": 22619,
+          "selectedCharacters": 22619,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "f_calcGridPos",
+              "characters": 1206,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_reduceGridIndex",
+              "characters": 663,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_calcGridHash",
+              "characters": 1311,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_subtract",
+              "characters": 413,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShiftMultiPeriod",
+              "characters": 285,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShift",
+              "characters": 466,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_Modify_Local_PosB",
+              "characters": 2572,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 16
+            },
+            {
+              "name": "f_Distance",
+              "characters": 302,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_add",
+              "characters": 277,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 3803,
+              "loops": 4,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 5,
+              "aggregateCopies": 12
+            }
+          ]
+        },
+        {
+          "entry": "neighborSearchID",
+          "inputCharacters": 24217,
+          "originalCharacters": 211305,
+          "trimmedCharacters": 22871,
+          "selectedCharacters": 22871,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "f_calcGridPos",
+              "characters": 1206,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_reduceGridIndex",
+              "characters": 663,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_calcGridHash",
+              "characters": 1311,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_subtract",
+              "characters": 413,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShiftMultiPeriod",
+              "characters": 285,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShift",
+              "characters": 466,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_Modify_Local_PosB",
+              "characters": 2572,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 16
+            },
+            {
+              "name": "f_Distance",
+              "characters": 302,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_add",
+              "characters": 277,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 3987,
+              "loops": 4,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 8,
+              "aggregateCopies": 12
+            }
+          ]
+        },
+        {
+          "entry": "OriginalToSortedD",
+          "inputCharacters": 3024,
+          "originalCharacters": 835,
+          "trimmedCharacters": 835,
+          "selectedCharacters": 835,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "main",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 2,
+              "aggregateCopies": 0
+            }
+          ]
+        },
+        {
+          "entry": "reorderDataD",
+          "inputCharacters": 19691,
+          "originalCharacters": 33728,
+          "trimmedCharacters": 17322,
+          "selectedCharacters": 17322,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsFinite",
+              "characters": 360,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_printf_0",
+              "characters": 423,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 4,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_printf_1",
+              "characters": 423,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 4,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 3192,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 15,
+              "aggregateCopies": 52
+            }
+          ]
+        },
+        {
+          "entry": "UpdateActivityD",
+          "inputCharacters": 21592,
+          "originalCharacters": 115349,
+          "trimmedCharacters": 48304,
+          "selectedCharacters": 48304,
+          "comparisonCandidates": 1,
+          "functions": [
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_2_make_Real3",
+              "characters": 239,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsFluidParticle",
+              "characters": 225,
+              "loops": 0,
+              "doubleCalls": 3,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_inAABB",
+              "characters": 538,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_reference_helper_0",
+              "characters": 24884,
+              "loops": 3,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 215,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 5138,
+              "loops": 0,
+              "doubleCalls": 4,
+              "correctedDivisions": 0,
+              "storageReferences": 9,
+              "aggregateCopies": 20
+            }
+          ]
+        },
+        {
+          "entry": "normalizeActivity",
+          "inputCharacters": 1169,
+          "originalCharacters": 849,
+          "trimmedCharacters": 849,
+          "selectedCharacters": 849,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "main",
+              "characters": 410,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 2,
+              "aggregateCopies": 0
+            }
+          ]
+        },
+        {
+          "entry": "fillActiveListD",
+          "inputCharacters": 1169,
+          "originalCharacters": 953,
+          "trimmedCharacters": 953,
+          "selectedCharacters": 953,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "main",
+              "characters": 424,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 3,
+              "aggregateCopies": 0
+            }
+          ]
+        },
+        {
+          "entry": "CopySortedToOriginalWCSPH_D",
+          "inputCharacters": 214369,
+          "originalCharacters": 330120,
+          "trimmedCharacters": 15659,
+          "selectedCharacters": 15659,
+          "comparisonCandidates": 8,
+          "functions": [
+            {
+              "name": "f_IsInMarkerGroup",
+              "characters": 1029,
+              "loops": 0,
+              "doubleCalls": 20,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 1865,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 16,
+              "aggregateCopies": 31
+            }
+          ]
+        },
+        {
+          "entry": "EulerStep_D",
+          "inputCharacters": 211661,
+          "originalCharacters": 619528,
+          "trimmedCharacters": 49905,
+          "selectedCharacters": 49905,
+          "comparisonCandidates": 1,
+          "functions": [
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_subtract",
+              "characters": 413,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_square",
+              "characters": 149,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsBceMarker",
+              "characters": 221,
+              "loops": 0,
+              "doubleCalls": 3,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_2_make_Real3",
+              "characters": 239,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_4_cw_binary_add",
+              "characters": 422,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_5_cw_compound_add",
+              "characters": 384,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_8_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_divide",
+              "characters": 390,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_9_make_Real4",
+              "characters": 421,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_12_make_Real4",
+              "characters": 344,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_13_IsFinite",
+              "characters": 442,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_compound_multiply",
+              "characters": 318,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_14_IsFinite",
+              "characters": 375,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_Eos",
+              "characters": 984,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_reference_helper_0",
+              "characters": 848,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 3,
+              "aggregateCopies": 9
+            },
+            {
+              "name": "f_cw_reference_helper_1",
+              "characters": 340,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_reference_helper_2",
+              "characters": 17976,
+              "loops": 0,
+              "doubleCalls": 107,
+              "correctedDivisions": 3,
+              "storageReferences": 58,
+              "aggregateCopies": 96
+            },
+            {
+              "name": "f_cw_reference_helper_3",
+              "characters": 448,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 5,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_reference_helper_4",
+              "characters": 397,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 6,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_reference_helper_5",
+              "characters": 415,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 6,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 2018,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 6,
+              "aggregateCopies": 0
+            }
+          ]
+        },
+        {
+          "entry": "ApplyPeriodicBoundaryY_D",
+          "inputCharacters": 211661,
+          "originalCharacters": 376694,
+          "trimmedCharacters": 16548,
+          "selectedCharacters": 16548,
+          "comparisonCandidates": 1,
+          "functions": [
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsBceMarker",
+              "characters": 221,
+              "loops": 0,
+              "doubleCalls": 3,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_9_make_Real4",
+              "characters": 421,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_12_make_Real4",
+              "characters": 344,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 3272,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 7,
+              "aggregateCopies": 29
+            }
+          ]
+        },
+        {
+          "entry": "Calc_Shifting_D<ShiftingMethod::XSPH>",
+          "inputCharacters": 194607,
+          "originalCharacters": 299697,
+          "trimmedCharacters": 30930,
+          "selectedCharacters": 30930,
+          "comparisonCandidates": 1,
+          "functions": [
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_subtract",
+              "characters": 413,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShiftMultiPeriod",
+              "characters": 285,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShift",
+              "characters": 466,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_Modify_Local_PosB",
+              "characters": 2572,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 16
+            },
+            {
+              "name": "f_Distance",
+              "characters": 302,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_square",
+              "characters": 149,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cube",
+              "characters": 155,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_quartic",
+              "characters": 166,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_quintic",
+              "characters": 174,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_CubicSpline",
+              "characters": 763,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_Quadratic",
+              "characters": 514,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_QuinticSpline",
+              "characters": 913,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_Wendland",
+              "characters": 515,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h",
+              "characters": 668,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsFluidParticle",
+              "characters": 225,
+              "loops": 0,
+              "doubleCalls": 3,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_2_make_Real3",
+              "characters": 239,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_5_cw_compound_add",
+              "characters": 384,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_7_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_8_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_divide",
+              "characters": 390,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_dot",
+              "characters": 334,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_14_IsFinite",
+              "characters": 375,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_printf_1",
+              "characters": 423,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 4,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_buffer_helper_0",
+              "characters": 3174,
+              "loops": 1,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 5,
+              "aggregateCopies": 17
+            },
+            {
+              "name": "main",
+              "characters": 2975,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 8,
+              "aggregateCopies": 33
+            }
+          ]
+        },
+        {
+          "entry": "CfdAdamiBC_D",
+          "inputCharacters": 30209,
+          "originalCharacters": 276390,
+          "trimmedCharacters": 37555,
+          "selectedCharacters": 37555,
+          "comparisonCandidates": 3,
+          "functions": [
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_subtract",
+              "characters": 413,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShiftMultiPeriod",
+              "characters": 285,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShift",
+              "characters": 466,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_Modify_Local_PosB",
+              "characters": 2572,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 16
+            },
+            {
+              "name": "f_Distance",
+              "characters": 302,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_square",
+              "characters": 149,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cube",
+              "characters": 155,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_quartic",
+              "characters": 166,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_quintic",
+              "characters": 174,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_CubicSpline",
+              "characters": 763,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_Quadratic",
+              "characters": 514,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_QuinticSpline",
+              "characters": 913,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_Wendland",
+              "characters": 515,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h",
+              "characters": 668,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_InvEos",
+              "characters": 1561,
+              "loops": 0,
+              "doubleCalls": 9,
+              "correctedDivisions": 4,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsFluidParticle",
+              "characters": 225,
+              "loops": 0,
+              "doubleCalls": 3,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsBceMarker",
+              "characters": 221,
+              "loops": 0,
+              "doubleCalls": 3,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsBceSolidMarker",
+              "characters": 216,
+              "loops": 0,
+              "doubleCalls": 2,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_2_make_Real3",
+              "characters": 239,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_compound_add",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_5_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_6_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_divide",
+              "characters": 390,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_dot",
+              "characters": 334,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_length",
+              "characters": 213,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 4996,
+              "loops": 1,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 20,
+              "aggregateCopies": 36
+            }
+          ]
+        },
+        {
+          "entry": "CfdCalcRHS_D",
+          "inputCharacters": 186284,
+          "originalCharacters": 1203454,
+          "trimmedCharacters": 476139,
+          "selectedCharacters": 476139,
+          "comparisonCandidates": 9,
+          "functions": [
+            {
+              "name": "f_calcGridPos",
+              "characters": 1206,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_subtract",
+              "characters": 413,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShiftMultiPeriod",
+              "characters": 285,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShift",
+              "characters": 466,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_Modify_Local_PosB",
+              "characters": 2572,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 16
+            },
+            {
+              "name": "f_Distance",
+              "characters": 302,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_square",
+              "characters": 149,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cube",
+              "characters": 155,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_quartic",
+              "characters": 166,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_quintic",
+              "characters": 174,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_CubicSpline",
+              "characters": 763,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_Quadratic",
+              "characters": 514,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_QuinticSpline",
+              "characters": 913,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_Wendland",
+              "characters": 515,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h",
+              "characters": 668,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsFluidParticle",
+              "characters": 225,
+              "loops": 0,
+              "doubleCalls": 3,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsBceMarker",
+              "characters": 221,
+              "loops": 0,
+              "doubleCalls": 3,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_2_make_Real3",
+              "characters": 239,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_4_cw_binary_add",
+              "characters": 422,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_5_cw_compound_add",
+              "characters": 384,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_7_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_8_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_divide",
+              "characters": 390,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_dot",
+              "characters": 334,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_length",
+              "characters": 213,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_9_make_Real4",
+              "characters": 421,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_10_make_Real4",
+              "characters": 245,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_11_make_Real4",
+              "characters": 329,
+              "loops": 0,
+              "doubleCalls": 1,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_12_make_Real4",
+              "characters": 344,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_unary_minus",
+              "characters": 275,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_6_cw_compound_add",
+              "characters": 444,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsFinite",
+              "characters": 427,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_GradW3h_CubicSpline",
+              "characters": 1087,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_GradW3h_Quadratic",
+              "characters": 796,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_GradW3h_QuinticSpline",
+              "characters": 1494,
+              "loops": 0,
+              "doubleCalls": 2,
+              "correctedDivisions": 4,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_GradW3h_Wendland",
+              "characters": 850,
+              "loops": 0,
+              "doubleCalls": 2,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_GradW3h",
+              "characters": 806,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsBceWallMarker",
+              "characters": 289,
+              "loops": 0,
+              "doubleCalls": 5,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsSphParticle",
+              "characters": 297,
+              "loops": 0,
+              "doubleCalls": 6,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_printf_0",
+              "characters": 304,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 3,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_buffer_helper_0",
+              "characters": 5536,
+              "loops": 2,
+              "doubleCalls": 5,
+              "correctedDivisions": 1,
+              "storageReferences": 8,
+              "aggregateCopies": 20
+            },
+            {
+              "name": "f_cw_buffer_helper_1",
+              "characters": 6117,
+              "loops": 1,
+              "doubleCalls": 3,
+              "correctedDivisions": 1,
+              "storageReferences": 8,
+              "aggregateCopies": 16
+            },
+            {
+              "name": "f_cw_buffer_helper_2",
+              "characters": 8419,
+              "loops": 1,
+              "doubleCalls": 3,
+              "correctedDivisions": 1,
+              "storageReferences": 8,
+              "aggregateCopies": 20
+            },
+            {
+              "name": "f_cw_buffer_helper_3",
+              "characters": 6621,
+              "loops": 0,
+              "doubleCalls": 16,
+              "correctedDivisions": 11,
+              "storageReferences": 0,
+              "aggregateCopies": 12
+            },
+            {
+              "name": "f_cw_buffer_helper_4",
+              "characters": 1858,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 4
+            },
+            {
+              "name": "f_cw_buffer_helper_5",
+              "characters": 2923,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 12
+            },
+            {
+              "name": "f_cw_buffer_helper_6",
+              "characters": 388056,
+              "loops": 1,
+              "doubleCalls": 6,
+              "correctedDivisions": 6,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 16911,
+              "loops": 1,
+              "doubleCalls": 14,
+              "correctedDivisions": 6,
+              "storageReferences": 33,
+              "aggregateCopies": 89
+            }
+          ]
+        }
+      ],
+      "gpu": {
+        "UpdateActivityD": {
+          "milliseconds": 0.065536,
+          "dispatches": 51
+        },
+        "normalizeActivity": {
+          "milliseconds": 0,
+          "dispatches": 51
+        },
+        "scanBlocks": {
+          "milliseconds": 0.65536,
+          "dispatches": 204
+        },
+        "addScanOffsets": {
+          "milliseconds": 0.131072,
+          "dispatches": 102
+        },
+        "fillActiveListD": {
+          "milliseconds": 0.131072,
+          "dispatches": 51
+        },
+        "hashSelected": {
+          "milliseconds": 0.131072,
+          "dispatches": 51
+        },
+        "sortPrepare": {
+          "milliseconds": 0.065536,
+          "dispatches": 51
+        },
+        "sortStage": {
+          "milliseconds": 11.20665599999998,
+          "dispatches": 6120
+        },
+        "sortFinish": {
+          "milliseconds": 0.131072,
+          "dispatches": 51
+        },
+        "OriginalToSortedD": {
+          "milliseconds": 0.131072,
+          "dispatches": 51
+        },
+        "reorderDataD": {
+          "milliseconds": 0.196608,
+          "dispatches": 51
+        },
+        "findCellStartEndD": {
+          "milliseconds": 0.131072,
+          "dispatches": 51
+        },
+        "neighborSearchNum": {
+          "milliseconds": 4.915199999999996,
+          "dispatches": 51
+        },
+        "neighborSearchID": {
+          "milliseconds": 6.7502079999999935,
+          "dispatches": 51
+        },
+        "CfdAdamiBC_D": {
+          "milliseconds": 3.1457279999999974,
+          "dispatches": 100
+        },
+        "CfdCalcRHS_D": {
+          "milliseconds": 38.20748800000003,
+          "dispatches": 100
+        },
+        "Calc_Shifting_D": {
+          "milliseconds": 2.8180479999999983,
+          "dispatches": 100
+        },
+        "EulerStep_D": {
+          "milliseconds": 0.9830400000000002,
+          "dispatches": 100
+        },
+        "ApplyPeriodicBoundaryY_D": {
+          "milliseconds": 0.196608,
+          "dispatches": 100
+        },
+        "CopySortedToOriginalWCSPH_D": {
+          "milliseconds": 0.39321599999999995,
+          "dispatches": 50
+        }
+      }
+    },
+    {
+      "mode": "comparisons",
+      "steps": 50,
+      "shaders": [
+        {
+          "entry": "hashSelected",
+          "inputCharacters": 24217,
+          "originalCharacters": 166193,
+          "trimmedCharacters": 14690,
+          "selectedCharacters": 14691,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "f_calcGridPos",
+              "characters": 1206,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_reduceGridIndex",
+              "characters": 663,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_calcGridHash",
+              "characters": 1311,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 585,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 4,
+              "aggregateCopies": 0
+            }
+          ]
+        },
+        {
+          "entry": "findCellStartEndD",
+          "inputCharacters": 24217,
+          "originalCharacters": 167091,
+          "trimmedCharacters": 11487,
+          "selectedCharacters": 11488,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "main",
+              "characters": 1419,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 5,
+              "aggregateCopies": 0
+            }
+          ]
+        },
+        {
+          "entry": "neighborSearchNum",
+          "inputCharacters": 24217,
+          "originalCharacters": 211053,
+          "trimmedCharacters": 22619,
+          "selectedCharacters": 22620,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "f_calcGridPos",
+              "characters": 1206,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_reduceGridIndex",
+              "characters": 663,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_calcGridHash",
+              "characters": 1311,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_subtract",
+              "characters": 413,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShiftMultiPeriod",
+              "characters": 285,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShift",
+              "characters": 466,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_Modify_Local_PosB",
+              "characters": 2572,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 16
+            },
+            {
+              "name": "f_Distance",
+              "characters": 302,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_add",
+              "characters": 277,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 3803,
+              "loops": 4,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 5,
+              "aggregateCopies": 12
+            }
+          ]
+        },
+        {
+          "entry": "neighborSearchID",
+          "inputCharacters": 24217,
+          "originalCharacters": 211305,
+          "trimmedCharacters": 22871,
+          "selectedCharacters": 22872,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "f_calcGridPos",
+              "characters": 1206,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_reduceGridIndex",
+              "characters": 663,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_calcGridHash",
+              "characters": 1311,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_subtract",
+              "characters": 413,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShiftMultiPeriod",
+              "characters": 285,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShift",
+              "characters": 466,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_Modify_Local_PosB",
+              "characters": 2572,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 16
+            },
+            {
+              "name": "f_Distance",
+              "characters": 302,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_add",
+              "characters": 277,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 3987,
+              "loops": 4,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 8,
+              "aggregateCopies": 12
+            }
+          ]
+        },
+        {
+          "entry": "OriginalToSortedD",
+          "inputCharacters": 3024,
+          "originalCharacters": 835,
+          "trimmedCharacters": 835,
+          "selectedCharacters": 836,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "main",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 2,
+              "aggregateCopies": 0
+            }
+          ]
+        },
+        {
+          "entry": "reorderDataD",
+          "inputCharacters": 19691,
+          "originalCharacters": 33728,
+          "trimmedCharacters": 17322,
+          "selectedCharacters": 17323,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsFinite",
+              "characters": 360,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_printf_0",
+              "characters": 423,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 4,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_printf_1",
+              "characters": 423,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 4,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 3192,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 15,
+              "aggregateCopies": 52
+            }
+          ]
+        },
+        {
+          "entry": "UpdateActivityD",
+          "inputCharacters": 21592,
+          "originalCharacters": 115349,
+          "trimmedCharacters": 48304,
+          "selectedCharacters": 48518,
+          "comparisonCandidates": 1,
+          "functions": [
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_2_make_Real3",
+              "characters": 239,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsFluidParticle",
+              "characters": 206,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_inAABB",
+              "characters": 538,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_reference_helper_0",
+              "characters": 24884,
+              "loops": 3,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 215,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 5138,
+              "loops": 0,
+              "doubleCalls": 4,
+              "correctedDivisions": 0,
+              "storageReferences": 9,
+              "aggregateCopies": 20
+            }
+          ]
+        },
+        {
+          "entry": "normalizeActivity",
+          "inputCharacters": 1169,
+          "originalCharacters": 849,
+          "trimmedCharacters": 849,
+          "selectedCharacters": 850,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "main",
+              "characters": 410,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 2,
+              "aggregateCopies": 0
+            }
+          ]
+        },
+        {
+          "entry": "fillActiveListD",
+          "inputCharacters": 1169,
+          "originalCharacters": 953,
+          "trimmedCharacters": 953,
+          "selectedCharacters": 954,
+          "comparisonCandidates": 0,
+          "functions": [
+            {
+              "name": "main",
+              "characters": 424,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 3,
+              "aggregateCopies": 0
+            }
+          ]
+        },
+        {
+          "entry": "CopySortedToOriginalWCSPH_D",
+          "inputCharacters": 214369,
+          "originalCharacters": 330120,
+          "trimmedCharacters": 15659,
+          "selectedCharacters": 14258,
+          "comparisonCandidates": 8,
+          "functions": [
+            {
+              "name": "f_IsInMarkerGroup",
+              "characters": 917,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 1865,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 16,
+              "aggregateCopies": 31
+            }
+          ]
+        },
+        {
+          "entry": "EulerStep_D",
+          "inputCharacters": 211661,
+          "originalCharacters": 619528,
+          "trimmedCharacters": 49905,
+          "selectedCharacters": 50194,
+          "comparisonCandidates": 1,
+          "functions": [
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_subtract",
+              "characters": 413,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_square",
+              "characters": 149,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsBceMarker",
+              "characters": 202,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_2_make_Real3",
+              "characters": 239,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_4_cw_binary_add",
+              "characters": 422,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_5_cw_compound_add",
+              "characters": 384,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_8_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_divide",
+              "characters": 390,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_9_make_Real4",
+              "characters": 421,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_12_make_Real4",
+              "characters": 344,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_13_IsFinite",
+              "characters": 442,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_compound_multiply",
+              "characters": 318,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_14_IsFinite",
+              "characters": 375,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_Eos",
+              "characters": 984,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_reference_helper_0",
+              "characters": 848,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 3,
+              "aggregateCopies": 9
+            },
+            {
+              "name": "f_cw_reference_helper_1",
+              "characters": 340,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_reference_helper_2",
+              "characters": 17976,
+              "loops": 0,
+              "doubleCalls": 107,
+              "correctedDivisions": 3,
+              "storageReferences": 58,
+              "aggregateCopies": 96
+            },
+            {
+              "name": "f_cw_reference_helper_3",
+              "characters": 448,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 5,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_reference_helper_4",
+              "characters": 397,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 6,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_reference_helper_5",
+              "characters": 415,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 6,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 2018,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 6,
+              "aggregateCopies": 0
+            }
+          ]
+        },
+        {
+          "entry": "ApplyPeriodicBoundaryY_D",
+          "inputCharacters": 211661,
+          "originalCharacters": 376694,
+          "trimmedCharacters": 16548,
+          "selectedCharacters": 15240,
+          "comparisonCandidates": 1,
+          "functions": [
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsBceMarker",
+              "characters": 202,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_9_make_Real4",
+              "characters": 421,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_12_make_Real4",
+              "characters": 344,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 3272,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 7,
+              "aggregateCopies": 29
+            }
+          ]
+        },
+        {
+          "entry": "Calc_Shifting_D<ShiftingMethod::XSPH>",
+          "inputCharacters": 194607,
+          "originalCharacters": 299697,
+          "trimmedCharacters": 30930,
+          "selectedCharacters": 29622,
+          "comparisonCandidates": 1,
+          "functions": [
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_subtract",
+              "characters": 413,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShiftMultiPeriod",
+              "characters": 285,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShift",
+              "characters": 466,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_Modify_Local_PosB",
+              "characters": 2572,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 16
+            },
+            {
+              "name": "f_Distance",
+              "characters": 302,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_square",
+              "characters": 149,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cube",
+              "characters": 155,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_quartic",
+              "characters": 166,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_quintic",
+              "characters": 174,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_CubicSpline",
+              "characters": 763,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_Quadratic",
+              "characters": 514,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_QuinticSpline",
+              "characters": 913,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_Wendland",
+              "characters": 515,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h",
+              "characters": 668,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsFluidParticle",
+              "characters": 206,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_2_make_Real3",
+              "characters": 239,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_5_cw_compound_add",
+              "characters": 384,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_7_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_8_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_divide",
+              "characters": 390,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_dot",
+              "characters": 334,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_14_IsFinite",
+              "characters": 375,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_printf_1",
+              "characters": 423,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 4,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_buffer_helper_0",
+              "characters": 3174,
+              "loops": 1,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 5,
+              "aggregateCopies": 17
+            },
+            {
+              "name": "main",
+              "characters": 2975,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 8,
+              "aggregateCopies": 33
+            }
+          ]
+        },
+        {
+          "entry": "CfdAdamiBC_D",
+          "inputCharacters": 30209,
+          "originalCharacters": 276390,
+          "trimmedCharacters": 37555,
+          "selectedCharacters": 37361,
+          "comparisonCandidates": 3,
+          "functions": [
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_subtract",
+              "characters": 413,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShiftMultiPeriod",
+              "characters": 285,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShift",
+              "characters": 466,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_Modify_Local_PosB",
+              "characters": 2572,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 16
+            },
+            {
+              "name": "f_Distance",
+              "characters": 302,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_square",
+              "characters": 149,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cube",
+              "characters": 155,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_quartic",
+              "characters": 166,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_quintic",
+              "characters": 174,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_CubicSpline",
+              "characters": 763,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_Quadratic",
+              "characters": 514,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_QuinticSpline",
+              "characters": 913,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_Wendland",
+              "characters": 515,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h",
+              "characters": 668,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_InvEos",
+              "characters": 1561,
+              "loops": 0,
+              "doubleCalls": 9,
+              "correctedDivisions": 4,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsFluidParticle",
+              "characters": 206,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsBceMarker",
+              "characters": 202,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsBceSolidMarker",
+              "characters": 207,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_2_make_Real3",
+              "characters": 239,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_compound_add",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_5_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_6_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_divide",
+              "characters": 390,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_dot",
+              "characters": 334,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_length",
+              "characters": 213,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 4996,
+              "loops": 1,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 20,
+              "aggregateCopies": 36
+            }
+          ]
+        },
+        {
+          "entry": "CfdCalcRHS_D",
+          "inputCharacters": 186284,
+          "originalCharacters": 1203454,
+          "trimmedCharacters": 476139,
+          "selectedCharacters": 476211,
+          "comparisonCandidates": 9,
+          "functions": [
+            {
+              "name": "f_calcGridPos",
+              "characters": 1206,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_0_make_Real3",
+              "characters": 355,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_1_make_Real3",
+              "characters": 296,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_subtract",
+              "characters": 413,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShiftMultiPeriod",
+              "characters": 285,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_MinimumImageShift",
+              "characters": 466,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_Modify_Local_PosB",
+              "characters": 2572,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 16
+            },
+            {
+              "name": "f_Distance",
+              "characters": 302,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_square",
+              "characters": 149,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cube",
+              "characters": 155,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_quartic",
+              "characters": 166,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_quintic",
+              "characters": 174,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_CubicSpline",
+              "characters": 763,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_Quadratic",
+              "characters": 514,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_QuinticSpline",
+              "characters": 913,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h_Wendland",
+              "characters": 515,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_W3h",
+              "characters": 668,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsFluidParticle",
+              "characters": 206,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsBceMarker",
+              "characters": 202,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_2_make_Real3",
+              "characters": 239,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_4_cw_binary_add",
+              "characters": 422,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_5_cw_compound_add",
+              "characters": 384,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_7_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_8_cw_binary_multiply",
+              "characters": 370,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_binary_divide",
+              "characters": 390,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_dot",
+              "characters": 334,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_length",
+              "characters": 213,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_9_make_Real4",
+              "characters": 421,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_10_make_Real4",
+              "characters": 245,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_11_make_Real4",
+              "characters": 329,
+              "loops": 0,
+              "doubleCalls": 1,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_12_make_Real4",
+              "characters": 344,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_unary_minus",
+              "characters": 275,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_overload_6_cw_compound_add",
+              "characters": 444,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsFinite",
+              "characters": 427,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_GradW3h_CubicSpline",
+              "characters": 1087,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 3,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_GradW3h_Quadratic",
+              "characters": 796,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_GradW3h_QuinticSpline",
+              "characters": 1494,
+              "loops": 0,
+              "doubleCalls": 2,
+              "correctedDivisions": 4,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_GradW3h_Wendland",
+              "characters": 850,
+              "loops": 0,
+              "doubleCalls": 2,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_GradW3h",
+              "characters": 806,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsBceWallMarker",
+              "characters": 261,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_IsSphParticle",
+              "characters": 259,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_printf_0",
+              "characters": 304,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 0,
+              "storageReferences": 3,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "f_cw_buffer_helper_0",
+              "characters": 5517,
+              "loops": 2,
+              "doubleCalls": 2,
+              "correctedDivisions": 1,
+              "storageReferences": 8,
+              "aggregateCopies": 20
+            },
+            {
+              "name": "f_cw_buffer_helper_1",
+              "characters": 6098,
+              "loops": 1,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 8,
+              "aggregateCopies": 16
+            },
+            {
+              "name": "f_cw_buffer_helper_2",
+              "characters": 8400,
+              "loops": 1,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 8,
+              "aggregateCopies": 20
+            },
+            {
+              "name": "f_cw_buffer_helper_3",
+              "characters": 6621,
+              "loops": 0,
+              "doubleCalls": 16,
+              "correctedDivisions": 11,
+              "storageReferences": 0,
+              "aggregateCopies": 12
+            },
+            {
+              "name": "f_cw_buffer_helper_4",
+              "characters": 1858,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 1,
+              "storageReferences": 0,
+              "aggregateCopies": 4
+            },
+            {
+              "name": "f_cw_buffer_helper_5",
+              "characters": 2923,
+              "loops": 0,
+              "doubleCalls": 0,
+              "correctedDivisions": 2,
+              "storageReferences": 0,
+              "aggregateCopies": 12
+            },
+            {
+              "name": "f_cw_buffer_helper_6",
+              "characters": 388056,
+              "loops": 1,
+              "doubleCalls": 6,
+              "correctedDivisions": 6,
+              "storageReferences": 0,
+              "aggregateCopies": 0
+            },
+            {
+              "name": "main",
+              "characters": 16911,
+              "loops": 1,
+              "doubleCalls": 14,
+              "correctedDivisions": 6,
+              "storageReferences": 33,
+              "aggregateCopies": 89
+            }
+          ]
+        }
+      ],
+      "gpu": {
+        "UpdateActivityD": {
+          "milliseconds": 0.45875199999999994,
+          "dispatches": 51
+        },
+        "normalizeActivity": {
+          "milliseconds": 0.065536,
+          "dispatches": 51
+        },
+        "scanBlocks": {
+          "milliseconds": 2.0971520000000003,
+          "dispatches": 204
+        },
+        "addScanOffsets": {
+          "milliseconds": 1.8350080000000002,
+          "dispatches": 102
+        },
+        "fillActiveListD": {
+          "milliseconds": 0.065536,
+          "dispatches": 51
+        },
+        "hashSelected": {
+          "milliseconds": 0.262144,
+          "dispatches": 51
+        },
+        "sortPrepare": {
+          "milliseconds": 0.32767999999999997,
+          "dispatches": 51
+        },
+        "sortStage": {
+          "milliseconds": 13.959167999999972,
+          "dispatches": 6120
+        },
+        "sortFinish": {
+          "milliseconds": 0.131072,
+          "dispatches": 51
+        },
+        "OriginalToSortedD": {
+          "milliseconds": 0.131072,
+          "dispatches": 51
+        },
+        "reorderDataD": {
+          "milliseconds": 1.6384,
+          "dispatches": 51
+        },
+        "findCellStartEndD": {
+          "milliseconds": 0,
+          "dispatches": 51
+        },
+        "neighborSearchNum": {
+          "milliseconds": 4.587519999999997,
+          "dispatches": 51
+        },
+        "neighborSearchID": {
+          "milliseconds": 6.160383999999994,
+          "dispatches": 51
+        },
+        "CfdAdamiBC_D": {
+          "milliseconds": 1.9005440000000007,
+          "dispatches": 100
+        },
+        "CfdCalcRHS_D": {
+          "milliseconds": 39.97696000000004,
+          "dispatches": 100
+        },
+        "Calc_Shifting_D": {
+          "milliseconds": 3.8010879999999956,
+          "dispatches": 100
+        },
+        "EulerStep_D": {
+          "milliseconds": 2.6869759999999987,
+          "dispatches": 100
+        },
+        "ApplyPeriodicBoundaryY_D": {
+          "milliseconds": 0.131072,
+          "dispatches": 100
+        },
+        "CopySortedToOriginalWCSPH_D": {
+          "milliseconds": 0.524288,
+          "dispatches": 50
+        }
+      }
+    }
+  ]
+}

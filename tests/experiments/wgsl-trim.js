@@ -1,7 +1,7 @@
 // Experimental post-emission pass. Never imported by the production compiler.
 // Intentionally recognizes only constructors made from uniform fields and
 // typed literals. Unknown expressions, calls, indexing and mutable reads stay.
-function tokens(source){
+export function tokens(source){
  const out=[];let i=0;
  while(i<source.length){
   if(/\s/.test(source[i])){i++;continue;}
@@ -12,7 +12,7 @@ function tokens(source){
  }
  return out;
 }
-function pairs(t){const result=new Map(),stack=[];for(let i=0;i<t.length;i++){const v=t[i].value;if(v==='('||v==='{')stack.push(i);else if(v===')'||v==='}'){const open=stack.pop();if(open===undefined||t[open].value!==(v===')'?'(':'{'))throw Error('Unbalanced WGSL');result.set(open,i);}}if(stack.length)throw Error('Unbalanced WGSL');return result;}
+export function pairs(t){const result=new Map(),stack=[];for(let i=0;i<t.length;i++){const v=t[i].value;if(v==='('||v==='{')stack.push(i);else if(v===')'||v==='}'){const open=stack.pop();if(open===undefined||t[open].value!==(v===')'?'(':'{'))throw Error('Unbalanced WGSL');result.set(open,i);}}if(stack.length)throw Error('Unbalanced WGSL');return result;}
 function structs(t,match){
  const result=new Map();
  for(let i=0;i<t.length-2;i++)if(t[i].value==='struct'&&t[i+2].value==='{'){
@@ -25,7 +25,7 @@ function structs(t,match){
  }
  return result;
 }
-function apply(source,edits){let output='',cursor=0;for(const e of edits){output+=source.slice(cursor,e.start)+e.text;cursor=e.end;}return output+source.slice(cursor);}
+export function apply(source,edits){let output='',cursor=0;for(const e of edits){output+=source.slice(cursor,e.start)+e.text;cursor=e.end;}return output+source.slice(cursor);}
 
 export function trimWgsl(artifact){
  let source=artifact.wgsl,projections=0,removedFunctions=0;

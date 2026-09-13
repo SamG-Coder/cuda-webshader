@@ -1,0 +1,18 @@
+{
+  "pass": true,
+  "values": 4112,
+  "operations": 32896,
+  "shifts": [
+    -512,
+    -149,
+    -1,
+    0,
+    1,
+    24,
+    127,
+    512
+  ],
+  "exactGpuBits": true,
+  "independentReference": true,
+  "softwareAdapterRequested": false
+}

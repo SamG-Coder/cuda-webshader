@@ -1,0 +1,18 @@
+{
+  "pass": true,
+  "values": 5064,
+  "comparisons": 30384,
+  "replacements": 4,
+  "exactGpuMatch": true,
+  "independentReference": true,
+  "includes": [
+    "NaNs",
+    "infinities",
+    "signed zero",
+    "subnormals",
+    "normal boundaries",
+    "nonrepresentable f64 constants",
+    "actual f64 arithmetic"
+  ],
+  "softwareAdapterRequested": false
+}
