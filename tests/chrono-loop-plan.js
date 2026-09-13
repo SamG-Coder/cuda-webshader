@@ -5,7 +5,7 @@ import {createChronoStep} from './chrono-step-plan.js';
 // Validate the completed step while obtaining the next active count, so the
 // next physics step cannot start until the previous diagnostics are checked.
 export async function createChronoLoop(runtime,params,count,options={}){
- const rebuild=await createChronoRebuild(runtime,params,count,options);
+ const rebuild=await createChronoRebuild(runtime,params,count,{...options,gpuActiveCount:true});
  let step;
  try{step=await createChronoStep(runtime,params,{...options,deferDiagnostics:true});}
  catch(error){rebuild.dispose();throw error;}

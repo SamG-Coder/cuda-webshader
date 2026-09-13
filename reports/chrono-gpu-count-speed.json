@@ -1,0 +1,52 @@
+{
+  "workload": "Original CUDA Chrono SPH, real NVIDIA Edge, unchanged timestep",
+  "steps": 10000,
+  "simulatedSeconds": 1,
+  "beforeMs": 74052.33999997377,
+  "afterMs": 42686.98999994993,
+  "speedup": 1.734775396439539,
+  "sameState": true,
+  "sameCounts": true,
+  "beforeHash": "d85240ced8077e4df74f9879a6cb0eb4163e92189e317be6aa447a941907d872",
+  "afterHash": "d85240ced8077e4df74f9879a6cb0eb4163e92189e317be6aa447a941907d872",
+  "preview": {
+    "before": {
+      "steps": 1372,
+      "elapsedMs": 10002.199999988079,
+      "stepsPerSecond": 137.1698226391829,
+      "simulatedSecondsPerWallSecond": 0.01371698226391829,
+      "stopped": 1399,
+      "device": "nvidia",
+      "viewport": [
+        1600,
+        1000
+      ]
+    },
+    "after": {
+      "steps": 2370,
+      "elapsedMs": 10000.185000002384,
+      "stepsPerSecond": 236.99561558105523,
+      "simulatedSecondsPerWallSecond": 0.023699561558105528,
+      "stopped": 2397,
+      "device": "nvidia",
+      "viewport": [
+        1600,
+        1000
+      ]
+    },
+    "speedup": 1.7277533135291583
+  },
+  "nativeApplication": {
+    "exitCode": 0,
+    "elapsedMs": 14239.2772,
+    "steps": 10000,
+    "note": "Whole Chrono native application process including startup and output; no concurrent GPU benchmark"
+  },
+  "nativeReplay": {
+    "exitCode": 0,
+    "steps": 10000,
+    "elapsedMs": 9648.7275,
+    "note": "Whole native process including startup and output; no concurrent GPU benchmark"
+  },
+  "note": "Single-run headless measurements; preview includes rendering. Native timings include process startup/output and different host orchestration. GPU-produced integer parameters eliminate the active-count CPU readback; active count, neighbour total and previous diagnostics are read together. No CUDA source or compiler changes."
+}

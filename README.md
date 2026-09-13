@@ -661,3 +661,14 @@ physics step, and every step rebuilds neighbours from current positions.
 These remain single-run, real NVIDIA headless Edge measurements; the simulation
 is still slower than real time. See [combined-readback results](reports/chrono-combined-readback-speed.json).
 Reproduce the scheduled loop with `node scripts/bench-chrono-loop.mjs 10000 output.json`.
+
+The latest scheduler leaves the active-marker count on the GPU, using the
+runtime's GPU integer parameters for the unchanged search kernels. It reads
+that count, the neighbour total and previous-step diagnostics together before
+integration. The 10,000-step run improved from **74.05 to 42.69 seconds (1.73×)**,
+with identical particle state and every neighbour count. Preview throughput
+improved from **137.2 to 237.0 steps/s** in headless Edge with rendering enabled.
+Partially active and empty marker sets also match the original host path.
+The freshly measured original native Chrono application took 14.24 seconds;
+the web loop is therefore about 3× slower at this workload. It remains slower
+than real time. See [GPU-count measurements and native timing notes](reports/chrono-gpu-count-speed.json).
