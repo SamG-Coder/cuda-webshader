@@ -982,6 +982,29 @@ class Emitter {
       case 'decls': return n.declarations.flatMap(d=>this.declare(d));
       case 'expr': return this.effect(n.value);
       case 'if': { const condition = this.expr(n.condition); return [...condition.pre, `if (${this.convert(condition.code, condition.type, 'bool', n)}) {`, ...indent(this.body(n.yes)), ...(n.no ? ['} else {', ...indent(this.body(n.no))] : []), '}']; }
+      case 'switch': {
+        const selector=this.expr(n.selector),type=selector.type==='bool'?'i32':selector.type;
+        if(!['i32','u32'].includes(type))this.fail('Switch selector must be a 32-bit integer or enum.',n);
+        const seen=new Set(),labels=n.cases.map(c=>{
+          if(c.value===null)return 'default';
+          const value=this.expr(c.value),integer=constantValue(c.value);
+          if(!['i32','u32'].includes(value.type)||value.pre.length||!Number.isInteger(integer)||integer<(type==='i32'?-2147483648:0)||integer>(type==='i32'?2147483647:4294967295))this.fail('Case labels must be integer constants in the selector range.',c);
+          if(seen.has(integer))this.fail('Duplicate switch case.',c);seen.add(integer);c.constant=integer;
+          return 'case '+integer+(type==='u32'?'u':'i');
+        });
+        // WGSL cases do not fall through. Repeat each reachable suffix inside its
+        // native switch case, preserving break, return and outer-loop continue.
+        const lines=[...selector.pre,`switch (${this.convert(selector.code,selector.type,type,n)}) {`];
+        this.switchDepth=(this.switchDepth||0)+1;
+        for(let i=0;i<n.cases.length;i++){
+          const statements=[];let done=false;
+          for(let j=i;j<n.cases.length&&!done;j++)for(const statement of n.cases[j].body){statements.push(statement);if(['break','return','continue'].includes(statement.kind)){done=true;break;}}
+          lines.push('  '+labels[i]+': {',...indent(indent(this.body({kind:'block',body:statements}))), '  }');
+        }
+        this.switchDepth--;
+        if(!n.cases.some(c=>c.value===null))lines.push('  default: {}');
+        return [...lines,'}'];
+      }
       case 'do': {
         const condition=this.expr(n.condition);this.loopDepth++;const inner=this.body(n.body);this.loopDepth--;
         if(!condition.pre.length&&((n.condition.kind==='literal'&&constantValue(n.condition)!==0)||(n.condition.kind==='id'&&n.condition.name==='true')))return ['loop {',...indent(inner),'}'];
@@ -999,7 +1022,7 @@ class Emitter {
         if (n.value) { const value = this.expr(n.value); if (this.currentFunction.result === 'void') this.fail('Void functions cannot return a value.', n); return [...value.pre, `return ${this.convert(value.code, value.type, this.currentFunction.result, n)};`]; }
         if (this.currentFunction.result !== 'void') this.fail('Non-void functions must return a value.', n); return ['return;'];
       }
-      case 'break': case 'continue': if (!this.loopDepth) this.fail(`${n.kind} is only valid in a loop.`, n); return [`${n.kind};`];
+      case 'break': case 'continue': if (!this.loopDepth&&!(n.kind==='break'&&this.switchDepth)) this.fail(`${n.kind} is only valid in a loop or an applicable switch.`, n); return [`${n.kind};`];
       default: this.fail(`Unsupported statement ${n.kind}.`, n);
     }
   }

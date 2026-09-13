@@ -384,6 +384,23 @@ export class Parser {
     if (this.is('{')) return this.block();
     if (this.match(';')) return {kind: 'empty', token};
     if (this.match('if')) { this.take('('); const condition = this.expression(); this.take(')'); const yes = this.statement(), no = this.match('else') ? this.statement() : null; return {kind: 'if', token, condition, yes, no}; }
+    if(this.match('switch')){
+      this.take('(');const selector=this.expression();this.take(')');this.take('{');const cases=[];let current;
+      while(!this.is('}')){
+        if(this.peek().kind==='eof')this.fail('Unclosed switch.',token);
+        if(this.is('case')||this.is('default')){
+          const label=this.take(),value=label.value==='case'?this.expression(2):null;this.take(':');
+          if(value===null&&cases.some(c=>c.value===null))this.fail('Duplicate switch default.',label);
+          if(cases.length>=64)this.fail('Switch supports at most 64 labels.',label);
+          current={kind:'case',token:label,value,body:[]};cases.push(current);
+        }else{
+          if(!current)this.fail('Switch statements must follow a case or default label.',this.peek());
+          const statement=this.statement();if(['decl','decls'].includes(statement.kind))this.fail('Enclose switch case declarations in braces.',statement.token);
+          current.body.push(statement);
+        }
+      }
+      this.take('}');return {kind:'switch',token,selector,cases};
+    }
     if (this.match('for')) { this.take('('); const init = this.is(';') ? null : this.startsType() ? this.declaration(false) : this.expression(); this.take(';'); const condition = this.is(';') ? null : this.expression(); this.take(';'); const steps=[];if(!this.is(')'))do{steps.push(this.expression());}while(this.match(','));const step=steps.length>1?{kind:'sequence',token,expressions:steps}:steps[0]||null; this.take(')'); return {kind: 'for', token, init, condition, step, body: this.statement()}; }
     if (this.match('while')) { this.take('('); const condition = this.expression(); this.take(')'); return {kind: 'while', token, condition, body: this.statement()}; }
     if (this.match('return')) { const value = this.is(';') ? null : this.expression(); this.take(';'); return {kind: 'return', token, value}; }

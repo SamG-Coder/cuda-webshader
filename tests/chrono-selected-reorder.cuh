@@ -88,4 +88,3 @@ __global__ void OriginalToSortedD(uint* mapOriginalToSorted, uint* gridMarkerInd
 
     mapOriginalToSorted[index] = id;
 }
-

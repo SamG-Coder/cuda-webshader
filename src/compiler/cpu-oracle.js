@@ -162,6 +162,11 @@ class Context {
       case 'decls':for(const d of n.declarations)yield* this.statement(d);return;
       case 'expr':yield* this.eval(n.value);return;
       case 'if':if(yield* this.eval(n.condition))return yield* this.statement(n.yes);else if(n.no)return yield* this.statement(n.no);return;
+      case 'switch':{
+        const selector=yield* this.eval(n.selector);let at=n.cases.findIndex(c=>c.value!==null&&c.constant===Number(selector));
+        if(at<0)at=n.cases.findIndex(c=>c.value===null);if(at<0)return;
+        for(let i=at;i<n.cases.length;i++)for(const statement of n.cases[i].body){const signal=yield* this.statement(statement);if(signal?.control==='break')return;if(signal)return signal;}return;
+      }
       case 'do':{do{const signal=yield* this.statement(n.body);if(signal?.control==='return')return signal;if(signal?.control==='break')break;this.tick();}while(yield* this.eval(n.condition));return;}
       case 'for':case 'while':{
         if(n.init){if(['decl','decls'].includes(n.init.kind))yield* this.statement(n.init);else yield* this.eval(n.init);}

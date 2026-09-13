@@ -452,3 +452,16 @@ The next native solver operation for this captured configuration is Adami bounda
 conditions, then CFD derivatives and particle shifting (enabled in this demo).
 Pressure/force evaluation and RK2 time integration are not yet connected, and
 this remains an in-progress port rather than a runnable water showcase.
+
+## Boundary-condition compiler work
+
+The next original kernel, `CfdAdamiBC_D`, calls smoothing-kernel and inverse
+state-equation helpers that use C++ switch statements. The compiler now parses
+and emits these statements, preserving C++ fall-through through repeated case
+suffixes in WGSL. A separate unchanged CUDA control-flow fixture compares signed
+and unsigned selectors, default in the middle, stacked labels, conditional break,
+case scopes, returns, nested loops/switches and outer-loop continue.
+
+The original boundary fixture now parses past those helpers and stops at its
+`volatile bool* error_flag` parameter. This identifies the next ABI/parser gap;
+the boundary calculation has not yet executed through WebGPU.

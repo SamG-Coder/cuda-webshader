@@ -579,3 +579,9 @@ to `decodeDiagnostics` from `src/compiler/diagnostics.js` to obtain messages and
 attempted/dropped counts. This is bounded diagnostic capture, not host stdout;
 float/string formatting and printf return values are unsupported. Float
 `isfinite` is supported, including infinity and NaN classification.
+
+C++ `switch` statements support 32-bit integer/enum selectors, integer constant
+labels, default cases, fall-through, and nested loop/switch control. Case-local
+declarations must be enclosed in braces; at most 64 labels are accepted. Generated
+WGSL repeats reachable case suffixes because WGSL does not implicitly fall through
+([WGSL switch specification](https://www.w3.org/TR/WGSL/#switch-statement)).
