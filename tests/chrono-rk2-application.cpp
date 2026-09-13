@@ -184,10 +184,12 @@ int main(int argc, char* argv[]) {
     sysFSI.Initialize();
 
 // MIT capture harness: advance the original initialized application once.
-sysFSI.DoStepDynamics(step_size);
+const int captureSteps=argc>1?std::stoi(argv[1]):1;
+if(captureSteps<1||captureSteps>100000)return 4;
+for(int step=0;step<captureSteps;step++)sysFSI.DoStepDynamics(step_size);
 const auto properties=sysSPH.GetProperties(),velocities=sysSPH.GetVelocities();const auto view=sysSPH.GetMarkerDeviceView();
 std::vector<Real4> positions(properties.size());if(cudaMemcpy(positions.data(),view.pos_rad,positions.size()*sizeof(Real4),cudaMemcpyDeviceToHost)!=cudaSuccess)return 2;
-std::ofstream out("reports/chrono-rk2-application.bin",std::ios::binary);out.write((char*)positions.data(),positions.size()*sizeof(Real4));out.write((char*)velocities.data(),velocities.size()*sizeof(Real3));out.write((char*)properties.data(),properties.size()*sizeof(Real3));
-std::cout << "Original application advanced one step: " << step_size << " seconds, " << positions.size() << " markers\n";
+std::ofstream out(argc>2?argv[2]:"reports/chrono-rk2-application.bin",std::ios::binary);out.write((char*)positions.data(),positions.size()*sizeof(Real4));out.write((char*)velocities.data(),velocities.size()*sizeof(Real3));out.write((char*)properties.data(),properties.size()*sizeof(Real3));
+std::cout << "Original application capture: " << step_size << " seconds, " << positions.size() << " markers\n";
 return out?0:3;
 }

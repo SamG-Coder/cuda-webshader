@@ -1,0 +1,96 @@
+{
+  "steps": 1000,
+  "simulatedSeconds": 0.1,
+  "elapsedMs": 49869.32999998331,
+  "neighborRange": [
+    785849,
+    805741
+  ],
+  "sections": [
+    {
+      "name": "pos",
+      "components": [
+        {
+          "gpuMax": 2.86102294921875e-06,
+          "nativeFusionMax": 3.337860107421875e-06,
+          "gpuRms": 2.6778720899943903e-07,
+          "nativeFusionRms": 2.4681543655778215e-07
+        },
+        {
+          "gpuMax": 2.3351068278998355e-07,
+          "nativeFusionMax": 2.439138384602302e-07,
+          "gpuRms": 1.1982580634621316e-08,
+          "nativeFusionRms": 1.4137524989331616e-08
+        },
+        {
+          "gpuMax": 1.1920928955078125e-06,
+          "nativeFusionMax": 1.1920928955078125e-06,
+          "gpuRms": 1.6705787412084246e-07,
+          "nativeFusionRms": 1.6566994304952877e-07
+        },
+        {
+          "gpuMax": 0.0,
+          "nativeFusionMax": 0.0,
+          "gpuRms": 0.0,
+          "nativeFusionRms": 0.0
+        }
+      ],
+      "nonfinite": 0
+    },
+    {
+      "name": "vel",
+      "components": [
+        {
+          "gpuMax": 7.666647434234619e-05,
+          "nativeFusionMax": 6.939121522009373e-05,
+          "gpuRms": 1.0431819213460843e-05,
+          "nativeFusionRms": 9.47690654586903e-06
+        },
+        {
+          "gpuMax": 2.8526636015158147e-05,
+          "nativeFusionMax": 2.7155675525136758e-05,
+          "gpuRms": 4.54813461737326e-06,
+          "nativeFusionRms": 4.446736462376158e-06
+        },
+        {
+          "gpuMax": 4.37907874584198e-05,
+          "nativeFusionMax": 3.375113010406494e-05,
+          "gpuRms": 6.438952223458285e-06,
+          "nativeFusionRms": 5.759323724233793e-06
+        }
+      ],
+      "nonfinite": 0
+    },
+    {
+      "name": "rho",
+      "components": [
+        {
+          "gpuMax": 0.00030517578125,
+          "nativeFusionMax": 0.00030517578125,
+          "gpuRms": 6.271032496755196e-05,
+          "nativeFusionRms": 6.155461375481124e-05
+        },
+        {
+          "gpuMax": 3.5762939453125,
+          "nativeFusionMax": 3.74609375,
+          "gpuRms": 0.7596841721277744,
+          "nativeFusionRms": 0.7459992345144277
+        },
+        {
+          "gpuMax": 0.0,
+          "nativeFusionMax": 0.0,
+          "gpuRms": 0.0,
+          "nativeFusionRms": 0.0
+        },
+        {
+          "gpuMax": 0.0,
+          "nativeFusionMax": 0.0,
+          "gpuRms": 0.0,
+          "nativeFusionRms": 0.0
+        }
+      ],
+      "nonfinite": 0
+    }
+  ],
+  "trajectoryValidated": false
+}

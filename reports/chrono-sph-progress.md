@@ -1,12 +1,13 @@
-# Chrono SPH dam-break port: first original RK2 step validated
+# Chrono SPH dam-break port: repeated GPU steps under validation
 
 This is an in-progress compiler port, not a runnable water showcase.
 The GPU chain now connects activity selection, normalized compaction, original
 marker IDs, grid sorting, original property reordering, cell ranges and neighbour
 lists, Adami wall-pressure evaluation, CFD force derivatives, original XSPH
-particle shifting and one complete original RK2 step. Repeated stepping with
-neighbour rebuilding, longer trajectories and a visible sandbox preview remain
-pending.
+particle shifting and one complete original RK2 step. A local GPU loop now completes 100 steps with activity, compaction, sorting
+and neighbour rebuilding on every step. Multi-step native comparison exceeds
+the existing single-step tolerances and is not yet validated. A visible sandbox
+preview and the requested water showcase video/X post remain pending.
 
 Upstream: https://github.com/projectchrono/chrono at
 `a92c6f72f422fbcafe0b37125d4070cb6a3b5803`.
@@ -716,3 +717,73 @@ This proves one RK2 step. The native configuration requires neighbour rebuilding
 every step (`num_proximity_search_steps = 1`), so freezing the initial neighbour
 list is not a valid shortcut to a moving showcase. Repeated preparation, original
 state updates and trajectory comparison are next.
+
+## Current local loop investigation
+
+The original `CopySortedToOriginalWCSPH_D` now restores the original particle
+order on the GPU. Its one-step fluid output matches the original application's
+capture within the previously established tolerances (positions maximum
+5.781966837823185e-14; velocities 2.9753209673799574e-8; properties exact).
+`tests/chrono-rebuild.js` and `tests/chrono-step-plan.js` are development host
+adapters around the unchanged original kernels. They compile pipelines once,
+but currently allocate scratch buffers each step; this is not a performance
+optimized or released solver. Every step recomputes activity, normalized
+compaction, grid sorting/reordering and neighbour lists from current GPU state.
+
+Local real NVIDIA runs completed 10 and 100 RK2 steps. At 100 steps (0.01
+simulated seconds), neighbour totals range from 794643 to 798671. All compared
+fluid values are finite. Against the actual original application, maximum
+position error is 4.76837158203125e-7, velocity error 1.4841556549072266e-5,
+and property error 1.7880859375. Applying the existing single-step tolerances
+finds 14205 velocity-component and 1716 property-component mismatches. These
+are diagnostic failures, not passing trajectory validation. Investigate
+cumulative roundoff versus orchestration/order differences before selecting
+a justified trajectory criterion or publishing a working water showcase.
+
+Local evidence: `.local/chrono-10-comparison.json`,
+`.local/chrono-100-comparison.json`, native application captures and
+`.local/chrono-100-gpu.json`. The native capture executable now accepts a step
+count and output filename; omitting both retains the original one-step capture.
+
+### Native replay and arithmetic sensitivity
+
+A second native harness, `tests/chrono-loop-native.cu`, reconstructs the same
+100-step sequence with unchanged upstream kernels. Its fluid output matches
+the actual Chrono application bit-for-bit in position, velocity and properties.
+This diagnostic harness assumes all markers remain selected; the GPU loop
+executes original activity selection and normalized compaction every step.
+
+The host adapter now uses the application's `MarkerGroup::NON_SOLID` copy-back
+and copies the midpoint input before the first boundary update. This corrects
+its boundary-state semantics, though the fixed-wall fluid results in this
+case did not change. One-step copy-back also passes for all fixed boundaries.
+
+Compiling the native replay with `--fmad=false` instead of default fused
+arithmetic, without altering any CUDA body, changes the 100-step fluid result
+by up to 4.76837158203125e-7 in position, 1.1601734513533302e-5 in velocity,
+and 2.38671875 in properties. The observed WebGPU/native differences are of
+the same order. This establishes arithmetic sensitivity; it does not prove
+long-run agreement or justify claiming the failed single-step threshold passed.
+Local records: `.local/chrono-loop-application-comparison.json` and
+`.local/chrono-arithmetic-comparison.json`. The 1000-step comparison is recorded below.
+
+### 1000-step comparison
+
+`reports/chrono-loop-diagnostic.json` records the real NVIDIA run: 1000
+steps, 0.1 simulated seconds, 49869.33 ms measured wall time including control
+and diagnostic readbacks. It is not a kernel-only timing. Neighbour totals
+range from 785849 to 805741; every step rebuilds them. All fluid values are
+finite, with unchanged radius, viscosity and marker type. Maximum position
+error is 2.86102294921875e-6 (native arithmetic sensitivity 3.337860107421875e-6);
+density error 0.00030517578125 (same native sensitivity); pressure error
+3.5762939453125 (native sensitivity 3.74609375). Velocity max errors and RMS
+errors are also recorded independently by component. This is a numerical
+sensitivity comparison, not a full dam-break validation or finished showcase.
+
+Reproduce GPU output with `node scripts/run-chrono-loop.mjs 1000 OUTPUT.json`.
+Build `tests/chrono-loop-native.cu` with the configured nvcc and the same flags
+as the one-step adapter; pass `1000 OUTPUT.bin` to its executable. Repeat with
+`--fmad=false` to obtain the arithmetic-sensitivity baseline. The 100-step
+adapter result was separately checked bit-for-bit against the original
+application. Scratch reuse, fewer synchronization points, longer trajectories
+and sandbox preview remain work in progress.
