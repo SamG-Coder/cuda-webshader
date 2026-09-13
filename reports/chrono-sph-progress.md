@@ -1,13 +1,14 @@
-# Chrono SPH dam-break port: repeated GPU steps under validation
+# Chrono SPH dam-break: experimental sandbox preview
 
-This is an in-progress compiler port, not a runnable water showcase.
+This is a runnable experimental sandbox port, with long-run numerical and
+performance limitations documented below.
 The GPU chain now connects activity selection, normalized compaction, original
 marker IDs, grid sorting, original property reordering, cell ranges and neighbour
 lists, Adami wall-pressure evaluation, CFD force derivatives, original XSPH
 particle shifting and one complete original RK2 step. A local GPU loop now completes 100 steps with activity, compaction, sorting
 and neighbour rebuilding on every step. Multi-step native comparison exceeds
-the existing single-step tolerances and is not yet validated. A visible sandbox
-preview and the requested water showcase video/X post remain pending.
+the existing single-step tolerances and is not yet validated. The sandbox now renders live GPU positions. The requested professional video
+and X post remain pending.
 
 Upstream: https://github.com/projectchrono/chrono at
 `a92c6f72f422fbcafe0b37125d4070cb6a3b5803`.
@@ -430,7 +431,7 @@ The dam-break case now starts from `GetProperties()` and `GetVelocities()` captu
 immediately after the unchanged native demo initialization. The earlier activity
 fixture used placeholder density/pressure/viscosity (1000/0/0.001), which sufficed
 for marker-type selection but was unsuitable as fluid-solver input. The actual
-capture has density 1000–1003.822021484375, pressure 0–38220, and viscosity 5.
+capture has density 1000â€“1003.822021484375, pressure 0â€“38220, and viscosity 5.
 `prepare-chrono-property-reference.mjs` checks capture size, finite values,
 parameter equality and exact position equality before preparing the fixtures.
 The public properties API supplies three components; the host fixture restores
@@ -549,7 +550,7 @@ maximum density-derivative error falls below 9.51e-6. This separates amplificati
 of boundary-density roundoff by delta-SPH from arithmetic inside the force kernel.
 Independent float64 diagnostics for representative worst components show net
 accelerations near zero formed from contributions with absolute sums around
-577–754. Both native CUDA and WebGPU differ slightly from that higher-precision
+577â€“754. Both native CUDA and WebGPU differ slightly from that higher-precision
 reference. `diagnose-chrono-rhs-roundoff.py` reproduces these diagnostics.
 
 These are numerical tolerances, not a bitwise-force equivalence claim or a
@@ -802,3 +803,33 @@ status reads alone measured 27269.64 ms, so these measurements do not establish
 a separate speed benefit from pooling. They are single-run diagnostic timings,
 not a statistically controlled benchmark. `chrono-loop-optimization.json`
 records the state-equivalence check.
+
+## Experimental sandbox preview
+
+The showcase links only to `sandbox.html?example=chrono`. Its combined CUDA
+source preserves original function bodies while collecting required declarations
+in one editable file. Fifteen passes compile from that exact editor source in
+the compiler worker. A real-browser regression changed an Euler helper only in
+Monaco, recompiled, and measured the requested 0.01 x-offset as
+0.010000228881835938 on the GPU. No edited test source was saved to the sample.
+The renderer shares original position and property buffers with compute and
+uses pressure only as a display colour. It does not calculate particle motion.
+
+The browser worker exposed a generic deep-AST cloning failure: structuredClone
+returned null for a deeply nested pointer helper. Iterative AST cloning fixes
+that issue without any sample-specific compiler logic. Unit coverage includes
+12000 nested nodes, alias preservation and cycles; a browser-worker GPU test
+compiles a 900-term pointer helper and checks all 16 outputs exactly.
+
+The one-second diagnostic is in `chrono-loop-one-second.json`. Every step
+rebuilds activity and neighbours; all 16731 fluid markers remain finite with
+unchanged radius, viscosity and marker type. Individual particle positions and
+velocities differ substantially after 10000 steps, as do the two native
+arithmetic modes. Raw y-coordinate errors include periodic wrap differences
+(period 1.1); they are not minimum-image distances. The results support an
+experimental visualization, not a claim of exact long-run trajectories.
+
+Validation before publication: 721 unit tests; 244 real NVIDIA GPU checks;
+Monaco edit-to-GPU regression; visible shared-buffer preview and animation
+advancing at least 25 steps. No software GPU tests were used. Video production
+and publication on X remain pending.

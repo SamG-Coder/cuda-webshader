@@ -1,13 +1,13 @@
 // MIT orchestration of the original Chrono RK2 kernels.
-export async function createChronoStep(runtime,params){
+export async function createChronoStep(runtime,params,{cudaSource,kernelFactory}={}){
  if(params['constant.paramsD.physics_problem']!==0||params['constant.paramsD.shifting_method']!==2)throw Error('Chrono step requires CFD with XSPH');
  const load=async p=>await(await fetch(new URL(p,import.meta.url))).text();
- const integration=await load('chrono-rk2.cu'),shiftSource=await load('chrono-shifting.cu'),rhsSource=await load('chrono-rhs.cu'),bcSource=await load('chrono-adami.cu');
- const make=(source,entry)=>runtime.kernel(source,{entry,defines:{__CUDA_ARCH__:1},workgroupSize:[128]});
- const scatter=await make(integration+'\n'+await load('chrono-scatter.cuh'),'CopySortedToOriginalWCSPH_D');
+ const integration=cudaSource??await load('chrono-rk2.cu'),shiftSource=cudaSource??await load('chrono-shifting.cu'),rhsSource=cudaSource??await load('chrono-rhs.cu'),bcSource=cudaSource??await load('chrono-adami.cu');
+ const make=(source,entry)=>(kernelFactory??((s,o)=>runtime.kernel(s,o)))(source,{entry,defines:{__CUDA_ARCH__:1},workgroupSize:[128]});
+ const scatter=await make(cudaSource??(integration+'\n'+await load('chrono-scatter.cuh')),'CopySortedToOriginalWCSPH_D');
  const euler=await make(integration,'EulerStep_D'),periodic=await make(integration,'ApplyPeriodicBoundaryY_D'),shift=await make(shiftSource,'Calc_Shifting_D<ShiftingMethod::XSPH>'),bc=await make(bcSource,'CfdAdamiBC_D'),rhs=await make(rhsSource,'CfdCalcRHS_D');
  const pool=[];
- const step=async function(original,{buffers:b,neighbors,count:n}){
+ const step=async function(original,{buffers:b,neighbors,count:n,diagnosticBuffers:preparationDiagnostics=[]}){
   if(!n)return;
   const originalCount=original.pos.byteLength/16;
   let cursor=0;
@@ -34,9 +34,9 @@ export async function createChronoStep(runtime,params){
 
    // Gather every status word into one readback. Queue ordering guarantees the
    // copy follows all kernels, so no separate idle wait or per-kernel map is needed.
-   const status=alloc(4+diags.size*8),enc=runtime.device.createCommandEncoder();
+   const allDiagnostics=[...diags.values(),...preparationDiagnostics],status=alloc(4+allDiagnostics.length*8),enc=runtime.device.createCommandEncoder();
    enc.copyBufferToBuffer(flag.gpuBuffer,0,status.gpuBuffer,0,4);
-   let offset=4;for(const d of diags.values()){enc.copyBufferToBuffer(d.gpuBuffer,0,status.gpuBuffer,offset,8);offset+=8;}
+   let offset=4;for(const d of allDiagnostics){enc.copyBufferToBuffer(d.gpuBuffer,0,status.gpuBuffer,offset,8);offset+=8;}
    runtime.device.queue.submit([enc.finish()]);
    const errors=await runtime.read(status,Uint32Array);if(errors.some(Boolean))throw Error('Chrono integration diagnostic: '+JSON.stringify([...errors]));
   }catch(error){step.dispose();throw error;}

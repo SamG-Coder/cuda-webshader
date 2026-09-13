@@ -601,3 +601,19 @@ are supported. Local array offsets and aliased array arguments remain unsupporte
 Free unary `+`/`-` record operators and CUDA float `abs`, `fmin`, `fmax` overloads
 are recognized. Long arithmetic chains are emitted iteratively with ordered
 intermediates, avoiding JavaScript recursion without reassociating operations.
+
+### Experimental Chrono water
+
+[Open the Chrono SPH dam-break sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=chrono).
+The editor contains the original Project Chrono CUDA kernels and helpers; all
+15 physics/preparation passes compile from that source. The host adapter
+allocates initial-state buffers and sequences activity, neighbour rebuilding,
+RK2 integration and shared-buffer rendering. Pressure controls the display
+colour. No Chrono code is embedded in the compiler.
+
+This is an experimental, slower-than-real-time port. A 10,000-step real NVIDIA
+run completed one simulated second with finite fluid values. Individual particle
+trajectories differ from native CUDA, with differences comparable to changing
+native fused-arithmetic settings; this is not a claim of exact long-run agreement
+or experimental fluid-benchmark validation. See
+[the progress and comparison notes](reports/chrono-sph-progress.md).

@@ -1,3 +1,4 @@
+import {cloneAst} from './clone-ast.js';
 import {pruneConstexpr} from './constexpr.js';
 import {lowerPrintf} from './diagnostics.js';
 import {containsNativeBool,nativeRecordLayout,decodeNativeRecord} from './native-records.js';
@@ -578,7 +579,7 @@ class Emitter {
     const key=JSON.stringify([helper.name,roots]);
     if(!this.pointerHelpers.has(key)){
       if(this.pointerHelpers.size>=128)this.fail('At most 128 helper buffer specializations are supported.',n);
-      const clone=structuredClone(helper);let name='cw_buffer_helper_'+this.pointerHelpers.size;while(this.functions.has(name))name+='_';
+      const clone=cloneAst(helper);let name='cw_buffer_helper_'+this.pointerHelpers.size;while(this.functions.has(name))name+='_';
       clone.name=name;clone.pointerOrigin=helper.name;
       const localNames=new Set(roots.filter(([,root])=>root==='@local').map(([i])=>clone.params[i].name));
       // Preserve forwarding of a scalar pointer through another typed device helper.
@@ -604,7 +605,7 @@ class Emitter {
     if(!this.referenceHelpers.has(key)){
       if(this.referenceHelpers.size>=128)this.fail('At most 128 helper reference specializations are supported.',n);
       const base=this.functions.get(origin)||helper;walk(base.body,node=>{if(node.kind==='decl'&&node.shared)this.fail('Reference address-space specialization of helpers with shared declarations is unsupported.',node);});
-      const clone=structuredClone(base);let name='cw_reference_helper_'+this.referenceHelpers.size;while(this.functions.has(name))name+='_';clone.name=name;clone.referenceOrigin=origin;
+      const clone=cloneAst(base);let name='cw_reference_helper_'+this.referenceHelpers.size;while(this.functions.has(name))name+='_';clone.name=name;clone.referenceOrigin=origin;
       spaces.forEach((space,i)=>{if(space)clone.params[i].referenceSpace=space;if(roots[i])clone.params[i].boundReferenceShared=roots[i];if(storageRoots[i]){clone.params[i].boundReferenceStorage=storageRoots[i];clone.params[i].boundReferencePath=storagePaths[i];}});this.referenceHelpers.set(key,clone);this.functions.set(name,clone);this.helpers.push(clone);this.ast.functions.push(clone);
     }
     return this.referenceHelpers.get(key);

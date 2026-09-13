@@ -1,3 +1,4 @@
+import {checkCloneWorker} from './clone-worker-gpu.js';
 import {checkChronoRk2} from './chrono-rk2-gpu.js';
 import {checkChronoEos} from './chrono-eos-gpu.js';
 import {checkIntegerPowers} from './integer-powers-gpu.js';
@@ -357,6 +358,7 @@ export async function runGpuSuite(runtime,sources,{onCase=()=>{}}={}){
   await run('Original Chrono neighbour cells and particle mapping support partial blocks',()=>checkChronoNeighbors(runtime));
   await run('Original Chrono scoped enums and boolean parameter records match native CUDA',()=>checkChronoTypes(runtime));
   await run('Original Chrono grid hashing matches native dam-break inputs and boundary cases',()=>checkChronoHash(runtime));
+  await run('Compiler worker deep helper cloning',()=>checkCloneWorker(runtime));
   await run('Original Chrono RK2 half-step and full-step match native CUDA',()=>checkChronoRk2(runtime));
   await run('Original Chrono equation of state matches native CUDA',()=>checkChronoEos(runtime));
   await run('Runtime integer powers preserve native signs and precision',()=>checkIntegerPowers(runtime));
