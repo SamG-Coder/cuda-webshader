@@ -1,0 +1,35 @@
+{
+  "steps": 1000,
+  "beforeMs": 11379.339999973774,
+  "afterMs": 10946.014999985695,
+  "speedup": 1.0395874663051938,
+  "sameState": true,
+  "sameCounts": true,
+  "beforeBindGroups": 148000,
+  "afterBindGroups": 29000,
+  "previewBefore": {
+    "steps": 985,
+    "elapsedMs": 10002.949999988079,
+    "stepsPerSecond": 98.47095106955187,
+    "simulatedSecondsPerWallSecond": 0.009847095106955186,
+    "stopped": 1011,
+    "device": "nvidia",
+    "viewport": [
+      1600,
+      1000
+    ]
+  },
+  "previewAfter": {
+    "steps": 1004,
+    "elapsedMs": 10000.509999990463,
+    "stepsPerSecond": 100.39487986122282,
+    "simulatedSecondsPerWallSecond": 0.010039487986122283,
+    "stopped": 1031,
+    "device": "nvidia",
+    "viewport": [
+      1600,
+      1000
+    ]
+  },
+  "note": "Single-run paired headless timing on real NVIDIA Edge; preview timings are separate 10-second runs, rendering enabled. Small gains are subject to run-to-run variation. Readback pooling was rejected."
+}

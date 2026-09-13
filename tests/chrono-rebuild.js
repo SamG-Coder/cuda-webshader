@@ -15,7 +15,7 @@ export async function createChronoRebuild(runtime,params,n,{cudaSource,kernelFac
  const compactSource=cudaSource??await(await load('chrono-compact.cu')).text();
  const normalize=await make(compactSource,{entry:'normalizeActivity',workgroupSize:[128]}),fill=await make(compactSource,{entry:'fillActiveListD',workgroupSize:[128]});
  const pool=[];let cursor=0,leased=false,generation=0,diagnosticBuffers=[];
- const alloc=input=>{const data=ArrayBuffer.isView(input)?input:null,size=data?data.byteLength:input,index=cursor++;let buffer=pool[index];if(buffer&&buffer.byteLength!==size){runtime.destroyBuffer(buffer);buffer=null;}if(!buffer)pool[index]=buffer=runtime.createBuffer(size);if(data)runtime.write(buffer,data);return buffer;};
+ const alloc=(input,grow=false)=>{const data=ArrayBuffer.isView(input)?input:null,size=data?data.byteLength:input,index=cursor++;let buffer=pool[index];if(buffer&&(grow?buffer.byteLength<size:buffer.byteLength!==size)){runtime.destroyBuffer(buffer);buffer=null;}if(!buffer)pool[index]=buffer=runtime.createBuffer(grow?2**Math.ceil(Math.log2(Math.max(size,4))):size);if(data)runtime.write(buffer,data);return buffer;};
  const bind=(k,data,scalars)=>{const d=k.artifact.metadata.diagnostics;if(d&&!data[d.buffer]){const buffer=alloc((2+d.capacity*d.strideWords)*4);diagnosticBuffers.push(buffer);data={...data,[d.buffer]:buffer};}return k.bind(data,scalars);};
  const rebuild=async function(original,time){
   if(leased)throw Error('Release the previous neighbour state before rebuilding');leased=true;cursor=0;diagnosticBuffers=[];const ticket=++generation;
@@ -50,7 +50,9 @@ export async function createChronoRebuild(runtime,params,n,{cudaSource,kernelFac
    const search={sortedPosRad:b.sortedPosRad,sortedRhoPreMu:b.sortedRho,cellStart:b.start,cellEnd:b.end};
    dispatch('neighborSearchNum',{...search,numNeighborsPerPart:b.counts});await runtime.exclusiveScan(b.counts,b.offsets,{count:n+1,total:b.total,waitForCompletion:false});
    const total=(await runtime.read(b.total,Uint32Array))[0];
-   neighbors=alloc(Math.max(total,1)*4);dispatch('neighborSearchID',{...search,numNeighborsPerPart:b.offsets,neighborList:neighbors});
+   // Counts still rebuild every step; retain capacity when only the list length
+   // changes. The CUDA offsets delimit valid entries, not the allocation size.
+   neighbors=alloc(Math.max(total,1)*4,true);dispatch('neighborSearchID',{...search,numNeighborsPerPart:b.offsets,neighborList:neighbors});
    const readback=runtime.stats.readbackBytes-before.readbackBytes;if(readback!==4||runtime.stats.dataBytesUploaded!==before.dataBytesUploaded)throw Error('Unexpected CPU transfer in selected neighbour stages');
    return {buffers:b,neighbors,count:n,neighborEntries:total,diagnosticBuffers:[...diagnosticBuffers,b.diagnostics],dispose(){leased=false;}};
 

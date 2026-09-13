@@ -637,3 +637,10 @@ after warm-up. These headless-browser measurements are not a guarantee of the
 same throughput in a visible browser window. The preview reports live steps/s
 and simulated-time/wall-time speed. See [preview measurements](reports/chrono-preview-speed.json);
 run `node scripts/bench-chrono-preview.mjs output.json` to reproduce.
+
+Further resource reuse keeps one binding for all stages of a pair sort and
+retains neighbour-list capacity between steps. A fresh paired 1,000-step run
+took 11.38 seconds before and 10.95 seconds after (about 4% faster), with exact
+particle-state and neighbour-count agreement. Preview measurements were 98.5
+and 100.4 steps/s; that small difference is subject to run-to-run variation.
+See [resource reuse measurements](reports/chrono-resource-reuse-speed.json).
