@@ -1,0 +1,52 @@
+{
+  "date": "2026-09-13",
+  "baseCommit": "6bcf24c",
+  "device": "NVIDIA RTX 5080",
+  "browser": "Microsoft Edge (headless, real NVIDIA adapter)",
+  "steps": 3000,
+  "baselineElapsedMs": 12544.714999973774,
+  "experiments": [
+    {
+      "experiment": "GPU-gated neighbour fill overlapped with count readback",
+      "elapsedMs": 12518.639999985695,
+      "speedup": 1.0020828939875346,
+      "exactCounts": true,
+      "exactState": true,
+      "decision": "rejected: no material throughput gain; rendered sandbox failed with destroyed-buffer error"
+    },
+    {
+      "experiment": "64-thread integration workgroups",
+      "elapsedMs": 12772.199999988079,
+      "speedup": 0.9821890512194832,
+      "exactCounts": true,
+      "exactState": true,
+      "decision": "rejected: slower"
+    },
+    {
+      "experiment": "Generated WGSL integer and boolean constant specialization",
+      "elapsedMs": 12540.435000002384,
+      "speedup": 1.000341295973496,
+      "exactCounts": true,
+      "exactState": true,
+      "decision": "rejected: no material throughput gain"
+    }
+  ],
+  "baselinePreview": {
+    "steps": 2453,
+    "elapsedMs": 10000.474999964237,
+    "stepsPerSecond": 245.288348804309,
+    "simulatedSecondsPerWallSecond": 0.0245288348804309,
+    "stopped": 2479,
+    "device": "nvidia",
+    "viewport": [
+      1600,
+      1000
+    ]
+  },
+  "limitations": [
+    "One timed run per candidate; sub-percent differences are not established improvements.",
+    "Initialization and compilation are outside loop timing; final state readback is included.",
+    "No native CUDA comparison was rerun.",
+    "No experimental production change retained."
+  ]
+}
