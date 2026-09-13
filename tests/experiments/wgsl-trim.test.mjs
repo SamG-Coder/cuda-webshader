@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {trimWgsl} from './wgsl-trim.js';
+const header='struct Pair { a:f32, b:f32, } struct U { x:f32, y:f32, } @group(0) @binding(0) var<uniform> input:U;';
+const trim=body=>trimWgsl({wgsl:header+' fn main(){'+body+'}',entryPoint:'main',metadata:{}});
+test('projects typed uniform aggregates without freezing inputs',()=>{const r=trim('let x=Pair(input.x,input.y).a;');assert.equal(r.stats.projections,1);assert.match(r.artifact.wgsl,/let x=\(input.x\)/);});
+test('retains side-effecting calls and storage loads in discarded fields',()=>{for(const expr of ['touch()','atomicAdd(&counter,1u)','values[0]','textureLoad(tex,vec2<i32>(0),0).x']){const r=trim('let x=Pair(input.x,'+expr+').a;');assert.equal(r.stats.projections,0);assert.ok(r.artifact.wgsl.includes(expr));}});
+test('does not change abstract numeric materialization or selected type',()=>{for(const expr of ['1','1u'])assert.equal(trim('let x=Pair('+expr+',input.y).a;').stats.projections,0);});
+test('handles nested constructors and comments',()=>{const r=trim('let x=Pair(/* outer /* nested */ end */ f32(input.x),input.y).a;');assert.equal(r.stats.projections,1);assert.ok(r.artifact.wgsl.includes('(f32(input.x))'));});
+test('keeps transitively called functions and removes unreachable recursion',()=>{const r=trimWgsl({entryPoint:'main',wgsl:'fn leaf()->u32{return 2u;} fn mid()->u32{return leaf();} fn dead()->u32{return dead();} @compute @workgroup_size(1) fn main(){let a=mid();}',metadata:{}});assert.equal(r.stats.removedFunctions,1);assert.ok(r.artifact.wgsl.includes('fn leaf'));assert.ok(!r.artifact.wgsl.includes('fn dead'));assert.ok(r.artifact.wgsl.includes('@compute'));});
+test('keeps every entry point and preserves ABI metadata',()=>{const metadata={uniformSize:16};const r=trimWgsl({wgsl:'@compute @workgroup_size(1) fn first(){} @compute @workgroup_size(1) fn second(){}',entryPoint:'first',metadata});assert.equal(r.stats.removedFunctions,0);assert.equal(r.artifact.metadata,metadata);});
+test('idempotent on projected constructors',()=>{const a=trim('let x=Pair(input.x,input.y).b;');assert.equal(trimWgsl(a.artifact).artifact.wgsl,a.artifact.wgsl);});
+test('does not treat shadowed uniforms as immutable',()=>{assert.equal(trim('var input:U; let x=Pair(input.x,input.y).a;').stats.projections,0);});

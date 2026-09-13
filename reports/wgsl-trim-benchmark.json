@@ -1,0 +1,648 @@
+{
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell"
+  },
+  "softwareAdapterRequested": false,
+  "order": "ABBA",
+  "steps": 3000,
+  "timing": "Loop plus final GPU completion; compilation and output inspection excluded",
+  "runs": [
+    {
+      "mode": "original",
+      "steps": 3000,
+      "elapsedMs": 12478.165000021458,
+      "exactCounts": true,
+      "exactBits": true,
+      "shaders": [
+        {
+          "entry": "hashSelected",
+          "compileMs": 23.650000035762787,
+          "trimMs": 0,
+          "pipelineMs": 163.6850000023842,
+          "beforeBytes": 166193,
+          "afterBytes": 166193,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "findCellStartEndD",
+          "compileMs": 11.050000011920929,
+          "trimMs": 0.004999995231628418,
+          "pipelineMs": 29.439999997615814,
+          "beforeBytes": 167091,
+          "afterBytes": 167091,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "neighborSearchNum",
+          "compileMs": 10.375,
+          "trimMs": 0,
+          "pipelineMs": 343.6299999952316,
+          "beforeBytes": 211053,
+          "afterBytes": 211053,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "neighborSearchID",
+          "compileMs": 8.144999980926514,
+          "trimMs": 0,
+          "pipelineMs": 316.33999997377396,
+          "beforeBytes": 211305,
+          "afterBytes": 211305,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "OriginalToSortedD",
+          "compileMs": 1.3600000143051147,
+          "trimMs": 0,
+          "pipelineMs": 4.350000023841858,
+          "beforeBytes": 835,
+          "afterBytes": 835,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "reorderDataD",
+          "compileMs": 6.014999985694885,
+          "trimMs": 0,
+          "pipelineMs": 24.730000019073486,
+          "beforeBytes": 33728,
+          "afterBytes": 33728,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "UpdateActivityD",
+          "compileMs": 16,
+          "trimMs": 0,
+          "pipelineMs": 136.15500003099442,
+          "beforeBytes": 115349,
+          "afterBytes": 115349,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "normalizeActivity",
+          "compileMs": 0.6549999713897705,
+          "trimMs": 0,
+          "pipelineMs": 4.245000004768372,
+          "beforeBytes": 849,
+          "afterBytes": 849,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "fillActiveListD",
+          "compileMs": 0.42500001192092896,
+          "trimMs": 0,
+          "pipelineMs": 4.324999988079071,
+          "beforeBytes": 953,
+          "afterBytes": 953,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "CopySortedToOriginalWCSPH_D",
+          "compileMs": 138.96499997377396,
+          "trimMs": 0,
+          "pipelineMs": 102.99000000953674,
+          "beforeBytes": 330120,
+          "afterBytes": 330120,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "EulerStep_D",
+          "compileMs": 256.22000002861023,
+          "trimMs": 0,
+          "pipelineMs": 2337.389999985695,
+          "beforeBytes": 619528,
+          "afterBytes": 619528,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "ApplyPeriodicBoundaryY_D",
+          "compileMs": 132.9450000524521,
+          "trimMs": 0,
+          "pipelineMs": 118.91499996185303,
+          "beforeBytes": 376694,
+          "afterBytes": 376694,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "Calc_Shifting_D<ShiftingMethod::XSPH>",
+          "compileMs": 243.41499996185303,
+          "trimMs": 0,
+          "pipelineMs": 258.99000000953674,
+          "beforeBytes": 299697,
+          "afterBytes": 299697,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "CfdAdamiBC_D",
+          "compileMs": 8.994999945163727,
+          "trimMs": 0,
+          "pipelineMs": 536.0150000452995,
+          "beforeBytes": 276390,
+          "afterBytes": 276390,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "CfdCalcRHS_D",
+          "compileMs": 283.1299999952316,
+          "trimMs": 0,
+          "pipelineMs": 4646.110000014305,
+          "beforeBytes": 1203454,
+          "afterBytes": 1203454,
+          "projections": 0,
+          "removedFunctions": 0
+        }
+      ]
+    },
+    {
+      "mode": "trimmed",
+      "steps": 3000,
+      "elapsedMs": 12613.669999957085,
+      "exactCounts": true,
+      "exactBits": true,
+      "shaders": [
+        {
+          "entry": "hashSelected",
+          "compileMs": 7.365000009536743,
+          "trimMs": 12.530000030994415,
+          "pipelineMs": 41.73499995470047,
+          "beforeBytes": 166193,
+          "afterBytes": 14690,
+          "projections": 23,
+          "removedFunctions": 34
+        },
+        {
+          "entry": "findCellStartEndD",
+          "compileMs": 5.534999966621399,
+          "trimMs": 5.699999988079071,
+          "pipelineMs": 22.875,
+          "beforeBytes": 167091,
+          "afterBytes": 11487,
+          "projections": 23,
+          "removedFunctions": 40
+        },
+        {
+          "entry": "neighborSearchNum",
+          "compileMs": 8.315000057220459,
+          "trimMs": 8.819999992847443,
+          "pipelineMs": 75.3299999833107,
+          "beforeBytes": 211053,
+          "afterBytes": 22619,
+          "projections": 30,
+          "removedFunctions": 27
+        },
+        {
+          "entry": "neighborSearchID",
+          "compileMs": 5.245000004768372,
+          "trimMs": 7.9049999713897705,
+          "pipelineMs": 93.32500004768372,
+          "beforeBytes": 211305,
+          "afterBytes": 22871,
+          "projections": 30,
+          "removedFunctions": 27
+        },
+        {
+          "entry": "OriginalToSortedD",
+          "compileMs": 0.5400000214576721,
+          "trimMs": 0.14499998092651367,
+          "pipelineMs": 0.5799999833106995,
+          "beforeBytes": 835,
+          "afterBytes": 835,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "reorderDataD",
+          "compileMs": 3.5950000286102295,
+          "trimMs": 2.0049999952316284,
+          "pipelineMs": 30.410000026226044,
+          "beforeBytes": 33728,
+          "afterBytes": 17322,
+          "projections": 1,
+          "removedFunctions": 29
+        },
+        {
+          "entry": "UpdateActivityD",
+          "compileMs": 10.689999997615814,
+          "trimMs": 8.689999997615814,
+          "pipelineMs": 83.62000000476837,
+          "beforeBytes": 115349,
+          "afterBytes": 48304,
+          "projections": 6,
+          "removedFunctions": 14
+        },
+        {
+          "entry": "normalizeActivity",
+          "compileMs": 0.4750000238418579,
+          "trimMs": 0.12000000476837158,
+          "pipelineMs": 0.6549999713897705,
+          "beforeBytes": 849,
+          "afterBytes": 849,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "fillActiveListD",
+          "compileMs": 0.6700000166893005,
+          "trimMs": 0.12000000476837158,
+          "pipelineMs": 0.5199999809265137,
+          "beforeBytes": 953,
+          "afterBytes": 953,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "CopySortedToOriginalWCSPH_D",
+          "compileMs": 137.98499995470047,
+          "trimMs": 7.64000004529953,
+          "pipelineMs": 93.91499996185303,
+          "beforeBytes": 330120,
+          "afterBytes": 15659,
+          "projections": 46,
+          "removedFunctions": 78
+        },
+        {
+          "entry": "EulerStep_D",
+          "compileMs": 235.74000000953674,
+          "trimMs": 13.280000030994415,
+          "pipelineMs": 3191.3849999904633,
+          "beforeBytes": 619528,
+          "afterBytes": 49905,
+          "projections": 88,
+          "removedFunctions": 45
+        },
+        {
+          "entry": "ApplyPeriodicBoundaryY_D",
+          "compileMs": 112.36000001430511,
+          "trimMs": 10.009999990463257,
+          "pipelineMs": 31.955000042915344,
+          "beforeBytes": 376694,
+          "afterBytes": 16548,
+          "projections": 54,
+          "removedFunctions": 73
+        },
+        {
+          "entry": "Calc_Shifting_D<ShiftingMethod::XSPH>",
+          "compileMs": 209.7249999642372,
+          "trimMs": 7.0450000166893005,
+          "pipelineMs": 113.73000001907349,
+          "beforeBytes": 299697,
+          "afterBytes": 30930,
+          "projections": 41,
+          "removedFunctions": 45
+        },
+        {
+          "entry": "CfdAdamiBC_D",
+          "compileMs": 9.264999985694885,
+          "trimMs": 9.465000033378601,
+          "pipelineMs": 406.9549999833107,
+          "beforeBytes": 276390,
+          "afterBytes": 37555,
+          "projections": 39,
+          "removedFunctions": 12
+        },
+        {
+          "entry": "CfdCalcRHS_D",
+          "compileMs": 264.09500002861023,
+          "trimMs": 53.81999999284744,
+          "pipelineMs": 4082.604999959469,
+          "beforeBytes": 1203454,
+          "afterBytes": 476139,
+          "projections": 120,
+          "removedFunctions": 15
+        }
+      ]
+    },
+    {
+      "mode": "trimmed",
+      "steps": 3000,
+      "elapsedMs": 12461.590000033379,
+      "exactCounts": true,
+      "exactBits": true,
+      "shaders": [
+        {
+          "entry": "hashSelected",
+          "compileMs": 6.495000004768372,
+          "trimMs": 5.314999997615814,
+          "pipelineMs": 3.10999995470047,
+          "beforeBytes": 166193,
+          "afterBytes": 14690,
+          "projections": 23,
+          "removedFunctions": 34
+        },
+        {
+          "entry": "findCellStartEndD",
+          "compileMs": 6.334999978542328,
+          "trimMs": 4.009999990463257,
+          "pipelineMs": 0.6949999928474426,
+          "beforeBytes": 167091,
+          "afterBytes": 11487,
+          "projections": 23,
+          "removedFunctions": 40
+        },
+        {
+          "entry": "neighborSearchNum",
+          "compileMs": 5.475000023841858,
+          "trimMs": 4.360000014305115,
+          "pipelineMs": 1.199999988079071,
+          "beforeBytes": 211053,
+          "afterBytes": 22619,
+          "projections": 30,
+          "removedFunctions": 27
+        },
+        {
+          "entry": "neighborSearchID",
+          "compileMs": 5.394999980926514,
+          "trimMs": 5.319999992847443,
+          "pipelineMs": 1.4399999976158142,
+          "beforeBytes": 211305,
+          "afterBytes": 22871,
+          "projections": 30,
+          "removedFunctions": 27
+        },
+        {
+          "entry": "OriginalToSortedD",
+          "compileMs": 0.47999995946884155,
+          "trimMs": 0.09500002861022949,
+          "pipelineMs": 0.550000011920929,
+          "beforeBytes": 835,
+          "afterBytes": 835,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "reorderDataD",
+          "compileMs": 3.564999997615814,
+          "trimMs": 1.9600000381469727,
+          "pipelineMs": 1.0699999928474426,
+          "beforeBytes": 33728,
+          "afterBytes": 17322,
+          "projections": 1,
+          "removedFunctions": 29
+        },
+        {
+          "entry": "UpdateActivityD",
+          "compileMs": 10.035000026226044,
+          "trimMs": 5.860000014305115,
+          "pipelineMs": 5.274999976158142,
+          "beforeBytes": 115349,
+          "afterBytes": 48304,
+          "projections": 6,
+          "removedFunctions": 14
+        },
+        {
+          "entry": "normalizeActivity",
+          "compileMs": 0.6050000190734863,
+          "trimMs": 0.10000002384185791,
+          "pipelineMs": 0.8449999690055847,
+          "beforeBytes": 849,
+          "afterBytes": 849,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "fillActiveListD",
+          "compileMs": 0.4150000214576721,
+          "trimMs": 0.09499996900558472,
+          "pipelineMs": 0.6850000023841858,
+          "beforeBytes": 953,
+          "afterBytes": 953,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "CopySortedToOriginalWCSPH_D",
+          "compileMs": 123.26500004529953,
+          "trimMs": 8.739999949932098,
+          "pipelineMs": 2.090000033378601,
+          "beforeBytes": 330120,
+          "afterBytes": 15659,
+          "projections": 46,
+          "removedFunctions": 78
+        },
+        {
+          "entry": "EulerStep_D",
+          "compileMs": 235.09499996900558,
+          "trimMs": 12.535000026226044,
+          "pipelineMs": 9.8299999833107,
+          "beforeBytes": 619528,
+          "afterBytes": 49905,
+          "projections": 88,
+          "removedFunctions": 45
+        },
+        {
+          "entry": "ApplyPeriodicBoundaryY_D",
+          "compileMs": 117.83000004291534,
+          "trimMs": 7.539999961853027,
+          "pipelineMs": 1.4200000166893005,
+          "beforeBytes": 376694,
+          "afterBytes": 16548,
+          "projections": 54,
+          "removedFunctions": 73
+        },
+        {
+          "entry": "Calc_Shifting_D<ShiftingMethod::XSPH>",
+          "compileMs": 207.55500000715256,
+          "trimMs": 6.5,
+          "pipelineMs": 2.290000021457672,
+          "beforeBytes": 299697,
+          "afterBytes": 30930,
+          "projections": 41,
+          "removedFunctions": 45
+        },
+        {
+          "entry": "CfdAdamiBC_D",
+          "compileMs": 7.5299999713897705,
+          "trimMs": 5.379999995231628,
+          "pipelineMs": 2.850000023841858,
+          "beforeBytes": 276390,
+          "afterBytes": 37555,
+          "projections": 39,
+          "removedFunctions": 12
+        },
+        {
+          "entry": "CfdCalcRHS_D",
+          "compileMs": 234.27499997615814,
+          "trimMs": 55.64500004053116,
+          "pipelineMs": 19.44999998807907,
+          "beforeBytes": 1203454,
+          "afterBytes": 476139,
+          "projections": 120,
+          "removedFunctions": 15
+        }
+      ]
+    },
+    {
+      "mode": "original",
+      "steps": 3000,
+      "elapsedMs": 12495.100000023842,
+      "exactCounts": true,
+      "exactBits": true,
+      "shaders": [
+        {
+          "entry": "hashSelected",
+          "compileMs": 6.355000019073486,
+          "trimMs": 0,
+          "pipelineMs": 5.7299999594688416,
+          "beforeBytes": 166193,
+          "afterBytes": 166193,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "findCellStartEndD",
+          "compileMs": 5.325000047683716,
+          "trimMs": 0,
+          "pipelineMs": 4.049999952316284,
+          "beforeBytes": 167091,
+          "afterBytes": 167091,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "neighborSearchNum",
+          "compileMs": 5.349999964237213,
+          "trimMs": 0,
+          "pipelineMs": 5.944999992847443,
+          "beforeBytes": 211053,
+          "afterBytes": 211053,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "neighborSearchID",
+          "compileMs": 6.14000004529953,
+          "trimMs": 0,
+          "pipelineMs": 4.394999980926514,
+          "beforeBytes": 211305,
+          "afterBytes": 211305,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "OriginalToSortedD",
+          "compileMs": 0.45499998331069946,
+          "trimMs": 0,
+          "pipelineMs": 0.6950000524520874,
+          "beforeBytes": 835,
+          "afterBytes": 835,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "reorderDataD",
+          "compileMs": 3.4449999928474426,
+          "trimMs": 0,
+          "pipelineMs": 1.4149999618530273,
+          "beforeBytes": 33728,
+          "afterBytes": 33728,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "UpdateActivityD",
+          "compileMs": 9.465000033378601,
+          "trimMs": 0,
+          "pipelineMs": 3.034999966621399,
+          "beforeBytes": 115349,
+          "afterBytes": 115349,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "normalizeActivity",
+          "compileMs": 0.34999996423721313,
+          "trimMs": 0,
+          "pipelineMs": 0.6650000214576721,
+          "beforeBytes": 849,
+          "afterBytes": 849,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "fillActiveListD",
+          "compileMs": 0.3400000333786011,
+          "trimMs": 0,
+          "pipelineMs": 0.6699999570846558,
+          "beforeBytes": 953,
+          "afterBytes": 953,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "CopySortedToOriginalWCSPH_D",
+          "compileMs": 118.10499995946884,
+          "trimMs": 0.004999995231628418,
+          "pipelineMs": 9.785000026226044,
+          "beforeBytes": 330120,
+          "afterBytes": 330120,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "EulerStep_D",
+          "compileMs": 241.55000001192093,
+          "trimMs": 0,
+          "pipelineMs": 19.319999992847443,
+          "beforeBytes": 619528,
+          "afterBytes": 619528,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "ApplyPeriodicBoundaryY_D",
+          "compileMs": 109.43000000715256,
+          "trimMs": 0,
+          "pipelineMs": 10.230000019073486,
+          "beforeBytes": 376694,
+          "afterBytes": 376694,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "Calc_Shifting_D<ShiftingMethod::XSPH>",
+          "compileMs": 220.7399999499321,
+          "trimMs": 0,
+          "pipelineMs": 7.150000035762787,
+          "beforeBytes": 299697,
+          "afterBytes": 299697,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "CfdAdamiBC_D",
+          "compileMs": 7.334999978542328,
+          "trimMs": 0,
+          "pipelineMs": 6.764999985694885,
+          "beforeBytes": 276390,
+          "afterBytes": 276390,
+          "projections": 0,
+          "removedFunctions": 0
+        },
+        {
+          "entry": "CfdCalcRHS_D",
+          "compileMs": 242.74000000953674,
+          "trimMs": 0,
+          "pipelineMs": 37.0450000166893,
+          "beforeBytes": 1203454,
+          "afterBytes": 1203454,
+          "projections": 0,
+          "removedFunctions": 0
+        }
+      ]
+    }
+  ]
+}

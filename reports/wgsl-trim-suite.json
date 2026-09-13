@@ -1,0 +1,6497 @@
+{
+  "schema": "cuda-webshader.correctness.v1",
+  "mode": "REAL WebGPU execution",
+  "device": {
+    "vendor": "nvidia",
+    "architecture": "blackwell",
+    "device": "",
+    "description": "",
+    "features": [
+      "core-features-and-limits",
+      "subgroup-size-control",
+      "float32-filterable",
+      "timestamp-query",
+      "subgroups"
+    ],
+    "timestampQuery": true,
+    "limits": {
+      "maxComputeInvocationsPerWorkgroup": 1024,
+      "maxComputeWorkgroupStorageSize": 16384,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "date": "2026-09-13T03:58:59.661Z",
+  "total": 248,
+  "passed": 248,
+  "failed": 0,
+  "wallMs": 58661.110000014305,
+  "results": [
+    {
+      "name": "SAXPY n=0",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 25.264999985694885
+    },
+    {
+      "name": "SAXPY n=1",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 1.5649999976158142
+    },
+    {
+      "name": "SAXPY n=2",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 1.2199999690055847
+    },
+    {
+      "name": "SAXPY n=63",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 1.0849999785423279
+    },
+    {
+      "name": "SAXPY n=127",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 1.9299999475479126
+    },
+    {
+      "name": "SAXPY n=128",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.774999976158142
+    },
+    {
+      "name": "SAXPY n=129",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.939999997615814
+    },
+    {
+      "name": "SAXPY n=257",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 1.5600000023841858
+    },
+    {
+      "name": "SAXPY n=1031",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.9700000286102295
+    },
+    {
+      "name": "float4 SAXPY records=0",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 10.459999978542328
+    },
+    {
+      "name": "float4 SAXPY records=1",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 2.9800000190734863
+    },
+    {
+      "name": "float4 SAXPY records=31",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 0.9749999642372131
+    },
+    {
+      "name": "float4 SAXPY records=128",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.129999995231628
+    },
+    {
+      "name": "float4 SAXPY records=129",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.894999980926514
+    },
+    {
+      "name": "float4 SAXPY records=257",
+      "pass": true,
+      "checks": {
+        "y": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.939999997615814
+    },
+    {
+      "name": "matmul_naive 1×1×1",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 12.939999997615814
+    },
+    {
+      "name": "matmul_tiled 1×1×1",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 15.004999995231628
+    },
+    {
+      "name": "matmul_register 1×1×1",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 26.99500000476837
+    },
+    {
+      "name": "matmul_naive 3×5×7",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 2.988747068412719e-7
+        }
+      },
+      "wallMs": 5.0450000166893005
+    },
+    {
+      "name": "matmul_tiled 3×5×7",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 2.988747068412719e-7
+        }
+      },
+      "wallMs": 3.9300000071525574
+    },
+    {
+      "name": "matmul_register 3×5×7",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 2.988747068412719e-7
+        }
+      },
+      "wallMs": 5.879999995231628
+    },
+    {
+      "name": "matmul_naive 16×16×16",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 4.76837158203125e-7,
+          "maxRel": 0.000007962963505512887
+        }
+      },
+      "wallMs": 3.0149999856948853
+    },
+    {
+      "name": "matmul_tiled 16×16×16",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 4.76837158203125e-7,
+          "maxRel": 0.000007962963505512887
+        }
+      },
+      "wallMs": 1.625
+    },
+    {
+      "name": "matmul_register 16×16×16",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 4.76837158203125e-7,
+          "maxRel": 0.000007962963505512887
+        }
+      },
+      "wallMs": 6.415000021457672
+    },
+    {
+      "name": "matmul_naive 17×19×23",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 7.152557373046875e-7,
+          "maxRel": 0.00017283374599630626
+        }
+      },
+      "wallMs": 15.02999997138977
+    },
+    {
+      "name": "matmul_tiled 17×19×23",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 7.152557373046875e-7,
+          "maxRel": 0.00017283374599630626
+        }
+      },
+      "wallMs": 4.955000042915344
+    },
+    {
+      "name": "matmul_register 17×19×23",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 7.152557373046875e-7,
+          "maxRel": 0.00017283374599630626
+        }
+      },
+      "wallMs": 9.214999973773956
+    },
+    {
+      "name": "matmul_naive 31×9×5",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.1920928955078125e-7,
+          "maxRel": 0.000004401365831844938
+        }
+      },
+      "wallMs": 3.824999988079071
+    },
+    {
+      "name": "matmul_tiled 31×9×5",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.1920928955078125e-7,
+          "maxRel": 0.000004401365831844938
+        }
+      },
+      "wallMs": 5.060000002384186
+    },
+    {
+      "name": "matmul_register 31×9×5",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.1920928955078125e-7,
+          "maxRel": 0.000004401365831844938
+        }
+      },
+      "wallMs": 7.004999995231628
+    },
+    {
+      "name": "matmul_naive 0×5×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.9449999928474426
+    },
+    {
+      "name": "matmul_tiled 0×5×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.974999964237213
+    },
+    {
+      "name": "matmul_register 0×5×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.6399999856948853
+    },
+    {
+      "name": "matmul_naive 5×0×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.450000047683716
+    },
+    {
+      "name": "matmul_tiled 5×0×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.9049999713897705
+    },
+    {
+      "name": "matmul_register 5×0×3",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 7.064999997615814
+    },
+    {
+      "name": "matmul_naive 5×7×0",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.004999995231628
+    },
+    {
+      "name": "matmul_tiled 5×7×0",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.909999966621399
+    },
+    {
+      "name": "matmul_register 5×7×0",
+      "pass": true,
+      "checks": {
+        "C": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 6.009999990463257
+    },
+    {
+      "name": "Reduction partials n=0",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 12.055000007152557
+    },
+    {
+      "name": "Reduction partials n=1",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 1.215000033378601
+    },
+    {
+      "name": "Reduction partials n=2",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.7450000047683716
+    },
+    {
+      "name": "Reduction partials n=127",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 1.2599999904632568
+    },
+    {
+      "name": "Reduction partials n=128",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.784999966621399
+    },
+    {
+      "name": "Reduction partials n=129",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.939999997615814
+    },
+    {
+      "name": "Reduction partials n=255",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.025000035762787
+    },
+    {
+      "name": "Reduction partials n=256",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.089999973773956
+    },
+    {
+      "name": "Reduction partials n=257",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.875
+    },
+    {
+      "name": "Reduction partials n=1031",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.004999995231628
+    },
+    {
+      "name": "Convolution + halo n=0",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 10.189999997615814
+    },
+    {
+      "name": "Convolution + halo n=1",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.7799999713897705
+    },
+    {
+      "name": "Convolution + halo n=2",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 5.0200000405311584
+    },
+    {
+      "name": "Convolution + halo n=3",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.9899999499320984
+    },
+    {
+      "name": "Convolution + halo n=127",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.000001985454559894215
+        }
+      },
+      "wallMs": 4.105000019073486
+    },
+    {
+      "name": "Convolution + halo n=128",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.000001985454559894215
+        }
+      },
+      "wallMs": 3.9050000309944153
+    },
+    {
+      "name": "Convolution + halo n=129",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.000001985454559894215
+        }
+      },
+      "wallMs": 4.004999995231628
+    },
+    {
+      "name": "Convolution + halo n=259",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.000002949040578798364
+        }
+      },
+      "wallMs": 4.9799999594688416
+    },
+    {
+      "name": "Histogram grid-stride n=0",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 14.035000026226044
+    },
+    {
+      "name": "Histogram grid-stride n=1",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.975000023841858
+    },
+    {
+      "name": "Histogram grid-stride n=127",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.0299999713897705
+    },
+    {
+      "name": "Histogram grid-stride n=128",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 5.024999976158142
+    },
+    {
+      "name": "Histogram grid-stride n=129",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.8850000500679016
+    },
+    {
+      "name": "Histogram grid-stride n=1031",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.039999961853027
+    },
+    {
+      "name": "Histogram grid-stride n=4099",
+      "pass": true,
+      "checks": {
+        "bins": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.949999988079071
+    },
+    {
+      "name": "Transpose 1×1",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 12.995000004768372
+    },
+    {
+      "name": "Transpose 7×19",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.990000009536743
+    },
+    {
+      "name": "Transpose 33×35",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 4.009999990463257
+    },
+    {
+      "name": "Transpose 64×9",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 1.4399999976158142
+    },
+    {
+      "name": "Transpose 0×5",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 1.2299999594688416
+    },
+    {
+      "name": "Transpose 5×0",
+      "pass": true,
+      "checks": {
+        "output": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 3.3050000071525574
+    },
+    {
+      "name": "Particle float4 interop n=1, dt=0.016",
+      "pass": true,
+      "checks": {
+        "position": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        },
+        "velocity": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.4901161193847656e-8,
+          "maxRel": 6.473254873600313e-8
+        }
+      },
+      "wallMs": 14.025000035762787
+    },
+    {
+      "name": "Particle float4 interop n=17, dt=0.016",
+      "pass": true,
+      "checks": {
+        "position": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 2.9802322387695312e-8,
+          "maxRel": 1.1298011606447323e-7
+        },
+        "velocity": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 1.0583948172522589e-7
+        }
+      },
+      "wallMs": 9.02999997138977
+    },
+    {
+      "name": "Particle float4 interop n=129, dt=0.033",
+      "pass": true,
+      "checks": {
+        "position": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 5.960464477539063e-8,
+          "maxRel": 0.0000034511987865248366
+        },
+        "velocity": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 1.1920928955078125e-7,
+          "maxRel": 0.00001895253120455294
+        }
+      },
+      "wallMs": 7.9700000286102295
+    },
+    {
+      "name": "Particle float4 interop n=17, dt=0",
+      "pass": true,
+      "checks": {
+        "position": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        },
+        "velocity": {
+          "pass": true,
+          "failures": 0,
+          "first": null,
+          "maxAbs": 0,
+          "maxRel": 0
+        }
+      },
+      "wallMs": 6.9549999833106995
+    },
+    {
+      "name": "Two parameter versions in one batch retain their own snapshots",
+      "pass": true,
+      "wallMs": 6.990000009536743
+    },
+    {
+      "name": "Reusable hierarchical reduction, including empty and singleton inputs",
+      "pass": true,
+      "wallMs": 7.009999990463257
+    },
+    {
+      "name": "Device helper templates: deduction, specialization, nested types, references and vectors",
+      "pass": true,
+      "wallMs": 25.430000007152557
+    },
+    {
+      "name": "NVIDIA N-body vector traits resolve in kernel buffers and device helpers",
+      "pass": true,
+      "wallMs": 17.805000007152557
+    },
+    {
+      "name": "NVIDIA N-body interaction reads constant uniforms with per-dispatch snapshots",
+      "pass": true,
+      "wallMs": 18.64500004053116
+    },
+    {
+      "name": "Static and dynamic shared helpers coordinate lanes through nested calls",
+      "pass": true,
+      "wallMs": 37.87999999523163
+    },
+    {
+      "name": "Storage pointer helpers preserve nested offsets, vectors, atomics, aliases and shared storage",
+      "pass": true,
+      "wallMs": 39.825000047683716
+    },
+    {
+      "name": "Vector aggregate initializers preserve partial zero filling and dependent helper types",
+      "pass": true,
+      "wallMs": 16.75499999523163
+    },
+    {
+      "name": "Original NVIDIA shared-memory conversion wrapper exchanges float4 tiles",
+      "pass": true,
+      "wallMs": 18.185000002384186
+    },
+    {
+      "name": "Original NVIDIA N-body advances three steps with an enforced whole-block contract",
+      "pass": true,
+      "wallMs": 235.49000000953674
+    },
+    {
+      "name": "Original NVIDIA N-body early return remains rejected before a helper barrier",
+      "pass": true,
+      "expectedRejection": true,
+      "reason": "Early return depends on the lane index before a shared-memory barrier.",
+      "wallMs": 6.375
+    },
+    {
+      "name": "Constant integer arrays retain defaults, high bits and per-dispatch snapshots",
+      "pass": true,
+      "wallMs": 9.469999969005585
+    },
+    {
+      "name": "RGBA 2D linear sampling and transfer helper use distinct coordinate modes",
+      "pass": true,
+      "wallMs": 12.939999997615814
+    },
+    {
+      "name": "Original NVIDIA Mandelbrot and Julia frames match native CUDA",
+      "pass": true,
+      "nativeFlags": "-O3 --fmad=false -std=c++17 -arch=native",
+      "independentReference": true,
+      "comparisons": [
+        {
+          "k": 0,
+          "frame": 0,
+          "w": 33,
+          "h": 25,
+          "mismatches": 0,
+          "maxChannelError": 0
+        },
+        {
+          "k": 0,
+          "frame": 1,
+          "w": 33,
+          "h": 25,
+          "mismatches": 0,
+          "maxChannelError": 0
+        },
+        {
+          "k": 1,
+          "frame": 0,
+          "w": 256,
+          "h": 192,
+          "mismatches": 0,
+          "maxChannelError": 0
+        },
+        {
+          "k": 1,
+          "frame": 1,
+          "w": 256,
+          "h": 192,
+          "mismatches": 0,
+          "maxChannelError": 0
+        },
+        {
+          "k": 2,
+          "frame": 0,
+          "w": 256,
+          "h": 192,
+          "mismatches": 0,
+          "maxChannelError": 0
+        },
+        {
+          "k": 2,
+          "frame": 1,
+          "w": 256,
+          "h": 192,
+          "mismatches": 0,
+          "maxChannelError": 0
+        }
+      ],
+      "wallMs": 120.95000004768372
+    },
+    {
+      "name": "Packed destinations match native CUDA C++17 evaluation ordering",
+      "pass": true,
+      "wallMs": 10.73499995470047
+    },
+    {
+      "name": "3D surface writes match native CUDA and reject oversized XYZ dispatches",
+      "pass": true,
+      "voxels": 256,
+      "nativeExact": true,
+      "oversizedXYZRejected": true,
+      "wallMs": 10.310000002384186
+    },
+    {
+      "name": "Imported device type aliases match native CUDA",
+      "pass": true,
+      "nativeExact": true,
+      "values": [
+        4,
+        6,
+        5,
+        4
+      ],
+      "wallMs": 10.004999995231628
+    },
+    {
+      "name": "Exact double-literal byte scaling matches native rounding boundaries",
+      "pass": true,
+      "values": 255,
+      "nativeExact": true,
+      "floatProductShortcutDifferences": 255,
+      "wallMs": 13.979999959468842
+    },
+    {
+      "name": "Original NVIDIA static byte conversion matches native at rounding boundaries",
+      "pass": true,
+      "values": 767,
+      "nativeExact": true,
+      "roundedFloatProductDifferences": 0,
+      "wallMs": 16.189999997615814
+    },
+    {
+      "name": "cudaExtent size comparisons match native CUDA including signed negatives",
+      "pass": true,
+      "comparisons": 168,
+      "nativeExact": true,
+      "unsigned64Promotion": true,
+      "wallMs": 19.430000007152557
+    },
+    {
+      "name": "Float4 constant array helper reads match native CUDA",
+      "pass": true,
+      "records": 125,
+      "components": 500,
+      "nativeExact": true,
+      "wallMs": 70.02500003576279
+    },
+    {
+      "name": "Complete implicit marching-cubes GPU pipeline matches native CUDA",
+      "pass": true,
+      "profile": "original implicit field, shared triangle kernel",
+      "activeVoxels": 1024,
+      "vertices": 6240,
+      "triangles": 2080,
+      "comparisons": [
+        {
+          "name": "positions",
+          "components": 24960,
+          "maxError": 0
+        },
+        {
+          "name": "normals",
+          "components": 24960,
+          "maxError": 0
+        },
+        {
+          "name": "scan",
+          "components": 4096,
+          "maxError": 0
+        },
+        {
+          "name": "compacted",
+          "components": 1024,
+          "maxError": 0
+        }
+      ],
+      "completeGpuPipeline": true,
+      "nativeIntermediateFixturesUsedAsInputs": false,
+      "controlReadbackBytes": 8,
+      "intermediateArrayReadbacks": 0,
+      "wallMs": 148.625
+    },
+    {
+      "name": "Hierarchical exclusive scan matches native CUDA",
+      "pass": true,
+      "results": [
+        {
+          "count": 1,
+          "waitForCompletion": true,
+          "exact": true,
+          "total": 2779096485
+        },
+        {
+          "count": 2,
+          "waitForCompletion": true,
+          "exact": true,
+          "total": 3778576825
+        },
+        {
+          "count": 511,
+          "waitForCompletion": true,
+          "exact": true,
+          "total": 3252289814
+        },
+        {
+          "count": 512,
+          "waitForCompletion": true,
+          "exact": true,
+          "total": 922242816
+        },
+        {
+          "count": 513,
+          "waitForCompletion": true,
+          "exact": true,
+          "total": 38737573
+        },
+        {
+          "count": 4096,
+          "waitForCompletion": true,
+          "exact": true,
+          "total": 1101363200
+        },
+        {
+          "count": 32768,
+          "waitForCompletion": true,
+          "exact": true,
+          "total": 2980036608
+        },
+        {
+          "count": 262145,
+          "waitForCompletion": true,
+          "exact": true,
+          "total": 2545919397
+        },
+        {
+          "count": 1,
+          "waitForCompletion": false,
+          "exact": true,
+          "total": 2779096485
+        },
+        {
+          "count": 2,
+          "waitForCompletion": false,
+          "exact": true,
+          "total": 3778576825
+        },
+        {
+          "count": 511,
+          "waitForCompletion": false,
+          "exact": true,
+          "total": 3252289814
+        },
+        {
+          "count": 512,
+          "waitForCompletion": false,
+          "exact": true,
+          "total": 922242816
+        },
+        {
+          "count": 513,
+          "waitForCompletion": false,
+          "exact": true,
+          "total": 38737573
+        },
+        {
+          "count": 4096,
+          "waitForCompletion": false,
+          "exact": true,
+          "total": 1101363200
+        },
+        {
+          "count": 32768,
+          "waitForCompletion": false,
+          "exact": true,
+          "total": 2980036608
+        },
+        {
+          "count": 262145,
+          "waitForCompletion": false,
+          "exact": true,
+          "total": 2545919397
+        }
+      ],
+      "noIntermediateCPUTransfer": true,
+      "threeLevelHierarchy": true,
+      "wallMs": 173.46999996900558
+    },
+    {
+      "name": "Original shared marching-cubes triangle generation matches native CUDA",
+      "pass": true,
+      "activeVoxels": 1024,
+      "vertices": 6240,
+      "comparisons": [
+        {
+          "name": "positions",
+          "components": 24960,
+          "mismatches": 0,
+          "maxError": 0
+        },
+        {
+          "name": "normals",
+          "components": 24960,
+          "mismatches": 0,
+          "maxError": 0
+        }
+      ],
+      "originalSharedKernel": true,
+      "nativeScanFixture": true,
+      "completeGpuPipeline": false,
+      "wallMs": 26.474999964237213
+    },
+    {
+      "name": "Full fluids solver compared with native CUDA and cuFFT",
+      "pass": true,
+      "results": [
+        {
+          "width": 64,
+          "step": 1,
+          "name": "velocity",
+          "maxError": 3.725290298461914e-9,
+          "rms": 2.4833884175599323e-10,
+          "components": 8192
+        },
+        {
+          "width": 64,
+          "step": 1,
+          "name": "particles",
+          "maxError": 1.1920928955078125e-7,
+          "rms": 1.3170890159654386e-9,
+          "components": 8192
+        },
+        {
+          "width": 64,
+          "step": 8,
+          "name": "velocity",
+          "maxError": 7.450580596923828e-8,
+          "rms": 5.0026982248627976e-9,
+          "components": 8192
+        },
+        {
+          "width": 64,
+          "step": 8,
+          "name": "particles",
+          "maxError": 2.384185791015625e-7,
+          "rms": 1.0618711124166268e-8,
+          "components": 8192
+        },
+        {
+          "width": 64,
+          "step": 32,
+          "name": "velocity",
+          "maxError": 0.0000026766210794448853,
+          "rms": 8.049306855557586e-8,
+          "components": 8192
+        },
+        {
+          "width": 64,
+          "step": 32,
+          "name": "particles",
+          "maxError": 0.000003814697265625,
+          "rms": 1.2257422251613562e-7,
+          "components": 8192
+        },
+        {
+          "width": 64,
+          "step": 64,
+          "name": "velocity",
+          "maxError": 0.000052228569984436035,
+          "rms": 0.0000011649086374089341,
+          "components": 8192
+        },
+        {
+          "width": 64,
+          "step": 64,
+          "name": "particles",
+          "maxError": 0.0004156827926635742,
+          "rms": 0.000006183587894173536,
+          "components": 8192
+        },
+        {
+          "width": 512,
+          "step": 1,
+          "name": "velocity",
+          "maxError": 2.3283064365386963e-9,
+          "rms": 1.8576607319219162e-11,
+          "components": 524288
+        },
+        {
+          "width": 512,
+          "step": 1,
+          "name": "particles",
+          "maxError": 1.1920928955078125e-7,
+          "rms": 3.681375715146283e-10,
+          "components": 524288
+        },
+        {
+          "width": 512,
+          "step": 8,
+          "name": "velocity",
+          "maxError": 1.30385160446167e-8,
+          "rms": 2.2550420636027666e-10,
+          "components": 524288
+        },
+        {
+          "width": 512,
+          "step": 8,
+          "name": "particles",
+          "maxError": 2.384185791015625e-7,
+          "rms": 2.1779312442370816e-9,
+          "components": 524288
+        },
+        {
+          "width": 512,
+          "step": 32,
+          "name": "velocity",
+          "maxError": 8.381903171539307e-7,
+          "rms": 1.0330536317746448e-8,
+          "components": 524288
+        },
+        {
+          "width": 512,
+          "step": 32,
+          "name": "particles",
+          "maxError": 0.00007653236389160156,
+          "rms": 1.74746494521692e-7,
+          "components": 524288
+        },
+        {
+          "width": 512,
+          "step": 64,
+          "name": "velocity",
+          "maxError": 1.5040859580039978e-7,
+          "rms": 4.544174475554779e-9,
+          "components": 524288
+        },
+        {
+          "width": 512,
+          "step": 64,
+          "name": "particles",
+          "maxError": 0.00018739700317382812,
+          "rms": 4.668460232301538e-7,
+          "components": 524288
+        }
+      ],
+      "intermediateReadbackBytes": 0,
+      "originalKernelsUnchanged": true,
+      "wallMs": 5506.990000009537
+    },
+    {
+      "name": "Real FFT packed transforms match native cuFFT",
+      "pass": true,
+      "results": [
+        {
+          "width": 1,
+          "height": 1,
+          "realStride": 2,
+          "maxForwardError": 0,
+          "relativeL2": 0,
+          "inverseNormalizedError": 0,
+          "normalizedRoundtripError": 0,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "width": 2,
+          "height": 4,
+          "realStride": 4,
+          "maxForwardError": 0,
+          "relativeL2": 0,
+          "inverseNormalizedError": 0,
+          "normalizedRoundtripError": 0,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "width": 8,
+          "height": 4,
+          "realStride": 10,
+          "maxForwardError": 4.76837158203125e-7,
+          "relativeL2": 5.981714402600152e-8,
+          "inverseNormalizedError": 1.1920928955078125e-7,
+          "normalizedRoundtripError": 1.1920928955078125e-7,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "width": 64,
+          "height": 32,
+          "realStride": 66,
+          "maxForwardError": 0.0000152587890625,
+          "relativeL2": 2.2512767482911075e-7,
+          "inverseNormalizedError": 4.76837158203125e-7,
+          "normalizedRoundtripError": 7.152557373046875e-7,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "width": 512,
+          "height": 512,
+          "realStride": 514,
+          "maxForwardError": 0.000518798828125,
+          "relativeL2": 4.3740125396387403e-7,
+          "inverseNormalizedError": 9.5367431640625e-7,
+          "normalizedRoundtripError": 0.0000016689300537109375,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        }
+      ],
+      "pipelineVerified": true,
+      "artifacts": [
+        "realToComplex",
+        "packSpectrum",
+        "forwardFftAxis",
+        "forwardFftAxis",
+        "unpackSpectrum",
+        "complexToReal",
+        "inverseFftAxis",
+        "inverseFftAxis"
+      ],
+      "packedLayout": "height rows of floor(width/2)+1 complex values",
+      "inverseNormalization": "none",
+      "wallMs": 407.1500000357628
+    },
+    {
+      "name": "Original fluids pitched kernels match native CUDA",
+      "pass": true,
+      "comparisons": [
+        {
+          "name": "fluids-forces-native",
+          "components": 632,
+          "maxError": 0
+        },
+        {
+          "name": "fluids-update-native",
+          "components": 632,
+          "maxError": 0
+        },
+        {
+          "name": "fluids-particles-native",
+          "components": 494,
+          "maxError": 0
+        }
+      ],
+      "originalBodiesUnchanged": true,
+      "pitchBytes": 192,
+      "paddingPreserved": true,
+      "misalignmentRejected": true,
+      "particleSteps": 5,
+      "wallMs": 53.78999996185303
+    },
+    {
+      "name": "2048-point real FFT axes match native cuFFT",
+      "pass": true,
+      "results": [
+        {
+          "width": 2048,
+          "height": 8,
+          "realStride": 2050,
+          "maxForwardError": 0.00011444091796875,
+          "relativeL2": 3.56716583028121e-7,
+          "inverseNormalizedError": 6.556510925292969e-7,
+          "normalizedRoundtripError": 0.0000010728836059570312,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "width": 8,
+          "height": 2048,
+          "realStride": 10,
+          "maxForwardError": 0.0000896453857421875,
+          "relativeL2": 3.492200687075704e-7,
+          "inverseNormalizedError": 7.152557373046875e-7,
+          "normalizedRoundtripError": 0.0000011920928955078125,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "width": 2048,
+          "height": 2048,
+          "realStride": 2050,
+          "maxForwardError": 0.0029296875,
+          "relativeL2": 5.383302232008093e-7,
+          "inverseNormalizedError": 0.0000013709068298339844,
+          "normalizedRoundtripError": 0.000002384185791015625,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        }
+      ],
+      "maximumAxis": 2048,
+      "maximumThreads": 1024,
+      "roundtripLimit": 0.000004,
+      "wallMs": 467.0300000309944
+    },
+    {
+      "name": "Sincos and first-set-bit intrinsics match native CUDA",
+      "pass": true,
+      "values": 8195,
+      "components": 32780,
+      "maxNativeError": 0.000007748603820800781,
+      "maxStandardNativeError": 4.172325134277344e-7,
+      "maxMathError": 4.2384562060071573e-7,
+      "firstSetBitNativeExact": true,
+      "phaseRange": [
+        -51.20000076293945,
+        51.22500228881836
+      ],
+      "wallMs": 26.339999973773956
+    },
+    {
+      "name": "Original NVIDIA scalar layered textures match native CUDA",
+      "pass": true,
+      "passed": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "width": 512,
+      "height": 512,
+      "layers": 5,
+      "values": 1310720,
+      "nativeValuesExact": true,
+      "distinctLayerSelection": true,
+      "helperTexturePropagation": true,
+      "softwareAdapterRequested": false,
+      "wallMs": 70.24500000476837
+    },
+    {
+      "name": "Deferred pointer assignments preserve batch and channel offsets",
+      "pass": true,
+      "elements": 2304,
+      "batches": 24,
+      "channels": 3,
+      "gridZ": 4,
+      "exact": true,
+      "originalBgrStage": {
+        "values": 5760,
+        "nativeExact": true,
+        "paddingPreserved": true,
+        "sourceUnchanged": true,
+        "fullDefaultPipeline": false
+      },
+      "wallMs": 35.35499995946884
+    },
+    {
+      "name": "Original full-resolution NV12 conversion matches native CUDA",
+      "pass": true,
+      "width": 1920,
+      "height": 1080,
+      "frames": 24,
+      "checkedValues": 149299200,
+      "maxError": 0.0000152587890625,
+      "tolerance": 0.0001,
+      "streamed": true,
+      "originalBodiesUnchanged": true,
+      "fullNv12ResizePipeline": false,
+      "wallMs": 694.2700000405312
+    },
+    {
+      "name": "Original single-frame NV12 resize matches native byte output",
+      "pass": true,
+      "width": 1920,
+      "height": 1080,
+      "dstWidth": 640,
+      "dstHeight": 480,
+      "bytes": 460800,
+      "repeats": 3,
+      "nativeExact": true,
+      "originalKernelUnchanged": true,
+      "fullBatchPipeline": false,
+      "wallMs": 66
+    },
+    {
+      "name": "Original CUDA RNG buffers and downcast cleanup match native",
+      "pass": true,
+      "floatValues": 4608,
+      "randomWords": 1536,
+      "nativeExact": true,
+      "wideSeeds": true,
+      "recordStride": 24,
+      "framebufferStride": 12,
+      "freedSphereMaterialPairs": 512,
+      "allPoolsEmpty": true,
+      "fullPathtracerSupported": false,
+      "wallMs": 187.55500000715256
+    },
+    {
+      "name": "Original CUDA materials scatter through virtual dispatch",
+      "pass": true,
+      "cases": 1024,
+      "modes": [
+        "invocation",
+        "persistent"
+      ],
+      "materials": [
+        "lambertian",
+        "metal",
+        "dielectric"
+      ],
+      "virtualDispatch": true,
+      "randomStateExact": true,
+      "floatValues": 10240,
+      "maxAbsoluteError": 1.1920928955078125e-7,
+      "fullPathtracerSupported": false,
+      "wallMs": 2476.1349999904633
+    },
+    {
+      "name": "Original CUDA camera and cuRAND XORWOW match native",
+      "pass": true,
+      "cameras": 512,
+      "randomIntegers": 4608,
+      "randomIntegersExact": true,
+      "uniformFloatsExact": true,
+      "floatValues": 11776,
+      "maxAbsoluteError": 0.000003814697265625,
+      "fullPathtracerSupported": false,
+      "wallMs": 91.22000002861023
+    },
+    {
+      "name": "Original CUDA hitable_list captures live object buffers",
+      "pass": true,
+      "values": 8,
+      "nativeExact": true,
+      "capturedBufferMutation": true,
+      "missPreserved": true,
+      "fullPathtracerSupported": false,
+      "wallMs": 133.4749999642372
+    },
+    {
+      "name": "Persistent CUDA sphere objects survive separate create/trace/free submissions",
+      "pass": true,
+      "arenaIsolation": true,
+      "cycles": 2,
+      "objectsPerCycle": 512,
+      "values": 5120,
+      "nativeExact": true,
+      "separateSubmissions": true,
+      "allFreed": true,
+      "persistent": true,
+      "fullPathtracerSupported": false,
+      "wallMs": 90.04000002145767
+    },
+    {
+      "name": "Path tracer value-class constructors and accessors match native CUDA",
+      "pass": true,
+      "cases": 512,
+      "values": 56320,
+      "nativeExact": true,
+      "copyIsolation": true,
+      "fullPathtracerSupported": false,
+      "wallMs": 2233.8450000286102
+    },
+    {
+      "name": "NVIDIA cubemap faces and edge filtering match native CUDA",
+      "pass": true,
+      "passed": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "faces": 6,
+      "width": 64,
+      "values": 24576,
+      "maxAbsoluteError": 0,
+      "edgeProbes": 12,
+      "edgeExact": true,
+      "helperTexturePropagation": true,
+      "seamlessExplicitlyRejected": true,
+      "softwareAdapterRequested": false,
+      "wallMs": 34.669999957084656
+    },
+    {
+      "name": "Complete NVIDIA Walsh convolution matches native CUDA",
+      "pass": true,
+      "passed": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "values": 8388608,
+      "kernelValues": 128,
+      "transforms": 3,
+      "globalPassesPerTransform": 6,
+      "sharedPassesPerTransform": 1,
+      "l2": 0,
+      "maxAbsoluteError": 0,
+      "bitMismatches": 0,
+      "softwareAdapterRequested": false,
+      "wallMs": 262.18000000715256
+    },
+    {
+      "name": "Original NVIDIA binomial options match all native outputs",
+      "pass": true,
+      "passed": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "options": 1024,
+      "steps": 2048,
+      "l1": 1.1014507031980355e-39,
+      "maxAbsoluteError": 1.0460491249205897e-37,
+      "allOptionsCompared": true,
+      "softwareAdapterRequested": false,
+      "wallMs": 33.905000030994415
+    },
+    {
+      "name": "Device globals persist across dispatches and support helper atomics",
+      "pass": true,
+      "passed": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "elements": 128,
+      "dispatches": 2,
+      "helperAtomics": 256,
+      "undersizedRejected": true,
+      "softwareAdapterRequested": false,
+      "wallMs": 11.980000019073486
+    },
+    {
+      "name": "Complete NVIDIA odd-even sorting matches native CUDA",
+      "pass": true,
+      "passed": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "results": [
+        {
+          "direction": 0,
+          "arrayLength": 64,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 128,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 256,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 512,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 1024,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 2048,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 4096,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 8192,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 16384,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 32768,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 65536,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 131072,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 262144,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 524288,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 1048576,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 64,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 128,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 256,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 512,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 1024,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 2048,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 4096,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 8192,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 16384,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 32768,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 65536,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 131072,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 262144,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 524288,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 1048576,
+          "elements": 1048576,
+          "nativeMatch": true
+        }
+      ],
+      "wallMs": 481.539999961853
+    },
+    {
+      "name": "Complete NVIDIA bitonic sorting matches native CUDA",
+      "pass": true,
+      "passed": true,
+      "aliasEdgeChecks": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "results": [
+        {
+          "direction": 0,
+          "arrayLength": 64,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 128,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 256,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 512,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 1024,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 2048,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 4096,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 8192,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 16384,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 32768,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 65536,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 131072,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 262144,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 524288,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 0,
+          "arrayLength": 1048576,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 64,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 128,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 256,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 512,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 1024,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 2048,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 4096,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 8192,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 16384,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 32768,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 65536,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 131072,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 262144,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 524288,
+          "elements": 1048576,
+          "nativeMatch": true
+        },
+        {
+          "direction": 1,
+          "arrayLength": 1048576,
+          "elements": 1048576,
+          "nativeMatch": true
+        }
+      ],
+      "wallMs": 496.9399999976158
+    },
+    {
+      "name": "Full Sobol sequence matches native CUDA",
+      "pass": true,
+      "passed": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "workgroupSize": [
+        64,
+        1,
+        1
+      ],
+      "sharedBytes": 128,
+      "results": [
+        {
+          "vectors": 100000,
+          "dimensions": 100,
+          "groups": [
+            512,
+            100,
+            1
+          ],
+          "components": 10000000,
+          "mismatches": 0
+        },
+        {
+          "vectors": 1025,
+          "dimensions": 3,
+          "groups": [
+            32,
+            3,
+            1
+          ],
+          "components": 3075,
+          "mismatches": 0
+        },
+        {
+          "vectors": 2000,
+          "dimensions": 512,
+          "groups": [
+            1,
+            512,
+            1
+          ],
+          "components": 1024000,
+          "mismatches": 0
+        }
+      ],
+      "wallMs": 170.2300000190735
+    },
+    {
+      "name": "Full quasirandom sequence matches native CUDA",
+      "pass": true,
+      "passed": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "workgroupSize": [
+        128,
+        3,
+        1
+      ],
+      "groups": [
+        128,
+        1,
+        1
+      ],
+      "results": [
+        {
+          "N": 1048576,
+          "seed": 0,
+          "components": 3145728,
+          "mismatches": 0
+        },
+        {
+          "N": 1025,
+          "seed": 1,
+          "components": 3075,
+          "mismatches": 0
+        },
+        {
+          "N": 1025,
+          "seed": 4294967280,
+          "components": 3075,
+          "mismatches": 0
+        }
+      ],
+      "wallMs": 122.0349999666214
+    },
+    {
+      "name": "DXT full image matches native CUDA",
+      "pass": true,
+      "passed": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "softwareAdapterRequested": false,
+      "nonzeroWords": 24832,
+      "blocks": 16384,
+      "workgroupSize": 64,
+      "sharedBytes": 2176,
+      "differingWords": 0,
+      "differingBlocks": 0,
+      "firstActual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "firstNative": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wallMs": 124.94999998807907
+    },
+    {
+      "name": "DXT tiled colour stage matches native CUDA",
+      "pass": true,
+      "passed": true,
+      "blocks": 16384,
+      "workgroupSize": 64,
+      "tileSize": 16,
+      "sharedBytes": 1024,
+      "results": [
+        {
+          "name": "dxt-colors-native",
+          "components": 1048576,
+          "mismatches": 0,
+          "maxError": 0
+        },
+        {
+          "name": "dxt-sums-native",
+          "components": 1048576,
+          "mismatches": 0,
+          "maxError": 0
+        },
+        {
+          "name": "dxt-ranks-native",
+          "components": 262144,
+          "mismatches": 0,
+          "maxError": 0
+        }
+      ],
+      "wallMs": 137.875
+    },
+    {
+      "name": "DXT endpoint fitting matches native CUDA",
+      "pass": true,
+      "passed": true,
+      "nativeExact": true,
+      "permutations": 4096,
+      "endpointComponents": 16384,
+      "errorComponents": 16384,
+      "results": [
+        {
+          "block": 0,
+          "maxError": 0,
+          "endpointMismatches": 0,
+          "nonfiniteMatches": 0,
+          "nonfiniteMismatches": 0
+        },
+        {
+          "block": 1,
+          "maxError": 0,
+          "endpointMismatches": 0,
+          "nonfiniteMatches": 0,
+          "nonfiniteMismatches": 0
+        },
+        {
+          "block": 2,
+          "maxError": 0,
+          "endpointMismatches": 0,
+          "nonfiniteMatches": 0,
+          "nonfiniteMismatches": 0
+        },
+        {
+          "block": 3,
+          "maxError": 0,
+          "endpointMismatches": 0,
+          "nonfiniteMatches": 0,
+          "nonfiniteMismatches": 0
+        }
+      ],
+      "wallMs": 81.45999997854233
+    },
+    {
+      "name": "rintf matches native bits including halfway ties",
+      "pass": true,
+      "values": 6152,
+      "nativeBitExact": true,
+      "signedZero": true,
+      "halfwayTies": true,
+      "wallMs": 12.425000011920929
+    },
+    {
+      "name": "Complete custom FFT convolution variants match native CUDA",
+      "pass": true,
+      "passed": true,
+      "results": [
+        {
+          "variant": 1,
+          "width": 37,
+          "height": 19,
+          "fftWidth": 32,
+          "fftHeight": 32,
+          "components": 2048,
+          "relativeL2": 8.469367786584508e-8,
+          "maxError": 0.0009765625,
+          "originalCpuRelativeL2": 6.28194119328516e-8,
+          "cpuMaxError": 0.0009765625,
+          "intermediateReadbackBytes": 0,
+          "artifacts": [
+            "padKernel_kernel",
+            "padDataClampToBorder_kernel",
+            "forwardFftAxis",
+            "spPostprocess2D_kernel",
+            "modulateAndNormalize_kernel",
+            "spPreprocess2D_kernel",
+            "inverseFftAxis"
+          ]
+        },
+        {
+          "variant": 1,
+          "width": 2000,
+          "height": 2000,
+          "fftWidth": 1024,
+          "fftHeight": 2048,
+          "components": 4194304,
+          "relativeL2": 2.024730284647966e-7,
+          "maxError": 0.0035400390625,
+          "originalCpuRelativeL2": 1.407405516910913e-7,
+          "cpuMaxError": 0.0029296875,
+          "intermediateReadbackBytes": 0,
+          "artifacts": [
+            "padKernel_kernel",
+            "padDataClampToBorder_kernel",
+            "forwardFftAxis",
+            "spPostprocess2D_kernel",
+            "modulateAndNormalize_kernel",
+            "spPreprocess2D_kernel",
+            "inverseFftAxis"
+          ]
+        },
+        {
+          "variant": 2,
+          "width": 37,
+          "height": 19,
+          "fftWidth": 32,
+          "fftHeight": 32,
+          "components": 2048,
+          "relativeL2": 8.786428591733209e-8,
+          "maxError": 0.0009765625,
+          "originalCpuRelativeL2": 6.011973580314317e-8,
+          "cpuMaxError": 0.0009765625,
+          "intermediateReadbackBytes": 0,
+          "artifacts": [
+            "padKernel_kernel",
+            "padDataClampToBorder_kernel",
+            "forwardFftAxis",
+            "spProcess2D_kernel",
+            "inverseFftAxis"
+          ]
+        },
+        {
+          "variant": 2,
+          "width": 2000,
+          "height": 2000,
+          "fftWidth": 1024,
+          "fftHeight": 2048,
+          "components": 4194304,
+          "relativeL2": 2.0239125391561638e-7,
+          "maxError": 0.00341796875,
+          "originalCpuRelativeL2": 1.4038218432466336e-7,
+          "cpuMaxError": 0.0029296875,
+          "intermediateReadbackBytes": 0,
+          "artifacts": [
+            "padKernel_kernel",
+            "padDataClampToBorder_kernel",
+            "forwardFftAxis",
+            "spProcess2D_kernel",
+            "inverseFftAxis"
+          ]
+        }
+      ],
+      "wallMs": 1843.1399999856949
+    },
+    {
+      "name": "Original custom FFT convolution stages match native CUDA",
+      "pass": true,
+      "passed": true,
+      "results": [
+        {
+          "entry": "spPostprocess2D_kernel",
+          "direction": -1,
+          "compared": 4100,
+          "guards": 1028,
+          "maxError": 0
+        },
+        {
+          "entry": "spPreprocess2D_kernel",
+          "direction": -1,
+          "compared": 4096,
+          "guards": 1032,
+          "maxError": 0
+        },
+        {
+          "entry": "spProcess2D_kernel",
+          "direction": -1,
+          "compared": 4096,
+          "guards": 1032,
+          "maxError": 0
+        },
+        {
+          "entry": "spPostprocess2D_kernel",
+          "direction": 1,
+          "compared": 4100,
+          "guards": 1028,
+          "maxError": 0
+        },
+        {
+          "entry": "spPreprocess2D_kernel",
+          "direction": 1,
+          "compared": 4096,
+          "guards": 1032,
+          "maxError": 0
+        },
+        {
+          "entry": "spProcess2D_kernel",
+          "direction": 1,
+          "compared": 4096,
+          "guards": 1032,
+          "maxError": 0
+        }
+      ],
+      "wallMs": 55.939999997615814
+    },
+    {
+      "name": "Original full-size FFT convolution matches native CUDA",
+      "pass": true,
+      "results": [
+        {
+          "width": 37,
+          "height": 19,
+          "fftW": 64,
+          "fftH": 32,
+          "components": 2048,
+          "relativeL2": 8.537089707094412e-8,
+          "maxError": 0.0009765625,
+          "originalCpuRelativeL2": 5.998814938972565e-8,
+          "cpuMaxError": 0.0009765625,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "width": 2000,
+          "height": 2000,
+          "fftW": 2048,
+          "fftH": 2048,
+          "components": 4194304,
+          "relativeL2": 1.9979428385512446e-7,
+          "maxError": 0.0029296875,
+          "originalCpuRelativeL2": 1.385154575358956e-7,
+          "cpuMaxError": 0.0029296875,
+          "intermediateReadbackBytes": 0
+        }
+      ],
+      "source": "Original NVIDIA test0 device bodies",
+      "input": "Original srand(2010), rand()%16 captured on Windows",
+      "passed": true,
+      "wallMs": 494.0049999952316
+    },
+    {
+      "name": "GPU copies to multi-row float linear textures match native",
+      "pass": true,
+      "nativeExact": true,
+      "records": 32771,
+      "components": 229425,
+      "multiRow": true,
+      "partialLastRow": true,
+      "sourceOffsetChecked": true,
+      "intermediateReadbackBytes": 0,
+      "wallMs": 37.31999999284744
+    },
+    {
+      "name": "Raw float linear texture records match native",
+      "pass": true,
+      "records": 32771,
+      "lookups": 98325,
+      "components": 229425,
+      "nativeExact": true,
+      "multiRow": true,
+      "outOfRangeZero": true,
+      "wallMs": 26.439999997615814
+    },
+    {
+      "name": "Complete optical flow matches original native pipeline",
+      "pass": true,
+      "checks": [
+        {
+          "name": "u",
+          "maxError": 0,
+          "rms": 0,
+          "meanAbsolute": 0,
+          "maxMagnitude": 41.07566452026367
+        },
+        {
+          "name": "v",
+          "maxError": 0,
+          "rms": 0,
+          "meanAbsolute": 0,
+          "maxMagnitude": 14.071155548095703
+        }
+      ],
+      "entries": [
+        "DownscaleKernel",
+        "WarpingKernel",
+        "ComputeDerivativesKernel",
+        "JacobiIteration",
+        "AddKernel",
+        "UpscaleKernel"
+      ],
+      "levels": 5,
+      "warps": 3,
+      "solverIterations": 500,
+      "intermediateReadbackBytes": 0,
+      "wallMs": 2563.475000023842
+    },
+    {
+      "name": "Original optical flow Jacobi matches 500 native iterations",
+      "pass": true,
+      "results": [
+        {
+          "width": 67,
+          "height": 19,
+          "block": [
+            32,
+            6,
+            1
+          ],
+          "step": 1,
+          "component": "u",
+          "maxError": 0,
+          "rms": 0
+        },
+        {
+          "width": 67,
+          "height": 19,
+          "block": [
+            32,
+            6,
+            1
+          ],
+          "step": 1,
+          "component": "v",
+          "maxError": 0,
+          "rms": 0
+        },
+        {
+          "width": 67,
+          "height": 19,
+          "block": [
+            32,
+            6,
+            1
+          ],
+          "step": 8,
+          "component": "u",
+          "maxError": 0,
+          "rms": 0
+        },
+        {
+          "width": 67,
+          "height": 19,
+          "block": [
+            32,
+            6,
+            1
+          ],
+          "step": 8,
+          "component": "v",
+          "maxError": 0,
+          "rms": 0
+        },
+        {
+          "width": 67,
+          "height": 19,
+          "block": [
+            32,
+            6,
+            1
+          ],
+          "step": 500,
+          "component": "u",
+          "maxError": 0,
+          "rms": 0
+        },
+        {
+          "width": 67,
+          "height": 19,
+          "block": [
+            32,
+            6,
+            1
+          ],
+          "step": 500,
+          "component": "v",
+          "maxError": 0,
+          "rms": 0
+        },
+        {
+          "width": 128,
+          "height": 96,
+          "block": [
+            16,
+            4,
+            1
+          ],
+          "step": 1,
+          "component": "u",
+          "maxError": 0,
+          "rms": 0
+        },
+        {
+          "width": 128,
+          "height": 96,
+          "block": [
+            16,
+            4,
+            1
+          ],
+          "step": 1,
+          "component": "v",
+          "maxError": 0,
+          "rms": 0
+        },
+        {
+          "width": 128,
+          "height": 96,
+          "block": [
+            16,
+            4,
+            1
+          ],
+          "step": 8,
+          "component": "u",
+          "maxError": 0,
+          "rms": 0
+        },
+        {
+          "width": 128,
+          "height": 96,
+          "block": [
+            16,
+            4,
+            1
+          ],
+          "step": 8,
+          "component": "v",
+          "maxError": 0,
+          "rms": 0
+        },
+        {
+          "width": 128,
+          "height": 96,
+          "block": [
+            16,
+            4,
+            1
+          ],
+          "step": 500,
+          "component": "u",
+          "maxError": 0,
+          "rms": 0
+        },
+        {
+          "width": 128,
+          "height": 96,
+          "block": [
+            16,
+            4,
+            1
+          ],
+          "step": 500,
+          "component": "v",
+          "maxError": 0,
+          "rms": 0
+        }
+      ],
+      "originalKernelUnchanged": true,
+      "iterations": 500,
+      "wallMs": 125.63499999046326
+    },
+    {
+      "name": "Original stereo disparity matches native pixels",
+      "pass": true,
+      "results": [
+        {
+          "width": 67,
+          "height": 19,
+          "pixels": 1273,
+          "nativeExact": true
+        },
+        {
+          "width": 640,
+          "height": 533,
+          "pixels": 341120,
+          "nativeExact": true
+        }
+      ],
+      "originalDeviceBodiesUnchanged": true,
+      "wallMs": 51.69999998807907
+    },
+    {
+      "name": "Original NVIDIA inline PTX SAD matches native",
+      "pass": true,
+      "components": 4100,
+      "nativeExact": true,
+      "independentByteSumExact": true,
+      "wallMs": 16.205000042915344
+    },
+    {
+      "name": "size_t launch values preserve native 64-bit arithmetic",
+      "pass": true,
+      "cases": [
+        [
+          192,
+          7
+        ],
+        [
+          4294967295,
+          2
+        ],
+        [
+          12345,
+          -1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          4294967295,
+          2147483647
+        ]
+      ],
+      "components": 35,
+      "nativeExact": true,
+      "launchValueBits": 32,
+      "arithmeticBits": 64,
+      "wallMs": 55
+    },
+    {
+      "name": "Original fluids kernels: native projection and bounded texture filtering",
+      "pass": true,
+      "comparisons": [
+        {
+          "name": "fluids-advect-0-0-native",
+          "components": 328,
+          "maxError": 0,
+          "tolerance": 0.000001,
+          "exact": true
+        },
+        {
+          "name": "fluids-advect-0-1-native",
+          "components": 328,
+          "maxError": 0,
+          "tolerance": 0.000001,
+          "exact": true
+        },
+        {
+          "name": "fluids-advect-1-0-native",
+          "components": 328,
+          "maxError": 0.0020176336402073503,
+          "tolerance": 0.011039058691726998,
+          "exact": false
+        },
+        {
+          "name": "fluids-advect-1-1-native",
+          "components": 328,
+          "maxError": 0.0036315321922302246,
+          "tolerance": 0.010163694342968986,
+          "exact": false
+        },
+        {
+          "name": "fluids-advect-2-0-native",
+          "components": 328,
+          "maxError": 0,
+          "tolerance": 0.000001,
+          "exact": true
+        },
+        {
+          "name": "fluids-advect-2-1-native",
+          "components": 328,
+          "maxError": 0,
+          "tolerance": 0.000001,
+          "exact": true
+        },
+        {
+          "name": "fluids-project-0-native",
+          "components": 494,
+          "maxError": 0,
+          "tolerance": 0.000001,
+          "exact": true
+        },
+        {
+          "name": "fluids-project-1-native",
+          "components": 494,
+          "maxError": 0,
+          "tolerance": 0.000001,
+          "exact": true
+        },
+        {
+          "name": "isolated sampler 0",
+          "maxError": 0,
+          "nativeVsBilinear": 0,
+          "webgpuVsBilinear": 0,
+          "advectionMatchesCapturedCoordinates": true
+        },
+        {
+          "name": "isolated sampler 1",
+          "maxError": 0.0036315321922302246,
+          "nativeVsBilinear": 0.0024845365450993917,
+          "webgpuVsBilinear": 0.0024845365450993917,
+          "advectionMatchesCapturedCoordinates": true
+        },
+        {
+          "name": "isolated sampler 2",
+          "maxError": 0,
+          "nativeVsBilinear": 0.002495133549707179,
+          "webgpuVsBilinear": 0.002495133549707179,
+          "advectionMatchesCapturedCoordinates": true
+        }
+      ],
+      "filteringBoundPerChannel": [
+        0.005519529345863499,
+        0.005081847171484493
+      ],
+      "filteringNote": "Each backend checked against ideal bilinear interpolation using (maximum horizontal slope + maximum vertical slope)/256 + 1e-6. Cross-backend tolerance is twice that bound; it is not an exact match claim.",
+      "originalKernelBodies": true,
+      "paddedRows": true,
+      "partialWorkgroups": true,
+      "wallMs": 96.125
+    },
+    {
+      "name": "Smoke sandbox pipeline matches native integration and depth sorting",
+      "pass": true,
+      "comparisons": [
+        {
+          "frame": 1,
+          "positionsExact": true,
+          "velocitiesExact": true,
+          "sortedKeysExact": true,
+          "indicesExact": true
+        },
+        {
+          "frame": 8,
+          "positionsExact": true,
+          "velocitiesExact": true,
+          "sortedKeysExact": true,
+          "indicesExact": true
+        },
+        {
+          "frame": 32,
+          "positionsExact": true,
+          "velocitiesExact": true,
+          "sortedKeysExact": true,
+          "indicesExact": true
+        },
+        {
+          "frame": 64,
+          "positionsExact": true,
+          "velocitiesExact": true,
+          "sortedKeysExact": true,
+          "indicesExact": true
+        }
+      ],
+      "frames": 64,
+      "particles": 257,
+      "intermediateReadbackBytes": 0,
+      "artifacts": [
+        "integrate_functor",
+        "calcDepth_functor",
+        "smokeIndices",
+        "sortPrepare",
+        "sortStage",
+        "sortFinish"
+      ],
+      "wallMs": 484.4800000190735
+    },
+    {
+      "name": "Float key sorting preserves IEEE bits and matches native smoke depths",
+      "pass": true,
+      "comparisons": [
+        {
+          "label": "IEEE edge cases 1",
+          "count": 1,
+          "exactKeyBits": true,
+          "exactValues": true,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "label": "IEEE edge cases 2",
+          "count": 2,
+          "exactKeyBits": true,
+          "exactValues": true,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "label": "IEEE edge cases 127",
+          "count": 127,
+          "exactKeyBits": true,
+          "exactValues": true,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "label": "IEEE edge cases 128",
+          "count": 128,
+          "exactKeyBits": true,
+          "exactValues": true,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "label": "IEEE edge cases 129",
+          "count": 129,
+          "exactKeyBits": true,
+          "exactValues": true,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "label": "IEEE edge cases 257",
+          "count": 257,
+          "exactKeyBits": true,
+          "exactValues": true,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "label": "IEEE edge cases 16384",
+          "count": 16384,
+          "exactKeyBits": true,
+          "exactValues": true,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "label": "native smoke step 1",
+          "count": 257,
+          "exactKeyBits": true,
+          "exactValues": true,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "label": "native smoke step 8",
+          "count": 257,
+          "exactKeyBits": true,
+          "exactValues": true,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "label": "native smoke step 32",
+          "count": 257,
+          "exactKeyBits": true,
+          "exactValues": true,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "label": "native smoke step 64",
+          "count": 257,
+          "exactKeyBits": true,
+          "exactValues": true,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        }
+      ],
+      "softwareAdapterRequested": false,
+      "wallMs": 89.75
+    },
+    {
+      "name": "Original smoke integration and depth match native Thrust",
+      "pass": true,
+      "count": 257,
+      "frames": 64,
+      "comparisons": [
+        {
+          "frame": 1,
+          "name": "positions",
+          "components": 1028,
+          "maxError": 0
+        },
+        {
+          "frame": 1,
+          "name": "velocities",
+          "components": 1028,
+          "maxError": 0
+        },
+        {
+          "frame": 1,
+          "name": "depth",
+          "components": 257,
+          "maxError": 0
+        },
+        {
+          "frame": 8,
+          "name": "positions",
+          "components": 1028,
+          "maxError": 0
+        },
+        {
+          "frame": 8,
+          "name": "velocities",
+          "components": 1028,
+          "maxError": 0
+        },
+        {
+          "frame": 8,
+          "name": "depth",
+          "components": 257,
+          "maxError": 0
+        },
+        {
+          "frame": 32,
+          "name": "positions",
+          "components": 1028,
+          "maxError": 0
+        },
+        {
+          "frame": 32,
+          "name": "velocities",
+          "components": 1028,
+          "maxError": 0
+        },
+        {
+          "frame": 32,
+          "name": "depth",
+          "components": 257,
+          "maxError": 0
+        },
+        {
+          "frame": 64,
+          "name": "positions",
+          "components": 1028,
+          "maxError": 0
+        },
+        {
+          "frame": 64,
+          "name": "velocities",
+          "components": 1028,
+          "maxError": 0
+        },
+        {
+          "frame": 64,
+          "name": "depth",
+          "components": 257,
+          "maxError": 0
+        }
+      ],
+      "originalFunctorsUnchanged": true,
+      "partialBlockGuards": true,
+      "wallMs": 71.8299999833107
+    },
+    {
+      "name": "Original smoke float4 noise sampling matches native CUDA",
+      "pass": true,
+      "comparisons": [
+        {
+          "mode": 0,
+          "coordinates": 769,
+          "components": 3076,
+          "maxError": 0
+        },
+        {
+          "mode": 1,
+          "coordinates": 769,
+          "components": 3076,
+          "maxError": 0
+        },
+        {
+          "mode": 2,
+          "coordinates": 769,
+          "components": 3076,
+          "maxError": 0
+        },
+        {
+          "mode": 3,
+          "coordinates": 769,
+          "components": 3076,
+          "maxError": 0
+        }
+      ],
+      "originalHelperUnchanged": true,
+      "originalNoiseGeneration": true,
+      "wallMs": 68.42500001192093
+    },
+    {
+      "name": "Original preintegrated volume tables and ray marching match native CUDA",
+      "pass": true,
+      "tableMaxError": 1.1920928955078125e-7,
+      "comparisons": [
+        {
+          "tableSize": 32,
+          "scenario": 0,
+          "pixels": 65536,
+          "maxChannelError": 1,
+          "differingChannels": 4
+        },
+        {
+          "tableSize": 32,
+          "scenario": 1,
+          "pixels": 65536,
+          "maxChannelError": 1,
+          "differingChannels": 6
+        },
+        {
+          "tableSize": 32,
+          "scenario": 2,
+          "pixels": 65536,
+          "maxChannelError": 1,
+          "differingChannels": 5
+        },
+        {
+          "tableSize": 1024,
+          "scenario": 0,
+          "pixels": 65536,
+          "maxChannelError": 1,
+          "differingChannels": 5
+        },
+        {
+          "tableSize": 1024,
+          "scenario": 1,
+          "pixels": 65536,
+          "maxChannelError": 1,
+          "differingChannels": 5
+        },
+        {
+          "tableSize": 1024,
+          "scenario": 2,
+          "pixels": 65536,
+          "maxChannelError": 1,
+          "differingChannels": 7
+        }
+      ],
+      "originalBodiesUnchanged": true,
+      "wallMs": 343.6700000166893
+    },
+    {
+      "name": "Integer-limb binary64 arithmetic matches native CUDA bits",
+      "pass": true,
+      "pairs": 8817,
+      "results": 88170,
+      "compiledExpressions": 52902,
+      "bitExactExceptNaNPayloads": true,
+      "softwareAdapterRequested": false,
+      "wallMs": 479.2549999952316
+    },
+    {
+      "name": "Original volume transfer integration matches native CUDA",
+      "pass": true,
+      "comparisons": [
+        {
+          "size": 64,
+          "components": 256,
+          "maxError": 0
+        },
+        {
+          "size": 37,
+          "components": 148,
+          "maxError": 0
+        },
+        {
+          "size": 1024,
+          "components": 4096,
+          "maxError": 0
+        }
+      ],
+      "originalKernelUnchanged": true,
+      "wallMs": 123.9099999666214
+    },
+    {
+      "name": "Float4 1D surfaces match native CUDA with checked extents",
+      "pass": true,
+      "nativeFloatComponents": 256,
+      "exact": true,
+      "partialCount": 37,
+      "integerCoordinate": true,
+      "unsafeExtentsRejected": 4,
+      "noIntermediateCPUTransfer": true,
+      "wallMs": 21.960000038146973
+    },
+    {
+      "name": "Original particle functor and collision simulation match 64 native steps",
+      "pass": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "softwareAdapterRequested": false,
+      "intermediateReadbackBytes": 0,
+      "results": [
+        {
+          "frame": 1,
+          "buffer": "positions",
+          "maxError": 0,
+          "components": 4096
+        },
+        {
+          "frame": 1,
+          "buffer": "velocities",
+          "maxError": 5.820766091346741e-11,
+          "components": 4096
+        },
+        {
+          "frame": 8,
+          "buffer": "positions",
+          "maxError": 4.470348358154297e-8,
+          "components": 4096
+        },
+        {
+          "frame": 8,
+          "buffer": "velocities",
+          "maxError": 1.4872057363390923e-8,
+          "components": 4096
+        },
+        {
+          "frame": 32,
+          "buffer": "positions",
+          "maxError": 4.023313522338867e-7,
+          "components": 4096
+        },
+        {
+          "frame": 32,
+          "buffer": "velocities",
+          "maxError": 1.4086253941059113e-8,
+          "components": 4096
+        },
+        {
+          "frame": 64,
+          "buffer": "positions",
+          "maxError": 8.344650268554688e-7,
+          "components": 4096
+        },
+        {
+          "frame": 64,
+          "buffer": "velocities",
+          "maxError": 1.4086253941059113e-8,
+          "components": 4096
+        }
+      ],
+      "wallMs": 546.7549999952316
+    },
+    {
+      "name": "GPU stable key/value sort preserves unsigned keys and guards",
+      "pass": true,
+      "results": [
+        {
+          "count": 1,
+          "waitForCompletion": true,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        },
+        {
+          "count": 2,
+          "waitForCompletion": true,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        },
+        {
+          "count": 127,
+          "waitForCompletion": true,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        },
+        {
+          "count": 128,
+          "waitForCompletion": true,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        },
+        {
+          "count": 129,
+          "waitForCompletion": true,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        },
+        {
+          "count": 257,
+          "waitForCompletion": true,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        },
+        {
+          "count": 16384,
+          "waitForCompletion": true,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        },
+        {
+          "count": 1,
+          "waitForCompletion": false,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        },
+        {
+          "count": 2,
+          "waitForCompletion": false,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        },
+        {
+          "count": 127,
+          "waitForCompletion": false,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        },
+        {
+          "count": 128,
+          "waitForCompletion": false,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        },
+        {
+          "count": 129,
+          "waitForCompletion": false,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        },
+        {
+          "count": 257,
+          "waitForCompletion": false,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        },
+        {
+          "count": 16384,
+          "waitForCompletion": false,
+          "stable": true,
+          "guardsIntact": true,
+          "readbackBytes": 0
+        }
+      ],
+      "wallMs": 103.74000000953674
+    },
+    {
+      "name": "Original NVIDIA particle collision stages match native CUDA",
+      "pass": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "softwareAdapterRequested": false,
+      "results": [
+        {
+          "case": 0,
+          "particles": 128,
+          "stage": "hash",
+          "maxError": 0,
+          "components": 128
+        },
+        {
+          "case": 0,
+          "particles": 128,
+          "stage": "index",
+          "maxError": 0,
+          "components": 128
+        },
+        {
+          "case": 0,
+          "particles": 128,
+          "stage": "start",
+          "maxError": 0,
+          "components": 262144
+        },
+        {
+          "case": 0,
+          "particles": 128,
+          "stage": "end",
+          "maxError": 0,
+          "components": 262144
+        },
+        {
+          "case": 0,
+          "particles": 128,
+          "stage": "positions",
+          "maxError": 0,
+          "components": 512
+        },
+        {
+          "case": 0,
+          "particles": 128,
+          "stage": "velocities",
+          "maxError": 0,
+          "components": 512
+        },
+        {
+          "case": 0,
+          "particles": 128,
+          "stage": "collision",
+          "maxError": 4.656612873077393e-10,
+          "components": 512
+        },
+        {
+          "case": 1,
+          "particles": 257,
+          "stage": "hash",
+          "maxError": 0,
+          "components": 257
+        },
+        {
+          "case": 1,
+          "particles": 257,
+          "stage": "index",
+          "maxError": 0,
+          "components": 257
+        },
+        {
+          "case": 1,
+          "particles": 257,
+          "stage": "start",
+          "maxError": 0,
+          "components": 262144
+        },
+        {
+          "case": 1,
+          "particles": 257,
+          "stage": "end",
+          "maxError": 0,
+          "components": 262144
+        },
+        {
+          "case": 1,
+          "particles": 257,
+          "stage": "positions",
+          "maxError": 0,
+          "components": 1028
+        },
+        {
+          "case": 1,
+          "particles": 257,
+          "stage": "velocities",
+          "maxError": 0,
+          "components": 1028
+        },
+        {
+          "case": 1,
+          "particles": 257,
+          "stage": "collision",
+          "maxError": 4.656612873077393e-10,
+          "components": 1028
+        }
+      ],
+      "wallMs": 97.16500002145767
+    },
+    {
+      "name": "GPU inverse FFT matches independent DFT and preserves guards",
+      "pass": true,
+      "results": [
+        {
+          "width": 1,
+          "height": 1,
+          "maxError": 0,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "width": 4,
+          "height": 8,
+          "maxError": 2.869379875924949e-7,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        },
+        {
+          "width": 1024,
+          "height": 1,
+          "maxError": 0,
+          "guardsIntact": true,
+          "intermediateReadbackBytes": 0
+        }
+      ],
+      "wallMs": 26.87000000476837
+    },
+    {
+      "name": "Original NVIDIA ocean stages match native cuFFT pipeline",
+      "pass": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "softwareAdapterRequested": false,
+      "intermediateReadbacks": "Validation only; no readback supplies later stage input",
+      "results": [
+        {
+          "case": 0,
+          "stage": "spectrum",
+          "components": 131072,
+          "maxError": 0,
+          "maxMagnitude": 0.04570027068257332,
+          "rmsError": 0
+        },
+        {
+          "case": 0,
+          "stage": "spatial",
+          "components": 131072,
+          "maxError": 1.4901161193847656e-7,
+          "maxMagnitude": 0.3127635419368744,
+          "rmsError": 2.6687740871884984e-8
+        },
+        {
+          "case": 0,
+          "stage": "height",
+          "components": 65536,
+          "maxError": 1.4901161193847656e-7,
+          "maxMagnitude": 0.3127635419368744,
+          "rmsError": 2.695704911299274e-8
+        },
+        {
+          "case": 0,
+          "stage": "slope",
+          "components": 131072,
+          "maxError": 1.1920928955078125e-7,
+          "maxMagnitude": 0.04664577171206474,
+          "rmsError": 2.142432733403093e-8
+        },
+        {
+          "case": 1,
+          "stage": "spectrum",
+          "components": 131072,
+          "maxError": 2.2351741790771484e-8,
+          "maxMagnitude": 0.06382914632558823,
+          "rmsError": 9.533293400577595e-11
+        },
+        {
+          "case": 1,
+          "stage": "spatial",
+          "components": 131072,
+          "maxError": 2.384185791015625e-7,
+          "maxMagnitude": 0.3423202931880951,
+          "rmsError": 4.609084808971669e-8
+        },
+        {
+          "case": 1,
+          "stage": "height",
+          "components": 65536,
+          "maxError": 2.384185791015625e-7,
+          "maxMagnitude": 0.3423202931880951,
+          "rmsError": 5.739505861586215e-8
+        },
+        {
+          "case": 1,
+          "stage": "slope",
+          "components": 131072,
+          "maxError": 1.6391277313232422e-7,
+          "maxMagnitude": 0.044252462685108185,
+          "rmsError": 2.8070193244219528e-8
+        },
+        {
+          "case": 2,
+          "stage": "spectrum",
+          "components": 131072,
+          "maxError": 2.9453076422214508e-8,
+          "maxMagnitude": 0.026072535663843155,
+          "rmsError": 2.2336716754469505e-10
+        },
+        {
+          "case": 2,
+          "stage": "spatial",
+          "components": 131072,
+          "maxError": 3.166496753692627e-7,
+          "maxMagnitude": 0.2669287919998169,
+          "rmsError": 6.361419692804876e-8
+        },
+        {
+          "case": 2,
+          "stage": "height",
+          "components": 65536,
+          "maxError": 3.166496753692627e-7,
+          "maxMagnitude": 0.2669287919998169,
+          "rmsError": 8.655283279682324e-8
+        },
+        {
+          "case": 2,
+          "stage": "slope",
+          "components": 131072,
+          "maxError": 1.7881393432617188e-7,
+          "maxMagnitude": 0.05265261232852936,
+          "rmsError": 3.3409243739437965e-8
+        }
+      ],
+      "wallMs": 126.56999999284744
+    },
+    {
+      "name": "Original NVIDIA optimized DCT matches native on padded and full images",
+      "pass": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "softwareAdapterRequested": false,
+      "results": [
+        {
+          "entry": "CUDAkernel2DCT",
+          "case": 0,
+          "width": 64,
+          "height": 32,
+          "stride": 72,
+          "maxError": 0,
+          "mismatches": 0,
+          "guardsIntact": true
+        },
+        {
+          "entry": "CUDAkernelQuantizationFloat",
+          "case": 0,
+          "width": 64,
+          "height": 32,
+          "stride": 72,
+          "maxError": 0,
+          "mismatches": 0,
+          "guardsIntact": true
+        },
+        {
+          "entry": "CUDAkernel2IDCT",
+          "case": 0,
+          "width": 64,
+          "height": 32,
+          "stride": 72,
+          "maxError": 0,
+          "mismatches": 0,
+          "guardsIntact": true
+        },
+        {
+          "entry": "CUDAkernel2DCT",
+          "case": 1,
+          "width": 512,
+          "height": 512,
+          "stride": 512,
+          "maxError": 0,
+          "mismatches": 0,
+          "guardsIntact": true
+        },
+        {
+          "entry": "CUDAkernelQuantizationFloat",
+          "case": 1,
+          "width": 512,
+          "height": 512,
+          "stride": 512,
+          "maxError": 0,
+          "mismatches": 0,
+          "guardsIntact": true
+        },
+        {
+          "entry": "CUDAkernel2IDCT",
+          "case": 1,
+          "width": 512,
+          "height": 512,
+          "stride": 512,
+          "maxError": 0,
+          "mismatches": 0,
+          "guardsIntact": true
+        }
+      ],
+      "wallMs": 116.05500000715256
+    },
+    {
+      "name": "Original NVIDIA floating DCT stages and rounding match native CUDA",
+      "pass": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "softwareAdapterRequested": false,
+      "intermediateCPUReadbackForProbe": false,
+      "results": [
+        {
+          "entry": "divisionProbe",
+          "pass": true,
+          "nativeBitExact": true,
+          "cases": 12
+        },
+        {
+          "entry": "roundingProbe",
+          "pass": true,
+          "nativeBitExact": true
+        },
+        {
+          "entry": "CUDAkernel1DCT",
+          "pixels": 768,
+          "maxError": 0,
+          "pass": true,
+          "guardsIntact": true
+        },
+        {
+          "entry": "CUDAkernelQuantizationFloat",
+          "pixels": 768,
+          "maxError": 0,
+          "pass": true,
+          "guardsIntact": true
+        },
+        {
+          "entry": "CUDAkernel1IDCT",
+          "pixels": 768,
+          "maxError": 0,
+          "pass": true,
+          "guardsIntact": true
+        }
+      ],
+      "wallMs": 92.09499996900558
+    },
+    {
+      "name": "All original NVIDIA imageDenoising kernels match native portrait captures",
+      "pass": true,
+      "device": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "",
+        "description": "",
+        "features": [
+          "core-features-and-limits",
+          "subgroup-size-control",
+          "float32-filterable",
+          "timestamp-query",
+          "subgroups"
+        ],
+        "timestampQuery": true,
+        "limits": {
+          "maxComputeInvocationsPerWorkgroup": 1024,
+          "maxComputeWorkgroupStorageSize": 16384,
+          "maxStorageBufferBindingSize": 268435456
+        }
+      },
+      "softwareAdapterRequested": false,
+      "results": [
+        {
+          "entry": "Copy",
+          "pass": true,
+          "maxChannelError": 0,
+          "pixels": 130560,
+          "guardsIntact": true
+        },
+        {
+          "entry": "KNN",
+          "pass": true,
+          "maxChannelError": 0,
+          "pixels": 130560,
+          "guardsIntact": true
+        },
+        {
+          "entry": "KNNdiag",
+          "pass": true,
+          "maxChannelError": 0,
+          "pixels": 130560,
+          "guardsIntact": true
+        },
+        {
+          "entry": "NLM",
+          "pass": true,
+          "maxChannelError": 0,
+          "pixels": 130560,
+          "guardsIntact": true
+        },
+        {
+          "entry": "NLMdiag",
+          "pass": true,
+          "maxChannelError": 0,
+          "pixels": 130560,
+          "guardsIntact": true
+        },
+        {
+          "entry": "NLM2",
+          "pass": true,
+          "maxChannelError": 0,
+          "pixels": 130560,
+          "guardsIntact": true
+        },
+        {
+          "entry": "NLM2diag",
+          "pass": true,
+          "maxChannelError": 0,
+          "pixels": 130560,
+          "guardsIntact": true
+        }
+      ],
+      "wallMs": 254.93000000715256
+    },
+    {
+      "name": "Original NVIDIA SobelShared matches native CUDA",
+      "pass": true,
+      "results": [
+        {
+          "entry": "SobelShared",
+          "width": 32,
+          "height": 17,
+          "pitch": 36,
+          "scale": 1,
+          "nativeExact": true,
+          "guardsIntact": true
+        },
+        {
+          "entry": "SobelShared",
+          "width": 64,
+          "height": 65,
+          "pitch": 68,
+          "scale": 1,
+          "nativeExact": true,
+          "guardsIntact": true
+        },
+        {
+          "entry": "SobelShared",
+          "width": 1024,
+          "height": 1024,
+          "pitch": 1024,
+          "scale": 1,
+          "nativeExact": true,
+          "guardsIntact": true
+        },
+        {
+          "entry": "SobelShared",
+          "width": 1024,
+          "height": 1024,
+          "pitch": 1024,
+          "scale": 0.25,
+          "nativeExact": true,
+          "guardsIntact": true
+        }
+      ],
+      "wallMs": 253.72000002861023
+    },
+    {
+      "name": "Original NVIDIA Sobel image kernels match native CUDA",
+      "pass": true,
+      "results": [
+        {
+          "entry": "SobelTex",
+          "width": 31,
+          "height": 17,
+          "pitch": 34,
+          "scale": 1,
+          "nativeExact": true,
+          "guardsIntact": true
+        },
+        {
+          "entry": "SobelCopyImage",
+          "width": 31,
+          "height": 17,
+          "pitch": 34,
+          "scale": 1,
+          "nativeExact": true,
+          "guardsIntact": true
+        },
+        {
+          "entry": "SobelTex",
+          "width": 61,
+          "height": 65,
+          "pitch": 64,
+          "scale": 1,
+          "nativeExact": true,
+          "guardsIntact": true
+        },
+        {
+          "entry": "SobelCopyImage",
+          "width": 61,
+          "height": 65,
+          "pitch": 64,
+          "scale": 1,
+          "nativeExact": true,
+          "guardsIntact": true
+        },
+        {
+          "entry": "SobelTex",
+          "width": 1024,
+          "height": 1024,
+          "pitch": 1024,
+          "scale": 1,
+          "nativeExact": true,
+          "guardsIntact": true
+        },
+        {
+          "entry": "SobelCopyImage",
+          "width": 1024,
+          "height": 1024,
+          "pitch": 1024,
+          "scale": 1,
+          "nativeExact": true,
+          "guardsIntact": true
+        },
+        {
+          "entry": "SobelTex",
+          "width": 1024,
+          "height": 1024,
+          "pitch": 1024,
+          "scale": 0.25,
+          "nativeExact": true,
+          "guardsIntact": true
+        },
+        {
+          "entry": "SobelCopyImage",
+          "width": 1024,
+          "height": 1024,
+          "pitch": 1024,
+          "scale": 0.25,
+          "nativeExact": true,
+          "guardsIntact": true
+        }
+      ],
+      "wallMs": 268.2950000166893
+    },
+    {
+      "name": "Short narrowing, promotion and launch values match native CUDA",
+      "pass": true,
+      "nativeExact": true,
+      "cases": 4,
+      "valuesPerCase": 8,
+      "wallMs": 21.569999992847443
+    },
+    {
+      "name": "Original NVIDIA ComputeSobel matches native CUDA across five scales",
+      "pass": true,
+      "originalHelper": true,
+      "results": [
+        {
+          "scale": -1,
+          "neighborhoods": 4099,
+          "guardBytes": 21,
+          "nativeExact": true
+        },
+        {
+          "scale": 0,
+          "neighborhoods": 4099,
+          "guardBytes": 21,
+          "nativeExact": true
+        },
+        {
+          "scale": 0.25,
+          "neighborhoods": 4099,
+          "guardBytes": 21,
+          "nativeExact": true
+        },
+        {
+          "scale": 1,
+          "neighborhoods": 4099,
+          "guardBytes": 21,
+          "nativeExact": true
+        },
+        {
+          "scale": 4,
+          "neighborhoods": 4099,
+          "guardBytes": 21,
+          "nativeExact": true
+        }
+      ],
+      "wallMs": 38.014999985694885
+    },
+    {
+      "name": "Packed byte stores preserve neighbouring pixels and match native CUDA",
+      "pass": true,
+      "packedAtomicStores": true,
+      "nativeExact": true,
+      "results": [
+        {
+          "width": 1,
+          "height": 1,
+          "pitch": 4,
+          "bytes": 12,
+          "exact": true,
+          "repeatedDispatches": 8
+        },
+        {
+          "width": 3,
+          "height": 5,
+          "pitch": 6,
+          "bytes": 40,
+          "exact": true,
+          "repeatedDispatches": 8
+        },
+        {
+          "width": 31,
+          "height": 9,
+          "pitch": 34,
+          "bytes": 316,
+          "exact": true,
+          "repeatedDispatches": 8
+        },
+        {
+          "width": 61,
+          "height": 65,
+          "pitch": 64,
+          "bytes": 4168,
+          "exact": true,
+          "repeatedDispatches": 8
+        }
+      ],
+      "wallMs": 32.59500002861023
+    },
+    {
+      "name": "Original RGBA box filter matches native row and column images",
+      "pass": true,
+      "originalKernels": true,
+      "results": [
+        {
+          "w": 64,
+          "h": 37,
+          "r": 0,
+          "comparisons": [
+            {
+              "stage": 0,
+              "comparedPixels": 2368,
+              "maxChannelError": 0,
+              "differentPixels": 0,
+              "guardsIntact": true
+            },
+            {
+              "stage": 1,
+              "comparedPixels": 2368,
+              "maxChannelError": 0,
+              "differentPixels": 0,
+              "guardsIntact": true
+            }
+          ],
+          "intermediateImageStayedOnGPU": true
+        },
+        {
+          "w": 64,
+          "h": 37,
+          "r": 3,
+          "comparisons": [
+            {
+              "stage": 0,
+              "comparedPixels": 2368,
+              "maxChannelError": 1,
+              "differentPixels": 1,
+              "guardsIntact": true
+            },
+            {
+              "stage": 1,
+              "comparedPixels": 2368,
+              "maxChannelError": 1,
+              "differentPixels": 16,
+              "guardsIntact": true
+            }
+          ],
+          "intermediateImageStayedOnGPU": true
+        },
+        {
+          "w": 1024,
+          "h": 1024,
+          "r": 14,
+          "comparisons": [
+            {
+              "stage": 0,
+              "comparedPixels": 1048576,
+              "maxChannelError": 1,
+              "differentPixels": 8507,
+              "guardsIntact": true
+            },
+            {
+              "stage": 1,
+              "comparedPixels": 1048576,
+              "maxChannelError": 1,
+              "differentPixels": 8920,
+              "guardsIntact": true
+            }
+          ],
+          "intermediateImageStayedOnGPU": true
+        },
+        {
+          "w": 1024,
+          "h": 1024,
+          "r": 22,
+          "comparisons": [
+            {
+              "stage": 0,
+              "comparedPixels": 1048576,
+              "maxChannelError": 1,
+              "differentPixels": 6517,
+              "guardsIntact": true
+            },
+            {
+              "stage": 1,
+              "comparedPixels": 1048576,
+              "maxChannelError": 1,
+              "differentPixels": 6598,
+              "guardsIntact": true
+            }
+          ],
+          "intermediateImageStayedOnGPU": true
+        }
+      ],
+      "scalarResults": [
+        {
+          "entry": "d_boxfilter_x_global",
+          "values": 2048,
+          "maxError": 0,
+          "guardsIntact": true
+        },
+        {
+          "entry": "d_boxfilter_y_global",
+          "values": 2048,
+          "maxError": 0,
+          "guardsIntact": true
+        },
+        {
+          "entry": "d_boxfilter_x_tex",
+          "values": 2048,
+          "maxError": 0,
+          "guardsIntact": true
+        },
+        {
+          "entry": "d_boxfilter_y_tex",
+          "values": 2048,
+          "maxError": 0,
+          "guardsIntact": true
+        }
+      ],
+      "wallMs": 368.0600000023842
+    },
+    {
+      "name": "Original sampled-volume marching cubes matches native CUDA at three isovalues",
+      "pass": true,
+      "originalSharedKernel": true,
+      "originalBuckyVolume": true,
+      "nativeFixturesUsedOnlyAsExpectedResults": true,
+      "results": [
+        {
+          "iso": 0.2,
+          "activeVoxels": 7164,
+          "vertices": 43524,
+          "triangles": 14508,
+          "controlReadbackBytes": 8,
+          "comparisons": [
+            {
+              "name": "positions",
+              "components": 174096,
+              "maxError": 0
+            },
+            {
+              "name": "normals",
+              "components": 174096,
+              "maxError": 0
+            },
+            {
+              "name": "scan",
+              "components": 32768,
+              "maxError": 0
+            },
+            {
+              "name": "compacted",
+              "components": 7164,
+              "maxError": 0
+            }
+          ]
+        },
+        {
+          "iso": 0.5,
+          "activeVoxels": 5545,
+          "vertices": 33378,
+          "triangles": 11126,
+          "controlReadbackBytes": 8,
+          "comparisons": [
+            {
+              "name": "positions",
+              "components": 133512,
+              "maxError": 0
+            },
+            {
+              "name": "normals",
+              "components": 133512,
+              "maxError": 0
+            },
+            {
+              "name": "scan",
+              "components": 32768,
+              "maxError": 0
+            },
+            {
+              "name": "compacted",
+              "components": 5545,
+              "maxError": 0
+            }
+          ]
+        },
+        {
+          "iso": 0.8,
+          "activeVoxels": 2288,
+          "vertices": 11214,
+          "triangles": 3738,
+          "controlReadbackBytes": 8,
+          "comparisons": [
+            {
+              "name": "positions",
+              "components": 44856,
+              "maxError": 0
+            },
+            {
+              "name": "normals",
+              "components": 44856,
+              "maxError": 0
+            },
+            {
+              "name": "scan",
+              "components": 32768,
+              "maxError": 0
+            },
+            {
+              "name": "compacted",
+              "components": 2288,
+              "maxError": 0
+            }
+          ]
+        }
+      ],
+      "wallMs": 359.4549999833107
+    },
+    {
+      "name": "Shared pointer helpers match native CUDA with aliases and offsets",
+      "pass": true,
+      "components": 1152,
+      "exact": true,
+      "originalCalcNormal": true,
+      "sharedAliasingAndForwarding": true,
+      "wallMs": 18.37999999523163
+    },
+    {
+      "name": "Shared vector references match native CUDA after synchronization",
+      "pass": true,
+      "components": 3072,
+      "exact": true,
+      "forwardedWorkgroupReferences": true,
+      "localAndSharedCalls": true,
+      "barrierAndNeighbourReads": true,
+      "workgroupStorageBytes": 4096,
+      "wallMs": 24.935000002384186
+    },
+    {
+      "name": "Original NVIDIA marching-cubes classification matches native CUDA",
+      "pass": true,
+      "comparisons": [
+        {
+          "isoValue": 0.2,
+          "voxels": 32768,
+          "totalVertices": 43524,
+          "activeVoxels": 7164,
+          "exact": true
+        },
+        {
+          "isoValue": 0.5,
+          "voxels": 32768,
+          "totalVertices": 33378,
+          "activeVoxels": 5545,
+          "exact": true
+        },
+        {
+          "isoValue": 0.8,
+          "voxels": 32768,
+          "totalVertices": 11214,
+          "activeVoxels": 2288,
+          "exact": true
+        }
+      ],
+      "components": 196608,
+      "originalKernel": true,
+      "wallMs": 59.519999980926514
+    },
+    {
+      "name": "Original NVIDIA interpolation through vector references matches native CUDA",
+      "pass": true,
+      "components": 2072,
+      "exact": true,
+      "originalNvidiaInterpolation": true,
+      "forwardedVectorReferences": true,
+      "dynamicLocalArrayElements": true,
+      "wallMs": 20.084999978542328
+    },
+    {
+      "name": "Vector launch arguments and packed byte reads match native CUDA",
+      "pass": true,
+      "components": 2056,
+      "exact": true,
+      "byteInputLength": 259,
+      "unalignedHelperOffset": true,
+      "vectorDimensions": [
+        2,
+        3,
+        4
+      ],
+      "integerWraparound": true,
+      "wallMs": 20.2950000166893
+    },
+    {
+      "name": "Linear texture fetch matches native CUDA",
+      "pass": true,
+      "records": 32771,
+      "results": 65550,
+      "integerExact": true,
+      "maxFloatError": 0,
+      "multiRow": true,
+      "paddedTail": true,
+      "negativeAndPastEndIndices": true,
+      "wallMs": 22.705000042915344
+    },
+    {
+      "name": "Original NVIDIA volume filter passes match native CUDA",
+      "pass": true,
+      "comparisons": [
+        {
+          "dataset": "synthetic",
+          "scenario": 0,
+          "pass": 0,
+          "voxels": 256,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "synthetic",
+          "scenario": 0,
+          "pass": 1,
+          "voxels": 256,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "synthetic",
+          "scenario": 1,
+          "pass": 0,
+          "voxels": 256,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "synthetic",
+          "scenario": 1,
+          "pass": 1,
+          "voxels": 256,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "synthetic",
+          "scenario": 2,
+          "pass": 0,
+          "voxels": 256,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "synthetic",
+          "scenario": 2,
+          "pass": 1,
+          "voxels": 256,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "synthetic",
+          "scenario": 3,
+          "pass": 0,
+          "voxels": 256,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "synthetic",
+          "scenario": 3,
+          "pass": 1,
+          "voxels": 256,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "Bucky",
+          "scenario": 0,
+          "pass": 0,
+          "voxels": 32768,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "Bucky",
+          "scenario": 0,
+          "pass": 1,
+          "voxels": 32768,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "Bucky",
+          "scenario": 1,
+          "pass": 0,
+          "voxels": 32768,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "Bucky",
+          "scenario": 1,
+          "pass": 1,
+          "voxels": 32768,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "Bucky",
+          "scenario": 2,
+          "pass": 0,
+          "voxels": 32768,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "Bucky",
+          "scenario": 2,
+          "pass": 1,
+          "voxels": 32768,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "Bucky",
+          "scenario": 3,
+          "pass": 0,
+          "voxels": 32768,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "dataset": "Bucky",
+          "scenario": 3,
+          "pass": 1,
+          "voxels": 32768,
+          "mismatches": 0,
+          "maxError": 0,
+          "noIntermediateCPUTransfer": true
+        }
+      ],
+      "wallMs": 1060.7799999713898
+    },
+    {
+      "name": "sizeof and byte surface sampling match native CUDA",
+      "pass": true,
+      "sizeofResults": 20,
+      "byteValues": 256,
+      "nativeExact": true,
+      "wallMs": 32.46000003814697
+    },
+    {
+      "name": "Concurrent packed byte writers preserve neighbouring channels and match native CUDA",
+      "pass": true,
+      "wallMs": 30.009999990463257
+    },
+    {
+      "name": "Four native CUDA tiles preserve votes, shuffles and independent loop counts",
+      "pass": true,
+      "tiles": 4,
+      "lanes": 128,
+      "checkedValues": 640,
+      "fixedSubgroupSize": 32,
+      "logicalThreadRemapping": true,
+      "divergentEntryRejected": true,
+      "wallMs": 16.40499997138977
+    },
+    {
+      "name": "Native tile memory phases preserve shared snapshots and inactive lanes",
+      "pass": true,
+      "checkedValues": 256,
+      "selectedTiles": [
+        0,
+        2
+      ],
+      "sharedSnapshots": true,
+      "wallMs": 24.619999945163727
+    },
+    {
+      "name": "Local CUDA array initializers preserve ordering and zero-filled elements",
+      "pass": true,
+      "lanes": 32,
+      "checkedValues": 320,
+      "nestedZeroFill": true,
+      "leftToRight": true,
+      "wallMs": 12.044999957084656
+    },
+    {
+      "name": "Original NVIDIA quadtree root partitions all 1024 native points",
+      "pass": true,
+      "originalKernel": true,
+      "points": 1024,
+      "nodesCompared": 5,
+      "fieldsCompared": 35,
+      "pointPermutationExact": true,
+      "allPointsInNativeQuadrants": true,
+      "queuedChildBlocks": 4,
+      "nonUniformVariantsRejected": 2,
+      "recursiveExecution": false,
+      "wallMs": 231.48500001430511
+    },
+    {
+      "name": "Original Chrono neighbour cells and particle mapping support partial blocks",
+      "pass": true,
+      "sizes": [
+        0,
+        1,
+        31,
+        127,
+        128,
+        129,
+        255,
+        256,
+        257,
+        1027
+      ],
+      "compared": 2936,
+      "nativeExact": true,
+      "partialBlocks": true,
+      "inactiveWrites": false,
+      "originalKernelBodies": true,
+      "wallMs": 104.68000000715256
+    },
+    {
+      "name": "Original Chrono scoped enums and boolean parameter records match native CUDA",
+      "pass": true,
+      "originalScopedEnums": 16,
+      "originalEnumValues": 52,
+      "booleanCombinations": 4,
+      "compared": 218,
+      "nativeEnumsExact": true,
+      "largeConstantFields": 121,
+      "wallMs": 36.29000002145767
+    },
+    {
+      "name": "Original Chrono grid hashing matches native dam-break inputs and boundary cases",
+      "pass": true,
+      "nativeParticles": 16731,
+      "edgePoints": 8,
+      "boundaryConfigurations": 9,
+      "compared": 602604,
+      "nativeExact": true,
+      "fullParameterRecord": true,
+      "real3Stride": 12,
+      "doubleFieldPreserved": true,
+      "wallMs": 138.52999997138977
+    },
+    {
+      "name": "Compiler worker deep helper cloning",
+      "pass": true,
+      "workerCompiled": true,
+      "terms": 900,
+      "compared": 16,
+      "exact": true,
+      "wallMs": 103.91500002145767
+    },
+    {
+      "name": "Original Chrono RK2 half-step and full-step match native CUDA",
+      "pass": true,
+      "stages": [
+        {
+          "path": "chrono-rk2-half-native.bin",
+          "sections": [
+            {
+              "name": "pos",
+              "max": 0,
+              "mismatches": 0,
+              "nonzero": 117396,
+              "examples": [],
+              "components": [
+                {
+                  "maximumError": 0,
+                  "unequal": 0
+                },
+                {
+                  "maximumError": 0,
+                  "unequal": 0
+                },
+                {
+                  "maximumError": 0,
+                  "unequal": 0
+                },
+                {
+                  "maximumError": 0,
+                  "unequal": 0
+                }
+              ]
+            },
+            {
+              "name": "vel",
+              "max": 1.373291524942033e-8,
+              "mismatches": 0,
+              "nonzero": 49337,
+              "examples": [],
+              "components": [
+                {
+                  "maximumError": 1.0108948345077806e-8,
+                  "unequal": 12154
+                },
+                {
+                  "maximumError": 1.0681151962899094e-8,
+                  "unequal": 10510
+                },
+                {
+                  "maximumError": 1.373291524942033e-8,
+                  "unequal": 13626
+                }
+              ]
+            },
+            {
+              "name": "rho",
+              "max": 0.00390625,
+              "mismatches": 0,
+              "nonzero": 95018,
+              "examples": [],
+              "components": [
+                {
+                  "maximumError": 0.0001220703125,
+                  "unequal": 253
+                },
+                {
+                  "maximumError": 0.00390625,
+                  "unequal": 320
+                },
+                {
+                  "maximumError": 0,
+                  "unequal": 0
+                },
+                {
+                  "maximumError": 0,
+                  "unequal": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "path": "chrono-rk2-native.bin",
+          "sections": [
+            {
+              "name": "pos",
+              "max": 5.781966837823185e-14,
+              "mismatches": 0,
+              "nonzero": 118917,
+              "examples": [],
+              "components": [
+                {
+                  "maximumError": 0,
+                  "unequal": 0
+                },
+                {
+                  "maximumError": 5.781966837823185e-14,
+                  "unequal": 1447
+                },
+                {
+                  "maximumError": 0,
+                  "unequal": 0
+                },
+                {
+                  "maximumError": 0,
+                  "unequal": 0
+                }
+              ]
+            },
+            {
+              "name": "vel",
+              "max": 2.9753209673799574e-8,
+              "mismatches": 0,
+              "nonzero": 49366,
+              "examples": [],
+              "components": [
+                {
+                  "maximumError": 2.021783984673675e-8,
+                  "unequal": 12461
+                },
+                {
+                  "maximumError": 2.2172925717711678e-8,
+                  "unequal": 10813
+                },
+                {
+                  "maximumError": 2.9753209673799574e-8,
+                  "unequal": 14074
+                }
+              ]
+            },
+            {
+              "name": "rho",
+              "max": 0.00390625,
+              "mismatches": 0,
+              "nonzero": 95018,
+              "examples": [],
+              "components": [
+                {
+                  "maximumError": 0.0001220703125,
+                  "unequal": 253
+                },
+                {
+                  "maximumError": 0.00390625,
+                  "unequal": 320
+                },
+                {
+                  "maximumError": 0,
+                  "unequal": 0
+                },
+                {
+                  "maximumError": 0,
+                  "unequal": 0
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "errors": [
+        0
+      ],
+      "messages": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "fullStepDispatched": true,
+      "rk2Steps": 1,
+      "nativeMatched": true,
+      "trajectoryValidated": false,
+      "compared": 667196,
+      "dt": 0.00009999999747378752,
+      "intermediateReadbackBytes": 0,
+      "tolerances": {
+        "position": {
+          "absolute": 0.000001,
+          "relative": 0.0002
+        },
+        "velocity": {
+          "absolute": 4e-7,
+          "relative": 0.0002
+        },
+        "properties": {
+          "absolute": 0.0002,
+          "relative": 0.00002
+        },
+        "radiusViscosityMarkerTypeAndFlags": "exact"
+      },
+      "originalCopyBack": {
+        "fluidMarkers": 16731,
+        "fixedBoundaryMarkers": 13596,
+        "sections": [
+          {
+            "name": "pos",
+            "maximumError": 5.781966837823185e-14,
+            "mismatches": 0
+          },
+          {
+            "name": "vel",
+            "maximumError": 2.9753209673799574e-8,
+            "mismatches": 0
+          },
+          {
+            "name": "rho",
+            "maximumError": 0.00390625,
+            "mismatches": 0
+          }
+        ],
+        "intermediateReadbackBytes": 0
+      },
+      "wallMs": 8006.840000033379
+    },
+    {
+      "name": "Original Chrono equation of state matches native CUDA",
+      "pass": true,
+      "n": 30327,
+      "sections": [
+        {
+          "name": "ratio",
+          "unequal": 0,
+          "max": 0,
+          "examples": []
+        },
+        {
+          "name": "pow",
+          "unequal": 0,
+          "max": 0,
+          "examples": []
+        },
+        {
+          "name": "pressure",
+          "unequal": 0,
+          "max": 0,
+          "examples": []
+        },
+        {
+          "name": "B",
+          "unequal": 0,
+          "max": 0,
+          "examples": []
+        }
+      ],
+      "nativeOracleMismatch": 0,
+      "gpuOracleMismatch": 0,
+      "wallMs": 358.3949999809265
+    },
+    {
+      "name": "Runtime integer powers preserve native signs and precision",
+      "pass": true,
+      "cases": 264,
+      "maxUlps": 1,
+      "negativeExponents": true,
+      "signedZeros": true,
+      "nonfiniteCases": true,
+      "wallMs": 114.33499997854233
+    },
+    {
+      "name": "Double sqrt, min/max, local quadratic solve and record scalar references match native CUDA",
+      "pass": true,
+      "pairs": 8817,
+      "results": 26451,
+      "bitExactExceptNaNPayloads": true,
+      "compiled": {
+        "bytesCompared": 2580,
+        "nativeExact": true,
+        "quadraticCases": 129,
+        "recordCases": 129
+      },
+      "integrationKernelCompiled": true,
+      "integrationKernelExecuted": false,
+      "wallMs": 666.6000000238419
+    },
+    {
+      "name": "Module constexpr constants and volatile helper flags match native CUDA",
+      "pass": true,
+      "nativeExact": true,
+      "bytesCompared": 2148,
+      "constantUniforms": 0,
+      "volatileHelperFlags": 65,
+      "paddingBytesUnchanged": 3,
+      "wallMs": 64.16500002145767
+    },
+    {
+      "name": "Original Chrono XSPH shifting matches native for initialized and nonzero velocities",
+      "pass": true,
+      "markers": 30327,
+      "compared": 181964,
+      "maximumError": 1.1920928955078125e-7,
+      "nonzero": 50193,
+      "nativeMatched": true,
+      "method": "XSPH",
+      "initializedStateAndSyntheticVelocity": true,
+      "tolerances": {
+        "absolute": 0.00001,
+        "relative": 0.0002
+      },
+      "intermediateReadbackBytes": 0,
+      "cpuPhysics": false,
+      "fullSolverAdvanced": false,
+      "cases": [
+        {
+          "mode": "native initialized state",
+          "nonzero": 0,
+          "maximumError": 0
+        },
+        {
+          "mode": "synthetic velocity validation",
+          "nonzero": 50193,
+          "maximumError": 1.1920928955078125e-7
+        }
+      ],
+      "forcesCompared": 242617,
+      "wallMs": 1900.8349999785423
+    },
+    {
+      "name": "GPU-produced integer scalars preserve dispatch snapshots",
+      "pass": true,
+      "gpuProducedCounts": true,
+      "dispatchSnapshots": true,
+      "signedBits": true,
+      "noIntermediateReadback": true,
+      "invalidInputsRejected": true,
+      "wallMs": 23.10499995946884
+    },
+    {
+      "name": "GPU active counts preserve partial and empty Chrono neighbour sets",
+      "pass": true,
+      "results": [
+        {
+          "empty": false,
+          "count": 22327,
+          "neighbors": 552019,
+          "exact": true
+        },
+        {
+          "empty": true,
+          "count": 0,
+          "neighbors": 0,
+          "exact": true
+        }
+      ],
+      "previousDiagnosticRejected": true,
+      "wallMs": 226.6899999976158
+    },
+    {
+      "name": "Chrono cached bindings match fresh bindings after input changes",
+      "pass": true,
+      "counts": [
+        30327,
+        30327,
+        22327,
+        30327,
+        0,
+        30327
+      ],
+      "exactState": true,
+      "parameterUpdates": true,
+      "resizedBuffers": true,
+      "resumeAfterEmpty": true,
+      "wallMs": 8306.7650000453
+    },
+    {
+      "name": "Chrono pipelined diagnostics preserve state and reject errors",
+      "pass": true,
+      "steps": 3,
+      "exactState": true,
+      "exactNeighbors": true,
+      "concurrentStepRejected": true,
+      "previousDiagnosticRejected": true,
+      "wallMs": 2357.3949999809265
+    },
+    {
+      "name": "Original Chrono force derivatives and timestep estimates match native",
+      "pass": true,
+      "tolerances": {
+        "acceleration": {
+          "absolute": 0.0004,
+          "relative": 0.0002
+        },
+        "densityDerivative": {
+          "absolute": 0.01,
+          "relative": 0.0002
+        },
+        "positionDivergence": {
+          "absolute": 0.00001,
+          "relative": 0.00002
+        },
+        "accelerationTimeStep": {
+          "absolute": 0.00001,
+          "relative": 0.003
+        },
+        "courantAndFlags": "exact"
+      },
+      "markers": 30327,
+      "compared": 242617,
+      "mismatches": 0,
+      "sections": [
+        {
+          "name": "sortedDerivVelRho",
+          "words": 121308,
+          "maximumError": 0.00855708122253418,
+          "failed": 0,
+          "examples": [],
+          "components": [
+            {
+              "maximumError": 0.000202178955078125,
+              "index": 13612,
+              "actual": 0.0017151832580566406,
+              "expected": 0.0019173622131347656
+            },
+            {
+              "maximumError": 0.000213623046875,
+              "index": 37925,
+              "actual": -0.0001087188720703125,
+              "expected": -0.0003223419189453125
+            },
+            {
+              "maximumError": 0.000274658203125,
+              "index": 29510,
+              "actual": 0.0642862319946289,
+              "expected": 0.0640115737915039
+            },
+            {
+              "maximumError": 0.00855708122253418,
+              "index": 22767,
+              "actual": -3.504889726638794,
+              "expected": -3.513446807861328
+            }
+          ]
+        },
+        {
+          "name": "sortedFreeSurfaceIdD",
+          "words": 30327,
+          "maximumError": 0,
+          "failed": 0,
+          "examples": [],
+          "components": [
+            {
+              "maximumError": 0,
+              "index": 0,
+              "actual": 0,
+              "expected": 0
+            }
+          ]
+        },
+        {
+          "name": "sortedPosDivergence",
+          "words": 30327,
+          "maximumError": 0.0000016689300537109375,
+          "failed": 0,
+          "examples": [],
+          "components": [
+            {
+              "maximumError": 0.0000016689300537109375,
+              "index": 8927,
+              "actual": 3.0601272583007812,
+              "expected": 3.0601255893707275
+            }
+          ]
+        },
+        {
+          "name": "courantViscousTimeStep",
+          "words": 30327,
+          "maximumError": 0,
+          "failed": 0,
+          "examples": [],
+          "components": [
+            {
+              "maximumError": 0,
+              "index": 0,
+              "actual": 0,
+              "expected": 0
+            }
+          ]
+        },
+        {
+          "name": "accelerationTimeStep",
+          "words": 30327,
+          "maximumError": 0.0030368566513061523,
+          "failed": 0,
+          "examples": [],
+          "components": [
+            {
+              "maximumError": 0.0030368566513061523,
+              "index": 4727,
+              "actual": 1.3768210411071777,
+              "expected": 1.3798578977584839
+            }
+          ]
+        },
+        {
+          "name": "error_flag",
+          "words": 1,
+          "maximumError": 0,
+          "failed": 0,
+          "examples": [],
+          "components": [
+            {
+              "maximumError": 0,
+              "index": 0,
+              "actual": 0,
+              "expected": 0
+            }
+          ]
+        }
+      ],
+      "nativeMatched": true,
+      "connectedBoundary": true,
+      "intermediateReadbackBytes": 0,
+      "cpuPhysics": false,
+      "fullSolverAdvanced": false,
+      "boundaryCompared": 212289,
+      "prerequisites": {
+        "nativeExact": true,
+        "compared": 128,
+        "longExpressionTerms": 900,
+        "localArraySizes": [
+          8,
+          12
+        ]
+      },
+      "wallMs": 1566.4300000071526
+    },
+    {
+      "name": "Original Chrono Adami wall pressure matches native CUDA",
+      "pass": true,
+      "markers": 30327,
+      "mismatches": 0,
+      "firstErrors": [],
+      "compared": 212289,
+      "maxAbsoluteError": 0.00390625,
+      "maxScaledError": 0.00010241568088531494,
+      "absoluteTolerance": 0.00001,
+      "pressureAbsoluteTolerance": 0.0002,
+      "relativeTolerance": 0.00002,
+      "nativeMatched": true,
+      "originalBoundaryKernel": true,
+      "connectedGpuPreparation": true,
+      "boundaryIntermediateReadbackBytes": 0,
+      "cpuPhysics": false,
+      "fullSolverAdvanced": false,
+      "preparationCompared": 1487332,
+      "wallMs": 1193.3650000095367
+    },
+    {
+      "name": "CUDA byte-stride bool buffers and volatile flags match native",
+      "pass": true,
+      "nativeExact": true,
+      "comparedBytes": 5136,
+      "markers": 1025,
+      "dispatches": 8,
+      "guardBytesPreserved": true,
+      "volatileFlags": true,
+      "wallMs": 23.819999992847443
+    },
+    {
+      "name": "C++ switch fall-through and nested control match native CUDA",
+      "pass": true,
+      "nativeExact": true,
+      "compared": 36,
+      "fallThrough": true,
+      "nestedBreakAndContinue": true,
+      "selectorEvaluatedOnce": true,
+      "wallMs": 21.035000026226044
+    },
+    {
+      "name": "Original Chrono property reordering and diagnostics match native CUDA",
+      "pass": true,
+      "cases": 4,
+      "originalMarkers": 521,
+      "selectedMarkers": 259,
+      "compared": 21756,
+      "nativeExact": true,
+      "capturedNativeMessages": 3,
+      "storageBindings": 16,
+      "cfdStressUntouched": true,
+      "crmStressReordered": true,
+      "nonfiniteDiagnosticsTested": true,
+      "diagnosticOverflowTested": true,
+      "wallMs": 115.61500000953674
+    },
+    {
+      "name": "Chrono selected markers feed native-matched neighbour construction",
+      "pass": true,
+      "cases": 14,
+      "compared": 1487332,
+      "neighborEntries": 807171,
+      "nativeNormalizedExact": true,
+      "originalMarkerIdsPreserved": true,
+      "activityAndCompactionVerified": true,
+      "intermediateReadbackBytes": 112,
+      "cpuPhysics": false,
+      "neighborsConnected": true,
+      "originalPropertyReorderConnected": true,
+      "nativeInitialProperties": true,
+      "fullSolverAdvanced": false,
+      "wallMs": 1155.5699999928474
+    },
+    {
+      "name": "Chrono normalized activity compaction matches native CUDA",
+      "pass": true,
+      "cases": 14,
+      "compared": 193110,
+      "nativeNormalizedExact": true,
+      "upstreamScanMismatchCases": 8,
+      "upstreamPrefixMismatches": 1464,
+      "upstreamWriteCollisions": 8,
+      "explicitPositiveFlagNormalization": true,
+      "activityKernelNativeExact": true,
+      "intermediateReadbackBytes": 56,
+      "cpuPhysics": false,
+      "neighborsConnected": false,
+      "wallMs": 431.1050000190735
+    },
+    {
+      "name": "Original Chrono activity selection matches native CUDA",
+      "pass": true,
+      "originalKernel": "UpdateActivityD",
+      "initializedMarkerPositions": 30327,
+      "controlledCases": 13,
+      "compared": 164505,
+      "nativeExact": true,
+      "nativeDomainStride": 52,
+      "nonzeroPaddingTested": true,
+      "additionalNativeAbiValues": 9,
+      "activityStates": [
+        -1,
+        0,
+        1
+      ],
+      "physicsStepAdvanced": false,
+      "wallMs": 172.08999997377396
+    },
+    {
+      "name": "Chrono 64-bit counters and double launch times match native CUDA",
+      "pass": true,
+      "originalCounterFields": 22,
+      "nativeCounterBytes": 176,
+      "cases": 12,
+      "compared": 1152,
+      "nativeExact": true,
+      "counterHighWordsPreserved": true,
+      "doubleTimePreserved": true,
+      "wallMs": 255.99500000476837
+    },
+    {
+      "name": "Original Chrono neighbour lists match native CUDA for fluid and boundary markers",
+      "pass": true,
+      "markers": 30327,
+      "fluidMarkers": 16731,
+      "boundaryMarkers": 13596,
+      "neighborEntries": 794643,
+      "compared": 1027953,
+      "nativeExact": true,
+      "intermediateReadbackBytes": 4,
+      "cpuPhysics": false,
+      "wallMs": 124.34500002861023
+    },
+    {
+      "name": "Original NVIDIA recursive quadtree matches every native node and output point",
+      "pass": true,
+      "originalKernel": true,
+      "points": 1024,
+      "nodesCompared": 193,
+      "fieldsCompared": 1351,
+      "pointPermutationExact": true,
+      "nativeOutputExact": true,
+      "untouchedUnusedNodes": true,
+      "recursiveExecution": true,
+      "scheduling": {
+        "maxGenerations": 8,
+        "launchCounts": [
+          1,
+          4,
+          16,
+          27,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controlReadbackBytes": 72,
+        "gpuScheduled": true
+      },
+      "wallMs": 558.0900000333786
+    },
+    {
+      "name": "Recursive GPU queues reject overflow and unfinished generations",
+      "pass": true,
+      "checkedValues": 576,
+      "arenaReuse": true,
+      "overflowRejected": true,
+      "generationLimitRejected": true,
+      "wallMs": 52.019999980926514
+    },
+    {
+      "name": "Original quadtree storage references preserve node and nested field mutations",
+      "pass": true,
+      "nodes": 32,
+      "checkedValues": 384,
+      "bufferAliasOffsets": true,
+      "indexCapturedOnce": true,
+      "nestedMutationPersisted": true,
+      "originalClassBodies": true,
+      "wallMs": 41
+    },
+    {
+      "name": "Queued offset pointers preserve disjoint child ranges and reject invalid offsets",
+      "pass": true,
+      "childLaunches": 8,
+      "checkedValues": 40,
+      "invalidOffsetsRejected": 2,
+      "parentAliasMutationIsolated": true,
+      "wallMs": 47.64999997615814
+    },
+    {
+      "name": "Original Parameters pass by value through queued child launches",
+      "pass": true,
+      "childLaunches": 32,
+      "checkedFields": 160,
+      "parentMutationIsolated": true,
+      "originalParameters": true,
+      "wallMs": 27.305000007152557
+    },
+    {
+      "name": "Queued children use CUDA launch shared-memory allocation",
+      "pass": true,
+      "checkedValues": 64,
+      "childBlocks": 2,
+      "sharedBytesPerBlock": 128,
+      "wallMs": 21.00499999523163
+    },
+    {
+      "name": "Volatile compound updates preserve integer and float shared values",
+      "pass": true,
+      "checkedValues": 96,
+      "separateLoadStore": true,
+      "wallMs": 16.439999997615814
+    },
+    {
+      "name": "Volatile shared pointer slots exchange values across GPU lanes",
+      "pass": true,
+      "checkedValues": 128,
+      "sharedPointerSlots": 4,
+      "wallMs": 13.509999990463257
+    },
+    {
+      "name": "Original quadtree Parameters constructors preserve const recursion limits",
+      "pass": true,
+      "threads": 32,
+      "constructors": 96,
+      "originalParameters": true,
+      "wallMs": 10.995000004768372
+    },
+    {
+      "name": "Original quadtree getters retain nested const field references",
+      "pass": true,
+      "references": 64,
+      "ownerMutationVisible": true,
+      "originalBoundingBoxAndNode": true,
+      "wallMs": 10.980000019073486
+    },
+    {
+      "name": "Original Points retains captured scalar buffers across GPU submissions",
+      "pass": true,
+      "boundsVerified": true,
+      "points": 64,
+      "updates": 3,
+      "originalPointsMethods": true,
+      "nonzeroOffsets": true,
+      "separateSubmissions": true,
+      "crossArenaRejected": true,
+      "wallMs": 74.56000000238419
+    },
+    {
+      "name": "Private class state and method access preserve CUDA values",
+      "pass": true,
+      "values": 32,
+      "privateFields": true,
+      "privateMethods": true,
+      "sameClassReceiver": true,
+      "wallMs": 9.024999976158142
+    },
+    {
+      "name": "Complete original Bezier parent and indirect children match native",
+      "pass": true,
+      "queueReuseVerified": true,
+      "unusedSlotsSkipped": true,
+      "overflowRejected": true,
+      "schedulingReadback": "error header only",
+      "curves": 256,
+      "vertices": 3958,
+      "maxError": 1.1920928955078125e-7,
+      "originalVertexAndFreeBodies": true,
+      "allFreed": true,
+      "parentSchedulingSupported": true,
+      "launchCountsFromNativeFixture": false,
+      "indirectDispatch": true,
+      "wallMs": 123.09500002861023
+    },
+    {
+      "name": "Original Bezier parent computes native counts and queues child work",
+      "pass": true,
+      "curves": 256,
+      "queuedLaunches": 256,
+      "countsMatchNative": true,
+      "originalParentBody": true,
+      "allocationAndCurvatureOnGpu": true,
+      "queueOverflow": false,
+      "overflowCaseVerified": true,
+      "argumentSnapshotsVerified": true,
+      "invalidGridRejected": true,
+      "allFreed": true,
+      "childrenExecuted": false,
+      "wallMs": 25.990000009536743
+    },
+    {
+      "name": "Original Bezier child and cleanup match all native curves",
+      "pass": true,
+      "curves": 256,
+      "vertices": 3958,
+      "maxError": 1.1920928955078125e-7,
+      "originalVertexAndFreeBodies": true,
+      "allFreed": true,
+      "parentSchedulingSupported": false,
+      "launchCountsFromNativeFixture": true,
+      "wallMs": 51.75499999523163
+    },
+    {
+      "name": "Device allocations persist, match native CUDA and reuse freed slots",
+      "pass": true,
+      "allocationsPerCycle": 256,
+      "cycles": 2,
+      "liveElementsPerCycle": 4224,
+      "floatComponentsCompared": 32768,
+      "nativeExact": true,
+      "allFreed": true,
+      "reused": true,
+      "arenaIsolation": true,
+      "capacityFailure": true,
+      "zeroByteAllocation": true,
+      "boundsIsolation": true,
+      "wallMs": 101.19999998807907
+    },
+    {
+      "name": "Bezier pointer records preserve opaque identity and clear independently",
+      "pass": true,
+      "records": 256,
+      "stride": 32,
+      "opaquePointerBitsPreserved": true,
+      "independentClear": true,
+      "nativeAbi": false,
+      "wallMs": 18.910000026226044
+    },
+    {
+      "name": "CUDA vector free operators dispatch their declared bodies",
+      "pass": true,
+      "values": 8,
+      "originalNvidiaOperators": true,
+      "nonstandardOverloadBodyVerified": true,
+      "wallMs": 10.894999980926514
+    },
+    {
+      "name": "Reference chains and sequenced expression updates match native CUDA",
+      "pass": true,
+      "valuesMatched": 13,
+      "negativeZeroSignPreserved": false,
+      "comparison": "Exact numeric values; zero sign recorded separately",
+      "wallMs": 12.9549999833107
+    },
+    {
+      "name": "Packed uchar4 and Boolean launch snapshots match native CUDA",
+      "pass": true,
+      "wallMs": 9.125
+    },
+    {
+      "name": "Desktop conditional extraction matches both native CUDA branches",
+      "pass": true,
+      "wallMs": 14.894999980926514
+    },
+    {
+      "name": "Original NVIDIA bilateral filter matches native images and independent reference",
+      "pass": true,
+      "comparisons": [
+        {
+          "k": 0,
+          "w": 17,
+          "h": 9,
+          "r": 0,
+          "maxNativeError": 0,
+          "maxReferenceError": 0,
+          "maxNativeReferenceError": 0
+        },
+        {
+          "k": 1,
+          "w": 31,
+          "h": 19,
+          "r": 2,
+          "maxNativeError": 1,
+          "maxReferenceError": 1,
+          "maxNativeReferenceError": 1
+        },
+        {
+          "k": 2,
+          "w": 640,
+          "h": 480,
+          "r": 5,
+          "maxNativeError": 1,
+          "maxReferenceError": 1,
+          "maxNativeReferenceError": 1
+        }
+      ],
+      "wallMs": 611.5749999880791
+    },
+    {
+      "name": "Original NVIDIA postProcessGL RGBA texture and shared tile match native images",
+      "pass": true,
+      "comparisons": [
+        {
+          "k": 0,
+          "w": 8,
+          "h": 8,
+          "r": 0,
+          "maxNativeError": 0,
+          "maxReferenceError": 0,
+          "maxNativeReferenceError": 0
+        },
+        {
+          "k": 1,
+          "w": 32,
+          "h": 16,
+          "r": 1,
+          "maxNativeError": 0,
+          "maxReferenceError": 0,
+          "maxNativeReferenceError": 0
+        },
+        {
+          "k": 2,
+          "w": 32,
+          "h": 16,
+          "r": 4,
+          "maxNativeError": 0,
+          "maxReferenceError": 0,
+          "maxNativeReferenceError": 0
+        },
+        {
+          "k": 3,
+          "w": 32,
+          "h": 16,
+          "r": 8,
+          "maxNativeError": 0,
+          "maxReferenceError": 0,
+          "maxNativeReferenceError": 0
+        },
+        {
+          "k": 4,
+          "w": 512,
+          "h": 512,
+          "r": 4,
+          "maxNativeError": 0,
+          "maxReferenceError": 0,
+          "maxNativeReferenceError": 0
+        }
+      ],
+      "wallMs": 670.5250000357628
+    },
+    {
+      "name": "Indexed shared uchar4 macro and definition branches match native CUDA",
+      "pass": true,
+      "wallMs": 12.709999978542328
+    },
+    {
+      "name": "Original NVIDIA FDTD3d stencil uses constant coefficients across three volume steps",
+      "pass": true,
+      "wallMs": 60.439999997615814
+    },
+    {
+      "name": "Pointer shifts preserve float4 stride, negative halo origins, aliases and by-value helper pointers",
+      "pass": true,
+      "wallMs": 7.995000004768372
+    },
+    {
+      "name": "GPU range copy uses byte offsets and preserves surrounding values",
+      "pass": true,
+      "wallMs": 0.5550000071525574
+    },
+    {
+      "name": "Original NVIDIA recursive Gaussian four-pass RGBA image filter",
+      "pass": true,
+      "wallMs": 71.2049999833107
+    },
+    {
+      "name": "Original NVIDIA simpleTexture3D samples real normalized 3D textures",
+      "pass": true,
+      "wallMs": 32.25499999523163
+    },
+    {
+      "name": "Ray helper math uses runtime float vectors for normalization and dot products",
+      "pass": true,
+      "wallMs": 13.014999985694885
+    },
+    {
+      "name": "Local structs and constant camera matrices retain value semantics on GPU",
+      "pass": true,
+      "wallMs": 19.0349999666214
+    },
+    {
+      "name": "Paired 3D volume and 1D float4 transfer textures sample on NVIDIA hardware",
+      "pass": true,
+      "wallMs": 17.9549999833107
+    },
+    {
+      "name": "Original NVIDIA volume matrix overloads and const references",
+      "pass": true,
+      "wallMs": 11.0450000166893
+    },
+    {
+      "name": "Expression macros preserve signed IMAD and argument precedence on GPU",
+      "pass": true,
+      "wallMs": 10.004999995231628
+    },
+    {
+      "name": "Complete original convolutionTexture matches native CUDA and independent reference",
+      "pass": true,
+      "comparisons": [
+        {
+          "scenario": 0,
+          "width": 128,
+          "height": 64,
+          "stage": "rows",
+          "maxNativeError": 5.960464477539063e-8,
+          "maxReferenceError": 5.960464477539063e-8,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "scenario": 0,
+          "width": 128,
+          "height": 64,
+          "stage": "columns",
+          "maxNativeError": 4.470348358154297e-8,
+          "maxReferenceError": 2.9802322387695312e-8,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "scenario": 1,
+          "width": 35,
+          "height": 19,
+          "stage": "rows",
+          "maxNativeError": 5.960464477539063e-8,
+          "maxReferenceError": 5.960464477539063e-8,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "scenario": 1,
+          "width": 35,
+          "height": 19,
+          "stage": "columns",
+          "maxNativeError": 2.9802322387695312e-8,
+          "maxReferenceError": 2.9802322387695312e-8,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "scenario": 2,
+          "width": 8,
+          "height": 5,
+          "stage": "rows",
+          "maxNativeError": 0,
+          "maxReferenceError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "scenario": 2,
+          "width": 8,
+          "height": 5,
+          "stage": "columns",
+          "maxNativeError": 0,
+          "maxReferenceError": 0,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "scenario": 3,
+          "width": 512,
+          "height": 512,
+          "stage": "rows",
+          "maxNativeError": 1.7881393432617188e-7,
+          "maxReferenceError": 1.7881393432617188e-7,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "scenario": 3,
+          "width": 512,
+          "height": 512,
+          "stage": "columns",
+          "maxNativeError": 1.7881393432617188e-7,
+          "maxReferenceError": 2.384185791015625e-7,
+          "noIntermediateCPUTransfer": true
+        }
+      ],
+      "wallMs": 253.3100000023842
+    },
+    {
+      "name": "Texture helpers forward distinct images and samplers through integer specializations",
+      "pass": true,
+      "wallMs": 32.77000004053116
+    },
+    {
+      "name": "Volume and transfer textures pass through helper parameters",
+      "pass": true,
+      "wallMs": 10.884999990463257
+    },
+    {
+      "name": "Unused 2D texture helper retains a valid shader module",
+      "pass": true,
+      "wallMs": 7.014999985694885
+    },
+    {
+      "name": "Complete original bicubicTexture modes match native CUDA and independent reference",
+      "pass": true,
+      "comparisons": [
+        {
+          "scenario": 0,
+          "mode": 0,
+          "width": 35,
+          "height": 19,
+          "maxNativeError": 0,
+          "maxReferenceError": 0,
+          "maxNativeReferenceError": 0,
+          "failures": 0
+        },
+        {
+          "scenario": 0,
+          "mode": 1,
+          "width": 35,
+          "height": 19,
+          "maxNativeError": 0,
+          "maxReferenceError": 1,
+          "maxNativeReferenceError": 1,
+          "failures": 0
+        },
+        {
+          "scenario": 0,
+          "mode": 2,
+          "width": 35,
+          "height": 19,
+          "maxNativeError": 0,
+          "maxReferenceError": 1,
+          "maxNativeReferenceError": 1,
+          "failures": 0
+        },
+        {
+          "scenario": 0,
+          "mode": 3,
+          "width": 35,
+          "height": 19,
+          "maxNativeError": 0,
+          "maxReferenceError": 1,
+          "maxNativeReferenceError": 1,
+          "failures": 0
+        },
+        {
+          "scenario": 0,
+          "mode": 4,
+          "width": 35,
+          "height": 19,
+          "maxNativeError": 1,
+          "maxReferenceError": 1,
+          "maxNativeReferenceError": 1,
+          "failures": 0
+        },
+        {
+          "scenario": 1,
+          "mode": 0,
+          "width": 128,
+          "height": 96,
+          "maxNativeError": 0,
+          "maxReferenceError": 0,
+          "maxNativeReferenceError": 0,
+          "failures": 0
+        },
+        {
+          "scenario": 1,
+          "mode": 1,
+          "width": 128,
+          "height": 96,
+          "maxNativeError": 0,
+          "maxReferenceError": 1,
+          "maxNativeReferenceError": 1,
+          "failures": 0
+        },
+        {
+          "scenario": 1,
+          "mode": 2,
+          "width": 128,
+          "height": 96,
+          "maxNativeError": 0,
+          "maxReferenceError": 0,
+          "maxNativeReferenceError": 0,
+          "failures": 0
+        },
+        {
+          "scenario": 1,
+          "mode": 3,
+          "width": 128,
+          "height": 96,
+          "maxNativeError": 1,
+          "maxReferenceError": 1,
+          "maxNativeReferenceError": 1,
+          "failures": 0
+        },
+        {
+          "scenario": 1,
+          "mode": 4,
+          "width": 128,
+          "height": 96,
+          "maxNativeError": 0,
+          "maxReferenceError": 0,
+          "maxNativeReferenceError": 0,
+          "failures": 0
+        },
+        {
+          "scenario": 2,
+          "mode": 0,
+          "width": 512,
+          "height": 512,
+          "maxNativeError": 0,
+          "maxReferenceError": 0,
+          "maxNativeReferenceError": 0,
+          "failures": 0
+        },
+        {
+          "scenario": 2,
+          "mode": 1,
+          "width": 512,
+          "height": 512,
+          "maxNativeError": 0,
+          "maxReferenceError": 1,
+          "maxNativeReferenceError": 1,
+          "failures": 0
+        },
+        {
+          "scenario": 2,
+          "mode": 2,
+          "width": 512,
+          "height": 512,
+          "maxNativeError": 1,
+          "maxReferenceError": 1,
+          "maxNativeReferenceError": 1,
+          "failures": 0
+        },
+        {
+          "scenario": 2,
+          "mode": 3,
+          "width": 512,
+          "height": 512,
+          "maxNativeError": 1,
+          "maxReferenceError": 1,
+          "maxNativeReferenceError": 1,
+          "failures": 0
+        },
+        {
+          "scenario": 2,
+          "mode": 4,
+          "width": 512,
+          "height": 512,
+          "maxNativeError": 1,
+          "maxReferenceError": 1,
+          "maxNativeReferenceError": 1,
+          "failures": 0
+        }
+      ],
+      "wallMs": 347.6650000214577
+    },
+    {
+      "name": "Packed uchar4 matches native CUDA byte layout and promotions",
+      "pass": true,
+      "wallMs": 16.740000009536743
+    },
+    {
+      "name": "Helper default arguments match native CUDA including templates and textures",
+      "pass": true,
+      "wallMs": 17.084999978542328
+    },
+    {
+      "name": "Multiple helper template types match native CUDA including texture forwarding",
+      "pass": true,
+      "wallMs": 17.115000009536743
+    },
+    {
+      "name": "Integer helper expressions terminate at negative specializations on GPU",
+      "pass": true,
+      "wallMs": 20.769999980926514
+    },
+    {
+      "name": "Original NVIDIA surface write and texture pipeline matches native CUDA",
+      "pass": true,
+      "comparisons": [
+        {
+          "scenario": 0,
+          "theta": 0.5,
+          "maxError": 0.0016390681266784668,
+          "pixels": 262144,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "scenario": 1,
+          "theta": 0,
+          "maxError": 0,
+          "pixels": 262144,
+          "noIntermediateCPUTransfer": true
+        },
+        {
+          "scenario": 2,
+          "theta": -0.7,
+          "maxError": 0.0016390830278396606,
+          "pixels": 262144,
+          "noIntermediateCPUTransfer": true
+        }
+      ],
+      "allSurfaceTexelsMatchInput": true,
+      "oversizedDispatchRejected": true,
+      "wallMs": 96.04000002145767
+    },
+    {
+      "name": "Original NVIDIA 2D texture rotation matches native CUDA images",
+      "pass": true,
+      "comparisons": [
+        {
+          "scenario": 0,
+          "theta": 0.5,
+          "filter": "linear",
+          "maxError": 0.0016390681266784668,
+          "boundaryPixels": 0,
+          "pixels": 262144
+        },
+        {
+          "scenario": 1,
+          "theta": 0,
+          "filter": "linear",
+          "maxError": 0,
+          "boundaryPixels": 0,
+          "pixels": 262144
+        },
+        {
+          "scenario": 2,
+          "theta": -0.7,
+          "filter": "linear",
+          "maxError": 0.0016390830278396606,
+          "boundaryPixels": 0,
+          "pixels": 262144
+        },
+        {
+          "scenario": 3,
+          "theta": 0.5,
+          "filter": "nearest",
+          "maxError": 0.023529410362243652,
+          "boundaryPixels": 5,
+          "pixels": 262144
+        }
+      ],
+      "wallMs": 79.49500000476837
+    },
+    {
+      "name": "Complete original NVIDIA volume renderer matches native CUDA images",
+      "pass": true,
+      "comparisons": [
+        {
+          "scenario": 0,
+          "width": 128,
+          "height": 128,
+          "maxChannelError": 1,
+          "differentPixels": 2
+        },
+        {
+          "scenario": 1,
+          "width": 65,
+          "height": 49,
+          "maxChannelError": 0,
+          "differentPixels": 0
+        },
+        {
+          "scenario": 2,
+          "width": 128,
+          "height": 128,
+          "maxChannelError": 1,
+          "differentPixels": 2
+        }
+      ],
+      "wallMs": 41.37999999523163
+    },
+    {
+      "name": "Original NVIDIA Haar full transform with GPU coefficient range copies",
+      "pass": true,
+      "wallMs": 51.964999973773956
+    },
+    {
+      "name": "Original NVIDIA separable convolution runs both passes with mutable pointer offsets",
+      "pass": true,
+      "wallMs": 53.280000030994415
+    },
+    {
+      "name": "GPU rejects divergent entry into a helper barrier",
+      "pass": true,
+      "wallMs": 0.6499999761581421
+    },
+    {
+      "name": "SAXPY workgroup specialization 64",
+      "pass": true,
+      "wallMs": 8.960000038146973
+    },
+    {
+      "name": "SAXPY workgroup specialization 256",
+      "pass": true,
+      "wallMs": 7.914999961853027
+    },
+    {
+      "name": "Three r186 compute-to-render shared-buffer pixel test",
+      "pass": true,
+      "mode": "REAL WebGPU render readback",
+      "cpuUploadAfterCompute": false
+    }
+  ],
+  "trim": {
+    "artifacts": 10527,
+    "beforeBytes": 95464864,
+    "afterBytes": 51983192,
+    "projections": 6801,
+    "removedFunctions": 7523
+  },
+  "dynamicUniformsAndSignedZero": true,
+  "softwareAdapterRequested": false
+}
