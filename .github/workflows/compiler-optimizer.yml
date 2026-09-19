@@ -21,13 +21,27 @@ jobs:
           node-version: 22
       - name: Compiler regression tests
         run: node --test tests/*.test.mjs
+      - name: Pinned Stratum integration fixture
+        uses: actions/checkout@v4
+        with:
+          repository: SamG-Coder/stratum-city
+          ref: 458860cb0470fa2c51516c37c1aaf34935b4e280
+          path: .integration/stratum
+          sparse-checkout: |
+            kernels
+            src/kernel-specs.js
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
       - name: Reproducible compiler sources
         if: always()
         run: |
-          git archive --format=tar HEAD src/compiler src/runtime src/kernels.js src/sandbox tests kernels scripts benchmarks package.json package-lock.json | gzip > compiler-sources.tar.gz
+          git archive --format=tar HEAD src/compiler src/runtime src/kernels.js src/sandbox tests kernels scripts benchmarks showcases reports package.json package-lock.json | gzip > compiler-sources.tar.gz
+          tar -czf stratum-fixture.tar.gz -C .integration/stratum kernels src/kernel-specs.js
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: compiler-regression-${{ github.sha }}
-          path: compiler-sources.tar.gz
+          path: |
+            compiler-sources.tar.gz
+            stratum-fixture.tar.gz
           retention-days: 7
