@@ -1,0 +1,65 @@
+name: Apply verified optimizer patch
+# One-time patch transport for the isolated implementation branch. This workflow
+# and its payload delete themselves in the resulting source commit.
+on:
+  push:
+    branches: [perf/automatic-dependency-trimming]
+    paths: ['.optimizer-patch-*.b64', '.github/workflows/apply-optimizer.yml']
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: github.repository == 'SamG-Coder/cuda-webshader' && github.ref == 'refs/heads/perf/automatic-dependency-trimming'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify exact compiler revision and apply source patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/compiler/compiler.js)" = 62ff3d8c83dc3e710aaf613aeb1cdb83ad41a101
+          cat .optimizer-patch-1.b64 .optimizer-patch-2.b64 .optimizer-patch-3.b64 | base64 --decode | gzip -d > "$RUNNER_TEMP/optimizer.patch"
+          echo "133de7ce3b1fb2f6ad3a0a078b79a1d5481b611e3ff0cbbb7e30163e32f7578b  $RUNNER_TEMP/optimizer.patch" | sha256sum -c -
+          git apply --check "$RUNNER_TEMP/optimizer.patch"
+          git apply "$RUNNER_TEMP/optimizer.patch"
+          test "$(git hash-object src/compiler/compiler.js)" = 7ad589c761d2e5734668dc59a9027fd39fb79d6b
+      - run: npm ci
+      - name: Full compiler regression
+        run: node --test tests/*.test.mjs
+      - uses: actions/checkout@v4
+        with:
+          repository: SamG-Coder/stratum-city
+          ref: 458860cb0470fa2c51516c37c1aaf34935b4e280
+          path: .integration/stratum
+          sparse-checkout: |
+            kernels
+            src/kernel-specs.js
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Real kernel dependency report
+        run: node scripts/report-dependency-optimization.mjs .integration/stratum reports/dependency-optimization-stratum.json reports/optimizer-wgsl
+      - run: npx playwright install --with-deps chromium
+      - name: Browser semantic regression
+        env:
+          CW_SOFTWARE_GPU: '1'
+        run: node scripts/test-dependency-optimization-gpu.mjs --stratum
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: optimizer-implementation-validation
+          path: reports/dependency-optimization-*.json
+          retention-days: 14
+      - name: Commit only verified implementation to the isolated branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .optimizer-patch-1.b64 .optimizer-patch-2.b64 .optimizer-patch-3.b64 .github/workflows/apply-optimizer.yml
+          git add src/compiler/compiler.js src/compiler/wgsl-dependencies.js src/compiler/specialize-dependencies.js
+          git add tests/dependency-optimization-cases.js tests/dependency-optimization-gpu.html tests/dependency-optimization-gpu.js tests/dependency-optimization.test.mjs
+          git add scripts/report-dependency-optimization.mjs scripts/test-dependency-optimization-gpu.mjs docs/dependency-optimization.md
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Add automatic WGSL dependency pruning and guarded mode specialization'
+          git push origin HEAD:refs/heads/perf/automatic-dependency-trimming

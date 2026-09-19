@@ -1,11 +1,10 @@
 name: Compiler optimizer regression
 on:
-  push:
-    branches: [perf/automatic-dependency-trimming]
   pull_request:
     paths:
       - 'src/compiler/**'
       - 'tests/**'
+      - 'scripts/*dependency*'
       - '.github/workflows/compiler-optimizer.yml'
   workflow_dispatch:
 permissions:
@@ -13,12 +12,13 @@ permissions:
 jobs:
   compiler:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - run: npm ci
       - name: Compiler regression tests
         run: node --test tests/*.test.mjs
       - name: Pinned Stratum integration fixture
@@ -32,16 +32,16 @@ jobs:
             src/kernel-specs.js
           sparse-checkout-cone-mode: false
           persist-credentials: false
-      - name: Reproducible compiler sources
-        if: always()
-        run: |
-          git archive --format=tar HEAD src/compiler src/runtime src/kernels.js src/sandbox tests kernels scripts benchmarks showcases reports package.json package-lock.json | gzip > compiler-sources.tar.gz
-          tar -czf stratum-fixture.tar.gz -C .integration/stratum kernels src/kernel-specs.js
+      - name: Real kernel dependency report
+        run: node scripts/report-dependency-optimization.mjs .integration/stratum reports/dependency-optimization-stratum.json reports/optimizer-wgsl
+      - run: npx playwright install --with-deps chromium
+      - name: Exact software WebGPU comparison and WGSL validation
+        env:
+          CW_SOFTWARE_GPU: '1'
+        run: node scripts/test-dependency-optimization-gpu.mjs --stratum
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: compiler-regression-${{ github.sha }}
-          path: |
-            compiler-sources.tar.gz
-            stratum-fixture.tar.gz
-          retention-days: 7
+          name: compiler-optimizer-${{ github.sha }}
+          path: reports/dependency-optimization-*.json
+          retention-days: 14
