@@ -1,0 +1,33 @@
+name: Compiler optimizer regression
+on:
+  push:
+    branches: [perf/automatic-dependency-trimming]
+  pull_request:
+    paths:
+      - 'src/compiler/**'
+      - 'tests/**'
+      - '.github/workflows/compiler-optimizer.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compiler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Compiler regression tests
+        run: node --test tests/*.test.mjs
+      - name: Reproducible compiler sources
+        if: always()
+        run: |
+          git archive --format=tar HEAD src/compiler src/runtime src/kernels.js src/sandbox tests kernels scripts benchmarks package.json package-lock.json | gzip > compiler-sources.tar.gz
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compiler-regression-${{ github.sha }}
+          path: compiler-sources.tar.gz
+          retention-days: 7
