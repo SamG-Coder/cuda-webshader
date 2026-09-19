@@ -1,3 +1,5 @@
+import {trimWgslDependencies} from './wgsl-dependencies.js';
+import {specializeDependencies} from './specialize-dependencies.js';
 import {cloneAst} from './clone-ast.js';
 import {pruneConstexpr} from './constexpr.js';
 import {lowerPrintf} from './diagnostics.js';
@@ -18,7 +20,7 @@ import {integerExpression} from './integer-expression.js';
 import {parse, CompileError,builtinType} from './parser.js';
 import {uniformBlockGuards} from './full-workgroups.js';
 export {CompileError, parse};
-export const COMPILER_VERSION = '0.1.0';
+export const COMPILER_VERSION = '0.1.1';
 export const isArray = t => !!t && typeof t === 'object' && t.kind === 'array';
 export const arrayOf = (element, length = null) => ({kind: 'array', element, length});
 export const typeName = t => isArray(t) ? `array<${typeName(t.element)}${t.length == null ? '' : `, ${t.length}`}>` : t;
@@ -1397,7 +1399,52 @@ function instantiateHelperTemplates(ast, kernel) {
     return definitions.get(call.callee.name);
   }};
 }
-export function compile(source, options = {},bufferUsage=null) {
+/** Every entry is still a separate artifact. optimize:false is the diagnostic baseline. */
+export function compile(source, options = {}, bufferUsage = null) {
+  const mode = options.optimize === undefined || options.optimize === true ? 'dependencies'
+    : options.optimize === false ? 'none' : options.optimize;
+  if (!['none', 'dependencies', 'specialize'].includes(mode))
+    throw new CompileError('optimize must be false, true, none, dependencies, or specialize.');
+  // Validate the ORIGINAL program before pruning any source branches, so errors
+  // in dead code cannot silently disappear. No driver/pipeline compilation here.
+  const baseline = compileCore(source, {...options, optimize: 'none'}, bufferUsage);
+  if (mode === 'none') return baseline;
+  let result = baseline, specializationReport = null;
+  if (mode === 'specialize') {
+    try {
+      const candidate = compileCore(source, {...options, optimize: 'specialize'}, bufferUsage);
+      specializationReport = candidate.metadata.optimization?.specialization;
+      const {optimization: ignored, ...candidateInterface} = candidate.metadata;
+      // Keep ALL runtime metadata, not just binding numbers. Uniform records,
+      // barriers, storage access, resource footprints and layouts must agree.
+      if (JSON.stringify(candidateInterface) === JSON.stringify(baseline.metadata)) result = candidate;
+      else specializationReport = {...specializationReport, fallback: 'interface-change'};
+    } catch (error) {
+      // A rejected optimization is not a rejected source program. Baseline has
+      // already validated. Report the fallback rather than swallowing it.
+      specializationReport = {fallback: 'optimization-rejected', message: String(error.message)};
+    }
+  }
+  const baselineBytes = new TextEncoder().encode(baseline.wgsl).length;
+  const trimmed = trimWgslDependencies(result.wgsl, result.entryPoint);
+  result.wgsl = trimmed.wgsl;
+  result.metadata.optimization = {mode, baselineBytes,
+    ...trimmed.report, ...(specializationReport ? {specialization: specializationReport} : {})};
+  // Scheduled children remain independent compilation units.
+  const trimChildren = artifact => {
+    for (const {artifact: child} of artifact.children || []) {
+      if (!child.metadata.optimization) {
+        const t = trimWgslDependencies(child.wgsl, child.entryPoint);
+        child.wgsl = t.wgsl;
+        child.metadata.optimization = {mode: 'dependencies', baselineBytes: t.report.beforeBytes, ...t.report};
+      }
+      trimChildren(child);
+    }
+  };
+  trimChildren(result);
+  return result;
+}
+function compileCore(source, options = {},bufferUsage=null) {
   const ast = parse(source, options);lowerPrintf(ast,options);const kernels = ast.functions.filter(f => f.qualifier === '__global__');
   if(options.valueBuffers!==undefined){
     if(!Array.isArray(options.valueBuffers)||new Set(options.valueBuffers).size!==options.valueBuffers.length)throw new CompileError('valueBuffers requires unique kernel parameter names.');
@@ -1446,6 +1493,7 @@ export function compile(source, options = {},bufferUsage=null) {
   const returnPhases=lowerReturnPhases(kernel,options,walk,(message,n)=>{throw new CompileError(message,n?.token,source);});
   const overloadGroups=new Map();for(const f of ast.functions)if(f.specializationArgument===undefined){const group=overloadGroups.get(f.name)||[];group.push(f);overloadGroups.set(f.name,group);}let overloadIndex=0;const occupied=new Set(ast.functions.map(f=>f.name));for(const [name,group]of overloadGroups)if(group.length>1){if(group.some(f=>f.qualifier!=='__device__'||f.templateParameter))throw new CompileError('Overloads support non-template device helpers only.',group[0].token,source);const signatures=new Set();for(const f of group){const signature=JSON.stringify(f.params.map(p=>[p.type,p.pointer,p.reference,(p.pointer||p.reference)&&p.constant]));if(signatures.has(signature))throw new CompileError('Duplicate function signature '+name,f.token,source);signatures.add(signature);let unique='cw_overload_'+overloadIndex+++'_'+name;while(occupied.has(unique))unique+='_';occupied.add(unique);f.overloadName=name;f.name=unique;}}
   const templates=instantiateHelperTemplates(ast,kernel);
+  const dependencySpecialization=options.optimize==='specialize'?specializeDependencies(ast,kernel):null;
   const emitter=new Emitter(ast,kernel,options,templates,bufferUsage),result=emitter.emit();if(options.libraries?.length)result.metadata.libraries=options.libraries.map(name=>({name,seedBits:64,subsequence:0,offset:0,stateLayout:'compiler-owned',operations:['curand_init','curand','curand_uniform']}));
   if(ast.diagnostics)result.metadata.diagnostics=ast.diagnostics;
   emitter.checkRecursion(); // Class calls have now resolved to concrete helpers.
@@ -1453,11 +1501,12 @@ export function compile(source, options = {},bufferUsage=null) {
   if(returnPhases)result.metadata.predicatedReturns=true;
   if(scalarConstraints.length||emitter.pointerConstraints.length)result.metadata.scalarConstraints=[...scalarConstraints,...emitter.pointerConstraints];
   const changed=['reads','writes','atomic'].some(k=>[...emitter.usage[k]].some(name=>!emitter.initialBufferUsage[k].has(name)));
-  if(changed){if(bufferUsage)throw new CompileError('Helper buffer access analysis did not converge.');return compile(source,options,Object.fromEntries(['reads','writes','atomic'].map(k=>[k,[...emitter.usage[k]]])));}if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};if(options.scheduleDeviceLaunches){
+  if(changed){if(bufferUsage)throw new CompileError('Helper buffer access analysis did not converge.');return compileCore(source,options,Object.fromEntries(['reads','writes','atomic'].map(k=>[k,[...emitter.usage[k]]])));}if(specialization)result.metadata.templateArguments={[kernel.templateParameter]:kernel.templateKind==='type'?specialization[2]:Number(specialization[2])};if(options.scheduleDeviceLaunches){
     const queues=result.metadata.deviceLaunchQueue?.queues.filter(q=>q.caller===result.name)||[];
     if(!queues.length)throw new CompileError('Scheduled execution requires a parent with child launches.');
     result.children=queues.map(q=>({queueId:q.id,artifact:compile(source,{...options,scheduleDeviceLaunches:false,deviceLaunchConsumer:q.id,entry:q.childEntry,workgroupSize:q.block,sharedMemoryBytes:q.sharedMemoryBytes})}));
   }
+  if(dependencySpecialization)result.metadata.optimization={specialization:dependencySpecialization};
   return result;
 }
 export function serializableArtifact(compiled) {
