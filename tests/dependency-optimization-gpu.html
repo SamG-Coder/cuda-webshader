@@ -1,0 +1,6 @@
+<!doctype html><meta charset="utf-8"><title>Compiler optimizer regression</title>
+<script type="module">
+import {runOptimizerGpu} from './dependency-optimization-gpu.js';
+try{window.__optimizerReport={passed:true,...await runOptimizerGpu()};}
+catch(e){window.__optimizerReport={passed:false,error:String(e.stack||e)};}
+</script>

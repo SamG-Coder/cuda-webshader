@@ -1,0 +1,47 @@
+name: Compiler optimizer regression
+on:
+  pull_request:
+    paths:
+      - 'src/compiler/**'
+      - 'tests/**'
+      - 'scripts/*dependency*'
+      - '.github/workflows/compiler-optimizer.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compiler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Compiler regression tests
+        run: node --test tests/*.test.mjs
+      - name: Pinned Stratum integration fixture
+        uses: actions/checkout@v4
+        with:
+          repository: SamG-Coder/stratum-city
+          ref: 458860cb0470fa2c51516c37c1aaf34935b4e280
+          path: .integration/stratum
+          sparse-checkout: |
+            kernels
+            src/kernel-specs.js
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Real kernel dependency report
+        run: node scripts/report-dependency-optimization.mjs .integration/stratum reports/dependency-optimization-stratum.json reports/optimizer-wgsl
+      - run: npx playwright install --with-deps chromium
+      - name: Exact software WebGPU comparison and WGSL validation
+        env:
+          CW_SOFTWARE_GPU: '1'
+        run: node scripts/test-dependency-optimization-gpu.mjs --stratum
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compiler-optimizer-${{ github.sha }}
+          path: reports/dependency-optimization-*.json
+          retention-days: 14
