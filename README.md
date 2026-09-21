@@ -1,380 +1,139 @@
-# CUDA → WebShader
+# CUDA WebShader
 
-**New: [NVIDIA recursive quadtree](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=quadtree)**. The unchanged CUDA kernel builds all 193 nodes for 1,024 points using GPU-scheduled recursive launches. Every node and output point matches native CUDA. [Source and validation](showcases/quadtree/README.md).
+CUDA WebShader translates device kernels from a defined subset of CUDA C into WGSL and runs them with WebGPU. JavaScript supplies the host side: which kernel to launch, the block size, the grid, and the buffers.
 
-**New: [NVIDIA Bezier curves — GPU allocation and child launches](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=bezier)**. All 256 curves run through the original parent and child kernels, with 3,958 vertices compared against native CUDA. [Source and validation](showcases/bezier/README.md).
+The public showcase explorer is at [samg-coder.github.io/cuda-webshader](https://samg-coder.github.io/cuda-webshader/). Use the local server below when you are changing source or running your own kernels. WebGPU requires localhost or HTTPS, so open the pages through that server.
 
-**New: [Glass, metal and 488 spheres — CUDA path tracer](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=pathtracer)**. Roger Allen’s final scene runs through the compiler and sandbox at 1200 × 800, 10 samples per pixel. [Source, pipeline and validation](showcases/pathtracer/README.md).
+## Requirements
 
+- Node.js 20 or newer
+- A current browser with WebGPU enabled (Chrome, Edge, or another Chromium browser on a machine with a working GPU)
+- npm, for the locked dependencies in `package-lock.json`
 
-## [Launch the live showcase explorer ↗](https://samg-coder.github.io/cuda-webshader/)
+The browser application does not need the CUDA Toolkit. Native CUDA checks and the optional performance comparison do. Three.js is pinned to 0.186.0 because the compute-to-render bridge uses a private buffer API in that release.
 
-**[NVIDIA sine-wave showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=wave)** · **[Particle sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=particles)** · **[CUDA vs. WebGPU results](https://samg-coder.github.io/cuda-webshader/reports/performance-comparison.html)**
-
-## CUDA sandbox
-
-[NVIDIA N-body is now a 3D sandbox showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=nbody):
-512 bodies, original force/integration kernels, and GPU position feedback.
-Native CUDA and NVIDIA WebGPU pass three-step independent reference checks.
-See [launch requirements and validation](showcases/nbody/README.md).
-[NVIDIA FDTD3d is also available as a 3D scalar-volume showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fdtd),
-with the original shared-memory stencil, editable constant coefficients and
-GPU-only field feedback. See [volume setup and validation](showcases/fdtd3d/README.md).
-[NVIDIA bicubic filtering](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=bicubic)
-provides all five original filter modes, with editable zoom and pan. All 15 tested images
-match native CUDA and an independent reference within one colour level.
-See [filter modes and validation](showcases/bicubic-texture/README.md).
-[NVIDIA texture convolution](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=convolution)
-runs the original 17-tap row and column filters, with pixel-coordinate texture
-sampling and an intermediate GPU image copy. See [setup and native comparisons](showcases/convolution-texture/README.md).
-[NVIDIA surface write](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=surface)
-runs the original surface-write and texture-rotation kernels as two GPU passes.
-See [surface support and validation](showcases/surface-write/README.md).
-[NVIDIA texture rotation](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=texture2d)
-runs the original teapot-image rotation kernel with a float 2D GPU texture.
-See [sampling settings and native comparisons](showcases/texture2d/README.md).
-[NVIDIA volume renderer](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=volume)
-runs the complete original ray-marching device code with the Bucky volume and colour transfer table.
-Three rendered images are compared with native CUDA, including a rotated camera and partial blocks.
-See [volume renderer setup and validation](showcases/volume-render/README.md).
-[NVIDIA 3D texture slice](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=texture3d)
-samples the original Bucky volume using a real 3D texture and sampler.
-See [texture setup and validation](showcases/texture3d/README.md).
-[NVIDIA recursive Gaussian](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=gaussian)
-runs the original four-pass colour-image filter with an RGBA preview.
-See [Gaussian setup and validation](showcases/recursive-gaussian/README.md).
-[NVIDIA Haar wavelet](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=haar)
-runs a complete 4,096-value transform with two kernel launches and GPU coefficient copies.
-See [Haar setup and validation](showcases/haar/README.md).
-[NVIDIA separable convolution](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=separable)
-runs the original row and column filters as a GPU pass sequence, with both
-generated shaders available for comparison. See [pass setup and validation](showcases/convolution-separable/README.md).
-Device helper integer arguments also support bounded signed arithmetic such as
-`filter<i - 1>` and negative terminating specializations. Native CUDA and
-NVIDIA WebGPU verify the expansion, including INT_MIN. These features now power the
-[verified texture-convolution showcase](showcases/convolution-texture/README.md),
-including texture handles in nested helpers and the original IMAD macro.
-Device helpers now
-support up to four explicit built-in type arguments or one integer template argument, including nested
-calls and arguments forwarded from a kernel template. Single type arguments can be deduced;
-multiple types currently require explicit arguments. This is a verified prerequisite for
-the [bicubic texture showcase](showcases/bicubic-texture/README.md).
-Device helpers also accept trailing scalar literal defaults, including defaults
-inherited from primary templates; native CUDA and WebGPU verify omitted and explicit
-arguments, overloads and nested texture helpers.
-Packed `uchar4` buffers now retain CUDA’s four-byte record layout. Byte components
-can be read and edited in local records, with integer promotion and narrowing verified
-against native CUDA. All four original bicubic render shaders now run in the sandbox; all five sampling
-modes pass complete native-image comparisons. Type-trait structs containing typedef members, including explicit type specializations
-and dependent types such as `typename vec4<T>::Type`, now resolve to built-in
-value types. Helper type arguments can now be deduced from direct scalar/vector
-parameters, and explicit device-function specializations are selected when present.
-The original N-body `rsqrt_T` float specialization passes the regression fixture.
-Scalar `__constant__` globals now become read-only uniforms, with values supplied
-through keys such as `constant.softeningSquared` in the sandbox’s scalar settings.
-Omitted values use the declaration’s numeric initializer or zero. NVIDIA’s original
-`bodyBodyInteraction` helper passes force checks at three softening values.
-Device helpers now support thread/block indices, block barriers, static shared
-arrays, one explicitly sized dynamic shared array, and by-value `thread_block`
-handles. Storage-buffer pointer parameters now support nested calls, offsets and
-type deduction. Local vector brace initializers support full, partial and empty
-lists, including dependent vector types; omitted components become zero. Components
-must match the element type or use explicit casts. Stateless shared-memory
-conversion wrappers now work with an explicitly sized dynamic shared allocation.
-N-body uses an explicit whole-block contract to make its early-return guard
-uniform; the runtime rejects partial-block counts. The unchecked original guard
-still fails WebGPU validation. One-dimensional constant arrays of up to 256
-scalar elements are supported, with dynamic indexing and per-dispatch uniforms.
-The helper support and NVIDIA’s original vector-trait declarations pass native
-CUDA and NVIDIA WebGPU tests for 1, 129 and 1,025 records. Coverage includes
-unsigned wraparound, reference mutation, vector position updates and output guards.
-
-**[Bitonic key/value merge](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=37)**
-runs NVIDIA’s original global merge kernel and reference-parameter comparator.
-The compiler now promotes mixed Boolean/numeric scalar operands as C++ does.
-The sandbox shows one merge stage. Separate native CUDA and hardware WebGPU
-checks also run complete sorting networks using repeated global-kernel dispatches
-and separate source/destination buffers, checking both keys and value permutations.
-This does not import the original shared-memory optimized sorting pipeline.
-
-**[Driver/runtime vector addition](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=36)**
-compiles the complete original NVIDIA kernel file, including its `extern "C"`
-declaration. Single-function C linkage is now accepted for kernels and helpers;
-linkage blocks, templates with C linkage and other linkage languages are rejected.
-Seven input sizes, including empty input and partial blocks, pass exact-output
-checks in native CUDA and hardware WebGPU. The preview covers the compute kernel;
-native driver/runtime API interoperability is outside the browser’s scope.
-
-**[Naïve matrix transpose](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=35)**
-joins the tiled and padded transpose examples. All three original kernels pass
-exact-output checks on four square and rectangular matrix sizes in native CUDA
-and hardware WebGPU. Dimensions must be multiples of 32. This validates
-correctness; these checks do not measure their performance difference.
-
-**[Square roots · MPI compute stage](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=34)**
-runs NVIDIA’s unchanged simpleMPI kernel. The compiler now accepts the float
-overload of `sqrt`. Four launch sizes passed native CUDA and real NVIDIA WebGPU
-checks, including the smallest normal and largest finite float, with a 0.0000002
-relative tolerance. The launch must match the input length because the original
-kernel has no bounds check. This is the isolated compute stage; MPI communication
-is not implemented in the browser. See [square-root results](reports/nvidia-mpi-sqrt.json).
-
-**[Inverse normal distribution](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=33)**
-runs NVIDIA's unchanged `inverseCNDKernel` and `MoroInvCNDgpu` helper with a supplied
-unsigned input buffer. Mutable by-value helper parameters now use local copies;
-scalar `static_cast` and static kernel declarations are supported. `UL`/`LU`
-literals are accepted within the unsigned 32-bit range and use `u32` semantics;
-64-bit arithmetic remains unsupported. Storage-buffer conditions are true under
-the runtime's required non-null binding contract. Missing/null buffers are
-rejected, so this sample's null-input uniform-generator mode is unavailable.
-Five sizes passed native CUDA and hardware WebGPU checks against independent
-normal-tail references, with a 0.00002 absolute tolerance. See
-[inverse-normal results](reports/nvidia-inverse-cnd.json).
-
-NVIDIA's **[64-bin histogram merge](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=31)**
-and **[256-bin histogram merge](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=32)**
-now run unchanged using the compiler's existing shared-memory and block-barrier
-support. Each combines supplied partial histograms into one result. Both passed
-native CUDA and hardware WebGPU checks for 0, 1, 17, 255, 256 and 513 partial
-histograms, including unsigned wraparound and guard values. The original byte-
-counting stages still need unsupported byte storage and/or shared-pointer helper
-features; these cards demonstrate the merge stages only.
-[Histogram merge results](reports/nvidia-histogram-merge.json).
-
-**[Walsh transform — shared memory](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=30)**
-runs NVIDIA's unchanged `fwtBatch1Kernel`, including `extern __shared__ float
-s_data[]`. Set **Dynamic shared bytes** in the sandbox, or pass
-`sharedMemoryBytes` to `compile` / `runtime.kernel`; changing it creates a new
-shader specialization. One unsized dynamic shared array is supported, alongside
-fixed shared arrays, and their combined allocation is checked against the device
-limit. Six sizes from 4 to 2,048 values passed native CUDA and real WebGPU checks
-against the direct Walsh matrix, including odd powers of two and guard values.
-The preset runs three complete 256-value transforms with 1,024 shared bytes and
-64 threads per block. [Shared-memory results](reports/nvidia-fwt-shared.json).
-
-**[Walsh transform — global pass](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=29)**
-runs NVIDIA's unchanged `fwtBatch2Kernel` with separate input/output buffers and
-multiple batches. The compiler now accepts local aliases of storage buffers,
-including `float *p = input + offset` and alias chains. Offsets are captured at
-declaration; reads, writes and atomics retain the original buffer's binding and
-const rules. Helpers now accept storage-buffer pointers and offsets. Pointer
-`+=`/`-=` updates move storage-pointer offsets; general reassignment, pointer casts
-and shared/local-array pointers remain unsupported. All dereferences must stay within the
-original allocation. This is one radix-4 transform pass; the shared-memory finishing kernel has its
-own preset, and full dyadic convolution is not implemented in this preview.
-See [native/WebGPU pass checks](reports/nvidia-fwt-pass.json).
-
-NVIDIA's `alignedTypes` copy template now accepts explicit built-in type
-specializations: **[int](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=26)**,
-**[uint4](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=27)** and
-**[float4](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=28)**.
-The compiler supports one `template<class T>` or `template<typename T>` parameter
-on a kernel, selected through an entry such as `testKernel<uint4>`. Parameters,
-local declarations and casts use the selected built-in type. Custom structs,
-template defaults, multiple parameters and templated helpers remain unsupported.
-These are new built-in specializations of the unchanged copy kernel, not the
-upstream custom-struct alignment benchmark. Native CUDA and real WebGPU passed
-12 byte-for-byte copy checks, including signed zero and untouched guards.
-See [typed copy results](reports/nvidia-aligned-copy.json).
-
-**[Atomic compare-and-swap counters](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=25)**
-runs NVIDIA's unchanged `cas_atomic` retry loop. The compiler now accepts
-`do…while` and 32-bit signed/unsigned `atomicCAS` on storage elements or shared
-scalars. The generated WGSL retries weak compare-exchange when it fails
-spuriously, preserving CUDA's strong compare-and-swap behavior and returning the
-observed old value. Native CUDA and hardware WebGPU checks include one million
-threads contending over ten counters, with guard values checked. The other
-CCCL `atomic_ref` versions in this upstream sample remain unsupported.
-See [CAS correctness results](reports/nvidia-atomic-cas.json).
-
-**[Scan block-offset update](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=24)**
-runs NVIDIA's unchanged `uniformUpdate` kernel. It adds one shared block offset
-to four unsigned integers per thread. This is the final update stage, not the
-complete scan pipeline: the earlier scan helpers still require unsupported
-shared-memory pointer parameters and barriers in helpers. The compiler now
-supports `int2/3/4` and `uint2/3/4` local values, their `make_*` constructors,
-two/four-component integer buffer layouts, and shared scalars (including integer
-atomics). Three-component buffer pointers remain rejected because CUDA and WGSL
-layouts differ. Integer components preserve all 32 bits through helpers, stores
-and readback. [Native and hardware checks](reports/nvidia-scan-update.json) include
-overflow and values beyond float precision.
-
-NVIDIA's original tiled matrix multiplication kernel now runs as two explicit
-integer template specializations:
-**[16×16 tiles](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=22)**
-and **[32×32 tiles](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=23)**.
-Enter `MatrixMulCUDA<16>` or `MatrixMulCUDA<32>` in the sandbox entry field.
-The compiler accepts one `template <int NAME>` parameter on a kernel, an explicit
-nonnegative 32-bit integer argument, comma-separated `for` step updates, and
-`#pragma unroll` hints. The hint leaves optimization to the WGSL backend.
-Template defaults, multiple template parameters and helper
-templates remain unsupported. For this NVIDIA kernel, launch blocks must match
-the selected square tile and all matrix dimensions must be positive multiples
-of it; the original kernel has no boundary guards. Both specializations passed
-native CUDA and hardware WebGPU checks for square and rectangular matrices.
-See [matrix test results](reports/nvidia-matrixmul.json).
-
-**[Black–Scholes sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?nvidia=21)**
-now compiles NVIDIA's complete `BlackScholes_kernel.cuh` unchanged, including its
-two device helpers. The compiler supports scalar output references in helpers,
-comma-separated local declarations, `__restrict`, and single-argument
-`__launch_bounds__` (enforced as a maximum thread count). Reference arguments must
-be distinct mutable named local scalars of the exact type; storage elements,
-vector components, reference returns and general C++ references remain unsupported.
-`__fdividef`, `__expf` and `__logf` map to WGSL division, `exp` and `log`;
-they do not promise CUDA fast-math bit equivalence. Both output buffers passed
-native CUDA and real NVIDIA WebGPU checks at six input sizes, including empty,
-partial-block and odd counts. The original kernel processes pairs, so an odd final
-option stays untouched. See [hardware results](reports/nvidia-blackscholes.json)
-and [native results](reports/nvidia-blackscholes-native.txt).
-
-NVIDIA's batched scalar-product kernel also runs unchanged. It uses the new
-`__mul24` / `__umul24` intrinsics and a direct forwarding macro such as
-`#define IMUL(a,b) __mul24(a,b)`. Forwarding macros must pass every argument
-once, in order, to a named function; general macro substitution is unsupported.
-The integer intrinsics retain the low 24 input bits (sign-extending for
-`__mul24`) and the low 32 product bits, including overflow. See
-[NVIDIA's intrinsic definitions](https://docs.nvidia.com/cuda/archive/13.0.3/cuda-math-api/cuda_math_api/group__CUDA__MATH__INTRINSIC__INT.html)
-and [the native/WebGPU scalar-product checks](reports/nvidia-scalar.json).
-
-NVIDIA's coalesced and padded matrix-transpose kernels now run unchanged in the
-sandbox. The compiler accepts `cooperative_groups::thread_block`, explicit
-namespace aliases such as `namespace cg = cooperative_groups;`, and
-`cg::sync(block)` / `block.sync()` for a local `this_thread_block()` handle.
-These become WGSL workgroup barriers, with a storage barrier when needed.
-Handles cannot be used as numbers, passed through helpers, or substituted with
-grid/tiled groups. Divergent barriers remain subject to WebGPU validation.
-The original 32×16 thread launch requires an adapter supporting 512 invocations
-per workgroup. See [transpose validation](reports/nvidia-transpose.json).
-
-The main showcase grid contains individual runnable samples; every card opens
-the sandbox directly. The NVIDIA audit covers 208 upstream sample directories,
-350 compiler entry probes, and 38 kernel entries/specializations checked with both native CUDA and
-real NVIDIA WebGPU. See [the audit and remaining blockers](reports/nvidia-audit.md)
-and [reproduction instructions](showcases/nvidia/README.md). These kernel checks
-are separate from full native application execution and from performance tests.
-
-Open `sandbox.html` from the local server, or use the **Sandbox** navigation link.
-The left pane uses Monaco (the editor behind VS Code) with C++ syntax highlighting,
-bracket matching, find/replace, and compiler error markers. Paste source or drop a
-`.cu` file to compile and run; use Ctrl/Cmd+Enter to rerun edits. The right pane
-shows GPU output and timestamped compilation, allocation, dispatch and readback logs.
-
-Float4 output is rendered as 3D points directly from its GPU buffer; scalar output
-gets a value table and heatmap. Expand **Launch settings & buffer inputs** to edit
-the entry point, threads per block, block counts, scalar arguments, record counts,
-synthetic input patterns and output buffer. Suggested values are configurable
-defaults, not inferred application semantics. The `blockIdx`, `blockDim` and
-`threadIdx` CUDA built-ins are mapped to real WebGPU workgroup/invocation indices.
-
-Desktop `.cu` imports extract standalone `__global__` and `__device__` functions
-and numeric macros, preserving diagnostic line numbers. Includes, host allocation,
-CUDA/OpenGL interop and window code are not executed. The supported CUDA language
-subset still applies; this is not arbitrary CUDA/C++ execution. Source stays local
-in the browser. Monaco assets and licenses are served with the app, without a CDN.
-
-Run the demos directly in a browser with WebGPU support. No local installation or CUDA Toolkit is needed for the browser showcases.
-
-A bounded **CUDA C kernel → typed AST → WGSL → WebGPU** pipeline, with a GPU-resident Three.js particle renderer, ten kernel examples, numerical tests and a device-local performance tuner.
-
-This is source translation. **It does not run CUDA binaries, PTX, the CUDA driver, cuBLAS or arbitrary C++ in a browser.** It deliberately implements a useful kernel-language subset rather than pretending a few string replacements constitute a CUDA compiler.
-
-## Validated on an RTX 5080
-
-The project is running locally with installed, locked dependencies. **327 Node tests, 93 real WebGPU checks (including Three.js rendered-pixel interop and expected validation rejections), five native CUDA edge-case checks, and all 20 matched CUDA/WebGPU benchmark cases passed.** The static build also succeeds.
-
-Open [the measured comparison](reports/performance-comparison.html) or read [the full methodology and results](reports/performance-comparison.md). All ten kernel sources are compiled by NVCC and translated to WGSL at two workload sizes. Raw GPU timestamps, CUDA event timings, ordinary CUDA launch timings, and verification logs are in `reports/`.
-
-Measured hardware: NVIDIA GeForce RTX 5080, driver 616.64, CUDA Toolkit 13.3, Microsoft Edge 152, Windows WDDM. Results apply to these specific kernels and workloads, not all CUDA code or optimized CUDA libraries. See [VALIDATION.md](VALIDATION.md).
-## Run
-
-Try the [NVIDIA simpleGL sandbox](sandbox.html?example=wave): an unchanged, BSD-3-Clause-licensed NVIDIA CUDA vertex kernel translated by this compiler and displayed through WebGPU/Three.js. It passed 12 native CUDA and 12 browser GPU checks. See [provenance and instructions](showcases/simplegl/README.md).
-
-Install Node.js 20 or newer. Extract the project, then:
+## Run the application
 
 ```sh
-npm install
+npm ci
 npm start
 ```
 
-Open **http://localhost:5173** in a browser with working WebGPU. Do not double-click `index.html`; modules, workers and WebGPU need a proper local/secure origin. No CUDA Toolkit is required for the browser application.
+Then open [http://localhost:5173](http://localhost:5173). `npm start` serves the repository on `127.0.0.1:5173`. Override the address with `HOST` and `PORT` when you need to.
 
-The main page is a searchable showcase explorer. Open **Kernel lab** (lab.html) for the original four-area workbench:
+Stop the server with Ctrl+C.
 
-- **Live system:** 131,072 particles by default; selectable up to 524,288 in the UI. Positions and velocities stay on the GPU. Orbit, zoom, pause and reset.
-- **Kernel lab:** edit/load `.cu`, change the launch shape, compile in a worker, inspect/export WGSL, and validate with the browser's real shader compiler. Compatible particle kernels can replace the live update kernel.
-- **Correctness:** run the actual GPU suite, including a render-target pixel test of compute-to-Three.js buffer sharing. Results begin at **NOT RUN**.
-- **Performance:** numerically verify each variant, warm it up, measure it, rank variants and export raw JSON. No invented benchmark values are preloaded.
+### Showcase explorer
 
-Three.js is pinned to **0.186.0** because the buffer bridge uses a small, isolated backend-internal API. Dependencies are pinned and package-lock.json is included; use npm ci for a reproducible installation.
+The home page lists the runnable demos. Search or filter the cards, then open one. Each card launches the sandbox with that sample already loaded. Cards added from the NVIDIA catalog are kernels that have a recorded passing browser check.
 
-## The pipeline
+Every sample under `showcases/` has its own README for source, launch settings, and what was compared with native CUDA. Start with these:
 
-```text
-CUDA C kernel source (.cu)
-    ↓ tokenizer + parser, inside a Web Worker
-Typed AST + semantic checks
-    ↓ structured WGSL emitter + explicit buffer/scalar ABI
-WGSL compute shader
-    ↓ browser shader validation + cached WebGPU compute pipeline
-GPUBuffer storage / GPU-only dispatch chains
-    ↓ same GPUDevice, same GPUBuffer — no CPU round trip
-Three.js WebGPURenderer + TSL material
+| Sample | What you see |
+|---|---|
+| [Orbital particles](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=particles) | A GPU-resident particle field rendered by Three.js from the same buffer the kernel writes |
+| [Path tracer](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=pathtracer) | Roger Allen’s glass, metal, and sphere scene, compiled into several compute passes |
+| [Recursive quadtree](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=quadtree) | An unchanged NVIDIA kernel that builds the tree with GPU-scheduled child launches |
+| [SAXPY](http://localhost:5173/sandbox.html?example=saxpy) | A numeric kernel. Useful as the smallest check that compilation and readback work |
+
+The Chrono dam-break sample is an experimental port of Project Chrono’s SPH kernels. It runs, and it is slower than real time. Its notes are in [reports/chrono-sph-progress.md](reports/chrono-sph-progress.md).
+
+### Sandbox
+
+Open [sandbox.html](http://localhost:5173/sandbox.html) to compile and run a kernel.
+
+1. Choose an example, paste CUDA into the editor, or drop a `.cu` file onto the page. **Open .cu** does the same thing.
+2. Set **Entry** when the file contains more than one `__global__` function. A template kernel uses the specialized name, such as `MatrixMulCUDA<16>`.
+3. Set **Threads per block**. That triple is the CUDA block size and the WebGPU workgroup size. It is compiled into the shader, so changing it requires another run.
+4. Set **Dynamic shared bytes** only for an `extern __shared__` array. Changing it creates a new shader.
+5. Open **Launch settings & buffer inputs** for the grid, scalar arguments, buffer sizes, and fill patterns. **Detect from source** fills in a starting configuration. Those values are defaults, so check the counts and shapes against your kernel.
+6. Press **Compile & run**, or use Ctrl+Enter (Cmd+Enter on macOS).
+
+The **CUDA .cu**, **Generated WGSL**, and **Compare** tabs show the input and the shader the browser compiled. The pass selector appears when a sample produces more than one shader. The log records compilation, allocation, dispatch, and readback. Float4 results are drawn as 3D points from the GPU buffer. Scalar results appear as a table and a heatmap. **Animate GPU steps** repeats a simulation plan; **Stop** ends that loop.
+
+**Save .cu** and **Save .wgsl** download the current editor contents. Source stays in the browser. The Monaco editor is served with the application.
+
+A showcase with several kernels is driven by a `pipeline.json` plan: buffers, textures, dispatches, and copies. Loading the example runs that plan. You do not re-enter the original host `.cpp`.
+
+### Kernel lab
+
+[lab.html](http://localhost:5173/lab.html) is the original workbench for the ten kernels in `kernels/`.
+
+- **Live system** runs the particle field. The default count is 131,072, and the selector goes up to 524,288. Orbit, pause, and reset from the page. Positions stay on the GPU.
+- **Kernel lab** edits CUDA, chooses the block size, compiles in a worker, and shows the generated WGSL. A compatible particle kernel can replace the live update.
+- **Correctness** runs the browser GPU suite in the page you already have open. The panel starts at **NOT RUN**.
+- **Performance** checks each bundled variant, measures it on your GPU, and exports the raw samples as JSON.
+
+## Compile a kernel
+
+From the repository:
+
+```sh
+node scripts/compile.mjs kernels/saxpy.cu --entry saxpy --block 128,1,1 --out generated/saxpy
 ```
 
-The compiler translates your input source; it does not recognize only the example kernel names and swap in handwritten shaders. Pre-generated `.wgsl` and ABI `.json` files are included for all ten examples.
+This writes `generated/saxpy.wgsl` and `generated/saxpy.json`. The JSON file is the ABI: entry point, bindings, strides, uniform offsets, and workgroup size. `--entry` is required when the file has more than one kernel. `--block` is `x,y,z` and defaults to `128,1,1`.
 
-## Kernels and the behavior they exercise
+Regenerate the ten bundled examples with:
 
-| Kernel | Main test / performance purpose |
-|---|---|
-| `saxpy` | Fused `y = a*x + y`, contiguous scalar loads, bounds checks |
-| `saxpy_vec4` | Four values per invocation; aligned float4 records |
-| `matmul_naive` | Row-major baseline and arbitrary M/N/K |
-| `matmul_tiled` | 16×16 shared tiles, zero-filled tails, barriers |
-| `matmul_register` | 2×2 outputs per lane, 16×16 shared tiles, fewer invocations |
-| `reduce_sum` | Two loads per lane; tree reduction; hierarchical GPU-only stages |
-| `convolution` | Five-tap convolution; shared halo; zero-padded edges |
-| `histogram` | Shared integer atomics; global merge; output clearing |
-| `transpose` | Rectangular matrices; 32×33 padded shared tile |
-| `particles` | Device helper, f32 math, in-place float4 state, render interop |
+```sh
+npm run compile
+```
 
-Numerical fixtures deliberately include empty/singleton inputs, nonmultiples of workgroup/tile sizes, rectangular matrices, zero K, signed values, and sentinel guards beyond valid output ranges. The 74 shared numerical fixtures also run through the CPU AST oracle. The remaining browser tests cover uniform snapshots, reusable multi-stage reduction, two workgroup specializations and a Three.js pixel-level integration test.
-
-## Performance decisions
-
-**Keep data resident.** The particle buffers are allocated by Three.js, borrowed by the compute runtime, and read directly by its rendering material. There is no per-frame position download and no CPU upload of a newly computed particle array. The CPU seed arrays remain allocated; they are not an authoritative copy after compute starts.
-
-**Do not synchronize the normal frame loop.** Compute and rendering are submitted to the same device queue. Queue ordering provides the producer/consumer sequence. Readback and `onSubmittedWorkDone()` are reserved for explicit tests, timing, reset and teardown.
-
-**Avoid allocation and compilation inside repeated work.** Compute pipelines and bind groups are cached, parameter storage is reused, and reduction plans preallocate every scratch level. Each frame still records command buffers and small JavaScript objects; this is not a claim of zero CPU overhead.
-
-**Batch safely.** A batch snapshots scalar parameters into aligned dynamic-uniform slots. Changing an invocation's values after one dispatch does not overwrite the earlier dispatch's parameters. Stable parameters reuse a slot. The uniform arena is uploaded once immediately before its batch submission; queue ordering keeps reuse safe across successive submissions. An arena overflow throws instead of silently overwriting earlier values.
-
-**Compare optimizations, do not assume them.** The tuner measures scalar/float4 SAXPY at 64/128/256 lanes and baseline/shared/register matrix multiplication. Workgroup limits are checked. A shared tile or float4 path may lose on a particular device or workload; the tuner keeps that result rather than asserting a universal winner.
-
-**Limit rendering overhead.** The demo uses batched sprites, no shadow maps, no bloom, no MSAA, a capped device-pixel ratio and a compact material. At high particle counts, transparency and fill-rate can dominate even when the compute kernel is fast. FPS is frame cadence, not compute time.
-
-## Minimal programmatic use
-
-Run this as a browser module from the served project:
+In Node, without writing files:
 
 ```js
-import {GpuRuntime} from './src/runtime/runtime.js';
-import {loadKernelSources} from './src/kernels.js';
+import { readFile } from 'node:fs/promises';
+import { compile } from './src/compiler/compiler.js';
+
+const source = await readFile('kernels/saxpy.cu', 'utf8');
+const artifact = compile(source, {
+  entry: 'saxpy',
+  workgroupSize: [128, 1, 1]
+});
+
+console.log(artifact.entryPoint, artifact.metadata.bindings);
+```
+
+`compile` returns the WGSL text and the metadata the runtime needs. `serializableArtifact` in the same module strips that result down to the JSON form.
+
+Compilation options that matter:
+
+| Option | Meaning |
+|---|---|
+| `entry` | `__global__` function name. Use `kernel<16>` or `kernel<float>` for a supported template specialization. |
+| `workgroupSize` | CUDA block dimensions, `[x, y, z]`. |
+| `sharedMemoryBytes` | Byte size of the single dynamic `__shared__` allocation. |
+| `optimize` | `'dependencies'` (the default) removes unused helper functions after a full validation. `'specialize'` also removes proven integer and bool branches, then falls back to dependency trimming if the ABI would change. `false` keeps the untrimmed shader. |
+
+The default optimization changes the generated text. A cache keyed only by CUDA source also needs the compiler revision (`COMPILER_VERSION` in `src/compiler/compiler.js`) and the `optimize` value. Details are in [docs/dependency-optimization.md](docs/dependency-optimization.md).
+
+## Run a kernel in the browser
+
+Serve the repository and run this as a module on that origin. `GpuRuntime.create()` requests a WebGPU device.
+
+```js
+import { GpuRuntime } from './src/runtime/runtime.js';
+
+const source = `
+__global__ void saxpy(const float* __restrict__ x, float* __restrict__ y,
+                      float a, unsigned int n) {
+  unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+  if (i < n) y[i] = fmaf(a, x[i], y[i]);
+}`;
 
 const runtime = await GpuRuntime.create();
-const sources = await loadKernelSources();
 const x = runtime.createBuffer(new Float32Array([1, 2, 3, 4]));
 const y = runtime.createBuffer(new Float32Array([10, 20, 30, 40]));
 
 try {
-  const kernel = await runtime.kernel(sources.saxpy, {
-    entry: 'saxpy', workgroupSize: [128, 1, 1]
+  const kernel = await runtime.kernel(source, {
+    entry: 'saxpy',
+    workgroupSize: [128, 1, 1]
   });
-  const invocation = kernel.bind({x, y}, {a: 2, n: 4});
-  runtime.batch().dispatch(invocation, [1]).submit();
-  console.log(await runtime.read(y)); // expected [12, 24, 36, 48]
+  const invocation = kernel.bind({ x, y }, { a: 2, n: 4 });
+  runtime.batch().dispatch(invocation, [1, 1, 1]).submit();
+  console.log(await runtime.read(y)); // [12, 24, 36, 48]
 } finally {
   runtime.destroyBuffer(x);
   runtime.destroyBuffer(y);
@@ -382,55 +141,57 @@ try {
 }
 ```
 
-`dispatch` takes **workgroup counts**, corresponding to CUDA blocks, not element counts. Kernel workgroup size is compiled into the shader. Callers must supply sufficient buffer lengths and correct dimensional/scalar arguments. Raw kernels are not automatically memory-safe mathematical operations; use the plans for the additional size checks they provide.
+`runtime.kernel` compiles the source, asks the browser to validate the WGSL, and caches the compute pipeline. `bind` attaches buffers by parameter name and packs scalar arguments into a uniform snapshot. `dispatch` takes **block counts**, the CUDA grid, not thread counts. One block of 128 threads covers the four-element example because the kernel checks `i < n`.
 
-### Reuse measured choices and GPU-only plans
+`createBuffer` owns the allocation and `dispose` destroys owned resources. `importBuffer` borrows a `GPUBuffer` that already belongs to the same device; the runtime does not destroy it. Call `await runtime.idle()` before replacing or destroying buffers that queued work still uses.
+
+For the bundled SAXPY, matrix, and reduction kernels, `src/runtime/operations.js` adds shape checks and reusable launch plans:
 
 ```js
-import {prepareSaxpy, prepareMatmul, prepareReduction}
-  from './src/runtime/operations.js';
+import { prepareSaxpy, prepareReduction } from './src/runtime/operations.js';
+import { loadKernelSources } from './src/kernels.js';
 
-// With x, y, n already allocated, and report returned by runBenchmarks(...):
-const saxpyPlan = await prepareSaxpy(runtime, sources, {
-  x, y, n, a: 0.5, choice: report.choices.saxpy
-});
+const sources = await loadKernelSources();
+const saxpyPlan = await prepareSaxpy(runtime, sources, { x, y, n: 4, a: 2 });
 saxpyPlan.encode(runtime.batch()).submit();
 
-// Reuses scratch and persistent bindings across calls; no intermediate readback.
-const reduction = await prepareReduction(runtime, sources, {input: y, n});
+const reduction = await prepareReduction(runtime, sources, { input: y, n: 4 });
 reduction.encode(runtime.batch()).submit();
-const sum = await runtime.read(reduction.output); // only the final scalar
-console.log(sum[0]);
-reduction.dispose(); // after submitted work is complete when sharing this resource
+const sum = await runtime.read(reduction.output);
+reduction.dispose();
 ```
 
-A vec4 SAXPY choice falls back to scalar when the input length or storage ABI is unsuitable. Choices are workload/device-specific: retune after changing hardware or materially changing dimensions. They are not globally optimal settings. Matrix plans accept the chosen variant by name and retain that variant's required launch contract.
+`loadKernelSources` uses `fetch`, so it belongs in the served page. A measured tuner choice can be passed as `choice`; an unsuitable float4 SAXPY choice falls back to the scalar kernel.
 
-## Supported language subset
+Readback is for tests and inspection. The particle frame does not download positions. It records the dispatch and lets Three.js read the same storage buffer.
 
-Supports `__global__ void` kernels; by-value scalar/vector `__device__` helpers; `float`, `int`, `unsigned int`/`uint`; scalar/float2/float4 buffer pointers; float2/3/4 local values and component access; `const` and `__restrict__`; fixed local/shared arrays; `if`, `else`, `for`, `while`, `break`, `continue`, `return`; numeric object-like `#define`; basic casts and arithmetic; CUDA block/thread/grid indices; `__syncthreads()`; integer `atomicAdd/Min/Max/Exch`; and a documented set of math intrinsics.
+## What a kernel can use
 
-Floating constants with an `f` suffix, e.g. `0.5f`, use float32. Unsuffixed floating literals use binary64 expression arithmetic emulated with integer limbs in WGSL: scalar +, -, *, /, comparisons, negation, and conversion back to float are supported. This preserves mixed-precision CUDA expressions without changing source literals; it is not native hardware FP64 and may use substantially more instructions. Explicit by-value double kernel parameters and double constant-record fields preserve both 32-bit words; size_t constant-record fields likewise preserve all 64 bits. Double local variables/buffers, double-to-integer casts and double transcendental functions remain unsupported. Mixed scalar expressions are explicitly typed. Guarded ternary expressions become real branches, not an eager `select()` that could evaluate an unselected buffer access or atomic operation.
+A compilation selects one `__global__` kernel and the device helpers it can reach. Pointer parameters become storage buffers. Scalar arguments become a uniform struct. `__shared__` memory becomes workgroup memory. `threadIdx`, `blockIdx`, `blockDim`, and `gridDim` map to the WebGPU invocation and the declared block size. `__syncthreads()` is a workgroup barrier. A reduction across blocks is a sequence of dispatches, each reading the previous dispatch’s buffer.
 
-**Not supported:** arbitrary host CUDA execution, kernel launch syntax inside compiled device code, cudaMalloc/streams/events host APIs, binary/PTX input, C++ STL, unrestricted C++ classes or templates, nested or storage-buffer structs, general pointers and unrestricted pointer arithmetic, runtime recursion, cooperative grid barriers, warp shuffles/votes, inline PTX, tensor cores/WMMA, half arithmetic, double storage, unrestricted 64-bit integer arithmetic, or floating-point atomics. Read-only records containing bool fields use native byte layouts when their stride is a multiple of four. Writable packed records and standalone float3/bool pointer-buffer ABIs remain unsupported. The feature-specific sections above describe supported templates, local structs, dynamic shared memory, helper pointers and vector operations. Fully parenthesized expression macros such as IMAD can expand into the typed syntax tree; nested expression macros remain unsupported. Texture support includes tex3D<float>, tex3D<float4>, tex2D<float>, tex1D<float4> and tex2DLayered<float4> with bound kernel handles or explicitly typed helper chains. Surface support includes float4 surf1Dwrite with checked global X coordinates, float surf2Dwrite with checked global XY coordinates, float/byte surf3Dwrite with checked global XYZ coordinates, and float4 surf2DLayeredwrite with checked global XY and a uniform layer; arbitrary coordinates, surface reads and surface helper parameters remain unsupported.
+The frontend rejects programs it cannot lower without changing their meaning. Packed `float3` pointer parameters are rejected because CUDA and WGSL would use different strides. Writable use of the same buffer through two bindings is rejected. A barrier the workgroup cannot execute uniformly is left for the browser validator to reject.
 
-Unsupported syntax/types fail explicitly where recognized. The browser's WGSL compiler remains the final validation gate for emitted code, including uniformity and implementation limits. Finite f32 numerical agreement is tested with tolerances; do not assume NVCC bit-for-bit equivalence, identical FMA contraction, denormal handling, NaN behavior or transcendental precision. This is an experimental compiler/runtime, not a production-hardened general CUDA replacement.
+The accepted subset also covers the features used by the showcases: limited kernel and helper templates, textures and surfaces, integer atomics, dynamic shared memory, and GPU-scheduled child launches for the samples written that way. [docs/architecture.md](docs/architecture.md) is the contract for the ABI, barriers, and resource ownership. A showcase README is the contract for that sample.
 
-## Test, compile and build commands
+## Tests and builds
 
 ```sh
-npm test                         # No npm dependencies needed: compiler/oracle/mock-host tests
-npm run compile                  # Regenerate all WGSL + ABI JSON files
-npm run check:cuda-syntax         # Optional: requires g++ (or CXX); syntax only
-node scripts/compile.mjs kernels/saxpy.cu --entry saxpy --block 128,1,1 --out generated/saxpy-custom
-
-npx playwright install chromium  # Requires npm install first
-npm run test:gpu                 # Real WebGPU tests, fails on unavailable/failed GPU
-npm run build                    # Static dist/; requires installed Three.js
-node scripts/serve.mjs dist       # Serve the static build
+npm test
+npm run compile
+npm run build
+node scripts/serve.mjs dist
 ```
 
-For local hardware testing, the **Correctness** tab in your normal browser is the simplest path. Playwright defaults to headless Chromium and writes `reports/gpu-local.json`. Use `CW_CHROMIUM` for an explicit executable path, `CW_HEADED=1` for a headed browser, and `CW_BENCH=1` to include benchmarks. In PowerShell, for example:
+`npm test` runs the Node parser, CPU-oracle, and host tests. It does not launch a browser. `npm run build` writes a static site to `dist/`.
+
+Browser tests need Playwright’s Chromium and a WebGPU adapter:
+
+```sh
+npx playwright install chromium
+npm run test:gpu
+```
+
+On Windows, point the runner at an installed browser when you want a visible window:
 
 ```powershell
 $env:CW_HEADED = "1"
@@ -438,246 +199,37 @@ $env:CW_CHROMIUM = "C:\Program Files\Google\Chrome\Application\chrome.exe"
 npm run test:gpu
 ```
 
-GitHub Actions runs compiler tests and the static build only. Software WebGPU/SwiftShader tests are disabled by project preference. Run GPU tests locally on real hardware.
+`CW_BENCH=1` includes the benchmark cases. Results are written to `reports/gpu-local.json`. The **Correctness** tab in the kernel lab runs the same suite in your normal browser.
 
-An optional native CUDA baseline is included in `tests/native-reference.cu`. With an appropriate NVIDIA CUDA Toolkit and GPU, run:
+Optional native checks need the CUDA Toolkit:
 
 ```sh
 nvcc -O3 -std=c++17 -arch=native tests/native-reference.cu -o native-reference
+npm run bench:native:build
 ```
 
-Then run the resulting executable. It checks SAXPY, three matrix variants and hierarchical reduction against independent host references. This baseline was built and all five checks passed on the RTX 5080. The separate benchmarks/ harness provides matched performance tests for all ten kernels. Run npm run bench:native:build, then reports/native-benchmark.exe; see the measured report for complete reproduction commands.
+`npm run check:cuda-syntax` only checks that sample sources still parse. It needs `g++` or `CXX`. Syntax success does not establish CUDA runtime behavior.
 
-## Reading benchmark output
+Measured runs, hardware, and methodology are recorded in [VALIDATION.md](VALIDATION.md) and [reports/performance-comparison.md](reports/performance-comparison.md). Those documents describe the runs that produced them. Later showcase checks live with each showcase and in `reports/`.
 
-`gpuMedianMs` uses WebGPU timestamp queries when supported and nonzero. Otherwise the report clearly falls back to `wallMedianMs`: CPU encode/submit-to-completion time amortized across repeated dispatches. The ranking uses the same metric for every compared variant. JSON retains each sample, workgroup shape, dimensions, warm-up count, repeats, exposed device information and skipped-limit reasons.
-
-Compilation, allocation and initial data upload are excluded. Repeated dispatches deliberately reuse buffers and can benefit from cache residency. `effectiveGBs` is logical bytes moved divided by time, **not measured DRAM bandwidth**. Matrix GFLOP/s uses the conventional `2*M*N*K` operation count. Very short timestamp intervals may be quantized. Do not compare these numbers to native CUDA without matching the GPU, data, precision, workload, reuse, timing boundary and synchronization policy.
-
-## Layout
+## Repository layout
 
 ```text
-src/compiler/     Parser, type checks, WGSL emitter, worker and CPU AST oracle
-src/runtime/      WebGPU runtime, plans, benchmarks, isolated Three.js buffer bridge
-src/demo/         GPU-resident Three.js particle scene
-kernels/          Ten original CUDA C sample kernels
-generated/        Emitted WGSL and ABI metadata
-scripts/          Dependency-light server, compiler CLI, build and test runners
-tests/            CPU fixtures, host tests, GPU suite, pixel interop, native baseline
-reports/          Actual authoring logs and explicit validation status
-docs/             Architecture and primary-source research notes
+src/compiler/     CUDA frontend, WGSL emitter, worker, CPU oracle
+src/runtime/      WebGPU runtime, launch plans, Three.js buffer bridge
+src/sandbox/      Sandbox editor, pipeline runner, previews
+src/demo/         Particle scene used by the kernel lab
+kernels/          Ten original sample kernels
+showcases/        Sample sources, pipeline plans, inputs, and notes
+generated/        WGSL and ABI JSON for the ten sample kernels
+scripts/          Static server, compiler CLI, tests, and benchmarks
+tests/            Node tests, browser suite, native baseline
+docs/             Architecture and design notes
+reports/          Recorded checks and timings
 ```
 
 ## License
 
-The original project source, CUDA kernel examples, generated WGSL, tests, benchmark harness and documentation are available under the [MIT License](LICENSE), Copyright (c) 2026 SamG-Coder and CUDA WebShader contributors. Commercial use, modification and redistribution are permitted subject to preserving the license and copyright notice.
+Original project source, sample kernels written for this project, generated WGSL, tests, and documentation are under the [MIT License](LICENSE), Copyright (c) 2026 SamG-Coder and CUDA WebShader contributors.
 
-Dependencies retain their own licenses: Three.js is MIT, while Playwright and playwright-core are Apache-2.0 development dependencies. The CUDA Toolkit and browser binaries are external prerequisites and are not included in this source repository. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for license scope and attribution, and [docs/research.md](docs/research.md) for design references.
-
-The static build includes the project license, third-party notices and Three.js license. Native executables and large benchmark input binaries are excluded from Git; `npm run bench:native:build` regenerates them locally. Measured reports, raw timing samples and the generated native launcher source are included.
-
-[Try NVIDIA post-process glow in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=postprocess): original RGBA texture and shared-tile CUDA kernel, original teapot input, editable highlights and CUDA/WGSL comparison. [Validation and launch settings](showcases/postprocess-gl/README.md).
-
-[Try NVIDIA bilateral filtering in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=bilateral): the original edge-preserving filter and photograph, with editable colour-distance smoothing. [Validation and launch settings](showcases/bilateral-filter/README.md).
-
-[Try NVIDIA Mandelbrot in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=mandelbrot), [Julia](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=julia), or [two accumulated frames](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=mandelbrot-accumulated). Original float kernel, editable viewport and colours, and six exact native frame comparisons with multiply-add fusion disabled in the native build. [Validation, arithmetic profile and supported scope](showcases/mandelbrot/README.md).
-
-### NVIDIA 3D volume filtering
-
-[Try the volume filter in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=volume-filter). Run the unchanged NVIDIA filter on its original 32³ Bucky volume, compare CUDA/WGSL and move through the output with a Z-slice slider. Separate presets expose voxel coordinates, nearest sampling and the original normalized/wrap settings. Sixteen native volume captures match hardware WebGPU exactly for the tested configurations. [Supported scope and why upstream settings produce a flat volume](showcases/volume-filter/README.md).
-
-### NVIDIA marching cubes
-
-[Open the implicit 3D mesh in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=marching).
-Original NVIDIA kernels classify a 16³ field, compact voxels and generate 2,080 triangles with shared memory. Project CUDA scan kernels connect the stages on the GPU. Compare all generated shaders and orbit the resulting position/normal buffers directly. Native CUDA and hardware WebGPU agree within 1e-6 for every mesh component. [Setup, pipeline format and supported scope](showcases/marching-cubes/README.md). [The Bucky sampled-volume branch also runs in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=marching-volume), producing 11,126 triangles at the default threshold. Three complete volume meshes match native CUDA.
-
-### NVIDIA box filter
-
-[Blur NVIDIA’s original teapot image in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=box-filter). The original CUDA row and column kernels use a sliding window and keep the packed intermediate image on the GPU. The default 1024² image uses radius 14; edit both radius settings to try another size. Eight complete colour captures match native within one channel level, and all four scalar entries are verified too. [Setup and supported scope](showcases/box-filter/README.md).
-
-### NVIDIA Sobel edges
-
-[Find teapot edges in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=sobel). The unchanged NVIDIA texture kernel processes its original 1024² grayscale image, with editable edge intensity and CUDA/WGSL comparison. Eight image captures across edge detection and copy kernels match native CUDA exactly. [Setup, validation and remaining shared-memory path](showcases/sobel/README.md).
-
-[Run the shared-memory Sobel version](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=sobel-shared). NVIDIA's unchanged shared-tile kernel now has its own showcase, with four exact native image comparisons, original byte storage and checked packed-output pitch alignment.
-
-### NVIDIA image denoising
-
-Run [KNN](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=denoise-knn), [non-local means](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=denoise-nlm), or [shared non-local means](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=denoise-nlm2) on NVIDIA's original noisy portrait. All seven filter/copy/diagnostic kernels run in the sandbox with their original function bodies. Fourteen image captures match native CUDA exactly or within one colour level. [Settings and verification](showcases/denoising/README.md).
-
-### NVIDIA DCT image showcase
-
-[Run the DCT image in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=dct)
-(or [locally](http://localhost:5173/sandbox.html?example=dct)). The original first
-floating-point DCT, quantization and IDCT kernels reconstruct NVIDIA's 512 × 512
-teapot image. All intermediate values and final pixels match native CUDA on the
-validated NVIDIA Blackwell GPU. Five compiled CUDA passes, including two labelled
-project adapters for host pixel conversion, are available in the comparison view.
-See [validation and remaining DCT paths](reports/dct-progress.md). The packed-short path is not yet claimed to work.
-
-[Run the optimized DCT showcase](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=dct-optimized)
-(or [locally](http://localhost:5173/sandbox.html?example=dct-optimized)). Its original
-shared-memory DCT/IDCT helper functions now run unchanged, with all three stages
-matching native CUDA exactly for a padded 64 × 32 image and the full 512 × 512
-teapot. This establishes correctness; no speedup over the first path is claimed.
-
-### Animated NVIDIA FFT ocean
-
-[Run the ocean in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=ocean)
-(or [locally](http://localhost:5173/sandbox.html?example=ocean)). This runs the
-original spectrum, height and slope CUDA kernels around a project GPU inverse
-FFT, producing an animated 256 × 256 ocean with 130,050 triangles. Drag to orbit;
-use Animate GPU steps or Stop to control the simulation. Compare generated WGSL
-for the original kernels, runtime FFT and labelled CUDA mesh adapter.
-
-All numerical stages were compared with native CUDA/cuFFT at three animation
-times; maximum absolute error was 3.17e-7. The preview uses project rendering,
-and no cuFFT performance parity is claimed. See [validation details](reports/ocean-progress.md).
-
-### NVIDIA particle collisions
-
-[Run the particle simulation](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=particle-collision)
-(or [locally](http://localhost:5173/sandbox.html?example=particle-collision)).
-Watch 1,024 spheres fall and collide using NVIDIA's original integration functor,
-spatial hashing and collision kernels. Sorting and cell clearing also run on the
-GPU, with positions shared directly with the renderer. Pause/resume and orbit
-controls are available in the sandbox.
-
-The complete simulation is compared with native Thrust/CUDA after 1, 8, 32 and
-64 steps, with maximum position error below 8.35e-7. The preview uses project
-initial conditions and rendering. See [validation and support boundaries](reports/particle-collision-progress.md).
-
-### NVIDIA pre-integrated volume
-
-[Open the coloured 3D volume in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=volume-preintegrated). The original NVIDIA integration, layered colour/opacity tables and ray marcher run with unchanged device function bodies. Both original 1024² transfer layers stay on the GPU; the final 256² image matches native CUDA within one 8-bit channel level. The two differently coloured halves are selected by the original kernel. Camera, density and rendering mode are editable in the launch settings. See [source, controls and validation](showcases/volume-preintegrated/README.md).
-
-### NVIDIA smoke particles
-
-[Run the smoke showcase in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=smoke): 16,384 particles, original CUDA integration/depth functions, GPU depth sorting and a WebGPU adaptation of NVIDIA's 32-slice shadow renderer. See [the smoke notes](showcases/smoke/README.md) for validation and presentation differences.
-
-[Try NVIDIA fluid flow in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fluids): drag to stir 262,144 GPU particles, inspect the original CUDA and generated WGSL, and run a 512 × 512 FFT fluid solver. [Implementation and native comparison details](showcases/fluids/README.md).
-
-[Try NVIDIA stereo disparity in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=stereo): compare the original CUDA and generated WGSL while recovering a disparity image from NVIDIA's stereo camera pair. [Details and native verification](showcases/stereo/README.md).
-
-[Try NVIDIA optical flow in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=optical): estimate motion between two images using the original six kernels, five-level pyramid and 7,500 solver iterations. [Configuration and native verification](showcases/optical-flow/README.md).
-
-### NVIDIA FFT convolution
-
-[Run the original-size FFT convolution in the sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fft-convolution). The unchanged padding and modulation kernels process the original 2000 × 2000 random input through 2048 × 2048 real FFTs. Complete output matches native CUDA with relative L2 error 2.0e-7. [Pipeline, preview and validation](showcases/fft-convolution/README.md).
-
-### NVIDIA custom and fused FFT convolution
-
-[Custom FFT convolution](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fft-custom) and [fused FFT convolution](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=fft-fused) run the other two original convolutionFFT2D paths at 2000 × 2000. Both use 1024 × 2048 complex transforms, unchanged NVIDIA device kernels and GPU-only texture transfers. Full results match native CUDA at approximately 2.02e-7 relative L2 error. [Pipeline details and validation](showcases/fft-convolution-custom/README.md).
-
-
-GPU diagnostic capture supports standalone `printf` calls with literal `%u`, `%d`
-and `%%` formats and at most eight integer arguments. Compile with
-`diagnosticCapacity` (default 64), allocate the buffer named in
-`artifact.metadata.diagnostics.buffer` using its binding's `minBindingSize`, and
-clear it before each run. After GPU completion, pass its `Uint32Array` readback
-to `decodeDiagnostics` from `src/compiler/diagnostics.js` to obtain messages and
-attempted/dropped counts. This is bounded diagnostic capture, not host stdout;
-float/string formatting and printf return values are unsupported. Float
-`isfinite` is supported, including infinity and NaN classification.
-
-C++ `switch` statements support 32-bit integer/enum selectors, integer constant
-labels, default cases, fall-through, and nested loop/switch control. Case-local
-declarations must be enclosed in braces; at most 64 labels are accepted. Generated
-WGSL repeats reachable case suffixes because WGSL does not implicitly fall through
-([WGSL switch specification](https://www.w3.org/TR/WGSL/#switch-statement)).
-
-CUDA `bool*` buffers use packed one-byte elements in 32-bit WebGPU storage words.
-Writes preserve neighbouring bytes with atomic compare/exchange; volatile bool
-kernel pointers use atomic loads as well. Upload boolean data as `Uint8Array`
-with 0/1 values. This does not provide a grid-wide synchronization primitive.
-
-Free `void operator+=`, `-=`, `*=` and `/=` overloads support a mutable record
-reference plus a value or const-reference operand. Record-specific `length`
-helpers are resolved as user functions, preserving the source math.
-
-Device helpers can receive whole mutable local arrays by pointer, with specialization
-by element type and array length; nested forwarding and scalar pointer arguments
-are supported. Local array offsets and aliased array arguments remain unsupported.
-Free unary `+`/`-` record operators and CUDA float `abs`, `fmin`, `fmax` overloads
-are recognized. Long arithmetic chains are emitted iteratively with ordered
-intermediates, avoiding JavaScript recursion without reassociating operations.
-
-### Experimental Chrono water
-
-The runtime can copy GPU-produced integer counters into kernel parameters with
-`kernel.bind(buffers, scalars, {scalarBuffers: {n: {resource: counter, offset: 0}}})`.
-The counter is copied in queue order before each dispatch, without CPU readback.
-Normal scalar values are still required to initialize the parameter snapshot.
-This supports unconstrained 32-bit integer parameters; narrow integers, booleans,
-parameters with full-workgroup constraints, and surface kernels are rejected.
-
-[Open the Chrono SPH dam-break sandbox](https://samg-coder.github.io/cuda-webshader/sandbox.html?example=chrono).
-The editor contains the original Project Chrono CUDA kernels and helpers; all
-15 physics/preparation passes compile from that source. The host adapter
-allocates initial-state buffers and sequences activity, neighbour rebuilding,
-RK2 integration and shared-buffer rendering. Pressure controls the display
-colour. No Chrono code is embedded in the compiler.
-
-This is an experimental, slower-than-real-time port. A 10,000-step real NVIDIA
-run completed one simulated second with finite fluid values. Individual particle
-trajectories differ from native CUDA, with differences comparable to changing
-native fused-arithmetic settings; this is not a claim of exact long-run agreement
-or experimental fluid-benchmark validation. See
-[the progress and comparison notes](reports/chrono-sph-progress.md).
-
-Runtime scheduling optimizations reduced a 10,000-step headless run on the RTX
-5080 from **283.9 seconds to 108.7 seconds (2.61× faster)**. All particle-state
-values and all neighbour counts matched the previous WebGPU run exactly. The
-runtime now caches its fixed scan/sort kernels and the host queues dependent
-GPU work without unnecessary completion waits. The CUDA source and compiler
-are unchanged. These are single-run timings without rendering, not display FPS;
-one simulated second still takes about 109 seconds. See the
-[timing and correctness report](reports/chrono-runtime-speed.json). Reproduce
-the profiled loop with `node scripts/profile-chrono-loop.mjs 10000 output.json`
-on Windows with Edge and a real NVIDIA adapter.
-
-The interactive preview now advances simulation independently of display frames
-and presents at up to 30 fps. Every physics step still runs with the original
-timestep. A separate 1600×1000 sandbox benchmark with rendering enabled improved
-from 76.9 to 98.5 steps/s (1.28×), measured in real NVIDIA Edge over ten seconds
-after warm-up. These headless-browser measurements are not a guarantee of the
-same throughput in a visible browser window. The preview reports live steps/s
-and simulated-time/wall-time speed. See [preview measurements](reports/chrono-preview-speed.json);
-run `node scripts/bench-chrono-preview.mjs output.json` to reproduce.
-
-Further resource reuse keeps one binding for all stages of a pair sort and
-retains neighbour-list capacity between steps. A fresh paired 1,000-step run
-took 11.38 seconds before and 10.95 seconds after (about 4% faster), with exact
-particle-state and neighbour-count agreement. Preview measurements were 98.5
-and 100.4 steps/s; that small difference is subject to run-to-run variation.
-See [resource reuse measurements](reports/chrono-resource-reuse-speed.json).
-
-Combining each completed step's diagnostic readback with the next rebuild's
-active-count readback reduced a 1,000-step run from 10.95 to 7.41 seconds. The
-preview measured 137.2 steps/s versus 100.4 previously (1.37×). A 10,000-step run
-took 74.05 seconds, with identical particle data and neighbour counts to the
-earlier WebGPU reference. Every diagnostic is checked before the following
-physics step, and every step rebuilds neighbours from current positions.
-These remain single-run, real NVIDIA headless Edge measurements; the simulation
-is still slower than real time. See [combined-readback results](reports/chrono-combined-readback-speed.json).
-Reproduce the scheduled loop with `node scripts/bench-chrono-loop.mjs 10000 output.json`.
-
-The latest scheduler leaves the active-marker count on the GPU, using the
-runtime's GPU integer parameters for the unchanged search kernels. It reads
-that count, the neighbour total and previous-step diagnostics together before
-integration. The 10,000-step run improved from **74.05 to 42.69 seconds (1.73×)**,
-with identical particle state and every neighbour count. Preview throughput
-improved from **137.2 to 237.0 steps/s** in headless Edge with rendering enabled.
-Partially active and empty marker sets also match the original host path.
-The freshly measured original native Chrono application took 14.24 seconds;
-the web loop is therefore about 3× slower at this workload. It remains slower
-than real time. See [GPU-count measurements and native timing notes](reports/chrono-gpu-count-speed.json).
-
-The host also reuses bindings and packed parameters for unchanged pass inputs,
-invalidating them when resources, parameters or GPU counter bindings change.
-A clean 3,000-step comparison took 13.08 seconds before and 12.59 after (about
-4% faster), with exact state and neighbour-count agreement. Binding creation
-fell from 87,018 to 27,029. Preview throughput was effectively unchanged at
-240.6 versus 241.8 steps/s; that difference is within run-to-run variation.
-These measurements were repeated after closing a competing GPU tab. See
-[binding-cache measurements](reports/chrono-binding-cache-speed.json).
+NVIDIA sample kernels and their data are BSD-3-Clause. Three.js and Monaco Editor are MIT. Playwright is Apache-2.0. Attributions and the Three.js pin are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
