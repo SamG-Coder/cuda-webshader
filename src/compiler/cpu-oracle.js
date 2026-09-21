@@ -136,6 +136,12 @@ class Context {
     if(name==='make_float4'&&Array.isArray(args[0]))return [...args[0],args[1]];
     if(name==='length'&&!n.userHelper)return f(Math.sqrt(args[0].reduce((sum,a)=>f(sum+f(a*a)),0)));
     if(!n.userHelper&&(name==='dot'||name==='normalize')){const sum=args[0].reduce((sum,a,i)=>f(sum+f(a*(name==='dot'?args[1][i]:a))),0);return name==='dot'?sum:args[0].map(a=>f(a/Math.sqrt(sum)));}
+    if(['__float_as_uint','__float_as_int','__uint_as_float','__int_as_float'].includes(name)) {
+      const bits=new DataView(new ArrayBuffer(4));
+      if(name.startsWith('__float_as_')) { bits.setFloat32(0,args[0],true);return name==='__float_as_uint'?bits.getUint32(0,true):bits.getInt32(0,true); }
+      if(name==='__uint_as_float')bits.setUint32(0,args[0],true);else bits.setInt32(0,args[0],true);
+      return bits.getFloat32(0,true);
+    }
     if(name==='isfinite')return Number.isFinite(args[0]);
     if(['fminf','fmaxf'].includes(name)&&Array.isArray(args[0]))return args[0].map((a,i)=>f(name==='fminf'?Math.min(a,args[1][i]):Math.max(a,args[1][i])));
     if(/^make_(float|uint|int)[234]$/.test(name))return (args.length===1?Array(vectorLength(n.type)).fill(args[0]):args).map(v=>convert(v,vectorElement(n.type)));

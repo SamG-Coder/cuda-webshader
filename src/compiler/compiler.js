@@ -762,6 +762,12 @@ class Emitter {
     if(name==='float'&&n.args.length===1){const value=this.expr({kind:'cast',target:'f32',value:n.args[0],token:n.token});return this.result(n,'f32',value.code,value.pre);}
     const args = n.args.map(a => this.argument(a)), pre = args.flatMap(a => a.pre);
     if(n.printfIntegerArguments&&args.some(a=>!['i32','u32','cw_short','cw_ushort','cw_uchar','bool'].includes(a.type)))this.fail('Diagnostic integer formats require integer arguments.',n);
+    if (['__float_as_uint','__uint_as_float','__float_as_int','__int_as_float'].includes(name)) {
+      const types = {__float_as_uint:['f32','u32'],__uint_as_float:['u32','f32'],__float_as_int:['f32','i32'],__int_as_float:['i32','f32']};
+      const [from,to] = types[name];
+      if(args.length!==1 || args[0].type!==from) this.fail(name+' requires one '+from+' argument.',n);
+      return this.result(n,to,`bitcast<${to}>(${args[0].code})`,pre);
+    }
     if(name==='isfinite'){if(args.length!==1||args[0].type!=='f32')this.fail('isfinite currently supports one float argument.',n);return this.result(n,'bool',`((bitcast<u32>(${args[0].code}) & 2139095040u) != 2139095040u)`,pre);}
     if(name==='__mul24'||name==='__umul24'){
       if(args.length!==2||args.some(a=>!['i32','u32'].includes(a.type)))this.fail(`${name} requires two 32-bit integer arguments.`,n);
