@@ -4,7 +4,7 @@ import {GpuRuntime} from '../src/runtime/runtime.js';
 
 async function requested(options={},maximum=2147483644){
  let descriptor;const stop=new Error('Captured request');
- const adapter={features:new Set(),limits:{maxStorageBuffersPerShaderStage:16,maxComputeInvocationsPerWorkgroup:1024,maxComputeWorkgroupSizeX:1024,maxStorageBufferBindingSize:maximum,maxBufferSize:maximum+4},requestDevice:async d=>{descriptor=d;throw stop;}};
+ const adapter={features:new Set(),limits:{maxComputeWorkgroupStorageSize:32768,maxStorageBuffersPerShaderStage:16,maxComputeInvocationsPerWorkgroup:1024,maxComputeWorkgroupSizeX:1024,maxStorageBufferBindingSize:maximum,maxBufferSize:maximum+4},requestDevice:async d=>{descriptor=d;throw stop;}};
  // The sentinel stops before creating GPU resources; tests the real request path.
  const original=Object.getOwnPropertyDescriptor(globalThis,'navigator');
  Object.defineProperty(globalThis,'navigator',{value:{gpu:{}},configurable:true});
@@ -20,4 +20,10 @@ test('Large-buffer opt-in requests actual supported limits, including smaller ad
 });
 test('Large-buffer opt-in rejects invalid options',async()=>{
  await assert.rejects(GpuRuntime.create({useAdapterBufferLimits:'yes'}),/must be a boolean/);
+});
+
+test('Shared-memory opt-in requests adapter storage without changing the default',async()=>{
+ assert.equal((await requested()).maxComputeWorkgroupStorageSize,undefined);
+ assert.equal((await requested({useAdapterWorkgroupLimits:true})).maxComputeWorkgroupStorageSize,32768);
+ await assert.rejects(GpuRuntime.create({useAdapterWorkgroupLimits:1}),/must be a boolean/);
 });

@@ -241,3 +241,5 @@ Local and shared `__half` / `__half2` values compile to WGSL `f16` / `vec2<f16>`
 This is a bounded subset: kernel half parameters and half storage-buffer pointers are rejected. Use float or packed integer buffers and convert into local/shared half values. The unprefixed names `half` and `half2` are not reserved. Shared allocation accounting uses two bytes per half lane. The CPU oracle rounds to binary16, but portable GPU behavior for denormals and exceptional values follows WebGPU; do not assume full CUDA floating-point equivalence. This support does not expose tensor cores.
 
 CUDA `__clz` accepts a 32-bit signed or unsigned integer, counts leading zero bits (32 for zero), and lowers to WGSL `countLeadingZeros` with unsigned bit interpretation. The CPU oracle uses the same semantics.
+
+Set `useAdapterWorkgroupLimits: true` to request the adapter's full `maxComputeWorkgroupStorageSize`. The default leaves the WebGPU default limit unchanged. Callers must still check the returned device limit and provide fallbacks for smaller adapters or supplied devices.
