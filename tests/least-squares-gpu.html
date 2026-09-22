@@ -1,0 +1,27 @@
+<!doctype html><meta charset="utf-8"><link rel="icon" href="data:,"><title>Least squares GPU test</title>
+<script type="module">
+import {GpuRuntime} from '../src/runtime/runtime.js';
+import {NormalEquations,solveNormalEquations} from '../src/runtime/least-squares.js';
+window.runLeastSquaresTests=async()=>{
+ const runtime=await GpuRuntime.create(),errors=[];
+ runtime.device.addEventListener('uncapturederror',event=>errors.push(event.error.message));
+ const observations=new Float32Array(1031*5),reference=new Float64Array(3*5);
+ for(let i=0;i<1031;i++) {
+  const x=Math.sin(i*0.1),y=Math.cos(i*0.3),row=[x,y,1,2*x-3*y+4,-x+0.5*y-2];
+  observations.set(row,i*5);
+ }
+ for(let i=0;i<1031;i++)for(let a=0;a<3;a++)for(let b=0;b<5;b++)reference[a*5+b]+=observations[i*5+a]*observations[i*5+b];
+ const expected=solveNormalEquations(reference,3,2),fit=await NormalEquations.create(runtime,3,2);
+ const rows=runtime.createBuffer(observations);
+ try {
+  fit.append(rows,509);fit.append(rows,522,{offset:509*5});
+  const actual=await fit.solve(),difference=Math.max(...actual.map((v,i)=>Math.abs(v-expected[i])));
+  if(difference>2e-5)throw Error(`GPU / CPU difference ${difference}`);
+  for(const call of [()=>fit.append(rows,0),()=>fit.append(rows,1032),()=>fit.append(rows,1,{stride:4}),()=>fit.append(rows,1,{offset:-1})]) {
+   let refused=false;try{call();}catch{refused=true;}if(!refused)throw Error('Invalid row layout accepted');
+  }
+  await runtime.idle();if(errors.length)throw Error(errors.join('\n'));
+  return {actual:Array.from(actual),expected:Array.from(expected),maxDifference:difference,rows:fit.rows,adapter:runtime.adapter.info,errors};
+ }finally{await runtime.idle();fit.dispose();runtime.dispose();}
+};
+</script>

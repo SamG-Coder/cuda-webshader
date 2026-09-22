@@ -110,6 +110,42 @@ The default optimization changes the generated text. A cache keyed only by CUDA 
 
 ## Run a kernel in the browser
 
+### Streaming least squares
+
+`src/runtime/least-squares.js` supplies `NormalEquations` for applications such as
+texture fitting that generate many observation rows but solve a small dense
+system. Each GPU row contains `[features..., targets...]`; include a constant
+feature when the model needs a bias. Append batches from a reusable GPU buffer,
+then call `solve()` to obtain output-major coefficients. Products and partial
+sums use f32 on the GPU, and the final reduction and pivoted dense solve use f64
+on the host. This is not a native f64 or QR solver; normal equations can lose
+accuracy for ill-conditioned inputs. The default relative ridge is `1e-6`.
+
+```js
+import {NormalEquations} from './src/runtime/least-squares.js';
+
+const fit = await NormalEquations.create(runtime, 3, 2);
+try {
+  // observationBuffer has rows [x0, x1, 1, target0, target1].
+  fit.append(observationBuffer, rowCount);
+  // More appends may follow, including GPU-generated rows in the same buffer.
+  const weights = await fit.solve(); // 2 output rows of 3 coefficients
+} finally {
+  await runtime.idle();
+  fit.dispose();
+}
+```
+
+Both feature and output counts are bounded to 1..64. `append` supports `stride`
+and `offset` in float elements, validates buffer ownership and bounds, and
+submits work immediately. Queue order protects a reused observation buffer.
+Singular systems without a ridge, empty fits and non-finite solved equations
+are rejected. Test the numerical GPU path with
+`node scripts/test-least-squares.mjs` (installed Edge on Windows; Playwright
+Chromium elsewhere; override with `CW_BROWSER`).
+
+### General kernel launch
+
 Serve the repository and run this as a module on that origin. `GpuRuntime.create()` requests a WebGPU device.
 
 ```js
