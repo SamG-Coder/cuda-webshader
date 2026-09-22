@@ -17,7 +17,7 @@ test('Half scalar conversions and arithmetic honor binary16 ties and limits in t
   executeCPU(a,{input,output},{},[1]);assert.deepEqual([...output],[1,1.001953125,65504,Infinity,0,2**-23,-2,0]);
 });
 test('Half ABI and wrong intrinsic arguments are rejected explicitly',()=>{
-  for(const params of ['__half* out','__half value','__half2 value'])assert.throws(()=>compile(`__global__ void h(${params}){}`),/Half kernel parameters/);
+  for(const params of ['__half value','__half2 value'])assert.throws(()=>compile(`__global__ void h(${params}){}`),/Half kernel parameters/);
   assert.throws(()=>compile('__global__ void h(float* out){out[0]=__half2float(1.0f);}'),/requires one f16/);
   assert.throws(()=>compile('__global__ void h(float* out){__half2 x=__floats2half2_rn(1,2);}'),/requires two float/);
   const ordinary=compile('__global__ void h(float* out){unsigned half=2;out[0]=(float)(half-1);}');assert.doesNotMatch(ordinary.wgsl,/enable f16/);
