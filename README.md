@@ -233,3 +233,9 @@ reports/          Recorded checks and timings
 Original project source, sample kernels written for this project, generated WGSL, tests, and documentation are under the [MIT License](LICENSE), Copyright (c) 2026 SamG-Coder and CUDA WebShader contributors.
 
 NVIDIA sample kernels and their data are BSD-3-Clause. Three.js and Monaco Editor are MIT. Playwright is Apache-2.0. Attributions and the Three.js pin are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## Native half arithmetic
+
+Local and shared `__half` / `__half2` values compile to WGSL `f16` / `vec2<f16>`. Supported conversions are `__float2half_rn`, `__half2float`, `__floats2half2_rn`, `__float22half2_rn`, and `__half22float2`; arithmetic intrinsics are `__hadd`, `__hsub`, `__hmul` and their `2` variants. Artifacts declare `shader-f16`; the runtime requests it when supported and rejects half kernels on devices without it. Ordinary kernels remain usable without that feature.
+
+This is a bounded subset: kernel half parameters and half storage-buffer pointers are rejected. Use float or packed integer buffers and convert into local/shared half values. The unprefixed names `half` and `half2` are not reserved. Shared allocation accounting uses two bytes per half lane. The CPU oracle rounds to binary16, but portable GPU behavior for denormals and exceptional values follows WebGPU; do not assume full CUDA floating-point equivalence. This support does not expose tensor cores.
