@@ -14,3 +14,10 @@ test('Mixed components and side effects retain scalar evaluation',()=>{
   const out=new Float32Array(4);executeCPU(a,{out},{},[1]);assert.deepEqual([...out],[1,2,3,4]);
   assert.match(a.wgsl,/vec4<f32>\(/);
 });
+
+test('Component-wise extrema preserve lane order in vector reductions',()=>{
+  const source=`__device__ float4 reduce(float4 a,float4 b){return make_float4(fmaxf(a.x,b.x),fmaxf(a.y,b.y),fmaxf(a.z,b.z),fmaxf(a.w,b.w));}
+  __global__ void sample(float4* out){out[0]=reduce(make_float4(-128.0f,-6.0f,5.0f,-21.0f),make_float4(-21.0f,2.0f,-6.0f,-128.0f));}`;
+  const a=compile(source);assert.match(a.wgsl,/return max\(v_a, v_b\);/);
+  const out=new Float32Array(4);executeCPU(a,{out},{},[1]);assert.deepEqual([...out],[-21,2,5,-21]);
+});
