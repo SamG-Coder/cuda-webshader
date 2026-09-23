@@ -2,6 +2,8 @@
 
 CUDA WebShader translates device kernels from a defined subset of CUDA C into WGSL and runs them with WebGPU. JavaScript supplies the host side: which kernel to launch, the block size, the grid, and the buffers.
 
+An experimental [shared-memory WebAssembly backend](docs/wasm.md) can compile the same CUDA kernels for CPU threads using Emscripten, including fixed shared arrays and workgroup barriers. WaterCuda uses it to render while WebGPU pipelines compile, then hands over to the GPU.
+
 The public showcase explorer is at [samg-coder.github.io/cuda-webshader](https://samg-coder.github.io/cuda-webshader/). Use the local server below when you are changing source or running your own kernels. WebGPU requires localhost or HTTPS, so open the pages through that server.
 
 ## Requirements

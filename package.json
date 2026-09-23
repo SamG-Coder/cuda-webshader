@@ -18,7 +18,8 @@
     "check:cuda-syntax": "node scripts/check-cuda-syntax.mjs",
     "bench:native:build": "powershell -NoProfile -File scripts/build-native.ps1",
     "bench:webgpu": "node scripts/run-comparison.mjs",
-    "bench:report": "node scripts/report-comparison.mjs"
+    "bench:report": "node scripts/report-comparison.mjs",
+    "test:wasm": "node scripts/test-wasm.mjs"
   },
   "dependencies": {
     "monaco-editor": "0.52.2",
