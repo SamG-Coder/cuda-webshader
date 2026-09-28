@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/bendlang/bend",
+  "revision": "3378e6237ed431d17629efd36d24c96241815b7e",
+  "files": {
+    "bend2/bend.ts": "924197360cefc61a9314072e9cb1ef46a9266550eb527f535c36839a3b102bcb",
+    "bend2/base.bend": "c742fae9c49b14f0cc9128429a2c6109364c8a933a142f2c90b9f2e5fd976661"
+  },
+  "modification": "TypeScript types and filesystem/package loader removed; parser and checker unchanged."
+}

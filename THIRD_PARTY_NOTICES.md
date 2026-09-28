@@ -7,6 +7,7 @@ licenses; the project's MIT license does not relicense them.
 
 | Component | Version | License | Use |
 |---|---|---|---|
+| Bend 2 parser, checker and base library | commit 3378e6237ed431d17629efd36d24c96241815b7e | Apache-2.0 | Browser-adapted frontend under `src/bend/vendor`; retained license and provenance alongside it. TypeScript types and the filesystem/package loader are removed; the language parser/checker is preserved. The WebShader Bend CUDA runtime is original project code. |
 | Three.js | 0.186.0 | MIT | Browser rendering dependency |
 | Monaco Editor | 0.52.2 | MIT, with bundled third-party notices | Sandbox source editor used by VS Code |
 | Playwright | 1.56.1 | Apache-2.0 | Development/browser test runner |

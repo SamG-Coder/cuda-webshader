@@ -14,6 +14,16 @@ The public showcase explorer is at [samg-coder.github.io/cuda-webshader](https:/
 
 The browser application does not need the CUDA Toolkit. Native CUDA checks and the optional performance comparison do. Three.js is pinned to 0.186.0 because the compute-to-render bridge uses a private buffer API in that release.
 
+### Bend 2 language tool
+
+The experimental [Bend 2 lab](bend.html) checks Bend source with its pinned upstream
+frontend, embeds the checked program in a CUDA runtime, and translates that CUDA
+through this project's existing WGSL compiler. Recursive calls, captured closures,
+constructors and pattern matching execute on WebGPU with bounded per-invocation
+arenas. The lab includes source editing, CUDA/WGSL inspection, inputs, GPU results
+and code downloads. See [Bend runtime scope and validation](docs/bend.md) before
+porting a program; this is not full upstream BendRT compatibility.
+
 ## Run the application
 
 ```sh

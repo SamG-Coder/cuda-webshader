@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bend 2 · CUDA WebShader</title><link rel="stylesheet" href="src/bend/style.css"></head>
+<body>
+<header><a class="brand" href="./">CW <span>CUDA WEB SHADER</span></a><nav><a href="sandbox.html">CUDA sandbox ↗</a><a href="https://github.com/bendlang/bend">Bend upstream ↗</a></nav></header>
+<main>
+<div class="eyebrow">LANGUAGE LAB / EXPERIMENTAL</div>
+<h1>Bend 2, on WebGPU.</h1>
+<p class="intro">Check Bend source. Generate a CUDA runtime. Translate it through WebShader and execute recursive functions, closures and data constructors on your GPU.</p>
+<div class="pipeline"><span>01 / BEND SOURCE</span><b>→</b><span>02 / CUDA RUNTIME</span><b>→</b><span>03 / WGSL</span><b>→</b><span>04 / GPU RESULTS</span></div>
+<div class="toolbar"><label>Example <select id="example"></select></label><label>Entry <input id="entry" value="pow2" spellcheck="false"></label><button id="compile">Check & compile</button><button id="run" class="primary">Compile & run on GPU</button></div>
+<div class="workspace"><section><div class="section-head"><h2>Bend source</h2><button id="save-source">Save .bend</button></div><textarea id="source" spellcheck="false" aria-label="Bend source"></textarea></section>
+<section><div class="section-head"><h2>Generated code</h2><div><button id="cuda-tab" aria-pressed="true">CUDA</button><button id="wgsl-tab" aria-pressed="false">WGSL</button><button id="save-code">Save code</button></div></div><pre id="generated" tabindex="0">Compile to inspect the generated runtime and checked program.</pre></section></div>
+<div class="bottom"><section><h2>Inputs</h2><p>One argument list per GPU invocation. Arguments follow the entry’s declared order.</p><textarea id="inputs" aria-label="Input rows" spellcheck="false"></textarea><div class="limits"><label>Arena words / invocation <input type="number" id="arena" value="65536" min="64" step="4"></label><label>Step limit <input type="number" id="steps" value="100000" min="1"></label></div></section>
+<section><h2>Execution</h2><pre id="status" role="status">Ready. Nothing has run yet.</pre><div id="results"></div></section></div>
+<aside><strong>Runtime scope</strong><p>Pure Bend computations with scalar U32, Nat and F32 entry arguments/results. Recursive calls, captured closures and constructors execute in bounded per-invocation arenas. Independent input rows run in parallel; internal fork/join branches run sequentially. This is a WebShader runtime for checked Bend terms, not upstream BendRT.</p><p>The upstream TypeScript checker is included. The Lean-backed verdict and a proof of the translation are not. Nat values are limited to 32 bits; IO, foreign calls, unsafe definitions and package imports are unsupported.</p></aside>
+<footer><p>Bend 2 frontend and base library © 2026 HigherOrderCO · <a href="src/bend/vendor/LICENSE">Apache-2.0 license</a> · <a href="src/bend/vendor/provenance.json">Upstream revision & source hashes</a> · <a href="THIRD_PARTY_NOTICES.md">Third-party notices</a></p><p>WebShader runtime and integration: <a href="https://github.com/SamG-Coder/cuda-webshader">source</a> · <a href="https://github.com/SamG-Coder/cuda-webshader/blob/main/docs/bend.md">Findings & limitations</a></p></footer>
+</main><script type="module" src="src/bend/app.js"></script></body></html>

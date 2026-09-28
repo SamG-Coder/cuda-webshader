@@ -1,0 +1,110 @@
+{
+  "oracle": "Upstream Bend JS compiler",
+  "cases": [
+    {
+      "name": "pow2",
+      "rows": 7,
+      "passed": true
+    },
+    {
+      "name": "tree",
+      "rows": 5,
+      "passed": true
+    },
+    {
+      "name": "closure",
+      "rows": 4,
+      "passed": true
+    },
+    {
+      "name": "proof",
+      "rows": 3,
+      "passed": true
+    },
+    {
+      "name": "u32-add",
+      "rows": 6,
+      "passed": true
+    },
+    {
+      "name": "u32-sub",
+      "rows": 6,
+      "passed": true
+    },
+    {
+      "name": "u32-mul",
+      "rows": 6,
+      "passed": true
+    },
+    {
+      "name": "u32-div",
+      "rows": 6,
+      "passed": true
+    },
+    {
+      "name": "u32-mod",
+      "rows": 6,
+      "passed": true
+    },
+    {
+      "name": "u32-and",
+      "rows": 6,
+      "passed": true
+    },
+    {
+      "name": "u32-or",
+      "rows": 6,
+      "passed": true
+    },
+    {
+      "name": "u32-xor",
+      "rows": 6,
+      "passed": true
+    },
+    {
+      "name": "u32-shl",
+      "rows": 4,
+      "passed": true
+    },
+    {
+      "name": "u32-shr",
+      "rows": 4,
+      "passed": true
+    },
+    {
+      "name": "u32-shln",
+      "rows": 4,
+      "passed": true
+    },
+    {
+      "name": "u32-shrn",
+      "rows": 4,
+      "passed": true
+    },
+    {
+      "name": "boolean-match",
+      "rows": 6,
+      "passed": true
+    },
+    {
+      "name": "nested-closures",
+      "rows": 2,
+      "passed": true
+    },
+    {
+      "name": "partial-primitive",
+      "rows": 6,
+      "passed": true
+    },
+    {
+      "name": "generic-list",
+      "rows": 2,
+      "passed": true
+    },
+    {
+      "name": "nat-successor",
+      "rows": 3,
+      "passed": true
+    }
+  ]
+}
