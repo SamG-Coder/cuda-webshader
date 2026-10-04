@@ -311,3 +311,24 @@ Set `useAdapterWorkgroupLimits: true` to request the adapter's full `maxComputeW
 `#pragma unroll` now expands small counted `for` loops in generated WGSL. The bounded implementation supports literal integer start/end/positive increments, up to 32 iterations, and preserves statement order and iteration scope. An explicit factor equal to the trip count also expands; factor one disables this frontend transformation. Dynamic bounds, partial factors, counter aliases/mutation, loop exits, and excessive expansion retain ordinary loop control. This is a CUDA source hint; no generated-shader rewriting is needed. See the [CUDA language reference](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html) for the broader native compiler directive.
 
 Component-wise `make_float2/3/4` expressions over matching local vector components can lower to vector arithmetic. Supported expression trees use `+`, `-`, `*`, `/`, `truncf`, `floorf`, `ceilf`, `fabsf`, `fmaxf`, and `fminf`. Arithmetic association is preserved. Mixed component order, references, storage reads and expressions with side effects retain scalar construction. This supports ordinary CUDA helper functions without requiring nonstandard operators on CUDA vector types.
+
+
+## CUDA-owned buffers in an interop session
+
+Updated ChromiumRTXCuda exposes `nativeOwnedBuffers` and `maxNativeOwnedBytes`.
+Use `await runtime.native.createDeviceBuffer(byteLength)` for zero-initialized
+CUDA-only simulation state. Bind it as a normal `buffer` parameter in CUDA or
+OptiX. It has no `GPUBuffer` and cannot be accessed by WebGPU. Use
+`await runtime.native.destroyDeviceBuffer(resource)` for explicit destruction;
+closing the runtime also destroys all remaining native buffers.
+
+A batch may combine these buffers with shared output buffers/textures. Only
+shared resources cross the browser's CUDA/WebGPU ownership boundary. A CUDA-only
+batch uses the regular native dispatch endpoint; OptiX still requires a shared
+resource in the batch. Acceleration-structure construction currently requires
+shared geometry. Device buffers share the host's 64 MiB CUDA allocation budget.
+
+Use `runtime.createSharedTexture(...)` for the final image. CUDA/OptiX can write
+it as a `surface`; its `gpuTexture` is a real WebGPU texture for GPU presentation.
+This provides persistent resource ownership with normal batching, not a cached
+CUDA Graph or a new requestAnimationFrame API.

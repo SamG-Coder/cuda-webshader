@@ -65,7 +65,7 @@ class OptixPipeline extends OptixObject {
   }
 }
 export function buildAccelerationStructure(batch,scene,vertices,{update=false,vertexOffset=0}={}) {
-  const interop=batch.interop;check(scene,interop,'scene');interop.check(vertices,'buffer');
+  const interop=batch.interop;check(scene,interop,'scene');interop.check(vertices,'buffer');if(!vertices.nativeResource)throw new TypeError('Acceleration structure construction requires shared geometry.');
   if(batch.ended)throw new Error('Batch is closed.');
   if(batch.jobs.length>=256)throw new RangeError('GPU job budget exceeded.');
   if(typeof update!=='boolean'||(update&&!scene.allowUpdate)||!Number.isInteger(vertexOffset)||vertexOffset<0||vertexOffset%4||
@@ -83,14 +83,14 @@ export function traceRays(batch,invocation,dimensions) {
   const args=pipeline.parameters.map(p=>{
     if(p.type==='buffer'||p.type==='surface') {
       const resource=invocation.resources[p.name];interop.check(resource,p.type);batch.resources.add(resource);
-      return {[p.type]:resource.nativeResource.id};
+      return resource.nativeBufferId?{nativeBuffer:resource.nativeBufferId}:{[p.type]:resource.nativeResource.id};
     }
     const value=invocation.scalars[p.name];if(!scalarTypes[p.type](value))throw new RangeError('Invalid OptiX scalar '+p.name);
     return {type:p.type,value};
   });
   // Even a shader without buffer/surface parameters needs ownership of a
   // browser-managed resource. Typical renderers bind their output here.
-  if(!args.some(a=>a.buffer||a.surface)&&!batch.resources.size)
+  if(![...batch.resources].some(r=>r.nativeResource))
     throw new TypeError('OptiX launches require at least one shared resource in the batch.');
   batch.jobs.push({type:'optix-trace',pipeline:pipeline.id,scene:scene.id,dimensions:extent,arguments:args});
   return batch;

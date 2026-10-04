@@ -18,6 +18,7 @@ export function supportsInteropRequirements(capabilities,requirements={}) {
   const c=capabilities,r=requirements;
   if(!c.available||!c.samePhysicalGpu||!c.sharedBuffers||c.synchronization!=='d3d12-fence-cuda-external-semaphore')return false;
   if(r.optix&&!c.optix?.available)return false;
+  if(r.nativeOwnedBuffers&&!c.nativeOwnedBuffers)return false;
   if((r.sharedTextures||r.textureFormats?.length)&&(!c.sharedTextures||!(r.textureFormats||[]).every(f=>c.textureFormats.includes(f))))return false;
   if(r.gpuBufferToTexture&&!c.gpuBufferToTexture)return false;
   for(const [key,limit] of [['maxResourceBytes','maxResourceBytes'],['sharedBytes','maxSharedBytes'],
@@ -76,7 +77,7 @@ export class NativeInterop {
   }
   constructor(runtime,api,session,capabilities) {
     Object.assign(this,{runtime,api,session,capabilities});this.resources=new Set();this.kernels=new Map();
-    this.optixObjects=new Set();
+    this.optixObjects=new Set();this.deviceBuffers=new Set();this.deviceBytes=0;
     this.tail=Promise.resolve();this.closed=false;this.failure=null;
     this.stats={dispatches:0,submissions:0,sharedBytes:0};
     runtime.device.lost.then(()=>this.dispose());
@@ -89,6 +90,7 @@ export class NativeInterop {
   supports(requirements){return !this.closed&&!this.failure&&supportsInteropRequirements(this.capabilities,requirements);}
   check(resource,type) {
     this.runtime.checkResource(resource);
+    if(type==='buffer'&&this.deviceBuffers.has(resource)&&resource.nativeBufferId)return;
     if(!this.resources.has(resource)||!resource.nativeResource?.id||
       (type==='buffer'?!resource.gpuBuffer:!resource.gpuTexture))
       throw new TypeError('Native kernels require an explicitly created shared '+type+'.');
@@ -109,6 +111,27 @@ export class NativeInterop {
       this.stats.sharedBytes+=size;
       if(snapshot)this.runtime.write(resource,snapshot);
       return resource;
+    });
+  }
+  async createDeviceBuffer(byteLength,{label='CUDA-owned buffer'}={}) {
+    this.assertAlive();
+    if(!this.capabilities.nativeOwnedBuffers)throw new DOMException('Native-owned interop buffers require an updated ChromiumRTXCuda.','NotSupportedError');
+    if(!Number.isSafeInteger(byteLength)||byteLength<4||byteLength%4)throw new RangeError('Native buffer size must be a positive multiple of four.');
+    return this.enqueue(async()=>{
+      if(this.deviceBuffers.size>=256||this.deviceBytes+byteLength>this.capabilities.maxNativeOwnedBytes)throw new RangeError('Native buffer allocation budget exceeded.');
+      const {id}=JSON.parse(await this.api.execute('cuda.createBuffer',JSON.stringify({byteLength,$session:this.session})));
+      const resource={runtime:this.runtime,nativeBufferId:id,byteLength,size:byteLength,label,destroyed:false};
+      this.deviceBuffers.add(resource);this.deviceBytes+=byteLength;return resource;
+    },{fatal:false});
+  }
+  async destroyDeviceBuffer(resource) {
+    this.check(resource,'buffer');
+    if(!this.deviceBuffers.has(resource))throw new TypeError('Expected a CUDA-owned buffer.');
+    resource.destroyed=true;
+    return this.enqueue(async()=>{
+      await this.api.execute('cuda.idle',JSON.stringify({$session:this.session}));
+      await this.api.execute('cuda.destroyBuffer',JSON.stringify({id:resource.nativeBufferId,$session:this.session}));
+      this.deviceBuffers.delete(resource);this.deviceBytes-=resource.byteLength;
     });
   }
   async createTexture({width,height,format='rgba8unorm',usage=GPUTextureUsage.COPY_SRC|GPUTextureUsage.COPY_DST|
@@ -163,7 +186,7 @@ export class NativeInterop {
     this.done=this.tail.catch(()=>{}).then(()=>{
       for(const resource of this.resources){resource.nativeResource.destroy();resource.destroyed=true;
         this.runtime.buffers.delete(resource);this.runtime.textures.delete(resource);}
-      this.resources.clear();this.stats.sharedBytes=0;this.kernels.clear();this.api.close();
+      this.resources.clear();for(const resource of this.deviceBuffers)resource.destroyed=true;this.deviceBuffers.clear();this.deviceBytes=0;this.stats.sharedBytes=0;this.kernels.clear();this.api.close();
       for(const object of this.optixObjects)object.destroyed=true;
       this.optixObjects.clear();
     }).finally(()=>{if(owner===this)owner=null;});
@@ -191,7 +214,7 @@ class SharedBatch {
     const args=kernel.parameters.map(p=>{
       if(p.type==='buffer'||p.type==='surface') {
         const resource=invocation.resources[p.name];this.interop.check(resource,p.type);this.resources.add(resource);
-        return {[p.type]:resource.nativeResource.id};
+        return resource.nativeBufferId?{nativeBuffer:resource.nativeBufferId}:{[p.type]:resource.nativeResource.id};
       }
       const value=invocation.scalars[p.name];if(!scalarTypes[p.type](value))throw new RangeError('Invalid scalar '+p.name);
       return {type:p.type,value};
@@ -200,12 +223,14 @@ class SharedBatch {
   }
   submit() {
     if(this.ended)throw new Error('Batch is closed.');this.ended=true;
-    const resources=[...this.resources];for(const r of resources)this.interop.check(r,r.gpuBuffer?'buffer':'surface');
+    const resources=[...this.resources];for(const r of resources)this.interop.check(r,r.gpuTexture?'surface':'buffer');
     if(!this.jobs.length)return Promise.resolve();
     const jobs=this.jobs;
     return this.interop.enqueue(async()=>{
-      for(const r of resources)this.interop.check(r,r.gpuBuffer?'buffer':'surface');
-      const result=JSON.parse(await this.interop.api.dispatchShared(resources.map(r=>r.nativeResource),JSON.stringify({jobs,$session:this.interop.session})));
+      for(const r of resources)this.interop.check(r,r.gpuTexture?'surface':'buffer');
+      const shared=resources.filter(r=>r.nativeResource);
+      const payload=JSON.stringify({jobs,$session:this.interop.session});
+      const result=JSON.parse(await (shared.length?this.interop.api.dispatchShared(shared.map(r=>r.nativeResource),payload):this.interop.api.execute('cuda.dispatch',payload)));
       this.interop.stats.submissions++;this.interop.stats.dispatches+=jobs.length;return result;
     });
   }

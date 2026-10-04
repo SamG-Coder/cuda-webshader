@@ -41,3 +41,8 @@ test('capability detection never requests permission and tolerates absent, denie
     }
   } finally {if(descriptor)Object.defineProperty(globalThis,'navigator',descriptor);else delete globalThis.navigator;}
 });
+
+test('native-owned buffers require an explicit browser capability',()=>{
+  assert.equal(supportsInteropRequirements(capabilities,{nativeOwnedBuffers:true}),false);
+  assert.equal(supportsInteropRequirements({...capabilities,nativeOwnedBuffers:true},{nativeOwnedBuffers:true}),true);
+});
