@@ -47,7 +47,9 @@ test('dual artifacts retain source and original ordered ABI through serializatio
  assert.equal(artifact.native.source,source);assert.deepEqual(artifact.native.parameters,[{name:'factor',type:'f32'},{name:'src',type:'buffer'},{name:'n',type:'u32'},{name:'dst',type:'buffer'}]);assert.deepEqual(artifact.native.workgroupSize,[64,1,1]);assert.ok(artifact.wgsl);
  assert.equal(serializableArtifact(compile(source)).native,undefined);
  assert.throws(()=>compile(source,{includeNativeSource:'true'}),/boolean/);
- assert.throws(()=>compile('__global__ void bad(float4* a){a[0].x=1;}',{includeNativeSource:true}),/matching native and WebGPU layout/);
+ const vector=compile('__global__ void fill(float4* a){a[0].x=1;}',{includeNativeSource:true});
+ assert.deepEqual(vector.native.parameters,[{name:'a',type:'buffer'}]);assert.equal(vector.metadata.bindings[0].stride,16);
+ assert.throws(()=>compile('__global__ void bad(float3* a){a[0].x=1;}',{includeNativeSource:true}),/incompatible CUDA\/WGSL layouts/);
  assert.throws(()=>compile('__device__ float g[4];__global__ void bad(float* a){a[0]=g[0];}',{includeNativeSource:true}),/synthesized/);
 });
 test('native artifact execution preserves argument order, scalar snapshots and transactionality',async()=>{

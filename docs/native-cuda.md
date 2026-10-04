@@ -91,15 +91,88 @@ or compiler-managed features that do not share the native ABI. Original CUDA
 source still needs to be self-contained and accepted by NVRTC; this option is
 not a promise that all WebCuda language extensions are native CUDA syntax.
 
-## Current boundaries
+## Native CUDA with WebGPU resources
+
+Renderers can retain their real WebGPU device, buffers, textures, and canvas
+while selecting native CUDA for individual kernels:
+
+```js
+const runtime = await GpuRuntime.create({
+  nativeInterop: {requirements: {
+    sharedBuffers: true, gpuBufferToTexture: true,
+    maxResourceBytes: 32 * 1024 * 1024, sharedBytes: 128 * 1024 * 1024,
+    resources: 5, blocksPerLaunch: 32768,
+  }},
+});
+// No implicit prompt here. Request permission from a button separately.
+console.log(runtime.device instanceof GPUDevice); // true
+console.log(runtime.nativeInteropStatus); // actual-device capabilities / reason
+if (runtime.native) {
+  const output = await runtime.createSharedBuffer(1024 * 512 * 4);
+  const kernel = await runtime.native.kernel(cudaSource, {
+    entry: 'render', workgroupSize: [8, 8, 1],
+  });
+  await runtime.native.batch().dispatch(kernel.bind({output}), [128,64]).submit();
+  // output.gpuBuffer is a real GPUBuffer. Submit normal WebGPU use after await.
+  const encoder = runtime.device.createCommandEncoder();
+  encoder.copyBufferToTexture({buffer:output.gpuBuffer,bytesPerRow:4096},
+    {texture:canvasContext.getCurrentTexture()},[1024,512]);
+  runtime.device.queue.submit([encoder.finish()]);
+}
+```
+
+Alternatively, call `await runtime.enableNativeInterop({requirements})` on an
+existing WebGPU runtime. `getNativeInteropCapabilities(device)` and
+`supportsInteropRequirements(capabilities, requirements)` are named exports.
+Detection checks permission, the actual physical adapter, GPU-side fence
+synchronization, formats, usage flags, resource bytes/counts and launch limits.
+If requirements are unmet, `runtime.native` is null and the WebGPU backend
+remains available. An existing grant is required unless the application
+explicitly sets `nativeInterop.requestPermission: true` from a user gesture.
+
+Create a shared texture with
+`await runtime.createSharedTexture({width,height,format,usage})`. Its
+`gpuTexture` and `view` are real WebGPU objects. Native kernels bind the wrapper
+to `cudaSurfaceObject_t`; conventional surface signatures are inferred, or
+provide an explicit ordered `{name,type:'surface'}` parameter descriptor.
+The returned resource is distinct from an arbitrary normal WebGPU texture.
+There is no OS-handle or arbitrary-texture import API in this library.
+
+The initial browser backend supports 2D, single-layer, single-mip, single-sample
+`rgba8unorm`, `rgba16float`, `rgba32float`, and `r32float` textures. Use CUDA
+`uchar4`, half bits in `ushort4`, `float4`, and `float` surface values respectively.
+Texture usage supports WebGPU copy, sampling, storage and render attachment
+flags. Shared buffers support copy, storage, vertex, index and indirect usage;
+mapping and uniform/query use are excluded. The browser's
+[resource contract](https://github.com/SamG-Coder/ChromiumRTXCuda/blob/cuda-rtx/rtx_cuda/README.md#native-cuda-with-real-webgpu-resources)
+specifies dimensions, limits, alignment and lifecycle behavior.
+
+`runtime.native.batch().submit()` returns a promise. Submit earlier WebGPU work
+first, then await this promise before WebGPU uses the acquired resources again.
+It resolves after CUDA's signal and WebGPU's wait have been queued on the GPU.
+The library never transfers frame pixels through JavaScript or CPU buffers.
+Shared-buffer to texture copy/conversion is a GPU-only fallback, and is reported
+separately from direct shared-texture access. ArrayBuffer readback helpers are
+explicit diagnostic operations, not a presentation route.
+
+Use `destroyBuffer`, `destroyTexture`, and await `runtime.dispose()` for cleanup.
+Disposal, permission revocation and device loss invalidate native resources.
+Recreate the WebGPU device and scene after an aborted native session; live
+buffers are not silently migrated. The browser owns all native handles and
+cross-API fences. ClearWater uses the original `bloom_pass` and `present` CUDA
+kernels with five shared buffers while retaining WebGPU simulation/rendering
+and a GPU copy into its canvas.
+
+## Standalone native runtime boundaries
 
 This integrates the fork's CUDA **buffer-compute** API. Native runtime objects do
 not expose a WebGPU `device`, `GPUBuffer`, command encoder, textures, the Three.js
 buffer bridge, object arenas, GPU scalar-buffer parameters, or the WebGPU
 FFT/sort/scan helpers. Those calls reject with an explicit WebGPU requirement.
-Renderers that access these resources must create with `backend: 'webgpu'`.
+Renderers that access these resources use WebGPU or the `nativeInterop` option.
 The repository's renderer, sandbox and Bend lab explicitly keep that backend.
-This change does not convert the ClearWater renderer or add RTX/DLSS rendering.
+The separate interoperability extension above supports selected ClearWater
+kernels. It does not add RTX/DLSS rendering to this library.
 
 The native transport currently limits explicit buffers to 64 MiB total, 256
 buffers, 128 modules, 256 dispatches per batch, 65,536 blocks per launch and

@@ -6,7 +6,8 @@ export function nativeArtifact(source,options,compiled){
     throw new TypeError('includeNativeSource supports direct buffer/scalar kernels, not compiler-managed resources or lowered launch constraints.');
   if(new TextEncoder().encode(source).byteLength>262144)throw new RangeError('Native CUDA source exceeds 256 KiB.');
   const parameters=compiled.kernel.params.map(p=>{
-    if(p.reference||!['f32','i32','u32'].includes(p.type))throw new TypeError('includeNativeSource requires float/int/uint scalars or pointers with matching native and WebGPU layout.');
+    const compatiblePointer=p.pointer&&/^vec[24]<(f32|i32|u32)>$/.test(p.type);
+    if(p.reference||!(['f32','i32','u32'].includes(p.type)||compatiblePointer))throw new TypeError('includeNativeSource requires float/int/uint scalars or pointers with matching native and WebGPU layout.');
     return {name:p.name,type:p.pointer?'buffer':p.type};
   });
   if(m.bindings.length!==parameters.filter(p=>p.type==='buffer').length||m.scalars.length!==parameters.filter(p=>p.type!=='buffer').length)

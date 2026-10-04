@@ -1,4 +1,6 @@
 import {selectNativeBackend,SupportsNativeCuda,requestPermission} from './backend.js';
+import {NativeInterop} from './native-interop.js';
+export {getNativeInteropCapabilities,supportsInteropRequirements} from './native-interop.js';
 export {SupportsNativeCuda,requestPermission} from './backend.js';
 import {ObjectArena} from './object-arena.js';
 import {runRecursiveLaunches} from './recursive-launches.js';
@@ -50,7 +52,7 @@ export class GpuRuntime {
   static async create(options = {}) {
     if(options.useAdapterWorkgroupLimits !== undefined && typeof options.useAdapterWorkgroupLimits !== 'boolean') throw new TypeError('useAdapterWorkgroupLimits must be a boolean.');
     if(options.useAdapterBufferLimits !== undefined && typeof options.useAdapterBufferLimits !== 'boolean') throw new TypeError('useAdapterBufferLimits must be a boolean.');
-    const native=await selectNativeBackend(options);if(native.runtime)return native.runtime;
+    const native=await selectNativeBackend(options.nativeInterop?{...options,backend:'webgpu'}:options);if(native.runtime)return native.runtime;
     if (!globalThis.navigator?.gpu && !options.device) throw new Error('WebGPU is required. Open this project on localhost or HTTPS in a WebGPU-capable browser. WebGL cannot run these kernels.');
     const adapter = options.adapter || (!options.device ? await navigator.gpu.requestAdapter({powerPreference:'high-performance'}) : null);
     if (!adapter && !options.device) throw new Error('No WebGPU adapter is available. Check the browser GPU settings and graphics driver.');
@@ -64,7 +66,9 @@ export class GpuRuntime {
       maxBufferSize: options.useAdapterBufferLimits ? adapter.limits.maxBufferSize : Math.min(adapter.limits.maxBufferSize, 256 * 1024 * 1024)
     } : undefined;
     const device = options.device || await adapter.requestDevice({requiredFeatures:features, requiredLimits});
-    return new GpuRuntime(device, {...options,adapter,ownsDevice:!options.device,nativeStatus:native.status});
+    const runtime=new GpuRuntime(device, {...options,adapter,ownsDevice:!options.device,nativeStatus:native.status});
+    if(options.nativeInterop)await runtime.enableNativeInterop(options.nativeInterop===true?{}:options.nativeInterop);
+    return runtime;
   }
   constructor(device, options = {}) {
     this.backend='webgpu';this.nativeStatus=options.nativeStatus;this.device=device; this.adapter=options.adapter; this.ownsDevice=options.ownsDevice ?? false;
@@ -80,6 +84,9 @@ export class GpuRuntime {
     device.lost.then(info=>{this.lost=info;if(info.reason!=='destroyed'&&!this.disposed)this.onError(new Error(`GPU device lost: ${info.message}. Reload to recreate GPU resources.`));});
   }
   assertAlive() { if(this.disposed)throw new Error('Runtime is disposed.');if(this.lost)throw new Error(`GPU device lost: ${this.lost.message}`); }
+  async enableNativeInterop(options={}) {this.assertAlive();if(this.native)return this.native;return this.native=await NativeInterop.open(this,options);}
+  async createSharedBuffer(data,options={}) {if(!this.native)throw new Error('Native interoperability is not enabled.');return this.native.createBuffer(data,options);}
+  async createSharedTexture(options={}) {if(!this.native)throw new Error('Native interoperability is not enabled.');return this.native.createTexture(options);}
   describe() {
     const info=this.adapter?.info;
     return {backend:this.backend,native:this.nativeStatus,vendor:info?.vendor || 'not exposed',architecture:info?.architecture || '',device:info?.device || '',description:info?.description || '',features:[...this.device.features],timestampQuery:this.device.features.has('timestamp-query'),limits:{maxComputeInvocationsPerWorkgroup:this.device.limits.maxComputeInvocationsPerWorkgroup,maxComputeWorkgroupStorageSize:this.device.limits.maxComputeWorkgroupStorageSize,maxStorageBufferBindingSize:this.device.limits.maxStorageBufferBindingSize}};
@@ -148,7 +155,7 @@ export class GpuRuntime {
     if(upload)this.device.queue.writeTexture({texture:gpuTexture},upload,{bytesPerRow:width*bytes,rowsPerImage:height},[width,height,depth]);
     const resource={id:++resourceId,runtime:this,owned:true,destroyed:false,gpuTexture,view:gpuTexture.createView(),sampler:this.device.createSampler({minFilter:filter,magFilter:filter,addressModeU:addressMode,addressModeV:addressMode,addressModeW:addressMode}),format,dimension:'3d',width,height,depth,storage,filter,normalizedCoords,...(format==='rgba8unorm'?{scalarByteVolume:true}:{})};this.textures.add(resource);this.stats.dataBytesUploaded+=upload?.byteLength||0;return resource;
   }
-  destroyTexture(resource){this.checkResource(resource);if(!resource.gpuTexture)throw Error('Expected a texture resource.');resource.gpuTexture.destroy();resource.destroyed=true;this.textures.delete(resource);}
+  destroyTexture(resource){this.checkResource(resource);if(!resource.gpuTexture)throw Error('Expected a texture resource.');if(resource.nativeResource)this.native.release(resource);else resource.gpuTexture.destroy();resource.destroyed=true;this.textures.delete(resource);}
   createBuffer(dataOrBytes, {label='compute buffer',usage=0} = {}) {
     this.assertAlive(); const data=ArrayBuffer.isView(dataOrBytes)?dataOrBytes:null, bytes=data?data.byteLength:dataOrBytes;
     if(!Number.isSafeInteger(bytes)||bytes<0)throw new RangeError('Buffer size must be a nonnegative integer.');
@@ -165,7 +172,7 @@ export class GpuRuntime {
     return {id:++resourceId,gpuBuffer,byteLength,size:gpuBuffer.size,label,runtime:this,owned:false,destroyed:false};
   }
   checkResource(resource) { if(!resource||resource.runtime!==this||resource.destroyed)throw new Error('Buffer is destroyed or belongs to a different runtime.'); }
-  destroyBuffer(resource) { this.checkResource(resource);if(!resource.gpuBuffer)throw Error('Expected a buffer resource.'); if(resource.owned){resource.gpuBuffer.destroy();this.buffers.delete(resource);}resource.destroyed=true; }
+  destroyBuffer(resource) { this.checkResource(resource);if(!resource.gpuBuffer)throw Error('Expected a buffer resource.'); if(resource.owned){if(resource.nativeResource)this.native.release(resource);else resource.gpuBuffer.destroy();this.buffers.delete(resource);}resource.destroyed=true; }
   write(resource,data,offset=0) {
     this.assertAlive();this.checkResource(resource);if(!resource.gpuBuffer)throw Error('Expected a buffer resource.');
     if(!ArrayBuffer.isView(data)||offset%4||data.byteLength%4||offset<0||offset+data.byteLength>resource.size)throw new RangeError('Write must be aligned and fit in the destination.');
@@ -279,8 +286,8 @@ export class GpuRuntime {
     promise.catch(()=>this.pipelineCache.delete(key));return promise;
   }
   batch(options={}) {this.assertAlive();return new ComputeBatch(this,options);}
-  async idle() {this.assertAlive();await this.device.queue.onSubmittedWorkDone();}
-  dispose() {if(this.disposed)return;this.disposed=true;for(const t of this.textures){t.gpuTexture.destroy();t.destroyed=true;}this.textures.clear();for(const b of this.buffers){b.gpuBuffer.destroy();b.destroyed=true;}this.buffers.clear();this.uniformBuffer.destroy();this.pipelineCache.clear();this._fixedKernels?.clear();this.batchMemory=[];this.device.removeEventListener('uncapturederror',this.errorListener);if(this.ownsDevice)this.device.destroy();}
+  async idle() {this.assertAlive();if(this.native)await this.native.idle();await this.device.queue.onSubmittedWorkDone();}
+  dispose() {if(this.disposed)return this.closed;this.disposed=true;this.closed=this.native?.dispose();for(const t of this.textures){if(!t.nativeResource)t.gpuTexture.destroy();t.destroyed=true;}this.textures.clear();for(const b of this.buffers){if(!b.nativeResource)b.gpuBuffer.destroy();b.destroyed=true;}this.buffers.clear();this.uniformBuffer.destroy();this.pipelineCache.clear();this._fixedKernels?.clear();this.batchMemory=[];this.device.removeEventListener('uncapturederror',this.errorListener);if(this.ownsDevice)this.device.destroy();return this.closed;}
 }
 export class Kernel {
   constructor(runtime,artifact,pipeline,layout,messages,objectLayout=null){this.objectLayout=objectLayout;this.runtime=runtime;this.artifact=artifact;this.pipeline=pipeline;this.layout=layout;this.messages=messages;}
