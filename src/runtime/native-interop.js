@@ -1,4 +1,5 @@
 // Browser-managed CUDA / WebGPU interoperability. Native handles never enter JS.
+import {createAccelerationStructure,createRayTracingPipeline,buildAccelerationStructure,traceRays} from './native-optix.js';
 const unavailable = reason => ({version:1,available:false,sharedBuffers:false,sharedTextures:false,
   samePhysicalGpu:false,textureFormats:[],synchronization:'unavailable',reason});
 export async function getNativeInteropCapabilities(device) {
@@ -16,6 +17,7 @@ export async function getNativeInteropCapabilities(device) {
 export function supportsInteropRequirements(capabilities,requirements={}) {
   const c=capabilities,r=requirements;
   if(!c.available||!c.samePhysicalGpu||!c.sharedBuffers||c.synchronization!=='d3d12-fence-cuda-external-semaphore')return false;
+  if(r.optix&&!c.optix?.available)return false;
   if((r.sharedTextures||r.textureFormats?.length)&&(!c.sharedTextures||!(r.textureFormats||[]).every(f=>c.textureFormats.includes(f))))return false;
   if(r.gpuBufferToTexture&&!c.gpuBufferToTexture)return false;
   for(const [key,limit] of [['maxResourceBytes','maxResourceBytes'],['sharedBytes','maxSharedBytes'],
@@ -74,6 +76,7 @@ export class NativeInterop {
   }
   constructor(runtime,api,session,capabilities) {
     Object.assign(this,{runtime,api,session,capabilities});this.resources=new Set();this.kernels=new Map();
+    this.optixObjects=new Set();
     this.tail=Promise.resolve();this.closed=false;this.failure=null;
     this.stats={dispatches:0,submissions:0,sharedBytes:0};
     runtime.device.lost.then(()=>this.dispose());
@@ -144,6 +147,8 @@ export class NativeInterop {
     return this.kernels.get(key);
   }
   batch(){this.assertAlive();return new SharedBatch(this);}
+  createAccelerationStructure(options){return createAccelerationStructure(this,options);}
+  rayTracingPipeline(source,options){return createRayTracingPipeline(this,source,options);}
   release(resource) {
     if(!this.resources.delete(resource))return;
     this.stats.sharedBytes-=resource.size;
@@ -159,6 +164,8 @@ export class NativeInterop {
       for(const resource of this.resources){resource.nativeResource.destroy();resource.destroyed=true;
         this.runtime.buffers.delete(resource);this.runtime.textures.delete(resource);}
       this.resources.clear();this.stats.sharedBytes=0;this.kernels.clear();this.api.close();
+      for(const object of this.optixObjects)object.destroyed=true;
+      this.optixObjects.clear();
     }).finally(()=>{if(owner===this)owner=null;});
     this.done.catch(()=>{});return this.done;
   }
@@ -174,6 +181,8 @@ class SharedKernel {
 }
 class SharedBatch {
   constructor(interop){this.interop=interop;this.jobs=[];this.resources=new Set();this.ended=false;}
+  buildAccelerationStructure(scene,vertices,options){return buildAccelerationStructure(this,scene,vertices,options);}
+  trace(invocation,dimensions){return traceRays(this,invocation,dimensions);}
   dispatch(invocation,workgroups) {
     if(this.ended)throw new Error('Batch is closed.');
     const kernel=invocation.kernel;if(kernel.interop!==this.interop)throw new TypeError('Kernel belongs to another session.');

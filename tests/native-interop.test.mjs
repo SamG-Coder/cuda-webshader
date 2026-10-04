@@ -6,6 +6,15 @@ const capabilities={available:true,samePhysicalGpu:true,sharedBuffers:true,share
   synchronization:'d3d12-fence-cuda-external-semaphore',maxResourceBytes:268435456,maxSharedBytes:2147483648,
   maxResources:256,maxBlocksPerLaunch:65536,maxTextureDimension2D:8192,bufferUsageMask:444,textureUsageMask:31,
   textureDimension:'2d',mipLevelCount:1,sampleCount:1,textureArrayLayers:1};
+
+test('OptiX is selected only when its native capability and all sharing requirements are available',()=>{
+  const requirements={optix:true,sharedTextures:true,textureFormats:['rgba8unorm']};
+  assert.equal(supportsInteropRequirements(capabilities,requirements),false);
+  assert.equal(supportsInteropRequirements({...capabilities,optix:{available:false}},requirements),false);
+  assert.equal(supportsInteropRequirements({...capabilities,optix:{available:true}},requirements),true);
+  assert.equal(supportsInteropRequirements({...capabilities,optix:{available:true},samePhysicalGpu:false},requirements),false);
+  assert.equal(supportsInteropRequirements({...capabilities,optix:{available:true},sharedTextures:false},requirements),false);
+});
 test('ClearWater resource requirements include both directions of GPU synchronization and allocation limits',()=>{
   const w=1920,h=1200,requirements={sharedBuffers:true,gpuBufferToTexture:true,resources:5,
     maxResourceBytes:w*h*16,sharedBytes:w*h*52+3*65536*16+5*65536,blocksPerLaunch:Math.ceil(w/8)*Math.ceil(h/8),bufferUsage:140};

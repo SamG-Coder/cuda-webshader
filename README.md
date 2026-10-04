@@ -289,6 +289,15 @@ Original project source, sample kernels written for this project, generated WGSL
 
 NVIDIA sample kernels and their data are BSD-3-Clause. Three.js and Monaco Editor are MIT. Playwright is Apache-2.0. Attributions and the Three.js pin are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
+## Native OptiX ray tracing
+
+The mixed CUDA/WebGPU runtime supports `.cu` OptiX raygen and hit programs with
+`optixTrace()` when ChromiumRTXCuda exposes the capability and native GPU
+permission is granted. Geometry, ray output and presentation stay in shared
+GPU resources. See [the OptiX integration API](docs/native-optix.md) for
+`native.rayTracingPipeline()`, acceleration builds/updates, batching, limits
+and retaining the application's WebGPU fallback.
+
 ## Native half arithmetic
 
 Local, shared, and storage-pointer `__half` / `__half2` values compile to WGSL `f16` / `vec2<f16>`. Storage buffers use native binary16 values with two-byte scalar or four-byte paired records; reads and writes require no packed-integer conversion in the shader. Upload raw binary16 bytes, for example through `Uint16Array` or packed `Uint32Array`, and use the same raw representation with the CPU oracle. Kernel half parameters passed by value remain unsupported. Supported conversions are `__float2half_rn`, `__half2float`, `__floats2half2_rn`, `__float22half2_rn`, and `__half22float2`; arithmetic intrinsics are `__hadd`, `__hsub`, `__hmul` and their `2` variants. Artifacts declare `shader-f16`; the runtime requests it when supported and rejects half kernels on devices without it. Ordinary kernels remain usable without that feature.
