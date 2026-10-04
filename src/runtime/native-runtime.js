@@ -22,7 +22,7 @@ export class NativeRuntime extends NativeTransport {
     this.stats={pipelineCompiles:0,pipelineCacheHits:0,bindGroupsCreated:0,submissions:0,dispatches:0,uniformBytesUploaded:0,dataBytesUploaded:0,readbackBytes:0};
     this.nativeKernels=new WeakMap();
   }
-  describe(){return {backend:this.backend,native:this.nativeStatus,vendor:'NVIDIA',architecture:'',device:'',description:'ChromiumRTXCuda native CUDA',features:['native-cuda'],timestampQuery:false,limits:{maxBufferSize:67108864,maxSessionBufferBytes:67108864,maxBuffers:256,maxModules:128,maxDispatchesPerBatch:256,maxBlocksPerLaunch:65536,maxSharedMemoryBytes:49152},webgpuInterop:false};}
+  describe(){return {backend:this.backend,native:this.nativeStatus,vendor:'NVIDIA',architecture:'',device:'',description:'ChromiumRTXCuda native CUDA',features:['native-cuda'],timestampQuery:false,limits:{maxBufferSize:67108864,maxSessionBufferBytes:67108864,maxBuffers:256,maxModules:128,maxDispatchesPerBatch:256,maxSharedMemoryBytes:49152},webgpuInterop:false};}
   observe(promise,fatal){promise.catch(error=>{if(fatal&&!this.reportedLoss){this.reportedLoss=true;this.onError(error);}});return promise;}
   enqueue(operation,payload,fatal=true){return this.observe(super.enqueue(operation,payload,fatal),fatal);}
   enqueueDeferred(operation,payload){return this.observe(super.enqueueDeferred(operation,payload),true);}
@@ -74,7 +74,6 @@ export class NativeRuntime extends NativeTransport {
 class ComputeBatch extends NativeBatch {
   dispatch(invocation,workgroups){
     this.runtime.assertAlive();
-    if(Array.isArray(workgroups)&&workgroups.reduce((a,b)=>a*b,1)>65536)throw new RangeError('Native CUDA launch exceeds 65536 blocks.');
     validateScalars(invocation.kernel.parameters,invocation.scalars);
     return super.dispatch(invocation,workgroups);
   }

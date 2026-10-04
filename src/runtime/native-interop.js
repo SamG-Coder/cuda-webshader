@@ -24,7 +24,8 @@ export function supportsInteropRequirements(capabilities,requirements={}) {
   if(r.gpuBufferToTexture&&!c.gpuBufferToTexture)return false;
   for(const [key,limit] of [['maxResourceBytes','maxResourceBytes'],['sharedBytes','maxSharedBytes'],
     ['resources','maxResources'],['blocksPerLaunch','maxBlocksPerLaunch'],['textureDimension2D','maxTextureDimension2D']]) {
-    if(r[key]!==undefined&&(!Number.isSafeInteger(r[key])||r[key]<0||!Number.isSafeInteger(c[limit])||r[key]>c[limit]))return false;
+    const maximum=limit==='maxBlocksPerLaunch'&&c.maxGridDimensions?Math.min(Number.MAX_SAFE_INTEGER,c.maxGridDimensions.reduce((a,b)=>a*b,1)):c[limit];
+    if(r[key]!==undefined&&(!Number.isSafeInteger(r[key])||r[key]<0||!Number.isSafeInteger(maximum)||r[key]>maximum))return false;
   }
   if(r.bufferUsage!==undefined&&(!Number.isInteger(r.bufferUsage)||(r.bufferUsage&~c.bufferUsageMask)))return false;
   if(r.textureUsage!==undefined&&(!Number.isInteger(r.textureUsage)||(r.textureUsage&~c.textureUsageMask)))return false;
@@ -34,7 +35,7 @@ export function supportsInteropRequirements(capabilities,requirements={}) {
 }
 const dimensions=value=>{
   const v=Array.isArray(value)?[...value]:[value];while(v.length<3)v.push(1);
-  if(v.length!==3||v.some(n=>!Number.isInteger(n)||n<1||n>65535))throw new RangeError('Expected one to three positive grid/block dimensions.');
+  if(v.length!==3||v.some(n=>!Number.isInteger(n)||n<1||n>0xffffffff))throw new RangeError('Expected one to three positive grid/block dimensions.');
   return v;
 };
 const scalarTypes={f32:v=>typeof v==='number'&&Number.isFinite(v)&&Number.isFinite(Math.fround(v)),
@@ -233,7 +234,8 @@ class SharedBatch {
     if(this.ended)throw new Error('Batch is closed.');
     const kernel=invocation.kernel;if(kernel.interop!==this.interop)throw new TypeError('Kernel belongs to another session.');
     const grid=dimensions(workgroups);
-    if(grid.reduce((a,b)=>a*b,1)>this.interop.capabilities.maxBlocksPerLaunch||this.jobs.length>=256)throw new RangeError('CUDA launch budget exceeded.');
+    if((Number.isFinite(this.interop.capabilities.maxBlocksPerLaunch)&&grid.reduce((a,b)=>a*b,1)>this.interop.capabilities.maxBlocksPerLaunch)||this.jobs.length>=256)throw new RangeError('CUDA launch budget exceeded.');
+    if(this.interop.capabilities.maxGridDimensions?.some((limit,axis)=>grid[axis]>limit))throw new RangeError('Grid exceeds device dimension.');
     const args=kernel.parameters.map(p=>{
       if(p.type==='buffer'||p.type==='surface') {
         const resource=invocation.resources[p.name];this.interop.check(resource,p.type);this.resources.add(resource);

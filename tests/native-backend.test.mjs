@@ -60,7 +60,7 @@ test('native artifact execution preserves argument order, scalar snapshots and t
  const jobs=api.calls.find(c=>c.op==='cuda.dispatch').payload.jobs;assert.deepEqual(jobs[0].arguments,[{type:'f32',value:2},{buffer:a.id},{type:'u32',value:2},{buffer:b.id}]);assert.equal(jobs[1].arguments[0].value,3);
  assert.equal(await runtime.kernel(artifact),kernel);assert.equal(runtime.stats.pipelineCompiles,1);assert.equal(runtime.stats.pipelineCacheHits,1);assert.equal(runtime.stats.dispatches,2);
  await assert.rejects(runtime.kernel(serializableArtifact(compile(source))),/WGSL-only/);assert.throws(()=>runtime.createTexture2D(),{name:'NotSupportedError'});assert.throws(()=>runtime.batch({timestampWrites:{}}),{name:'NotSupportedError'});assert.throws(()=>runtime.createBuffer(4,{usage:32}),{name:'NotSupportedError'});
- assert.throws(()=>runtime.batch().dispatch(inv,[65535,2]),/65536/);await assert.rejects(runtime.kernel(source,{entry:'scale',workgroupSize:[1025]}),/1024/);
+ assert.doesNotThrow(()=>runtime.batch().dispatch(inv,[65536,2]));await assert.rejects(runtime.kernel(source,{entry:'scale',workgroupSize:[1025]}),/1024/);
  const pending=runtime.batch().dispatch(inv,[1]);runtime.destroyBuffer(a);assert.throws(()=>pending.submit(),/destroyed/);await runtime.dispose();
 });
 test('dual artifacts carry default arguments and reject non-buffer scalar bindings',async()=>{

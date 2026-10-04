@@ -52,3 +52,11 @@ test('direct native presentation is a separate capability from shared textures',
   assert.equal(supportsInteropRequirements(capabilities,{canvasPresentation:true}),false);
   assert.equal(supportsInteropRequirements({...capabilities,canvasPresentation:true},{canvasPresentation:true}),true);
 });
+
+test('hardware grid capabilities allow full 4K without a synthetic block cap',()=>{
+ const modern={...capabilities,maxGridDimensions:[2147483647,65535,65535]};
+ delete modern.maxBlocksPerLaunch;
+ assert.equal(supportsInteropRequirements(modern,{blocksPerLaunch:129600}),true);
+ assert.equal(supportsInteropRequirements(modern,{blocksPerLaunch:-1}),false);
+ assert.equal(supportsInteropRequirements(capabilities,{blocksPerLaunch:129600}),false);
+});

@@ -5,7 +5,7 @@ const MAX_TRANSFER = 512 * 1024;
 const constructors = [Float32Array, Uint32Array, Int32Array, Uint8Array, Uint16Array];
 const dimensions = value => {
   if (!Array.isArray(value) || value.length < 1 || value.length > 3 ||
-      value.some(x => !Number.isInteger(x) || x < 1 || x > 65535))
+      value.some(x => !Number.isInteger(x) || x < 1 || x > 0xffffffff))
     throw new RangeError('Expected one to three positive grid/block dimensions.');
   return [...value, 1, 1].slice(0, 3);
 };
