@@ -332,3 +332,48 @@ Use `runtime.createSharedTexture(...)` for the final image. CUDA/OptiX can write
 it as a `surface`; its `gpuTexture` is a real WebGPU texture for GPU presentation.
 This provides persistent resource ownership with normal batching, not a cached
 CUDA Graph or a new requestAnimationFrame API.
+
+
+### Direct native canvas presentation (ChromiumRTXCuda)
+
+When `runtime.native.capabilities.canvasPresentation` is true, a native frame
+can write straight into a browser-managed compositor surface. Persistent
+simulation buffers remain in CUDA; the final image is handed to the canvas
+without a WebGPU canvas-copy pass. The GPU still executes the recorded kernels
+and the compositor still presents the result.
+
+```js
+const context = canvas.getContext('webgpu');
+context.configure({device: runtime.device, format: 'rgba8unorm', alphaMode: 'opaque'});
+const target = await runtime.native.createCanvasTarget(canvas, {context, buffers: 3});
+async function frame() {
+  const image = target.acquire();
+  if (image) {
+    try {
+      const batch = runtime.native.batch();
+      // Record simulation, then CUDA/OptiX rendering with image as a surface.
+      batch.dispatch(render.bind({image}, {time}), [groupsX, groupsY]);
+      await batch.submit();
+      target.present(image);
+    } catch (error) { target.cancel(image); throw error; }
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+```
+
+A surface becomes reusable only after CUDA completes and the compositor releases
+it. Completion is tracked asynchronously. `acquire()` returns null while every
+surface is still in use. Retry next frame;
+do not spin or build an unbounded queue. A submit/present return means the work
+was queued, not that the GPU finished or the monitor displayed it. Do not report
+that duration as total GPU frame time. Normal rendering needs neither
+`copyTextureToTexture` nor `queue.onSubmittedWorkDone()` on this path. Explicit
+`runtime.idle()` drains CUDA and WebGPU for shutdown, readbacks, or benchmarking.
+
+Destroy/recreate the target after changing canvas dimensions, and configure an
+opaque sRGB canvas on the same device. Call `target.destroy()` and
+`context.unconfigure()` when retiring it. Normal shared textures remain available
+for older native browsers; applications retain their existing WebGPU fallback
+when native GPU permission or support is absent. Canvas presentation does not
+change shader quality or turn the application into an autonomous native loop.

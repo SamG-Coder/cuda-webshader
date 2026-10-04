@@ -46,3 +46,9 @@ test('native-owned buffers require an explicit browser capability',()=>{
   assert.equal(supportsInteropRequirements(capabilities,{nativeOwnedBuffers:true}),false);
   assert.equal(supportsInteropRequirements({...capabilities,nativeOwnedBuffers:true},{nativeOwnedBuffers:true}),true);
 });
+
+
+test('direct native presentation is a separate capability from shared textures',()=>{
+  assert.equal(supportsInteropRequirements(capabilities,{canvasPresentation:true}),false);
+  assert.equal(supportsInteropRequirements({...capabilities,canvasPresentation:true},{canvasPresentation:true}),true);
+});

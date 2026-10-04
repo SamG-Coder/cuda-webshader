@@ -10,7 +10,7 @@ export async function getNativeInteropCapabilities(device) {
     permission=await api.queryPermission();
     if(permission!=='granted')return {...unavailable('Native GPU permission is '+permission),permission};
     const capabilities=JSON.parse(await api.getInteropCapabilities(device));
-    return {...capabilities,permission,available:capabilities.samePhysicalGpu&&capabilities.sharedBuffers&&
+    return {...capabilities,canvasPresentation:typeof api.createCanvasSurface==='function',permission,available:capabilities.samePhysicalGpu&&capabilities.sharedBuffers&&
       capabilities.synchronization==='d3d12-fence-cuda-external-semaphore'};
   } catch(error) {return {...unavailable(error.message),permission};}
 }
@@ -19,6 +19,7 @@ export function supportsInteropRequirements(capabilities,requirements={}) {
   if(!c.available||!c.samePhysicalGpu||!c.sharedBuffers||c.synchronization!=='d3d12-fence-cuda-external-semaphore')return false;
   if(r.optix&&!c.optix?.available)return false;
   if(r.nativeOwnedBuffers&&!c.nativeOwnedBuffers)return false;
+  if(r.canvasPresentation&&!c.canvasPresentation)return false;
   if((r.sharedTextures||r.textureFormats?.length)&&(!c.sharedTextures||!(r.textureFormats||[]).every(f=>c.textureFormats.includes(f))))return false;
   if(r.gpuBufferToTexture&&!c.gpuBufferToTexture)return false;
   for(const [key,limit] of [['maxResourceBytes','maxResourceBytes'],['sharedBytes','maxSharedBytes'],
@@ -92,7 +93,7 @@ export class NativeInterop {
     this.runtime.checkResource(resource);
     if(type==='buffer'&&this.deviceBuffers.has(resource)&&resource.nativeBufferId)return;
     if(!this.resources.has(resource)||!resource.nativeResource?.id||
-      (type==='buffer'?!resource.gpuBuffer:!resource.gpuTexture))
+      (type==='buffer'?!resource.gpuBuffer:!(resource.gpuTexture||resource.nativeCanvas)))
       throw new TypeError('Native kernels require an explicitly created shared '+type+'.');
   }
   async createBuffer(dataOrBytes,{label='CUDA / WebGPU shared buffer',usage=0}={}) {
@@ -149,6 +150,28 @@ export class NativeInterop {
       this.runtime.textures.add(resource);this.resources.add(resource);this.stats.sharedBytes+=resource.size;return resource;
     });
   }
+  async createCanvasTarget(canvas,{buffers=3,context=canvas.getContext('webgpu')}={}) {
+    this.assertAlive();
+    if(!this.capabilities.canvasPresentation)throw new DOMException('Native canvas presentation requires an updated ChromiumRTXCuda.','NotSupportedError');
+    if(!Number.isInteger(buffers)||buffers<2||buffers>4)throw new RangeError('A canvas target needs two to four surfaces.');
+    const width=canvas.width,height=canvas.height;
+    if(!context||![width,height].every(n=>Number.isInteger(n)&&n>0&&n<=Math.min(8192,this.runtime.device.limits.maxTextureDimension2D)))throw new RangeError('Invalid native canvas dimensions or context.');
+    return this.enqueue(async()=>{
+      const surfaces=[];
+      try {
+        for(let i=0;i<buffers;i++) {
+          const native=await this.api.createCanvasSurface(this.runtime.device,width,height);
+          const resource={runtime:this.runtime,nativeResource:native,nativeCanvas:true,
+            width,height,format:'rgba8unorm',size:width*height*4,destroyed:false};
+          this.resources.add(resource);this.stats.sharedBytes+=resource.size;surfaces.push(resource);
+        }
+      } catch(error) {
+        for(const resource of surfaces){resource.nativeResource.destroy();this.resources.delete(resource);this.stats.sharedBytes-=resource.size;}
+        throw error;
+      }
+      return new NativeCanvasTarget(this,canvas,context,surfaces);
+    },{fatal:false});
+  }
   async kernel(sourceOrArtifact,options={}) {
     this.assertAlive();
     const artifact=typeof sourceOrArtifact==='string'?null:sourceOrArtifact,native=artifact?.native;
@@ -180,7 +203,7 @@ export class NativeInterop {
     this.tail=this.tail.then(()=>native.destroy());
     this.tail.catch(error=>{this.failure=error;});
   }
-  async idle(){await this.tail;this.assertAlive();}
+  async idle(){await this.enqueue(()=>this.api.execute('cuda.idle',JSON.stringify({$session:this.session})));}
   dispose() {
     if(this.closed)return this.done;this.closed=true;
     this.done=this.tail.catch(()=>{}).then(()=>{
@@ -223,11 +246,11 @@ class SharedBatch {
   }
   submit() {
     if(this.ended)throw new Error('Batch is closed.');this.ended=true;
-    const resources=[...this.resources];for(const r of resources)this.interop.check(r,r.gpuTexture?'surface':'buffer');
+    const resources=[...this.resources];for(const r of resources)this.interop.check(r,(r.gpuTexture||r.nativeCanvas)?'surface':'buffer');
     if(!this.jobs.length)return Promise.resolve();
     const jobs=this.jobs;
     return this.interop.enqueue(async()=>{
-      for(const r of resources)this.interop.check(r,r.gpuTexture?'surface':'buffer');
+      for(const r of resources)this.interop.check(r,(r.gpuTexture||r.nativeCanvas)?'surface':'buffer');
       const shared=resources.filter(r=>r.nativeResource);
       const payload=JSON.stringify({jobs,$session:this.interop.session});
       const result=JSON.parse(await (shared.length?this.interop.api.dispatchShared(shared.map(r=>r.nativeResource),payload):this.interop.api.execute('cuda.dispatch',payload)));
@@ -235,4 +258,40 @@ class SharedBatch {
     });
   }
   discard(){this.ended=true;this.jobs=[];this.resources.clear();}
+}
+
+// CUDA writes the same allocation consumed by Chromium's compositor.
+// Reuse requires both CUDA completion and compositor release; submission alone
+// never makes a busy surface available again.
+// No canvas texture copy and no queue.onSubmittedWorkDone() in this path.
+class NativeCanvasTarget {
+  constructor(interop,canvas,context,surfaces) {
+    Object.assign(this,{interop,canvas,context,surfaces});this.acquired=new Set();this.closed=false;
+    this.width=canvas.width;this.height=canvas.height;this.cursor=0;
+  }
+  acquire() {
+    this.interop.assertAlive();
+    if(this.closed||this.surfaces.some(s=>!s.nativeResource.id))throw new DOMException('Canvas target is destroyed or lost.','InvalidStateError');
+    if(this.canvas.width!==this.width||this.canvas.height!==this.height)throw new DOMException('Recreate the native target after resizing its canvas.','InvalidStateError');
+    for(let i=0;i<this.surfaces.length;i++) {
+      const resource=this.surfaces[this.cursor++%this.surfaces.length];
+      if(!this.acquired.has(resource)&&resource.nativeResource.available) {
+        this.acquired.add(resource);return resource;
+      }
+    }
+    // Bounded backpressure: retry next animation frame. Never queue unlimited
+    // native frames or overwrite a surface still being displayed.
+    return null;
+  }
+  present(resource) {
+    this.interop.assertAlive();
+    if(this.closed||!this.acquired.has(resource))throw new TypeError('Present requires a frame acquired from this target.');
+    resource.nativeResource.present(this.context);this.acquired.delete(resource);
+  }
+  cancel(resource) {this.acquired.delete(resource);}
+  destroy() {
+    if(this.closed)return;this.closed=true;
+    for(const resource of this.surfaces){resource.destroyed=true;this.interop.release(resource);}
+    this.acquired.clear();
+  }
 }
