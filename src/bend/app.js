@@ -30,7 +30,7 @@ async function execute(gpu){
   try {
     compiled=await compile();showCode();
     $('status').textContent=`Bend source checked. CUDA → WGSL compiled.\n${compiled.program.nodes.length} runtime nodes; ${compiled.program.parameters.map(p=>p.name+': '+p.type).join(', ')} → ${compiled.program.resultType}.\nTypeScript checker only; formal verdict not run.`;
-    if(gpu){runtime??=await GpuRuntime.create();const report=await runBend(runtime,compiled,JSON.parse($('inputs').value),{arenaWords:Number($('arena').value),maxSteps:Number($('steps').value)});table(report);$('status').textContent+=`\n${report.status.filter(x=>x===0).length}/${report.status.length} GPU results completed in ${report.elapsedMs.toFixed(2)} ms (dispatch + readback).`;if(report.status.some(Boolean))$('status').className='error';window.__bendLastRun=report;}
+    if(gpu){runtime??=await GpuRuntime.create({backend:'webgpu'});const report=await runBend(runtime,compiled,JSON.parse($('inputs').value),{arenaWords:Number($('arena').value),maxSteps:Number($('steps').value)});table(report);$('status').textContent+=`\n${report.status.filter(x=>x===0).length}/${report.status.length} GPU results completed in ${report.elapsedMs.toFixed(2)} ms (dispatch + readback).`;if(report.status.some(Boolean))$('status').className='error';window.__bendLastRun=report;}
   } catch(e){$('status').className='error';$('status').textContent=e.message;window.__bendLastError=e.message;}
   finally{controls.forEach(c=>c.disabled=false);}
 }

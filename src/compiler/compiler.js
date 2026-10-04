@@ -1,3 +1,4 @@
+import {nativeArtifact} from './native-artifact.js';
 import {vectorConstructor} from './vector-constructor.js';
 import {unrollCount} from './loop-unroll.js';
 import {trimWgslDependencies} from './wgsl-dependencies.js';
@@ -1420,6 +1421,7 @@ function instantiateHelperTemplates(ast, kernel) {
 }
 /** Every entry is still a separate artifact. optimize:false is the diagnostic baseline. */
 export function compile(source, options = {}, bufferUsage = null) {
+  if(options.includeNativeSource!==undefined&&typeof options.includeNativeSource!=='boolean')throw new TypeError('includeNativeSource must be a boolean.');
   const mode = options.optimize === undefined || options.optimize === true ? 'dependencies'
     : options.optimize === false ? 'none' : options.optimize;
   if (!['none', 'dependencies', 'specialize'].includes(mode))
@@ -1526,8 +1528,9 @@ function compileCore(source, options = {},bufferUsage=null) {
     result.children=queues.map(q=>({queueId:q.id,artifact:compile(source,{...options,scheduleDeviceLaunches:false,deviceLaunchConsumer:q.id,entry:q.childEntry,workgroupSize:q.block,sharedMemoryBytes:q.sharedMemoryBytes})}));
   }
   if(dependencySpecialization)result.metadata.optimization={specialization:dependencySpecialization};
+  if(options.includeNativeSource)result.native=nativeArtifact(source,options,result);
   return result;
 }
 export function serializableArtifact(compiled) {
-  return {version: compiled.version, name: compiled.name, entryPoint: compiled.entryPoint, wgsl: compiled.wgsl, metadata: compiled.metadata,...(compiled.children?{children:compiled.children.map(c=>({queueId:c.queueId,artifact:serializableArtifact(c.artifact)}))}:{})};
+  return {version: compiled.version, name: compiled.name, entryPoint: compiled.entryPoint, wgsl: compiled.wgsl, metadata: compiled.metadata,...(compiled.native?{native:compiled.native}:{}),...(compiled.children?{children:compiled.children.map(c=>({queueId:c.queueId,artifact:serializableArtifact(c.artifact)}))}:{})};
 }

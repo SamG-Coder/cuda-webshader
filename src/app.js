@@ -73,7 +73,7 @@ async function benchmark(){
 }
 $('benchmark').onclick=benchmark;$('export-bench').onclick=()=>benchmarkReport&&download('webgpu-benchmark.json',benchmarkReport);
 try{
-  runtime=await GpuRuntime.create({onError:error=>{$('fatal').hidden=false;$('fatal').textContent=errorMessage(error);}});
+  runtime=await GpuRuntime.create({backend:'webgpu',onError:error=>{$('fatal').hidden=false;$('fatal').textContent=errorMessage(error);}});
   const info=runtime.describe();$('device-status').textContent=`WEBGPU / ${(info.description||info.vendor).slice(0,45)}`;$('status-dot').classList.add('ready');
   $('timer-note').textContent=info.timestampQuery?'GPU timestamp queries available. Raw batch samples and wall times are included.':'GPU timestamps unavailable. Timings will be explicitly labeled submit-to-completion wall time.';
   demo=await createParticleDemo($('viewport'),runtime,sources.particles,{onStats:s=>{$('hud-count').textContent=s.count.toLocaleString();$('hud-fps').innerHTML=`${s.fps.toFixed(0)} <small>FPS</small>`;$('hud-memory').innerHTML=`${(s.gpuStateBytes/1048576).toFixed(1)} <small>MiB</small>`;},onError:error=>{$('fatal').hidden=false;$('fatal').textContent=errorMessage(error);}});

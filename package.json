@@ -22,7 +22,8 @@
     "bench:native:build": "powershell -NoProfile -File scripts/build-native.ps1",
     "bench:webgpu": "node scripts/run-comparison.mjs",
     "bench:report": "node scripts/report-comparison.mjs",
-    "test:wasm": "node scripts/test-wasm.mjs"
+    "test:wasm": "node scripts/test-wasm.mjs",
+    "test:native:browser": "node scripts/test-native-browser.mjs"
   },
   "dependencies": {
     "monaco-editor": "0.52.2",

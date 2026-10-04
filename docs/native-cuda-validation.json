@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-04",
+  "nativeBrowserRepository": "SamG-Coder/ChromiumRTXCuda",
+  "nativeBrowserRevision": "533fe7ef6c48871e0b082235268e83eb3eb0c3cd",
+  "testedDelivery": "Static dist build with versioned module imports",
+  "permissionDecisions": "DevTools-controlled, native browser enforcement",
+  "checks": [
+    "fork exposes real native CUDA capability",
+    "no-gesture startup falls back without opening a permission prompt",
+    "permission helper respects the native user-gesture gate",
+    "denial falls back to real WebGPU; strict native rejects",
+    "public GpuRuntime click flow executes dual artifact on CUDA with 262147 checked values",
+    "unmodified raw CUDA API, chunked snapshots, named ABI and two dispatch scalar versions",
+    "explicit WebGPU works even when native is supported and permitted",
+    "native permission revocation rejects live resources without switching backends",
+    "stock Edge requires no native permission and retains WebGPU execution"
+  ],
+  "cases": {
+    "native": {
+      "backend": "native-cuda",
+      "values": 262147,
+      "mismatches": 0,
+      "partial": [
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    "raw": {
+      "backend": "native-cuda",
+      "values": 262147,
+      "mismatches": 0,
+      "partial": [
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    "denied": {
+      "backend": "webgpu",
+      "values": 262147,
+      "mismatches": 0,
+      "partial": [
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    "explicit": {
+      "backend": "webgpu",
+      "values": 262147,
+      "mismatches": 0,
+      "partial": [
+        7,
+        8,
+        9,
+        10
+      ]
+    }
+  },
+  "stockEdge": {
+    "available": false,
+    "backend": "webgpu",
+    "out": [
+      3,
+      6,
+      9,
+      12
+    ]
+  },
+  "errors": [],
+  "unitTests": 800,
+  "compileAndBuild": "passed",
+  "cppSyntaxChecks": "10/10 (syntax only)",
+  "notClaimed": [
+    "Human acceptance of the visible permission prompt",
+    "WebGPU/native CUDA resource interoperability",
+    "ClearWater renderer conversion",
+    "Performance speedup"
+  ]
+}

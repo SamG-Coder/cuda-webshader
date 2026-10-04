@@ -1,3 +1,5 @@
+import {selectNativeBackend,SupportsNativeCuda,requestPermission} from './backend.js';
+export {SupportsNativeCuda,requestPermission} from './backend.js';
 import {ObjectArena} from './object-arena.js';
 import {runRecursiveLaunches} from './recursive-launches.js';
 import {SORT_SOURCE,SORT_FLOAT_SOURCE} from './sort-kernels.js';
@@ -43,9 +45,12 @@ export function validateWorkgroup(metadata, limits) {
   if (metadata.bindings.length + (metadata.objectHeap?.persistent?metadata.objectHeap.types.length+(metadata.objectHeap.imports?.length||0):0) > limits.maxStorageBuffersPerShaderStage) throw new Error('Too many storage buffers for this device.');
 }
 export class GpuRuntime {
+  static SupportsNativeCuda=SupportsNativeCuda;
+  static requestPermission=requestPermission;
   static async create(options = {}) {
     if(options.useAdapterWorkgroupLimits !== undefined && typeof options.useAdapterWorkgroupLimits !== 'boolean') throw new TypeError('useAdapterWorkgroupLimits must be a boolean.');
     if(options.useAdapterBufferLimits !== undefined && typeof options.useAdapterBufferLimits !== 'boolean') throw new TypeError('useAdapterBufferLimits must be a boolean.');
+    const native=await selectNativeBackend(options);if(native.runtime)return native.runtime;
     if (!globalThis.navigator?.gpu && !options.device) throw new Error('WebGPU is required. Open this project on localhost or HTTPS in a WebGPU-capable browser. WebGL cannot run these kernels.');
     const adapter = options.adapter || (!options.device ? await navigator.gpu.requestAdapter({powerPreference:'high-performance'}) : null);
     if (!adapter && !options.device) throw new Error('No WebGPU adapter is available. Check the browser GPU settings and graphics driver.');
@@ -59,10 +64,10 @@ export class GpuRuntime {
       maxBufferSize: options.useAdapterBufferLimits ? adapter.limits.maxBufferSize : Math.min(adapter.limits.maxBufferSize, 256 * 1024 * 1024)
     } : undefined;
     const device = options.device || await adapter.requestDevice({requiredFeatures:features, requiredLimits});
-    return new GpuRuntime(device, {...options,adapter,ownsDevice:!options.device});
+    return new GpuRuntime(device, {...options,adapter,ownsDevice:!options.device,nativeStatus:native.status});
   }
   constructor(device, options = {}) {
-    this.device=device; this.adapter=options.adapter; this.ownsDevice=options.ownsDevice ?? false;
+    this.backend='webgpu';this.nativeStatus=options.nativeStatus;this.device=device; this.adapter=options.adapter; this.ownsDevice=options.ownsDevice ?? false;
     this.disposed=false; this.lost=null; this.onError=options.onError || (error=>console.error(error));
     this.buffers=new Set();this.textures=new Set(); this.pipelineCache=new Map(); this.pipelineQueue=Promise.resolve();
     this.uniformAlignment=device.limits.minUniformBufferOffsetAlignment;
@@ -77,7 +82,7 @@ export class GpuRuntime {
   assertAlive() { if(this.disposed)throw new Error('Runtime is disposed.');if(this.lost)throw new Error(`GPU device lost: ${this.lost.message}`); }
   describe() {
     const info=this.adapter?.info;
-    return {vendor:info?.vendor || 'not exposed',architecture:info?.architecture || '',device:info?.device || '',description:info?.description || '',features:[...this.device.features],timestampQuery:this.device.features.has('timestamp-query'),limits:{maxComputeInvocationsPerWorkgroup:this.device.limits.maxComputeInvocationsPerWorkgroup,maxComputeWorkgroupStorageSize:this.device.limits.maxComputeWorkgroupStorageSize,maxStorageBufferBindingSize:this.device.limits.maxStorageBufferBindingSize}};
+    return {backend:this.backend,native:this.nativeStatus,vendor:info?.vendor || 'not exposed',architecture:info?.architecture || '',device:info?.device || '',description:info?.description || '',features:[...this.device.features],timestampQuery:this.device.features.has('timestamp-query'),limits:{maxComputeInvocationsPerWorkgroup:this.device.limits.maxComputeInvocationsPerWorkgroup,maxComputeWorkgroupStorageSize:this.device.limits.maxComputeWorkgroupStorageSize,maxStorageBufferBindingSize:this.device.limits.maxStorageBufferBindingSize}};
   }
   createTexture2D(data,{width,height,filter='linear',addressMode='repeat',label='CUDA float texture',storage=false,normalizedCoords=true,format='r32float'}={}){
     this.assertAlive();if(!['r32float','rg32float','rgba32float'].includes(format)||format==='rg32float'&&storage)throw Error('Unsupported 2D texture format or storage format.');const components=format==='rgba32float'?4:format==='rg32float'?2:1;if(![width,height].every(n=>Number.isInteger(n)&&n>0&&n<=this.device.limits.maxTextureDimension2D)||!(data===null&&storage)&&(!(data instanceof Float32Array)||data.length!==width*height*components||data.some(v=>!Number.isFinite(v))))throw new RangeError('2D texture requires finite floats matching width and height within device limits.');
