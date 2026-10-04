@@ -62,9 +62,13 @@ enableNative.onclick = async () => {
 
 `SupportsNativeCuda` and `requestPermission` are also named exports from
 `src/runtime/runtime.js`. Detection does not request permission. The browser
-enforces HTTPS/trusted localhost, top-level visibility, user activation and the
-`native-gpu` Permissions Policy. Hiding a tab, revoking permission, or closing the
-document can terminate its native session; recreate its resources afterwards.
+enforces HTTPS/trusted localhost, an active top-level document and the
+`native-gpu` Permissions Policy. A new permission prompt additionally requires
+visibility and user activation. ChromiumRTXCuda alpha.4 and later preserve
+grants and resources across tab switches, occlusion and minimising. Revoking
+permission or closing/deactivating the document terminates its native session;
+recreate its resources afterwards. Earlier browser releases also terminated
+sessions when hidden and should be updated for applications that resume.
 One native runtime owns a document at a time. Await its `dispose()` before opening
 a replacement so a delayed close cannot terminate the new session.
 
