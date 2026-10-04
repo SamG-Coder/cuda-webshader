@@ -234,7 +234,7 @@ class SharedBatch {
     if(this.ended)throw new Error('Batch is closed.');
     const kernel=invocation.kernel;if(kernel.interop!==this.interop)throw new TypeError('Kernel belongs to another session.');
     const grid=dimensions(workgroups);
-    if((Number.isFinite(this.interop.capabilities.maxBlocksPerLaunch)&&grid.reduce((a,b)=>a*b,1)>this.interop.capabilities.maxBlocksPerLaunch)||this.jobs.length>=256)throw new RangeError('CUDA launch budget exceeded.');
+    if((!this.interop.capabilities.maxGridDimensions&&Number.isFinite(this.interop.capabilities.maxBlocksPerLaunch)&&grid.reduce((a,b)=>a*b,1)>this.interop.capabilities.maxBlocksPerLaunch)||this.jobs.length>=256)throw new RangeError('CUDA launch budget exceeded.');
     if(this.interop.capabilities.maxGridDimensions?.some((limit,axis)=>grid[axis]>limit))throw new RangeError('Grid exceeds device dimension.');
     const args=kernel.parameters.map(p=>{
       if(p.type==='buffer'||p.type==='surface') {
